@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Статитика по дачам</title>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+
+    <link type="text/css" rel="stylesheet" href="/js/">
+    <script src="/libs/webix.min.js"></script>
+
+
+    <script src="/libs/popper.min.js"></script>
+    <script src="/libs/jquery-3.4.1.min.js"></script>
+    <script src="/libs/bootstrap.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/libs/webix.min.css">
+    <script src="/libs/webix.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div th:insert="~{navbar-bootstrap::frag ('Дачники. Статистика.')}"></div>
+<div id="chart-dep">
+
+</div>
+<div class="container">
+    <div class="row my-2">
+        <div class="col">
+            <div class="table-responsive-sm">
+                <table class="table" id="totalTable">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 70%"></th>
+                        <th scope="col" class="text-center" style="width: 30%">Уведомления</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="totalBody">
+
+                    </tbody>
+                    <span class="text-center" style="display:none" id="noResults">Нет результатов</span>
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+    <div class="dropdown-divider"></div>
+
+
+<!--    <div class="row my-2">-->
+<!--        <div class="col">-->
+<!--            <div class="table-responsive-sm">-->
+<!--                <table class="table" id="timeCreateTable">-->
+<!--                    <thead class="thead-dark">-->
+<!--                    <tr>-->
+<!--                        <th scope="col" class="text-center" style="width: 50%">Дата подачи уведомлениях</th>-->
+<!--                        <th scope="col" class="text-center" style="width: 50%">Уведомления</th>-->
+<!--                    </tr>-->
+<!--                    </thead>-->
+
+<!--                    <tbody id="timeCreateBody">-->
+
+<!--                    </tbody>-->
+<!--                    <span class="text-center" style="display:none" id="noResultsTimeCreate">Нет результатов</span>-->
+<!--                </table>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+    <div class="row my-2">
+        <div class="col">
+            <div class="table-responsive-sm">
+                <table class="table" id="valiDateTable">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 33%">Дата поездки</th>
+                        <th scope="col" class="text-center" style="width: 33%">Уведомления</th>
+                        <th scope="col" class="text-center" style="width: 33%">Люди</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="validDateBody">
+
+                    </tbody>
+                    <span class="text-center" style="display:none" id="noResultsValidDate">Нет результатов</span>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="row my-2">
+        <div class="col">
+            <div class="table-responsive-sm">
+                <table class="table" id="depTable">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 33%">День подачи</th>
+                        <th scope="col" class="text-center" style="width: 33%">День поездки</th>
+                        <th scope="col" class="text-center" style="width: 33%">Кол-во заявок</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="depBody">
+
+                    </tbody>
+                    <span class="text-center" style="display:none" id="noResults1">Нет результатов</span>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script th:inline="javascript">
+
+    const totalStatistic = [[${totalStatistic}]]
+    const nearestDaysStatistic = [[${nearestDaysStatistic}]]
+
+   // const timeCreateStatistic = totalStatistic.timeCreateStatistic;
+    const validDateStatistic = totalStatistic.validDateStatistic;
+
+    let total = 0
+
+    const dtf = new Intl.DateTimeFormat('ru', { year: 'numeric', month: '2-digit', day: '2-digit' })
+
+    function formatDate(date) {
+        const [{ value: mo },,{ value: da },,{ value: ye }] = dtf.formatToParts(date)
+        return `${mo}.${da}.${ye}`
+    }
+    function formatDateWithoutYear(date) {
+        const [{ value: mo },,{ value: da },,{ value: ye }] = dtf.formatToParts(date)
+        return `${mo}.${da}`
+    }
+
+
+    function insertRowIntoTotalTable(firstCol, secondCol, cssClass=""){
+        const html = `<tr>
+            <td class="${cssClass}"> ${ firstCol } </td>
+            <td class="${cssClass}"> ${ secondCol } </td>
+        </tr>`;
+
+        $("#totalBody").append(html);
+    }
+
+    //totalStatistic.peopleStatistic.total = totalStatistic.peopleStatistic.accepted + totalStatistic.peopleStatistic.declined + totalStatistic.peopleStatistic.awaiting;
+    totalStatistic.peopleStatistic.total = totalStatistic.peopleStatistic.awaiting;
+    //insertRowIntoTotalTable("Всего людей в утвержденных уведомлениях", totalStatistic.peopleStatistic.accepted, "text-center font-weight-bold");
+    insertRowIntoTotalTable("Всего людей в уведомлениях", totalStatistic.peopleStatistic.total, "text-center font-weight-bold");
+    chartData = {
+        requesrStatistic: [
+            //{  valid_date:[], time_create:[], legend:"Подано", color: "#ee9e36" },
+        ],
+        personStatistic: [
+            // { value:totalStatistic.peopleStatistic.declined, legend:"Отказано", color: "#ee3639" },
+            //{ valid_date:[], time_create:[], legend:"Подано", color: "#ee9e36" },
+            // { value:totalStatistic.peopleStatistic.accepted, legend:"Утвердили", color: "#a9ee36" },
+        ]
+    }
+
+    for (let i = 0; i < totalStatistic.forEachDayStatistic.length; i++) {
+
+        total += totalStatistic.forEachDayStatistic[i].total
+        totalStatistic.forEachDayStatistic[i].date = new Date(totalStatistic.forEachDayStatistic[i].date.replace('T', ' '))
+
+        chartData.requesrStatistic[i] = chartData.requesrStatistic[i] ? chartData.requesrStatistic[i] : {date: formatDate(new Date()), valid_date_count: 0, time_create_count: 0}
+        chartData.requesrStatistic[i].date = formatDateWithoutYear(totalStatistic.forEachDayStatistic[i].date)
+        chartData.requesrStatistic[i].time_create_count = totalStatistic.forEachDayStatistic[i].total
+
+
+        insertRowIntoTotalTable("За " + formatDate(totalStatistic.forEachDayStatistic[i].date), totalStatistic.forEachDayStatistic[i].total, "text-center")
+    }
+
+    insertRowIntoTotalTable('ВСЕГО УВЕДОМЛЕНИЙ', total, "text-center font-weight-bold")
+
+
+
+    // function insertRowIntoTimeCreateTable(time_create, count, cssClass=""){
+    //     const html = `<tr>
+    //         <td class="${cssClass}"> ${ time_create } </td>
+    //         <td class="${cssClass}"> ${ count } </td>
+    //     </tr>
+    //     `
+    //
+    //     $("#timeCreateBody").append(html);
+    // }
+    //
+    // for (let i = 0; i < timeCreateStatistic.length; i++) {
+    //     insertRowIntoTimeCreateTable(formatDate(new Date(timeCreateStatistic[i].time_create)) , timeCreateStatistic[i].count, "text-center")
+    // }
+
+
+
+
+    function insertRowIntoValidDateTable(valid_date, request, people,cssClass=""){
+
+        const html = `<tr>
+            <td class="${cssClass}"> ${ formatDate(valid_date) } </td>
+            <td class="${cssClass}"> ${ request} </td>
+            <td class="${cssClass}"> ${ people } </td>
+        </tr>
+        `
+
+        $("#validDateBody").append(html);
+    }
+
+
+
+    for (let i = 0; i < validDateStatistic.length; i++) {
+        validDateStatistic[i].valid_date = new Date(validDateStatistic[i].valid_date)
+
+        chartData.requesrStatistic[i] = chartData.requesrStatistic[i] ? chartData.requesrStatistic[i] : {date: formatDate(new Date()), valid_date_count: 0, time_create_count: 0}
+        chartData.requesrStatistic[i].date = formatDateWithoutYear(validDateStatistic[i].valid_date)
+        chartData.requesrStatistic[i].valid_date_count = validDateStatistic[i].request
+
+
+        insertRowIntoValidDateTable(validDateStatistic[i].valid_date , validDateStatistic[i].request, validDateStatistic[i].people, "text-center")
+    }
+
+    console.log(chartData.requesrStatistic)
+
+    let totalAwaiting = 0, totalAccepted = 0, totalDeclined = 0;
+    function insertRowIntoTimeCreateValidDateTable(time_create, valid_date, count, cssClass=""){
+
+
+        const html = `<tr>
+            <td class="${cssClass}"> ${ time_create } </td>
+            <td class="${cssClass}"> ${ valid_date} </td>
+            <td class="${cssClass}"> ${ count } </td>
+        </tr>
+        `
+
+        $("#depBody").append(html);
+    }
+    let prev_date;
+    for (let i = 0; i < nearestDaysStatistic.length; i++) {
+        insertRowIntoTimeCreateValidDateTable(nearestDaysStatistic[i].time_create == prev_date ? '' : formatDate(new Date(nearestDaysStatistic[i].time_create)), formatDate(new Date(nearestDaysStatistic[i].valid_date)) , nearestDaysStatistic[i].count, "text-center")
+        prev_date = nearestDaysStatistic[i].time_create;
+    }
+
+
+    // chartData = {
+    //     depStatistic: [
+    //         // { value:totalStatistic.requestStatistic[2] ? totalStatistic.requestStatistic[2].count : 0, legend:"Отказано", color: "#ee3639" },
+    //         { value:totalStatistic.requestStatistic[0] ? totalStatistic.requestStatistic[0].count : 0, legend:"Подано", color: "#ee9e36" },
+    //         // { value:totalStatistic.requestStatistic[1] ? totalStatistic.requestStatistic[1].count : 0, legend:"Утвердили", color: "#a9ee36" },
+    //     ],
+    //     personStatistic: [
+    //         // { value:totalStatistic.peopleStatistic.declined, legend:"Отказано", color: "#ee3639" },
+    //         { value:totalStatistic.peopleStatistic.awaiting, legend:"Подано", color: "#ee9e36" },
+    //         // { value:totalStatistic.peopleStatistic.accepted, legend:"Утвердили", color: "#a9ee36" },
+    //     ]
+    // }
+
+    webix.ready(function() {
+        webix.ui({
+            container: 'chart-dep',
+            width: document.body.clientWidth,
+            type:'clean',
+            height:400,
+            rows: [{
+                        rows:[
+                            {
+                                template:"<div style='width:100%;text-align:center'>Уведомления</div>",
+                                height:30
+                            },
+                            // {
+                            //     view: "chart",
+                            //     type:"pie",
+                            //     value:"#value#",
+                            //     color:"#color#",
+                            //     label:"#legend#",
+                            //     pieInnerText:"#value#",
+                            //     shadow:0,
+                            //     data:chartData.depStatistic
+                            // }, c
+                            {
+                                view:"chart",
+                                width:750,
+                                height:250,
+                                type:"area",
+                                barWidth:20,
+                                radius:2,
+                                alpha: 0.7,
+                                gradient:"rising",
+                                xAxis:{
+                                    template: "#date#",
+                                },
+                                yAxis:{
+                                    start:0,
+                                    step:5,
+                                },
+                                legend:{
+                                    values:[{text:"По дате поездки",color:"#4aa397"},{text:"По дате подачи",color:"#69ba00"}],
+                                    valign:"middle",
+                                    align:"right",
+                                    width:150,
+                                    height: 200,
+                                    layout:"y"
+                                },
+                                series:[
+                                    {
+                                        value:"#valid_date_count#",
+                                        color: "#4aa397",
+                                        tooltip:{
+                                            template:"#valid_date_count#"
+                                        }
+                                    },
+                                    {
+                                        value:"#time_create_count#",
+                                        color:"#69ba00",
+                                        tooltip:{
+                                            template:"#time_create_count#"
+                                        }
+                                    },
+                                ],
+                                data:chartData.requesrStatistic
+                            },
+                            {
+                                template:`<div style='width:100%;text-align:center'>Всего: ${total}</div>`,
+                                height:30
+                            },
+                        ]
+                    },
+                    // {
+                    //     rows:[
+                    //         {
+                    //             template:"<div style='width:100%;text-align:center'>Люди</div>",
+                    //             height:30
+                    //         },
+                    //         {
+                    //             view: "chart",
+                    //             type:"pie",
+                    //             value:"#value#",
+                    //             color:"#color#",
+                    //             label:"#legend#",
+                    //             pieInnerText:"#value#",
+                    //             shadow:0,
+                    //             data:chartData.personStatistic
+                    //         },
+                    //         {
+                    //             template:`<div style='width:100%;text-align:center'>Всего: ${totalStatistic.peopleStatistic.total}</div>`,
+                    //             height:30
+                    //         },
+                    //     ]
+                    // }
+
+                ]
+        })
+    });
+
+</script>
+
+</body>
+</html>

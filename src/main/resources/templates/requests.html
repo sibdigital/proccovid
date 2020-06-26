@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title>Работающая Бурятия</title>
+ <!--
+    <link type="text/css" rel="stylesheet" href="/libs/webix.css">
+    <script src="/libs/webix.min.js"></script>
+    <script src="/libs/routie.min.js"></script>
+    <script data-main="js/index" src="/libs/require.min.js"></script>
+-->
+    <style>
+    .webix_list_item {
+        font-size: 0.75em;
+    }
+    </style>
+    <link type="text/css" rel="stylesheet" th:href="@{/libs/webix.css}">
+    <script th:src="@{/libs/webix.min.js}"></script>
+    <script th:src="@{/libs/routie.min.js}"></script>
+    <script th:src="@{/js/views/requests.js}"></script>
+    <script th:src="@{/js/views/other-requests.js}"></script>
+    <script th:src="@{/js/views/showform.js}"></script>
+    <script th:src="@{/js/views/showform-processed.js}"></script>
+    <script th:src="@{/js/views/showform-other.js}"></script>
+    <script th:src="@{/js/utils/filter.js}"></script>
+    <script th:src="@{/js/index.js}"></script>
+    <style>body {margin: 0}
+    </style>
+</head>
+<body>
+<div id="app"></div>
+<script th:inline="javascript">
+    const ID_DEPARTMENT = [[${id_department}]]
+    const DEPARTMENT = [[${department_name}]]
+    const USER_NAME = [[${user_lastname + " " + user_firstname}]]
+    const LINK_PREFIX = [[${link_prefix}]]
+    const LINK_SUFFIX = [[${link_suffix}]]
+    const TOKEN = [[${token}]]
+
+    const winHeight = document.body.clientHeight
+    const winWidth = document.body.clientWidth
+    console.log(winHeight + ' x ' + winWidth)
+</script>
+</body>
+</html>
