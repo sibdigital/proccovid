@@ -151,6 +151,12 @@
                                     $$('filename_label').hide()
                                 }
     */
+                                if (data.organization.idTypeOrganization) {
+                                    let typeOrg = data.organization.idTypeOrganization;
+                                    if (typeOrg === 3) {
+                                        $$('isSelfEmployed').setValue(1);
+                                    }
+                                }
 
                                 $$('form').load('doc_requests/' + data.id);
 

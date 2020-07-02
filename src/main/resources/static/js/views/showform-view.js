@@ -52,12 +52,23 @@ webix.ready(function() {
                                                             readonly: true
                                                         },
                                                         {
-                                                            view: 'text',
-                                                            name: 'organization.inn',
-                                                            label: 'ИНН',
-                                                            labelPosition: 'top',
-                                                            invalidMessage: 'Поле не может быть пустым',
-                                                            readonly: true
+                                                            cols: [
+                                                                {
+                                                                    view: 'text',
+                                                                    name: 'organization.inn',
+                                                                    label: 'ИНН',
+                                                                    labelPosition: 'top',
+                                                                    invalidMessage: 'Поле не может быть пустым',
+                                                                    readonly: true
+                                                                },
+                                                                {
+                                                                    view: 'checkbox',
+                                                                    id: 'isSelfEmployed',
+                                                                    label: 'Самозанятый',
+                                                                    labelPosition: 'top',
+                                                                    readonly: true
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             view: 'text',
