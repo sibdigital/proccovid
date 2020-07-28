@@ -25,10 +25,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -62,6 +61,15 @@ public class RequestService {
 
     @Autowired
     private DocRequestPrsRepo docRequestPrsRepo;
+
+    @Autowired
+    private ClsTemplateRepo clsTemplateRepo;
+
+    @Autowired
+    private ClsPrincipalRepo clsPrincipalRepo;
+
+    @Autowired
+    private EmailService emailService;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -230,5 +238,36 @@ public class RequestService {
         cell.setCellValue(docRequest.getTypeRequest().getShortName());
         cell = row.createCell(9);
         cell.setCellValue(DateUtils.dateToStr(docRequest.getTimeCreate()));
+    }
+
+    public Page<ClsTemplate> findAllClsTemplate(int page, int size) {
+        return clsTemplateRepo.findAll(PageRequest.of(page, size, Sort.by("key")));
+    }
+
+    public Page<ClsPrincipal> getPrincipalsByCriteria(int page, int size) {
+        return clsPrincipalRepo.findAll(PageRequest.of(page, size, Sort.by("organization.inn")));
+    }
+
+    public void sendMessageToPrincipals(String type) {
+        if (type == null) {
+            return;
+        }
+
+        ClsTemplate clsTemplate = clsTemplateRepo.findByKey(type);
+        if (clsTemplate == null) {
+            return;
+        }
+
+        int size = 25;
+        Page<ClsPrincipal> pagePrincipals = getPrincipalsByCriteria(0, size);
+        if (pagePrincipals == null || pagePrincipals.getTotalElements() == 0) {
+            return;
+        }
+
+        int totalPage = pagePrincipals.getTotalPages();
+        for (int page = 0; page < totalPage; page++) {
+            pagePrincipals = getPrincipalsByCriteria(page, size);
+            emailService.sendMessage(pagePrincipals.getContent(), clsTemplate, new HashMap<>());
+        }
     }
 }

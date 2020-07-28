@@ -91,6 +91,10 @@ public class LoginController {
         session.setAttribute("token", depUser.hashCode());
         session.setMaxInactiveInterval(120*60);
 
+        if (depUser.getAdmin() != null && depUser.getAdmin()) {
+            return "redirect:/admin";
+        }
+
         return "redirect:/requests";
     }
 }

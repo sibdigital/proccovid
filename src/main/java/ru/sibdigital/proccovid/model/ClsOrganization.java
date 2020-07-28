@@ -1,5 +1,6 @@
 package ru.sibdigital.proccovid.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,10 @@ public class ClsOrganization {
     private Integer idTypeOrganization;
     private Integer typeTaxReporting;
 
+    @OneToOne
+    @JoinColumn(name = "id_principal", referencedColumnName = "id")
+    @JsonIgnore
+    private ClsPrincipal principal;
 
     public Long getId() {
         return id;
@@ -183,6 +188,14 @@ public class ClsOrganization {
 
     public void setTypeTaxReporting(Integer typeTaxReporting) {
         this.typeTaxReporting = typeTaxReporting;
+    }
+
+    public ClsPrincipal getPrincipal() {
+        return principal;
+    }
+
+    public void setPrincipal(ClsPrincipal principal) {
+        this.principal = principal;
     }
 
     @Override

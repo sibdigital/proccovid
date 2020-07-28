@@ -30,6 +30,7 @@ public class DepUser implements Serializable {
     private String patronymic;
     private String login;
     private String password;
+    private Boolean isAdmin;
 
     public Long getId() {
         return id;
@@ -97,6 +98,16 @@ public class DepUser implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Basic
+    @Column(name = "is_admin")
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 
     public String getFullName() {
