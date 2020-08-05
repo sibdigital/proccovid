@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
@@ -269,5 +270,35 @@ public class RequestService {
             pagePrincipals = getPrincipalsByCriteria(page, size);
             emailService.sendMessage(pagePrincipals.getContent(), clsTemplate, new HashMap<>());
         }
+    }
+
+
+    public ClsTypeRequest saveClsTypeRequest(ClsTypeRequestDto clsTypeRequestDto) {
+
+        ClsDepartment clsDepartment = null;
+        if (clsTypeRequestDto.getDepartmentId() != null) {
+            clsDepartment = departmentRepo.findById(clsTypeRequestDto.getDepartmentId()).orElse(null);
+        }
+
+        ClsTypeRequest clsTypeRequest = ClsTypeRequest.builder()
+                .id(clsTypeRequestDto.getId())
+                .activityKind(clsTypeRequestDto.getActivityKind())
+                .shortName(clsTypeRequestDto.getShortName())
+                .department(clsDepartment)
+                .prescription(clsTypeRequestDto.getPrescription())
+                .prescriptionLink(clsTypeRequestDto.getPrescriptionLink())
+                .settings(clsTypeRequestDto.getSettings())
+                .statusRegistration(clsTypeRequestDto.getStatusRegistration())
+                .beginRegistration(clsTypeRequestDto.getBeginRegistration())
+                .endRegistration(clsTypeRequestDto.getEndRegistration())
+                .statusVisible(clsTypeRequestDto.getStatusVisible())
+                .beginVisible(clsTypeRequestDto.getBeginVisible())
+                .endVisible(clsTypeRequestDto.getEndVisible())
+                .sortWeight(clsTypeRequestDto.getSortWeight())
+                .build();
+
+        clsTypeRequestRepo.save(clsTypeRequest);
+
+        return clsTypeRequest;
     }
 }

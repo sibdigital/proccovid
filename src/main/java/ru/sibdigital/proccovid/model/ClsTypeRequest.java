@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
@@ -16,6 +17,8 @@ public class ClsTypeRequest {
 
     @Id
     @Column(name = "id", nullable = false)
+    @SequenceGenerator(name = "CLS_TYPE_REQ_GEN", sequenceName = "cls_type_request_id_seq", allocationSize = 1, schema = "public")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CLS_TYPE_REQ_GEN")
     private Long id;
     private String activityKind;
     private String shortName;
@@ -23,6 +26,12 @@ public class ClsTypeRequest {
     private String prescriptionLink;
     private String settings;
     private int statusRegistration;
+    private Timestamp beginRegistration;
+    private Timestamp endRegistration;
+    private int statusVisible;
+    private Timestamp beginVisible;
+    private Timestamp endVisible;
+    private int sortWeight;
 
     @OneToOne
     @JoinColumn(name = "id_department", referencedColumnName = "id")
@@ -84,6 +93,60 @@ public class ClsTypeRequest {
 
     public void setStatusRegistration(int statusRegistration) {
         this.statusRegistration = statusRegistration;
+    }
+
+    @Column(name = "begin_registration")
+    public Timestamp getBeginRegistration() {
+        return beginRegistration;
+    }
+
+    public void setBeginRegistration(Timestamp beginRegistration) {
+        this.beginRegistration = beginRegistration;
+    }
+
+    @Column(name = "end_registration")
+    public Timestamp getEndRegistration() {
+        return endRegistration;
+    }
+
+    public void setEndRegistration(Timestamp endRegistration) {
+        this.endRegistration = endRegistration;
+    }
+
+    @Column(name = "status_visible")
+    public int getStatusVisible() {
+        return statusVisible;
+    }
+
+    public void setStatusVisible(int statusVisible) {
+        this.statusVisible = statusVisible;
+    }
+
+    @Column(name = "begin_visible")
+    public Timestamp getBeginVisible() {
+        return beginVisible;
+    }
+
+    public void setBeginVisible(Timestamp beginVisible) {
+        this.beginVisible = beginVisible;
+    }
+
+    @Column(name = "end_visible")
+    public Timestamp getEndVisible() {
+        return endVisible;
+    }
+
+    public void setEndVisible(Timestamp endVisible) {
+        this.endVisible = endVisible;
+    }
+
+    @Column(name = "sort_weight")
+    public int getSortWeight() {
+        return sortWeight;
+    }
+
+    public void setSortWeight(int sortWeight) {
+        this.sortWeight = sortWeight;
     }
 
     public ClsDepartment getDepartment() {

@@ -1,11 +1,11 @@
 package ru.sibdigital.proccovid.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.ClsTemplate;
 import ru.sibdigital.proccovid.model.DepUser;
@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Controller
 public class AdminController {
 
@@ -97,5 +98,16 @@ public class AdminController {
         result.put("pos", (long) page * size);
         result.put("total_count", templates.getTotalElements());
         return result;
+    }
+
+    @PostMapping("/save_cls_type_request")
+    public @ResponseBody String saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+        try {
+            requestService.saveClsTypeRequest(clsTypeRequestDto);
+        } catch(Exception e){
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить тип заявки";
+        }
+        return "Тип заявки сохранен";
     }
 }
