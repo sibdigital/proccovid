@@ -433,7 +433,7 @@ const typeRequestForm = {
     }
 }
 
-webix.require(['js/views/requests.js', 'js/views/other-requests.js']);
+webix.require(['js/views/requests.js', 'js/views/other-requests.js', 'js/views/showform-other.js']);
 
 const adminRequests = {
     view: 'scrollview',
