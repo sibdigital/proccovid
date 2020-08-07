@@ -22,7 +22,7 @@ public class DocRequestPrsSpecification implements Specification<DocRequestPrs> 
     public Predicate toPredicate(Root<DocRequestPrs> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
 
-        if (searchCriteria.getIdDepartment() != null) {
+        if (searchCriteria.getIdDepartment() != null && searchCriteria.getIdDepartment() != 0) {
             predicates.add(criteriaBuilder.equal(
                     root.get("department").get("id"), searchCriteria.getIdDepartment()));
         }

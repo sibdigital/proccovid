@@ -6,7 +6,7 @@
     const DATE_FORMAT = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s")
 //
 //     return function(param_url, status) {
-    function requests(param_url, status) {
+    function requests(param_url, status, view_item_another_page) {
         return {
             autowidth: true,
             autoheight: true,
@@ -57,14 +57,16 @@
                             this.hideOverlay();
                             let data = $$('requests_table').getItem(id);
 
-                            let form = status == 0 ? showform(status) : showform_processed();
+                            if (!view_item_another_page) {
 
-                            let reassignedUserName = '';
-                            if (data.reassignedUser != null) {
-                                reassignedUserName = ' Переназначил: ' + data.reassignedUser.fullName + ' (' + data.reassignedUser.idDepartment.name + ')';
-                            }
+                                let form = status == 0 ? showform(status) : showform_processed();
 
-                            // require([form], function (showform) {
+                                let reassignedUserName = '';
+                                if (data.reassignedUser != null) {
+                                    reassignedUserName = ' Переназначил: ' + data.reassignedUser.fullName + ' (' + data.reassignedUser.idDepartment.name + ')';
+                                }
+
+                                // require([form], function (showform) {
                                 let queryWin = webix.ui({
                                     view: 'window',
                                     id: 'showQueryWin',
@@ -97,18 +99,18 @@
                                                 url: 'doc_address_fact/' + data.id
                                             })
                                             $$('addr_table').sync(addr_table_data);
-                                            if (data.additionalAttributes){
-                                                if (data.additionalAttributes.isCheckingAgree){
-                                                    var  v = {
-                                                            view: 'checkbox',
-                                                            name: 'additionalAttributes.isCheckingAgree',
-                                                            labelPosition: 'top',
-                                                            readonly: true,
-                                                            labelRight: 'Ознакомлен, обязуется проверять сведения для размещения граждан'
+                                            if (data.additionalAttributes) {
+                                                if (data.additionalAttributes.isCheckingAgree) {
+                                                    var v = {
+                                                        view: 'checkbox',
+                                                        name: 'additionalAttributes.isCheckingAgree',
+                                                        labelPosition: 'top',
+                                                        readonly: true,
+                                                        labelRight: 'Ознакомлен, обязуется проверять сведения для размещения граждан'
                                                     };
                                                     $$('review_app_section').addView(v);
                                                 }
-                                             }
+                                            }
                                         }
                                     }
                                 });
@@ -118,39 +120,38 @@
                                 let fileList = []
                                 paths.forEach((path, index) => {
                                     let filename = path.split('\\').pop().split('/').pop()
-                                    if(filename != '' &&
+                                    if (filename != '' &&
                                         ((filename.toUpperCase().indexOf('.PDF') != -1) ||
-                                         (filename.toUpperCase().indexOf('.ZIP') != -1)
-                                        )){
+                                            (filename.toUpperCase().indexOf('.ZIP') != -1)
+                                        )) {
                                         filename = '<a href="' + LINK_PREFIX + filename + LINK_SUFFIX + '" target="_blank">'
                                             + filename + '</a>'
-                                        fileList.push({ id: index, value: filename })
+                                        fileList.push({id: index, value: filename})
                                     }
                                 })
 
-                                if(fileList.length > 0) {
+                                if (fileList.length > 0) {
                                     //data.attachmentFilename = fileList
                                     $$('filename').parse(fileList)
                                     //if(fileList.length = 1) $$('filename').height = 50
                                     //if(fileList.length > 3) $$('filename').height = 180
-                                }
-                                else {
+                                } else {
                                     //data.attachmentFilename = ''
                                     $$('filename_label').hide()
                                     $$('filename').hide()
                                 }
-    /*
-                                data.attachmentFilename = data.attachmentPath.split('\\').pop().split('/').pop()
+                                /*
+                                                            data.attachmentFilename = data.attachmentPath.split('\\').pop().split('/').pop()
 
-                                if(data.attachmentFilename != null && data.attachmentFilename != '') {
-                                    data.attachmentFilename = '<a href="' + LINK_PREFIX + data.attachmentFilename + LINK_SUFFIX + '" target="_blank">'
-                                        + data.attachmentFilename + '</a>'
-                                }
-                                else {
-                                    data.attachmentFilename = ''
-                                    $$('filename_label').hide()
-                                }
-    */
+                                                            if(data.attachmentFilename != null && data.attachmentFilename != '') {
+                                                                data.attachmentFilename = '<a href="' + LINK_PREFIX + data.attachmentFilename + LINK_SUFFIX + '" target="_blank">'
+                                                                    + data.attachmentFilename + '</a>'
+                                                            }
+                                                            else {
+                                                                data.attachmentFilename = ''
+                                                                $$('filename_label').hide()
+                                                            }
+                                */
                                 if (data.organization.idTypeOrganization) {
                                     let typeOrg = data.organization.idTypeOrganization;
                                     if (typeOrg === 3) {
@@ -163,8 +164,13 @@
                                 webix.extend($$('show_layout'), webix.ProgressBar);
 
                                 queryWin.show()
-                            // })
+                                // })
 
+                            } else {
+
+                                window.open('request/view?id=' + data.id);
+
+                            }
                         }
                     },
                     url: param_url

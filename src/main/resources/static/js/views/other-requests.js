@@ -23,7 +23,7 @@ function other_requests(param_url) {
                     {id: "orgPhone", header: "Телефон", template: "#organization.phone#", adjust: true},
                     {
                         id: "district",
-                        header: "Район, котором оказывается услуга",
+                        header: "Район, в котором оказывается услуга",
                         template: "#district.name#",
                         adjust: true
                     },
