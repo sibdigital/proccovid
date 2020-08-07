@@ -636,6 +636,34 @@ const adminRequests = {
     }
 }
 
+const statistic = {
+    view: 'scrollview',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            {
+                autowidth: true,
+                autoheight: true,
+                rows: [
+                    {
+                        view: 'label',
+                        label: "<a href='statistic'>Статистика по заявкам</a>"
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='dacha/statistic'>Статистика по заявкам от дачников</a>"
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='barber/statistic'>Статистика по заявкам от парикмахерских</a>"
+                    }
+                ]
+            }
+        ]
+    }
+}
+
 webix.ready(function() {
     let layout = webix.ui({
         rows: [
@@ -672,6 +700,7 @@ webix.ready(function() {
                             { id: "TypeRequests", value: 'Типы заявок' },
                             { id: "Principals", value: 'Пользователи' },
                             { id: "Templates", value: 'Шаблоны сообщений' },
+                            { id: "Statistic", value: 'Статистика' },
                         ],
                         on: {
                             onAfterSelect: function(id) {
@@ -691,6 +720,10 @@ webix.ready(function() {
                                     }
                                     case 'Requests': {
                                         view = adminRequests;
+                                        break;
+                                    }
+                                    case 'Statistic': {
+                                        view = statistic;
                                         break;
                                     }
                                 }
