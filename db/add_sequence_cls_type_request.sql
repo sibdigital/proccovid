@@ -4,4 +4,4 @@ alter table cls_type_request alter column id set default nextval('public.cls_typ
 
 alter sequence cls_type_request_id_seq owned by cls_type_request.id;
 
-alter sequence cls_type_request_id_seq start with 150;
+alter sequence cls_type_request_id_seq restart with 150;
