@@ -52,7 +52,7 @@ public class RequestService {
     ClsDepartmentRepo departmentRepo;
 
     @Autowired
-    private DepUserRepo depUserRepo;
+    private ClsUserRepo clsUserRepo;
 
     @Autowired
     private RegHistoryRequestRepo historyRequestRepo;
@@ -144,7 +144,7 @@ public class RequestService {
     }
 
     public boolean isTokenValid(Integer hash_code){
-        Iterator<DepUser> iter = depUserRepo.findAll().iterator();
+        Iterator<ClsUser> iter = clsUserRepo.findAll().iterator();
         while(iter.hasNext()) {
             if(hash_code == iter.next().hashCode()) return true;
         }

@@ -56,15 +56,15 @@ public class RegHistoryRequest {
 
     @OneToOne
     @JoinColumn(name = "id_reassigned_user", referencedColumnName = "id")
-    private DepUser reassignedUser;
+    private ClsUser reassignedUser;
 
     @OneToOne
     @JoinColumn(name = "id_processed_user", referencedColumnName = "id")
-    private DepUser processedUser;
+    private ClsUser processedUser;
 
     @OneToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id")
-    private DepUser user;
+    private ClsUser user;
 
     @OneToOne
     @JoinColumn(name = "id_type_request", referencedColumnName = "id")
@@ -78,7 +78,7 @@ public class RegHistoryRequest {
 
     }
 
-    public RegHistoryRequest(DocRequest docRequest, DepUser depUser){
+    public RegHistoryRequest(DocRequest docRequest, ClsUser clsUser){
         this.personOfficeCnt = docRequest.getPersonOfficeCnt();
         this.personRemoteCnt = docRequest.getPersonRemoteCnt();
         this.personSlrySaveCnt = docRequest.getPersonSlrySaveCnt();
@@ -100,7 +100,7 @@ public class RegHistoryRequest {
         this.organization = docRequest.getOrganization();
         this.reassignedUser = docRequest.getReassignedUser();
         this.processedUser = docRequest.getProcessedUser();
-        this.user = depUser;
+        this.user = clsUser;
         this.docRequest = docRequest;
     }
 //    @OneToMany(targetEntity = DocAddressFact.class, mappedBy="docRequestAddressFact", fetch = FetchType.EAGER)
@@ -285,19 +285,19 @@ public class RegHistoryRequest {
 //        return docAddressFact;
 //    }
 
-    public DepUser getReassignedUser() {
+    public ClsUser getReassignedUser() {
         return reassignedUser;
     }
 
-    public void setReassignedUser(DepUser reassignedUser) {
+    public void setReassignedUser(ClsUser reassignedUser) {
         this.reassignedUser = reassignedUser;
     }
 
-    public DepUser getProcessedUser() {
+    public ClsUser getProcessedUser() {
         return processedUser;
     }
 
-    public void setProcessedUser(DepUser processedUser) {
+    public void setProcessedUser(ClsUser processedUser) {
         this.processedUser = processedUser;
     }
 
@@ -333,11 +333,11 @@ public class RegHistoryRequest {
         this.regTime = regTime;
     }
 
-    public DepUser getUser() {
+    public ClsUser getUser() {
         return user;
     }
 
-    public void setUser(DepUser user) {
+    public void setUser(ClsUser user) {
         this.user = user;
     }
 

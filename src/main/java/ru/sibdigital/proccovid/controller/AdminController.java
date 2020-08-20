@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.ClsTemplate;
-import ru.sibdigital.proccovid.model.DepUser;
+import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.service.RequestService;
 
 import javax.servlet.http.HttpSession;
@@ -24,11 +24,11 @@ public class AdminController {
 
     @GetMapping("/admin")
     public String admin(HttpSession session) {
-        DepUser depUser = (DepUser) session.getAttribute("user");
-        if (depUser == null) {
+        ClsUser clsUser = (ClsUser) session.getAttribute("user");
+        if (clsUser == null) {
             return "404";
         } else {
-            if (!depUser.getAdmin()) {
+            if (!clsUser.getAdmin()) {
                 return "403";
             }
         }
@@ -39,11 +39,11 @@ public class AdminController {
     public @ResponseBody Map<String, Object> principals(HttpSession session,
                                                    @RequestParam(value = "start", required = false) Integer start,
                                                    @RequestParam(value = "count", required = false) Integer count) {
-        DepUser depUser = (DepUser) session.getAttribute("user");
-        if (depUser == null) {
+        ClsUser clsUser = (ClsUser) session.getAttribute("user");
+        if (clsUser == null) {
             return null;
         } else {
-            if (!depUser.getAdmin()) {
+            if (!clsUser.getAdmin()) {
                 return null;
             }
         }
@@ -63,11 +63,11 @@ public class AdminController {
     @GetMapping("/send_email")
     public @ResponseBody String sendEmail(HttpSession session,
                                           @RequestParam(value = "type") String type) {
-        DepUser depUser = (DepUser) session.getAttribute("user");
-        if (depUser == null) {
+        ClsUser clsUser = (ClsUser) session.getAttribute("user");
+        if (clsUser == null) {
             return "Не пройдена аутентификация";
         } else {
-            if (!depUser.getAdmin()) {
+            if (!clsUser.getAdmin()) {
                 return "Пользователь не авторизован";
             }
         }
@@ -79,11 +79,11 @@ public class AdminController {
     public @ResponseBody Map<String, Object> getClsTemplates(HttpSession session,
                                                            @RequestParam(value = "start", required = false) Integer start,
                                                            @RequestParam(value = "count", required = false) Integer count) {
-        DepUser depUser = (DepUser) session.getAttribute("user");
-        if (depUser == null) {
+        ClsUser clsUser = (ClsUser) session.getAttribute("user");
+        if (clsUser == null) {
             return null;
         } else {
-            if (!depUser.getAdmin()) {
+            if (!clsUser.getAdmin()) {
                 return null;
             }
         }

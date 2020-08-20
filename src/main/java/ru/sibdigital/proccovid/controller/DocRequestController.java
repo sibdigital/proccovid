@@ -29,7 +29,7 @@ import java.util.Optional;
 public class DocRequestController {
 
     @Autowired
-    private DepUserRepo depUserRepo;
+    private ClsUserRepo clsUserRepo;
 
     @Autowired
     private DocRequestRepo docRequestRepo;
@@ -63,9 +63,9 @@ public class DocRequestController {
 
     private static final Logger log = LoggerFactory.getLogger(DocRequestController.class);
 
-    private void addHistory(DocRequest docRequest, DepUser depUser){
+    private void addHistory(DocRequest docRequest, ClsUser clsUser){
         try{
-            RegHistoryRequest rhr = new  RegHistoryRequest(docRequest, depUser);
+            RegHistoryRequest rhr = new  RegHistoryRequest(docRequest, clsUser);
             historyRequestRepo.save(rhr);
         }catch (Exception ex){
             log.error("history exception =  " + ex.getMessage());
@@ -131,8 +131,8 @@ public class DocRequestController {
                     "Возможно, вы не были активны и ваша сессия истекла. Войдите в приложение повторно");
         }
 
-        DepUser depUser = (DepUser) session.getAttribute("user");
-        if (depUser == null){
+        ClsUser clsUser = (ClsUser) session.getAttribute("user");
+        if (clsUser == null){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Вы не авторизованы. " +
                     "Возможно, вы не были активны и ваша сессия истекла. Войдите в приложение повторно");
         }
@@ -142,8 +142,8 @@ public class DocRequestController {
             ClsDepartment clsDepartment = clsDepartmentRepo.getOne(obj.getDepartment().getId());
             docRequest.setDepartment(clsDepartment);
             docRequest.setOld_department_id(oldDepartmentId);
-            docRequest.setReassignedUser(depUser);
-            addHistory(docRequest, depUser);
+            docRequest.setReassignedUser(clsUser);
+            addHistory(docRequest, clsUser);
             docRequestRepo.save(docRequest);
 
             return ResponseEntity.ok().body("updated");
@@ -162,8 +162,8 @@ public class DocRequestController {
                     "Возможно, вы не были активны и ваша сессия истекла. Войдите в приложение повторно");
         }
 
-        DepUser depUser = (DepUser) session.getAttribute("user");
-        if (depUser == null){
+        ClsUser clsUser = (ClsUser) session.getAttribute("user");
+        if (clsUser == null){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Вы не авторизованы. " +
                     "Возможно, вы не были активны и ваша сессия истекла. Войдите в приложение повторно");
         }
@@ -188,7 +188,7 @@ public class DocRequestController {
 //                            for (DocRequest dr : docRequests) {
 //                                dr.setStatusReview(obj.getStatusReview());
 //                                dr.setTimeReview(timeReview);
-//                                dr.setProcessedUser(depUser);
+//                                dr.setProcessedUser(clsUser);
 //                            }
 //                            docRequestRepo.saveAll(docRequests);
 //                        }
@@ -213,8 +213,8 @@ public class DocRequestController {
             }
             docRequest.setStatusReview(obj.getStatusReview());
             docRequest.setTimeReview(timeReview);
-            docRequest.setProcessedUser(depUser);
-            addHistory(docRequest, depUser);
+            docRequest.setProcessedUser(clsUser);
+            addHistory(docRequest, clsUser);
             docRequestRepo.save(docRequest);
 
             emailService.sendMessage(docRequest);

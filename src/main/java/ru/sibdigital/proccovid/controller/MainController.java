@@ -2,7 +2,6 @@ package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.dto.KeyValue;
 import ru.sibdigital.proccovid.model.ClsTypeRequest;
-import ru.sibdigital.proccovid.model.DepUser;
+import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.DocRequest;
 import ru.sibdigital.proccovid.service.RequestService;
 
@@ -40,8 +39,8 @@ public class MainController {
 
     @GetMapping("/request/view")
     public String viewDocRequest(@RequestParam("id") Long id, Model model, HttpSession session) {
-        DepUser depUser = (DepUser) session.getAttribute("user");
-        if (depUser == null) {
+        ClsUser clsUser = (ClsUser) session.getAttribute("user");
+        if (clsUser == null) {
             return "404";
         }
         model.addAttribute("doc_request_id", id);

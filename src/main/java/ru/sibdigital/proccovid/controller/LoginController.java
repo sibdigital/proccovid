@@ -3,15 +3,14 @@ package ru.sibdigital.proccovid.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
-import ru.sibdigital.proccovid.model.DepUser;
-import ru.sibdigital.proccovid.repository.DepUserRepo;
+import ru.sibdigital.proccovid.model.ClsUser;
+import ru.sibdigital.proccovid.repository.ClsUserRepo;
 import ru.sibdigital.proccovid.repository.DocRequestRepo;
 
 import javax.servlet.http.HttpSession;
@@ -21,7 +20,7 @@ import java.util.Map;
 public class LoginController {
 
     @Autowired
-    private DepUserRepo depUserRepo;
+    private ClsUserRepo clsUserRepo;
 
     @Autowired
     private DocRequestRepo docRequestRepo;
@@ -48,16 +47,16 @@ public class LoginController {
     @GetMapping("/requests")
     public String requests(Map<String, Object> model, HttpSession session) {
         //model.put();
-        DepUser depUser = (DepUser) session.getAttribute("user");
-        if(depUser == null){
+        ClsUser clsUser = (ClsUser) session.getAttribute("user");
+        if(clsUser == null){
             return "404";
         }
         else {
-            //model.put("user", depUser);
-            model.put("id_department", depUser.getIdDepartment().getId());
-            model.put("department_name", depUser.getIdDepartment().getName());
-            model.put("user_lastname", depUser.getLastname());
-            model.put("user_firstname", depUser.getFirstname());
+            //model.put("user", clsUser);
+            model.put("id_department", clsUser.getIdDepartment().getId());
+            model.put("department_name", clsUser.getIdDepartment().getName());
+            model.put("user_lastname", clsUser.getLastname());
+            model.put("user_firstname", clsUser.getFirstname());
             model.put("link_prefix", applicationConstants.getLinkPrefix());
             model.put("link_suffix", applicationConstants.getLinkSuffix());
             model.put("token", session.getAttribute("token"));
@@ -74,15 +73,15 @@ public class LoginController {
 
     @PostMapping("/authenticate")
     //public String login(Model model, String error, String logout) {
-    public String authenticate(@ModelAttribute("log_form") DepUser inputDepUser, Map<String, Object> model, HttpSession session) {
+    public String authenticate(@ModelAttribute("log_form") ClsUser inputClsUser, Map<String, Object> model, HttpSession session) {
 
-        if(inputDepUser == null){
+        if(inputClsUser == null){
             return "login";
         }
 
-        DepUser depUser = depUserRepo.findByLogin(inputDepUser.getLogin().toLowerCase());
+        ClsUser clsUser = clsUserRepo.findByLogin(inputClsUser.getLogin().toLowerCase());
 
-        if ((depUser == null) || (!depUser.getPassword().equals(inputDepUser.getPassword()) ) ){
+        if ((clsUser == null) || (!clsUser.getPassword().equals(inputClsUser.getPassword()) ) ){
             //не прошли аутентификацию
             log.debug("LoginController. Аутентификация не пройдена.");
 
@@ -91,11 +90,11 @@ public class LoginController {
         }
         log.debug("LoginController. Аутентификация пройдена.");
 
-        session.setAttribute("user", depUser);
-        session.setAttribute("token", depUser.hashCode());
+        session.setAttribute("user", clsUser);
+        session.setAttribute("token", clsUser.hashCode());
         session.setMaxInactiveInterval(120*60);
 
-        if (depUser.getAdmin() != null && depUser.getAdmin()) {
+        if (clsUser.getAdmin() != null && clsUser.getAdmin()) {
             return "redirect:/admin";
         }
 

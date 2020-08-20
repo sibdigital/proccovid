@@ -62,11 +62,11 @@ public class DocRequestWithPerson {
 
     @OneToOne
     @JoinColumn(name = "id_reassigned_user", referencedColumnName = "id")
-    private DepUser reassignedUser;
+    private ClsUser reassignedUser;
 
     @OneToOne
     @JoinColumn(name = "id_processed_user", referencedColumnName = "id")
-    private DepUser processedUser;
+    private ClsUser processedUser;
 
     @OneToOne
     @JoinColumn(name = "id_type_request", referencedColumnName = "id")
@@ -258,19 +258,19 @@ public class DocRequestWithPerson {
         return docAddressFact;
     }
 
-    public DepUser getReassignedUser() {
+    public ClsUser getReassignedUser() {
         return reassignedUser;
     }
 
-    public void setReassignedUser(DepUser reassignedUser) {
+    public void setReassignedUser(ClsUser reassignedUser) {
         this.reassignedUser = reassignedUser;
     }
 
-    public DepUser getProcessedUser() {
+    public ClsUser getProcessedUser() {
         return processedUser;
     }
 
-    public void setProcessedUser(DepUser processedUser) {
+    public void setProcessedUser(ClsUser processedUser) {
         this.processedUser = processedUser;
     }
 
