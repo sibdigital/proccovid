@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org/">
 <head>
     <meta charset="UTF-8">
-    <title>Работающая Бурятия</title>
+    <title th:utext="${application_name}"></title>
  <!--
     <link type="text/css" rel="stylesheet" href="/libs/webix.css">
     <script src="/libs/webix.min.js"></script>
@@ -36,6 +36,7 @@
     const LINK_PREFIX = [[${link_prefix}]]
     const LINK_SUFFIX = [[${link_suffix}]]
     const TOKEN = [[${token}]]
+    const APPLICATION_NAME = [[${application_name}]]
 
     const winHeight = document.body.clientHeight
     const winWidth = document.body.clientWidth

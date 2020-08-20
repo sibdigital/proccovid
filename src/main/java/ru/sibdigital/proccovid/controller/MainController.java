@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.dto.KeyValue;
 import ru.sibdigital.proccovid.model.ClsTypeRequest;
 import ru.sibdigital.proccovid.model.DepUser;
@@ -27,11 +28,10 @@ public class MainController {
     @Autowired
     private RequestService requestService;
 
-    @Value("${link.prefix:http://fs.govrb.ru}")
-    private String linkPrefix;
+    @Autowired
+    private ApplicationConstants applicationConstants;
 
-    @Value("${link.suffix:}")
-    private String linkSuffix;
+
 
     @GetMapping(value = "/download/{id}")
     public void downloadFile(HttpServletResponse response, @PathVariable("id") DocRequest docRequest) throws Exception {
@@ -45,8 +45,9 @@ public class MainController {
             return "404";
         }
         model.addAttribute("doc_request_id", id);
-        model.addAttribute("link_prefix", linkPrefix);
-        model.addAttribute("link_suffix", linkSuffix);
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
         return "view";
     }
 
@@ -61,5 +62,13 @@ public class MainController {
                 .map( ctr -> new KeyValue(ctr.getClass().getSimpleName(), ctr.getId(), ctr.getShortName()))
                 .collect(Collectors.toList());
         return list;
+    }
+
+    @GetMapping("/")
+    public String getIndexPage(Model model) {
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "view";
     }
 }

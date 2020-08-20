@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org/">
 <head>
     <meta charset="UTF-8">
-    <title>Работающая Бурятия</title>
+    <title th:utext="${application_name}"></title>
     <link type="text/css" rel="stylesheet" href="/libs/webix.min.css">
     <script src="/libs/webix.min.js"></script>
     <script th:src="@{/js/views/showform-view.js}"></script>

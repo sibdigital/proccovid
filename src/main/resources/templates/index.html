@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/libs/webix.min.css" type="text/css">
     <script src="/libs/webix.min.js" type="text/javascript"></script>
-    <title>Вход. Работающая Бурятия</title>
+    <title th:utext="${application_name + '. Вход'}"></title>
 </head>
 <body>
 <div id="login"></div>
@@ -13,7 +13,7 @@
 
 <script th:inline="javascript">
     let message = [[${message}]] || ''
-
+    const APPLICATION_NAME = [[${application_name}]]
     console.log(message)
 
     webix.ui(
@@ -26,7 +26,7 @@
                     cols: [
                         {
                             view: 'label',
-                            label: '<span style="font-size: 1.5rem">Работающая Бурятия. Список заявок.</span>',
+                            label: `<span style="font-size: 1.5rem">${APPLICATION_NAME}. Список заявок.</span>`,
                         },
                     ]
                 },

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.model.RequestTypes;
 import ru.sibdigital.proccovid.service.StatisticService;
 
@@ -15,12 +16,15 @@ public class StatisticController {
     @Autowired
     StatisticService statisticService;
 
+    @Autowired
+    private ApplicationConstants applicationConstants;
+
     @GetMapping(value = "/statistic")
     public String getStatisticPage(Model model){
 
         model.addAttribute("totalStatistic", statisticService.getTotalStatistic());
         model.addAttribute("departmentStatistic", statisticService.getDepartmentRequestStatistic());
-
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
         return "statistic";
     }
 
@@ -29,7 +33,7 @@ public class StatisticController {
 
         model.addAttribute("totalStatistic", statisticService.getTotalDachaStatistic());
         model.addAttribute("nearestDaysStatistic", statisticService.getNearestDaysDachaRequestStatistic());
-
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
         return "dacha_statistic";
     }
 
@@ -38,7 +42,7 @@ public class StatisticController {
         Integer idTypeRequest = RequestTypes.BARBERSHOP.getValue();
         model.addAttribute("totalStatistic", statisticService.getTotalStatistic(idTypeRequest));
         model.addAttribute("departmentStatistic", statisticService.getDepartmentRequestStatistic(idTypeRequest));
-
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
         return "barber_statistic";
     }
 

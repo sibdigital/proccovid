@@ -27,7 +27,7 @@
                         cols: [
                             {
                                 view: 'label',
-                                label: '<span style="font-size: 1.5rem">Работающая Бурятия. Список заявок.</span>',
+                                label: `<span style="font-size: 1.5rem">${APPLICATION_NAME}. Список заявок.</span>`,
                             },
                             {
                             },
