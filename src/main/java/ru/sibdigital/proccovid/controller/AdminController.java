@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.ClsTemplate;
@@ -109,5 +110,17 @@ public class AdminController {
             return "Не удалось сохранить тип заявки";
         }
         return "Тип заявки сохранен";
+    }
+
+
+    @PostMapping("/save_cls_department")
+    public @ResponseBody String saveClsDepartment(@RequestBody ClsDepartmentDto clsDepartmentDto) {
+        try {
+            requestService.saveClsDepartment(clsDepartmentDto);
+        } catch(Exception e){
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить подразделение";
+        }
+        return "Подразделение сохранено";
     }
 }

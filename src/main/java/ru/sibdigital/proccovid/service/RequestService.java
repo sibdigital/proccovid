@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
@@ -49,7 +50,7 @@ public class RequestService {
     DocRequestRepo docRequestRepo;
 
     @Autowired
-    ClsDepartmentRepo departmentRepo;
+    ClsDepartmentRepo clsDepartmentRepo;
 
     @Autowired
     private ClsUserRepo clsUserRepo;
@@ -277,7 +278,7 @@ public class RequestService {
 
         ClsDepartment clsDepartment = null;
         if (clsTypeRequestDto.getDepartmentId() != null) {
-            clsDepartment = departmentRepo.findById(clsTypeRequestDto.getDepartmentId()).orElse(null);
+            clsDepartment = clsDepartmentRepo.findById(clsTypeRequestDto.getDepartmentId()).orElse(null);
         }
 
         ClsTypeRequest clsTypeRequest = ClsTypeRequest.builder()
@@ -300,5 +301,18 @@ public class RequestService {
         clsTypeRequestRepo.save(clsTypeRequest);
 
         return clsTypeRequest;
+    }
+
+    public ClsDepartment saveClsDepartment(ClsDepartmentDto clsDepartmentDto) {
+
+        ClsDepartment clsDepartment = ClsDepartment.builder()
+                .id(clsDepartmentDto.getId())
+                .name(clsDepartmentDto.getName())
+                .description(clsDepartmentDto.getDescription())
+                .build();
+
+        clsDepartmentRepo.save(clsDepartment);
+
+        return clsDepartment;
     }
 }

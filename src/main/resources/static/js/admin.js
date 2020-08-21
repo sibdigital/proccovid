@@ -10,6 +10,167 @@ function view_section(title) {
     }
 }
 
+const departments = {
+    view: 'scrollview',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            {
+                autowidth: true,
+                autoheight: true,
+                rows: [
+                    {
+                        view: 'datatable',
+                        id: 'departments_table',
+                        minHeight: 570,
+                        select: 'row',
+                        navigation: true,
+                        resizeColumn: true,
+                        // pager: 'Pager',
+                        datafetch: 25,
+                        columns: [
+                            {id: "name", header: "Наименование", template: "#name#", adjust: true},
+                            {id: "description", header: "Описание", template: "#description#", adjust: true},
+                        ],
+                        on: {
+                            onBeforeLoad: function () {
+                                this.showOverlay("Загружаю...");
+                            },
+                            onAfterLoad: function () {
+                                this.hideOverlay();
+                                if (!this.count()) {
+                                    this.showOverlay("Отсутствуют данные")
+                                }
+                            },
+                            onLoadError: function () {
+                                this.hideOverlay();
+                            },
+                            onItemDblClick: function (id) {
+
+                                let data = $$('departments_table').getItem(id);
+
+                                let window = webix.ui({
+                                    view: 'window',
+                                    id: 'window',
+                                    head: 'Редактирование подразделения (id: ' + data.id + ').',
+                                    close: true,
+                                    width: 1000,
+                                    height: 800,
+                                    position: 'center',
+                                    modal: true,
+                                    body: departmentForm,
+                                    on: {
+                                        'onShow': function () {
+                                        }
+                                    }
+                                });
+
+                                $$('departmentForm').parse(data);
+
+                                window.show();
+                            }
+                        },
+                        url: 'cls_departments'
+                    },
+                    {
+                        cols: [
+                            // {
+                            //     view: 'pager',
+                            //     id: 'Pager',
+                            //     height: 38,
+                            //     size: 25,
+                            //     group: 5,
+                            //     template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                            // },
+                            {},
+                            {},
+                            {},
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                value: 'Добавить',
+                                click: function () {
+
+                                    let window = webix.ui({
+                                        view: 'window',
+                                        id: 'window',
+                                        head: 'Добавление подразделения',
+                                        close: true,
+                                        width: 1000,
+                                        height: 800,
+                                        position: 'center',
+                                        modal: true,
+                                        body: departmentForm,
+                                        on: {
+                                            'onShow': function () {
+                                            }
+                                        }
+                                    });
+
+                                    window.show();
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+
+const departmentForm = {
+    view: 'scrollview',
+    scroll: 'y',
+    id: 'show_layout',
+    autowidth: true,
+    autoheight: true,
+    body: {
+        rows: [
+            {
+                view: 'form',
+                id: 'departmentForm',
+                elements: [
+                    { view: 'text', label: 'Наименование', labelPosition: 'top', name: 'name', required: true, validate: webix.rules.isNotEmpty },
+                    { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', required: true, validate: webix.rules.isNotEmpty },
+                    {
+                        view: 'button',
+                        css: 'webix_primary',
+                        value: 'Сохранить',
+                        click: function () {
+                            if ($$('departmentForm').validate()) {
+                                let params = $$('departmentForm').getValues();
+
+                                webix.ajax().headers({
+                                    'Content-Type': 'application/json'
+                                }).post('/save_cls_department',
+                                    JSON.stringify(params)
+                                ).then(function (data) {
+                                    if (data.text() === 'Подразделение сохранено') {
+                                        webix.message({text: data.text(), type: 'success'});
+
+                                        $$('window').close();
+
+                                        const departmentsTable = $$('departments_table');
+                                        const url = departmentsTable.data.url;
+                                        departmentsTable.clearAll();
+                                        departmentsTable.load(url);
+                                    } else {
+                                        webix.message({text: data.text(), type: 'error'});
+                                    }
+                                })
+                            } else {
+                                webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
+
 const principals = {
     view: 'scrollview',
     scroll: 'xy',
@@ -452,7 +613,7 @@ const adminRequests = {
                                 view: 'richselect',
                                 id: 'department_filter',
                                 css: 'smallText',
-                                placeholder: 'Все министерства',
+                                placeholder: 'Все подразделения',
                                 options: 'cls_departments',
                                 on: {
                                     onChange() {
@@ -696,6 +857,7 @@ webix.ready(function() {
                         view: 'sidebar',
                         css: 'webix_dark',
                         data: [
+                            { id: "Departments", value: 'Подразделения' },
                             { id: "Requests", value: 'Заявки' },
                             { id: "TypeRequests", value: 'Типы заявок' },
                             { id: "Principals", value: 'Пользователи' },
@@ -706,6 +868,10 @@ webix.ready(function() {
                             onAfterSelect: function(id) {
                                 let view;
                                 switch (id) {
+                                    case 'Departments': {
+                                        view = departments;
+                                        break;
+                                    }
                                     case 'Principals': {
                                         view = principals;
                                         break;
@@ -735,7 +901,7 @@ webix.ready(function() {
                                 }, $$('content'))
 
                                 if (id === 'Requests') {
-                                    $$('department_filter').getList().add({id:'', value:'Все министерства', $empty: true}, 0);
+                                    $$('department_filter').getList().add({id:'', value:'Все подразделения', $empty: true}, 0);
                                     $$('request_type').getList().add({id:'', value:'Все типы заявок', $empty: true}, 0);
                                     $$('district_filter').getList().add({id:'', value:'Все районы', $empty: true}, 0);
                                 }

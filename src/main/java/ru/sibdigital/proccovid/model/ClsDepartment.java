@@ -18,6 +18,8 @@ public class ClsDepartment {
 
     @Id
     @Column(name = "id", nullable = false)
+    @SequenceGenerator(name = "CLS_DEPARTMENT_GEN", sequenceName = "cls_department_id_seq", allocationSize = 1, schema = "public")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CLS_DEPARTMENT_GEN")
     private Long id;
     private String name;
     private String description;
