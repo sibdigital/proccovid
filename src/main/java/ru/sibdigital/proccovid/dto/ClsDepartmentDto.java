@@ -14,5 +14,6 @@ public class ClsDepartmentDto {
     private Long id;
     private String name;
     private String description;
+    private Boolean deleted;
 
 }

@@ -15,7 +15,6 @@ import java.util.Objects;
 @Builder(toBuilder = true)
 public class ClsDepartment {
 
-
     @Id
     @Column(name = "id", nullable = false)
     @SequenceGenerator(name = "CLS_DEPARTMENT_GEN", sequenceName = "cls_department_id_seq", allocationSize = 1, schema = "public")
@@ -25,10 +24,7 @@ public class ClsDepartment {
     private String description;
     private Integer statusImport;
     private Timestamp timeImport;
-
-
-
-
+    private Boolean isDeleted;
 
     public Long getId() {
         return id;
@@ -76,6 +72,16 @@ public class ClsDepartment {
 
     public void setTimeImport(Timestamp timeImport) {
         this.timeImport = timeImport;
+    }
+
+    @Basic
+    @Column(name = "is_deleted")
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 
     public String getValue() {

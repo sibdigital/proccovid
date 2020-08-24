@@ -309,6 +309,7 @@ public class RequestService {
                 .id(clsDepartmentDto.getId())
                 .name(clsDepartmentDto.getName())
                 .description(clsDepartmentDto.getDescription())
+                .isDeleted(clsDepartmentDto.getDeleted())
                 .build();
 
         clsDepartmentRepo.save(clsDepartment);

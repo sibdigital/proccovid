@@ -32,6 +32,16 @@ const departments = {
                         columns: [
                             {id: "name", header: "Наименование", template: "#name#", adjust: true},
                             {id: "description", header: "Описание", template: "#description#", adjust: true},
+                            {
+                                id: "deleted", header: "Удален",
+                                template: function (obj) {
+                                    let text = '';
+                                    if (obj.deleted === true) {
+                                        text = 'Да'
+                                    }
+                                    return text;
+                                },
+                                adjust: true},
                         ],
                         on: {
                             onBeforeLoad: function () {
@@ -134,6 +144,7 @@ const departmentForm = {
                 elements: [
                     { view: 'text', label: 'Наименование', labelPosition: 'top', name: 'name', required: true, validate: webix.rules.isNotEmpty },
                     { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', required: true, validate: webix.rules.isNotEmpty },
+                    { view: 'checkbox', label: 'Удален', labelPosition: 'top', name: 'deleted' },
                     {
                         view: 'button',
                         css: 'webix_primary',
