@@ -8,8 +8,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.sibdigital.proccovid.bean.DocRequestCollection;
+import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -87,7 +89,7 @@ public class DocRequestController {
     }
 
     @GetMapping("/list_request/{id_department}/{status}")
-    public DocRequestCollection listRequest(@PathVariable("id_department") Long idDepartment,
+    public Map<String, Object> listRequest(@PathVariable("id_department") Long idDepartment,
                                             @PathVariable("status") Integer status,
                                             @RequestParam(value = "id_type_request", required = false) Integer idTypeRequest,
                                             @RequestParam(value = "id_district", required = false) Integer idDistrict,
@@ -107,11 +109,11 @@ public class DocRequestController {
 
         Page<DocRequestPrs> docRequestPrsPage = requestService.getRequestsByCriteria(searchCriteria, page, size);
 
-        DocRequestCollection docRequestCollection = new DocRequestCollection();
-        docRequestCollection.setData(docRequestPrsPage.getContent());
-        docRequestCollection.setPos((long) page * size);
-        docRequestCollection.setTotal_count(docRequestPrsPage.getTotalElements());
-        return docRequestCollection;
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", docRequestPrsPage.getContent());
+        result.put("pos", (long) page * size);
+        result.put("total_count", docRequestPrsPage.getTotalElements());
+        return result;
     }
 
     //  @GetMapping("/list_requestByInnAndName/{id_department}/{status}/{innOrName}")
@@ -126,16 +128,8 @@ public class DocRequestController {
                                                 @RequestBody DocRequest obj,
                                                 @RequestHeader("Authorization") String token, HttpSession session){
 
-        if(!requestService.isTokenValid(Integer.valueOf(token.replace("Bearer", "").trim()))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Вы не авторизованы. " +
-                    "Возможно, вы не были активны и ваша сессия истекла. Войдите в приложение повторно");
-        }
-
-        ClsUser clsUser = (ClsUser) session.getAttribute("user");
-        if (clsUser == null){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Вы не авторизованы. " +
-                    "Возможно, вы не были активны и ваша сессия истекла. Войдите в приложение повторно");
-        }
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
 
         Long oldDepartmentId = docRequest.getDepartment().getId();
         if (oldDepartmentId != obj.getDepartment().getId()) {
@@ -157,16 +151,8 @@ public class DocRequestController {
                                               @RequestBody DocRequest obj,
                                               @RequestHeader("Authorization") String token, HttpSession session) {
 
-        if (!requestService.isTokenValid(Integer.valueOf(token.replace("Bearer", "").trim()))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Вы не авторизованы. " +
-                    "Возможно, вы не были активны и ваша сессия истекла. Войдите в приложение повторно");
-        }
-
-        ClsUser clsUser = (ClsUser) session.getAttribute("user");
-        if (clsUser == null){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Вы не авторизованы. " +
-                    "Возможно, вы не были активны и ваша сессия истекла. Войдите в приложение повторно");
-        }
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
 
         Boolean changeFlag = true;
         Timestamp timeReview = new Timestamp(System.currentTimeMillis());

@@ -11,9 +11,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
+import ru.sibdigital.proccovid.dto.ClsUserDto;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
@@ -72,6 +75,9 @@ public class RequestService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -315,5 +321,43 @@ public class RequestService {
         clsDepartmentRepo.save(clsDepartment);
 
         return clsDepartment;
+    }
+
+    public Page<ClsUser> getUsersByCriteria(int page, int size) {
+        return clsUserRepo.findAll(PageRequest.of(page, size, Sort.by("lastname", "firstname", "patronymic")));
+    }
+
+    public ClsUser findUserByLogin(String login) {
+        return clsUserRepo.findByLogin(login);
+    }
+
+    public ClsUser saveClsUser(ClsUserDto clsUserDto) {
+
+        ClsDepartment clsDepartment = clsDepartmentRepo.findById(clsUserDto.getDepartmentId()).orElse(null);
+
+        ClsUser clsUser = ClsUser.builder()
+                .id(clsUserDto.getId())
+                .idDepartment(clsDepartment)
+                .lastname(clsUserDto.getLastname())
+                .firstname(clsUserDto.getFirstname())
+                .patronymic(clsUserDto.getPatronymic())
+                .login(clsUserDto.getLogin())
+                .isAdmin(clsUserDto.getAdmin())
+                .build();
+
+        if (clsUserDto.getNewPassword() != null && !clsUserDto.getNewPassword().isBlank()) {
+            clsUser.setPassword(passwordEncoder.encode(clsUserDto.getNewPassword()));
+        } else {
+            if (clsUserDto.getId() != null) {
+                ClsUser currentUser = clsUserRepo.findById(clsUserDto.getId()).orElse(null);
+                if (currentUser != null) {
+                    clsUser.setPassword(currentUser.getPassword());
+                }
+            }
+        }
+
+        clsUserRepo.save(clsUser);
+
+        return clsUser;
     }
 }

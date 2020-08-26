@@ -3,6 +3,7 @@ package ru.sibdigital.proccovid.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.Objects;
 @Table(name = "cls_user", schema = "public")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder(toBuilder = true)
 public class ClsUser implements Serializable {
 
     @Id
