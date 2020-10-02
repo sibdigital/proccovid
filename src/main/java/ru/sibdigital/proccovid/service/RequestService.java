@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
@@ -256,6 +255,10 @@ public class RequestService {
         return clsPrincipalRepo.findAll(PageRequest.of(page, size, Sort.by("organization.inn")));
     }
 
+    public List<String> getOrganizationsEmailsByDocRequestStatus(int reviewStatus) {
+        return clsOrganizationRepo.getOrganizationsEmailsByDocRequestStatus(reviewStatus);
+    }
+
     public void sendMessageToPrincipals(String type) {
         if (type == null) {
             return;
@@ -277,6 +280,35 @@ public class RequestService {
             pagePrincipals = getPrincipalsByCriteria(page, size);
             emailService.sendMessage(pagePrincipals.getContent(), clsTemplate, new HashMap<>());
         }
+    }
+
+    public void sendMessageToOrganizations(String type) {
+        if (type == null) {
+            return;
+        }
+
+        ClsTemplate clsTemplate = clsTemplateRepo.findByKey(type);
+        if (clsTemplate == null) {
+            return;
+        }
+
+//        int size = 25;
+//        Page<ClsPrincipal> pagePrincipals = getPrincipalsByCriteria(0, size);
+//        if (pagePrincipals == null || pagePrincipals.getTotalElements() == 0) {
+//            return;
+//        }
+
+//        int totalPage = pagePrincipals.getTotalPages();
+//        for (int page = 0; page < totalPage; page++) {
+//            pagePrincipals = getPrincipalsByCriteria(page, size);
+//            emailService.sendMessage(pagePrincipals.getContent(), clsTemplate, new HashMap<>());
+//        }
+
+        List<String> organizationsEmails = getOrganizationsEmailsByDocRequestStatus(1);
+        for (String email  : organizationsEmails) {
+            emailService.sendMessage(email, clsTemplate, new HashMap<>());
+        }
+
     }
 
 
