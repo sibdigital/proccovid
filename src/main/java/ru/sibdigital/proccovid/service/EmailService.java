@@ -12,4 +12,6 @@ public interface EmailService {
     void sendMessage(DocRequest docRequest);
 
     void sendMessage(List<ClsPrincipal> principals, ClsTemplate clsTemplate, Map<String, String> params);
+
+    void sendMessage(String email, ClsTemplate clsTemplate, Map<String, String> params);
 }
