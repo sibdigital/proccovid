@@ -15,6 +15,7 @@ public class RegMailingHistory {
     private Long id;
     private Timestamp timeSend;
     private Short status;
+    private String email;
 
     @OneToOne
     @JoinColumn(name = "id_principal", referencedColumnName = "id")
@@ -81,5 +82,15 @@ public class RegMailingHistory {
     @Override
     public int hashCode() {
         return Objects.hash(id, timeSend, status);
+    }
+
+    @Basic
+    @Column(name = "email")
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -255,8 +256,13 @@ public class RequestService {
         return clsPrincipalRepo.findAll(PageRequest.of(page, size, Sort.by("organization.inn")));
     }
 
-    public List<String> getOrganizationsEmailsByDocRequestStatus(int reviewStatus) {
-        return clsOrganizationRepo.getOrganizationsEmailsByDocRequestStatus(reviewStatus);
+    public List<ClsOrganization> getOrganizationsEmailsByDocRequestStatus(int reviewStatus) {
+        return clsOrganizationRepo.getOrganizationsEmailsByDocRequestStatus(reviewStatus).stream()
+                .map(obj -> ClsOrganization.builder()
+                        .inn((String)obj[0])
+                        .email((String)obj[1])
+                        .build()
+                ).collect(Collectors.toList());
     }
 
     public void sendMessageToPrincipals(String type) {
@@ -283,6 +289,8 @@ public class RequestService {
     }
 
     public void sendMessageToOrganizations(String type) {
+        String formAddr = "http://rabota.govrb.ru/actualize_form"; //TODO в settings!
+
         if (type == null) {
             return;
         }
@@ -292,21 +300,11 @@ public class RequestService {
             return;
         }
 
-//        int size = 25;
-//        Page<ClsPrincipal> pagePrincipals = getPrincipalsByCriteria(0, size);
-//        if (pagePrincipals == null || pagePrincipals.getTotalElements() == 0) {
-//            return;
-//        }
-
-//        int totalPage = pagePrincipals.getTotalPages();
-//        for (int page = 0; page < totalPage; page++) {
-//            pagePrincipals = getPrincipalsByCriteria(page, size);
-//            emailService.sendMessage(pagePrincipals.getContent(), clsTemplate, new HashMap<>());
-//        }
-
-        List<String> organizationsEmails = getOrganizationsEmailsByDocRequestStatus(1);
-        for (String email  : organizationsEmails) {
-            emailService.sendMessage(email, clsTemplate, new HashMap<>());
+        List<ClsOrganization> organizationsEmails = getOrganizationsEmailsByDocRequestStatus(ReviewStatuses.CONFIRMED.getValue());
+        for (ClsOrganization org  : organizationsEmails) {
+            String link = formAddr + "?inn="+ org.getInn();
+            Map<String, String> params = Map.of(":link", link);
+            emailService.sendMessage(org.getEmail(), clsTemplate, params);
         }
 
     }

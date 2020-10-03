@@ -1,0 +1,1 @@
+alter table reg_mailing_history add column email varchar(200);

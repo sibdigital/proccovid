@@ -9,10 +9,11 @@ import java.util.List;
 
 @Repository
 public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long> {
-    @Query(nativeQuery = true, value = "SELECT DISTINCT email\n" +
-            "FROM cls_organization\n" +
-            "RIGHT JOIN doc_request\n" +
-            "ON cls_organization.id = doc_request.id_organization\n" +
-            "WHERE doc_request.status_review = :reviewStatus")
-    List<String> getOrganizationsEmailsByDocRequestStatus(int reviewStatus);
+    @Query(nativeQuery = true, value = "select distinct inn, email from cls_organization as co\n" +
+            "inner join (select *\n" +
+            "        from doc_request\n" +
+            "        where status_review = :reviewStatus\n" +
+            "    ) as dr\n" +
+            "on co.id = dr.id_organization")
+    List<Object[]> getOrganizationsEmailsByDocRequestStatus(int reviewStatus);
 }

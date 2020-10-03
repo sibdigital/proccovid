@@ -1,0 +1,1 @@
+alter table reg_mailing_history alter column id_principal drop not null;

@@ -4,7 +4,8 @@ public enum MailingStatuses {
     EMAIL_SENT((short) 0),
     INVALID_ADDRESS((short) 1),
     EMAIL_NOT_CREATED((short) 2),
-    EMAIL_NOT_SENT((short) 3);
+    EMAIL_NOT_SENT((short) 3),
+    UNKNOWN_ERROR((short) 4);
 
     private final short value;
 
