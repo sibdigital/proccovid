@@ -343,10 +343,11 @@ public class RequestService {
         ClsSettings testEmailSetting = settingService.findActualByKey("testEmail");
         String testEmail = testEmailSetting != null ? testEmailSetting.getStringValue() : "";
 
-        List<ClsOrganization> organizationsEmails =
-                getOrganizationsEmailsByDocRequestStatus(ReviewStatuses.CONFIRMED.getValue())
-                .stream().filter(o -> o.getEmail().equalsIgnoreCase(testEmail))
-                .collect(Collectors.toList());
+        List<ClsOrganization> organizationsEmails = List.of(ClsOrganization.builder()
+                .inn("test")
+                .email(testEmail)
+                .name("test")
+                .build());
         sendMessage(organizationsEmails, clsTemplate);
     }
 
