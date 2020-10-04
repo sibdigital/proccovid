@@ -16,9 +16,6 @@ spring.jpa.show-sql=false
 upload.path=uploads
 upload_xls.path=uploads_xls
 
-spring.mail.host=172.18.16.241
-spring.mail.port=25
-spring.mail.properties.mail.smtp.auth=false
 spring.mail.properties.mail.smtp.starttls.enable=false
 
 link.prefix=http://fs.govrb.ru/

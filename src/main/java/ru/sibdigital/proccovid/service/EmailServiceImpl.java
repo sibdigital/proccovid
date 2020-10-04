@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -30,6 +31,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private RegMailingHistoryRepo regMailingHistoryRepo;
+
+    @Value("${spring.mail.from:/rabota@govrb.ru}")
+    protected String fromAdress;
 
     private final static String sep = "|";
 
@@ -199,8 +203,9 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(address.getAddress());
-        helper.setSubject("Работающая Бурятия");
-        helper.setFrom("rabota@govrb.ru");
+        String subject = params.get("subject") == null ? "Работающая Бурятия" : params.get("subject");
+        helper.setSubject(subject);
+        helper.setFrom(fromAdress);
 
         String text = clsTemplate.getValue();
         for (Map.Entry<String, String> param : params.entrySet()) {

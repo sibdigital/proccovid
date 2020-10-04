@@ -29,10 +29,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -256,13 +253,25 @@ public class RequestService {
         return clsPrincipalRepo.findAll(PageRequest.of(page, size, Sort.by("organization.inn")));
     }
 
+    private ClsOrganization buldOrg(Object[] obj){
+        return ClsOrganization.builder()
+                .inn((String)obj[0])
+                .email((String)obj[1])
+                .name((String)obj[2])
+                .build();
+    }
+
     public List<ClsOrganization> getOrganizationsEmailsByDocRequestStatus(int reviewStatus) {
         return clsOrganizationRepo.getOrganizationsEmailsByDocRequestStatus(reviewStatus).stream()
-                .map(obj -> ClsOrganization.builder()
-                        .inn((String)obj[0])
-                        .email((String)obj[1])
-                        .build()
-                ).collect(Collectors.toList());
+                .map(this::buldOrg)
+                .collect(Collectors.toList());
+    }
+
+    public List<ClsOrganization> getOrganizationsEmailsByDocRequestStatusLast24HoursNotMailing(int reviewStatus, int mailingStatus, Date currDate) {
+        return clsOrganizationRepo
+                .getOrganizationsEmailsByDocRequestStatusLast24HoursNotMailing(reviewStatus, mailingStatus, currDate).stream()
+                .map(this::buldOrg)
+                .collect(Collectors.toList());
     }
 
     public void sendMessageToPrincipals(String type) {
@@ -289,8 +298,6 @@ public class RequestService {
     }
 
     public void sendMessageToOrganizations(String type) {
-        String formAddr = "http://rabota.govrb.ru/actualize_form"; //TODO в settings!
-
         if (type == null) {
             return;
         }
@@ -301,12 +308,33 @@ public class RequestService {
         }
 
         List<ClsOrganization> organizationsEmails = getOrganizationsEmailsByDocRequestStatus(ReviewStatuses.CONFIRMED.getValue());
-        for (ClsOrganization org  : organizationsEmails) {
-            String link = formAddr + "?inn="+ org.getInn();
-            Map<String, String> params = Map.of(":link", link);
-            emailService.sendMessage(org.getEmail(), clsTemplate, params);
+        sendMessage(organizationsEmails, clsTemplate);
+    }
+
+    public void sendMessageToOrganizations24(String type) {
+        if (type == null) {
+            return;
         }
 
+        ClsTemplate clsTemplate = clsTemplateRepo.findByKey(type);
+        if (clsTemplate == null) {
+            return;
+        }
+
+        List<ClsOrganization> organizationsEmails =
+                getOrganizationsEmailsByDocRequestStatusLast24HoursNotMailing(ReviewStatuses.CONFIRMED.getValue(),
+                        MailingStatuses.EMAIL_SENT.value(), new Date());
+        sendMessage(organizationsEmails, clsTemplate);
+    }
+
+    private void sendMessage(List<ClsOrganization> organizationsEmails, ClsTemplate clsTemplate){
+        String formAddr = "http://rabota.govrb.ru/actualize_form"; //TODO в settings!
+        for (ClsOrganization org  : organizationsEmails) {
+            String link = formAddr + "?inn="+ org.getInn();
+            String subject = org.getName() + ", актуализируйте утвержденную заявку на портале Работающая Бурятия";
+            Map<String, String> params = Map.of(":link", link, "subject", subject);
+            emailService.sendMessage(org.getEmail(), clsTemplate, params);
+        }
     }
 
 

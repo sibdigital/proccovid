@@ -467,6 +467,18 @@ const principals = {
                         webix.message(data.text());
                     });
                 }
+            },
+            {
+                view: 'button',
+                id: 'button_send_message24',
+                value: 'Отправить сообщение (не получившие в последние 24 часа)',
+                disabled: false,
+                click: function () {
+                    this.disable();
+                    webix.ajax().get('send_email_message24', 'type=1402').then(function (data) {
+                        webix.message(data.text());
+                    });
+                }
             }
         ]
     }
