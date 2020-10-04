@@ -329,11 +329,20 @@ public class RequestService {
 
     private void sendMessage(List<ClsOrganization> organizationsEmails, ClsTemplate clsTemplate){
         String formAddr = "http://rabota.govrb.ru/actualize_form"; //TODO в settings!
+        int count = 0;
         for (ClsOrganization org  : organizationsEmails) {
             String link = formAddr + "?inn="+ org.getInn();
             String subject = org.getName() + ", актуализируйте утвержденную заявку на портале Работающая Бурятия";
             Map<String, String> params = Map.of(":link", link, "subject", subject);
             emailService.sendMessage(org.getEmail(), clsTemplate, params);
+            count++;
+            if (count % 50 == 0){
+                try {
+                    Thread.sleep(10_000L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
