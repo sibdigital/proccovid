@@ -77,6 +77,13 @@ public class AdminController {
         return "OK";
     }
 
+    @GetMapping("/send_email_test_message")
+    public @ResponseBody
+    String sendEmailTestMessage(@RequestParam(value = "type") String type) {
+        requestService.sendEmailTestMessage(type);
+        return "OK";
+    }
+
     @GetMapping("/cls_templates")
     public @ResponseBody Map<String, Object> getClsTemplates(@RequestParam(value = "start", required = false) Integer start,
                                                              @RequestParam(value = "count", required = false) Integer count) {

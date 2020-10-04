@@ -479,6 +479,18 @@ const principals = {
                         webix.message(data.text());
                     });
                 }
+            },
+            {
+                view: 'button',
+                id: 'button_send_test_message',
+                value: 'Отправить тестовое сообщение',
+                disabled: false,
+                click: function () {
+                    this.disable();
+                    webix.ajax().get('send_email_test_message', 'type=1402').then(function (data) {
+                        webix.message(data.text());
+                    });
+                }
             }
         ]
     }

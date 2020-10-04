@@ -76,6 +76,9 @@ public class RequestService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private SettingService settingService;
+
     @Value("${upload.path:/uploads}")
     String uploadingDir;
 
@@ -327,12 +330,41 @@ public class RequestService {
         sendMessage(organizationsEmails, clsTemplate);
     }
 
+    public void sendEmailTestMessage(String type) {
+        if (type == null) {
+            return;
+        }
+
+        ClsTemplate clsTemplate = clsTemplateRepo.findByKey(type);
+        if (clsTemplate == null) {
+            return;
+        }
+
+        ClsSettings testEmailSetting = settingService.findActualByKey("testEmail");
+        String testEmail = testEmailSetting != null ? testEmailSetting.getStringValue() : "";
+
+        List<ClsOrganization> organizationsEmails =
+                getOrganizationsEmailsByDocRequestStatus(ReviewStatuses.CONFIRMED.getValue())
+                .stream().filter(o -> o.getEmail().equalsIgnoreCase(testEmail))
+                .collect(Collectors.toList());
+        sendMessage(organizationsEmails, clsTemplate);
+    }
+
+
+
     private void sendMessage(List<ClsOrganization> organizationsEmails, ClsTemplate clsTemplate){
-        String formAddr = "http://rabota.govrb.ru/actualize_form"; //TODO в settings!
+
+        ClsSettings actualizeSubject = settingService.findActualByKey("actualizeSubject");
+        ClsSettings actualizeFormAddr = settingService.findActualByKey("actualizeFormAddr");
+
+        String formAddr = actualizeFormAddr != null ? actualizeFormAddr.getStringValue()
+                :"http://rabota.govrb.ru/actualize_form"; //TODO в settings!
         int count = 0;
         for (ClsOrganization org  : organizationsEmails) {
             String link = formAddr + "?inn="+ org.getInn();
-            String subject = org.getName() + ", актуализируйте утвержденную заявку на портале Работающая Бурятия";
+            String subject = org.getName() + ", " +
+                    (actualizeSubject != null ? actualizeSubject.getStringValue()
+                    : "актуализируйте утвержденную заявку на портале Работающая Бурятия");
             Map<String, String> params = Map.of(":link", link, "subject", subject);
             emailService.sendMessage(org.getEmail(), clsTemplate, params);
             count++;
@@ -345,7 +377,6 @@ public class RequestService {
             }
         }
     }
-
 
     public ClsTypeRequest saveClsTypeRequest(ClsTypeRequestDto clsTypeRequestDto) {
 
