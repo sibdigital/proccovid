@@ -362,19 +362,20 @@ public class RequestService {
                 :"http://rabota.govrb.ru/actualize_form"; //TODO в settings!
         int count = 0;
         for (ClsOrganization org  : organizationsEmails) {
-            String link = formAddr + "?inn="+ org.getInn();
-            String subject = org.getName() + ", " +
-                    (actualizeSubject != null ? actualizeSubject.getStringValue()
-                    : "актуализируйте утвержденную заявку на портале Работающая Бурятия");
-            Map<String, String> params = Map.of(":link", link, "subject", subject);
-            emailService.sendMessage(org.getEmail(), clsTemplate, params);
-            count++;
-            if (count % 50 == 0){
-                try {
-                    Thread.sleep(10_000L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            try {
+                String link = formAddr + "?inn="+ org.getInn();
+                String subject = org.getName() + ", " +
+                        (actualizeSubject != null ? actualizeSubject.getStringValue()
+                        : "актуализируйте утвержденную заявку на портале Работающая Бурятия");
+                Map<String, String> params = Map.of(":link", link, "subject", subject);
+                emailService.sendMessage(org.getEmail(), clsTemplate, params);
+                count++;
+                if (count % 50 == 0){
+                   Thread.sleep(10_000L);
                 }
+            } catch (Exception e) {
+                log.error(e.toString());
+                e.printStackTrace();
             }
         }
     }
