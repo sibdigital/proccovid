@@ -1061,6 +1061,14 @@ const statistic = {
                     {
                         view: 'label',
                         label: "<a href='barber/statistic'>Статистика по заявкам от парикмахерских</a>"
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='actualOrganizations/statistic'>Статистика по актуальным заявкам по организациям</a>"
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='actualDepartments/statistic'>Статистика по актуальным заявкам по подразделениям</a>"
                     }
                 ]
             }
