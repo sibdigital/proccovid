@@ -46,6 +46,21 @@ public class StatisticController {
         return "barber_statistic";
     }
 
+    @GetMapping(value = "/actualOrganizations/statistic")
+    public String getActualOrganizationsStatisticPage(Model model) {
+        model.addAttribute("actualOrganizationsStatistic", statisticService.getActualRequestStatisticForEeachOrganization());
+        model.addAttribute("actualNumberWorkerOrganizationsStatistic", statisticService.getActualRequestNumberWorkerStatisticForEeachOrganization());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "actual_organizations_statistic";
+    }
+
+    @GetMapping(value = "/actualDepartments/statistic")
+    public String getActualDepartmentsStatisticPage(Model model) {
+        model.addAttribute("actualDepartmentsStatistic", statisticService.getActualRequestStatisticForEeachDepartment());
+        model.addAttribute("actualNumberWorkerDepartmentStatistic", statisticService.getActualRequestNumberWorkerStatisticForEeachDepartment());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "actual_departments_statistic";
+    }
 
 
 

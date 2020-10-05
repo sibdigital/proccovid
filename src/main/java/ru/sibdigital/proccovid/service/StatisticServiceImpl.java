@@ -67,10 +67,34 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
+    public List<Map<String, Object>> getActualRequestStatisticForEeachOrganization() {
+        List<Map<String, Object>> rawStatistic = docRequestRepo.getActualRequestStatisticForEeachOrganization();
+        return rawStatistic;
+    }
+
+    @Override
+    public List<Map<String, Object>> getActualRequestStatisticForEeachDepartment() {
+        List<Map<String, Object>> rawStatistic = docRequestRepo.getActualRequestStatisticForEeachDepartment();
+        return rawStatistic;
+    }
+
+    @Override
     public List<Map<String, Object>> getDepartmentRequestStatistic(Integer idTypeRequest){
         List<Map<String, Object>> rawStatistic = docRequestRepo.getRequestStatisticForEeachDepartment(idTypeRequest);
         /*statistic.put("totalPeople", docPersonRepo.getTotalPeople());
         statistic.put("totalApprovedPeople", docPersonRepo.getTotalApprovedPeopleByReviewStatus());*/
+        return rawStatistic;
+    }
+
+    @Override
+    public List<Map<String, Object>> getActualRequestNumberWorkerStatisticForEeachOrganization() {
+        List<Map<String, Object>> rawStatistic = docRequestRepo.getActualNumberWorkerForEachOrganization();
+        return rawStatistic;
+    }
+
+    @Override
+    public List<Map<String, Object>> getActualRequestNumberWorkerStatisticForEeachDepartment() {
+        List<Map<String, Object>> rawStatistic = docRequestRepo.getActualNumberWorkerForEachDepartment();
         return rawStatistic;
     }
 

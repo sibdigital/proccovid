@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cтатиcтика ведомств по актуальным заявкам</title>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+
+    <link type="text/css" rel="stylesheet" href="/js/">
+    <script src="/libs/webix.min.js"></script>
+
+
+    <script src="/libs/popper.min.js"></script>
+    <script src="/libs/jquery-3.4.1.min.js"></script>
+    <script src="/libs/bootstrap.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/libs/webix.min.css">
+    <script src="/libs/webix.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        /*.test .webix_canvas_text {*/
+        /*   font-size: 15px !important;-->*/
+        /*    offset: 1.5em !important;-->*/
+        /*}*/
+
+        /*tr {*/
+        /*    line-height: 10px;*/
+        /*    min-height: 10px;*/
+        /*    height: 10px;*/
+        /*}*/
+    </style>
+</head>
+<body>
+<div th:insert="~{navbar-bootstrap::frag ('Статистика по актуальным заявкам по подразделениям.', ${application_name})}"></div>
+<div id="chart-dep">
+
+</div>
+<div class="container">
+    <div class="row my-2 justify-content-center">
+        <div class="col-8">
+            <div class="table-responsive-sm">
+                <table class=" table" id="totalTable">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 70%"></th>
+                        <th scope="col" class="text-center" style="width: 30%">Заявки</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="totalBody">
+
+                    </tbody>
+                    <span class="text-center" style="display:none" id="noResults">Нет результатов</span>
+                </table>
+
+                <table class=" table" id="totalDepartmentTable">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="text-center vertical-separator" style="width: 20%">Ведомство</th>
+                        <th scope="col" class="text-center" style="width: 20%">Актуальные заявки</th>
+                        <th scope="col" class="text-center" style="width: 20%">Не актуальные заявки</th>
+                        <th scope="col" class="text-center" style="width: 20%">Работников в офисе</th>
+                        <th scope="col" class="text-center" style="width: 20%">Работников на удаленной</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="totalDepartmentBody">
+
+                    </tbody>
+                    <span class="text-center" style="display:none" id="noDepartmentResults">Нет результатов</span>
+                </table>
+
+                <table class=" table" id="totalWorkerTable">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 40%"></th>
+                        <th scope="col" class="text-center" style="width: 30%">Количество</th>
+                        <th scope="col" class="text-center" style="width: 30%">Процент</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="totalWorkerBody">
+
+                    </tbody>
+                    <span class="text-center" style="display:none" id="noWorkerResults">Нет результатов</span>
+                </table>
+
+            </div>
+        </div>
+    </div>
+    <div class="dropdown-divider"></div>
+
+
+</div>
+
+<script th:inline="javascript">
+
+    const totalStatistic = [[${actualDepartmentsStatistic}]]
+    const totalWorkersStatistic = [[${actualNumberWorkerDepartmentStatistic}]]
+
+    let total = 0
+
+    function insertRow(firstCol, secondCol, cssClass="") {
+        const html = `<tr>
+            <td class="${cssClass}"> ${ firstCol } </td>
+            <td class="${cssClass}"> ${ secondCol } </td>
+        </tr>`;
+
+        $("#totalBody").append(html);
+    }
+
+    function insertSecondRow(firstCol, secondCol, thirdCol, fourthCol, fifthCol, cssClass="") {
+        const html = `<tr>
+            <td class="${cssClass}"> ${ firstCol } </td>
+            <td class="${cssClass}"> ${ secondCol } </td>
+            <td class="${cssClass}"> ${ thirdCol } </td>
+            <td class="${cssClass}"> ${ fourthCol } </td>
+            <td class="${cssClass}"> ${ fifthCol } </td>
+        </tr>`;
+
+        $("#totalDepartmentBody").append(html);
+    }
+
+    function insertThirdRow(firstCol, secondCol, thirdCol, cssClass=""){
+        const html = `<tr>
+            <td class="${cssClass}"> ${ firstCol } </td>
+            <td class="${cssClass}"> ${ secondCol } </td>
+            <td class="${cssClass}"> ${ thirdCol } </td>
+        </tr>`;
+
+        $("#totalWorkerBody").append(html);
+    }
+
+    let totalActual = 0, totalNotActual = 0;
+
+    for (let i = 0; i < totalStatistic.length; i++) {
+        total += totalStatistic[i].count_actual + totalStatistic[i].count_not_actual;
+        totalActual += totalStatistic[i].count_actual;
+        totalNotActual += totalStatistic[i].count_not_actual;
+    }
+
+    insertRow("Всего заявок", total, "text-center font-weight-bold");
+    insertRow("Всего актуальных заявок", totalActual, "text-center font-weight-bold");
+    insertRow("Всего не актуальных заявок", totalNotActual, "text-center font-weight-bold");
+
+    for(let i = 0; i < totalStatistic.length; i++) {
+        // const totalWorkersDepartment = totalStatistic[i].count_worker_office + totalStatistic[i].count_worker_remote;
+        // const totalOfficeWorkersDepartmentPercent = totalStatistic[i].count_worker_office * 100 / totalWorkersDepartment,
+        //     totalRemoteWorkersDepartmentPercent = totalStatistic[i].count_worker_remote * 100/ totalWorkersDepartment;
+        const totalOfficeWorkersDepartmentPercent = totalStatistic[i].count_worker_office,
+            totalRemoteWorkersDepartmentPercent = totalStatistic[i].count_worker_remote;
+        insertSecondRow(
+            totalStatistic[i].name,
+            totalStatistic[i].count_actual,
+            totalStatistic[i].count_not_actual,
+            totalOfficeWorkersDepartmentPercent,
+            totalRemoteWorkersDepartmentPercent,
+            "text-center font-weight-bold"
+        );
+    }
+    let totalActualWorkersOffice = 0, totalActualWorkersRemote = 0, totalWorkers = 0;
+    for(let i = 0; i < totalWorkersStatistic.length; i++) {
+        totalWorkers += totalWorkersStatistic[i].count_office + totalWorkersStatistic[i].count_remote;
+        totalActualWorkersOffice += totalWorkersStatistic[i].count_office;
+        totalActualWorkersRemote += totalWorkersStatistic[i].count_remote;
+    }
+    const totalActualWorkersOfficePercent = totalActualWorkersOffice * 100 / totalWorkers, totalActualWorkersRemotePercent = totalActualWorkersRemote * 100 / totalWorkers;
+    insertThirdRow("Всего работников", totalWorkers, "100%", "text-center font-weight-bold");
+    insertThirdRow("Работников в офисе", totalActualWorkersOffice, Math.round(totalActualWorkersOfficePercent) + "%", "text-center font-weight-bold");
+    insertThirdRow("Работников на удаленной", totalActualWorkersRemote, Math.round(totalActualWorkersRemotePercent) + "%", "text-center font-weight-bold");
+
+
+    chartData = {
+        actualStatistic: [
+            { value:totalActual, legend:"актуальные", color: "#ee3639" },
+            { value:totalNotActual, legend:"не актуальные", color: "#ee9e36" },
+        ],
+        workerStatistic: [
+            { value: totalActualWorkersOffice, legend:"В офисе", color: "#ee3639" },
+            { value: totalActualWorkersRemote, legend:"На удаленной", color: "#ee9e36" },
+        ]
+    }
+
+    webix.ready(function() {
+        webix.ui({
+            container: 'chart-dep',
+            width: document.body.clientWidth,
+            type:'clean',
+            // height:250,
+            rows: [
+                {
+                    rows:[
+                        {
+                            template:"<div style='width:100%; font-weight: bold; text-align:center'>Заявки</div>",
+                            height:30
+                        },
+                        {
+                            height:250,
+                            view: "chart",
+                            // css: "test",
+                            type:"pie",
+                            value:"#value#",
+                            color:"#color#",
+                            label:"#legend#",
+                            pieInnerText:"#value#",
+                            shadow:0,
+                            data:chartData.actualStatistic
+                        },
+                        {
+                            template:`<div style='width:100%;text-align:center'>Всего: ${total}</div>`,
+                            height:30
+                        },
+                    ]
+                },
+                {
+                    rows:[
+                        {
+                            template:"<div style='width:100%; font-weight: bold; text-align:center'>Работников в актуальных заявках</div>",
+                            height:30
+                        },
+                        {
+                            height: 250,
+                            view: "chart",
+                            type:"pie",
+                            value:"#value#",
+                            color:"#color#",
+                            label:"#legend#",
+                            pieInnerText:"#value#",
+                            shadow:0,
+                            data:chartData.workerStatistic
+                        },
+                        {
+                            template:`<div style='width:100%;text-align:center'>Всего: ${totalWorkers}</div>`,
+                            height:30
+                        },
+                    ]
+                }
+
+            ]
+        })
+    });
+
+</script>
+
+</body>
+</html>

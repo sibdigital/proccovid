@@ -122,6 +122,69 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             " ORDER BY date_trunc('day',doc_request.time_create) DESC;")
     public List<Map<String, Object>> getStatisticForEachDay(@Param("id_type_request") int id_type_request);
 
+    @Query(nativeQuery = true, value = "with slice_doc_request as(\n" +
+            "    select id_organization,  max(time_create) as time_create\n" +
+            "    from doc_request\n" +
+            "    group by id_organization\n" +
+            ")\n" +
+            "\n" +
+            "select co.inn, count(*) filter ( where not dr.is_actualization ) as count_not_actual, count(*) filter ( where dr.is_actualization ) as count_actual\n" +
+            "from slice_doc_request as sdr\n" +
+            "         inner join cls_organization as co\n" +
+            "                    on (sdr.id_organization = co.id)\n" +
+            "         inner join doc_request dr\n" +
+            "                    on (co.id, sdr.time_create) = (dr.id_organization, dr.time_create)\n" +
+            "group by co.inn\n" +
+            "order by co.inn;")
+    public List<Map<String, Object>> getActualRequestStatisticForEeachOrganization();
 
+    @Query(nativeQuery = true, value = "with slice_doc_request as (\n" +
+            "    select id_department, max(time_create) as time_create\n" +
+            "    from doc_request\n" +
+            "    group by id_department\n" +
+            ")\n" +
+            "select cd.name, count(*) filter ( where dr.is_actualization ) as count_actual, count(*) filter ( where not dr.is_actualization ) as count_not_actual,\n" +
+            "       count(dr.person_remote_cnt) as count_worker_remote, count(dr.person_office_cnt) as count_worker_office\n" +
+            "from slice_doc_request as sdr\n" +
+            "         inner join doc_request as dr\n" +
+            "                    on (sdr.id_department, sdr.time_create) = (dr.id_department, dr.time_create)\n" +
+            "         inner join cls_department as cd\n" +
+            "                    on (sdr.id_department) = (cd.id)\n" +
+            "group by cd.name\n" +
+            "order by cd.name;")
+    public List<Map<String, Object>> getActualRequestStatisticForEeachDepartment();
+
+    @Query(nativeQuery = true, value = "with slice_doc_request as(\n" +
+            "    select id_organization,  max(time_create) as time_create\n" +
+            "    from doc_request\n" +
+            "    where is_actualization=true\n" +
+            "    group by id_organization\n" +
+            ")\n" +
+            "\n" +
+            "select co.inn, sum(dr.person_office_cnt) as count_office, sum(dr.person_remote_cnt) as count_remote\n" +
+            "from slice_doc_request as sdr\n" +
+            "         inner join cls_organization as co\n" +
+            "                    on (sdr.id_organization = co.id)\n" +
+            "         inner join doc_request dr\n" +
+            "                    on (co.id, sdr.time_create) = (dr.id_organization, dr.time_create)\n" +
+            "group by co.inn\n" +
+            "order by co.inn;")
+    public List<Map<String, Object>> getActualNumberWorkerForEachOrganization();
+
+    @Query(nativeQuery = true, value = "with slice_doc_request as (\n" +
+            "    select id_department, max(time_create) as time_create\n" +
+            "    from doc_request\n" +
+            "    where doc_request.is_actualization = true\n" +
+            "    group by id_department\n" +
+            ")\n" +
+            "\n" +
+            "select cd.name, dr.person_office_cnt as count_office, dr.person_remote_cnt as count_remote\n" +
+            "from slice_doc_request as sdr\n" +
+            "    inner join doc_request as dr\n" +
+            "        on (dr.id_department, dr.time_create) = (sdr.id_department, sdr.time_create)\n" +
+            "    inner join cls_department as cd\n" +
+            "        on (sdr.id_department) = (cd.id)\n" +
+            "order by cd.name;")
+    public List<Map<String, Object>> getActualNumberWorkerForEachDepartment();
 
 }
