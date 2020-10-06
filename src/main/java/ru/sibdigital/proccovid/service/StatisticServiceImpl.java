@@ -67,8 +67,8 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public List<Map<String, Object>> getActualRequestStatisticForEeachOrganization() {
-        List<Map<String, Object>> rawStatistic = docRequestRepo.getActualRequestStatisticForEeachOrganization();
+    public Map<String, Object> getActualRequestStatisticForEeachOrganization() {
+        Map<String, Object> rawStatistic = docRequestRepo.getActualRequestStatisticForEeachOrganization();
         return rawStatistic;
     }
 
@@ -87,14 +87,14 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public List<Map<String, Object>> getActualRequestNumberWorkerStatisticForEeachOrganization() {
-        List<Map<String, Object>> rawStatistic = docRequestRepo.getActualNumberWorkerForEachOrganization();
+    public Map<String, Object> getActualRequestNumberWorkerStatisticForEeachOrganization() {
+        Map<String, Object> rawStatistic = docRequestRepo.getActualNumberWorkerForEachOrganization();
         return rawStatistic;
     }
 
     @Override
-    public List<Map<String, Object>> getActualRequestNumberWorkerStatisticForEeachDepartment() {
-        List<Map<String, Object>> rawStatistic = docRequestRepo.getActualNumberWorkerForEachDepartment();
+    public Map<String, Object> getActualRequestNumberWorkerStatisticForEeachDepartment() {
+        Map<String, Object> rawStatistic = docRequestRepo.getActualNumberWorkerForEachDepartment();
         return rawStatistic;
     }
 

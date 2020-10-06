@@ -62,8 +62,8 @@
                         <th scope="col" class="text-center vertical-separator" style="width: 20%">Ведомство</th>
                         <th scope="col" class="text-center" style="width: 20%">Актуальные заявки</th>
                         <th scope="col" class="text-center" style="width: 20%">Не актуальные заявки</th>
-                        <th scope="col" class="text-center" style="width: 20%">Работников в офисе</th>
-                        <th scope="col" class="text-center" style="width: 20%">Работников на удаленной</th>
+                        <th scope="col" class="text-center" style="width: 20%">Работников в офисе(в актуальных заявках)</th>
+                        <th scope="col" class="text-center" style="width: 20%">Работников на удаленной(в актуальных заявках)</th>
                     </tr>
                     </thead>
 
@@ -76,7 +76,7 @@
                 <table class=" table" id="totalWorkerTable">
                     <thead class="thead-dark">
                     <tr>
-                        <th scope="col" class="text-center" style="width: 40%"></th>
+                        <th scope="col" class="text-center" style="width: 40%">В актуальных заявках</th>
                         <th scope="col" class="text-center" style="width: 30%">Количество</th>
                         <th scope="col" class="text-center" style="width: 30%">Процент</th>
                     </tr>
@@ -101,18 +101,18 @@
     const totalStatistic = [[${actualDepartmentsStatistic}]]
     const totalWorkersStatistic = [[${actualNumberWorkerDepartmentStatistic}]]
 
-    let total = 0
-
     function insertRow(firstCol, secondCol, cssClass="") {
+
         const html = `<tr>
             <td class="${cssClass}"> ${ firstCol } </td>
             <td class="${cssClass}"> ${ secondCol } </td>
         </tr>`;
-
         $("#totalBody").append(html);
+
     }
 
     function insertSecondRow(firstCol, secondCol, thirdCol, fourthCol, fifthCol, cssClass="") {
+
         const html = `<tr>
             <td class="${cssClass}"> ${ firstCol } </td>
             <td class="${cssClass}"> ${ secondCol } </td>
@@ -120,21 +120,24 @@
             <td class="${cssClass}"> ${ fourthCol } </td>
             <td class="${cssClass}"> ${ fifthCol } </td>
         </tr>`;
-
         $("#totalDepartmentBody").append(html);
+
     }
 
     function insertThirdRow(firstCol, secondCol, thirdCol, cssClass=""){
+
         const html = `<tr>
             <td class="${cssClass}"> ${ firstCol } </td>
             <td class="${cssClass}"> ${ secondCol } </td>
             <td class="${cssClass}"> ${ thirdCol } </td>
         </tr>`;
-
         $("#totalWorkerBody").append(html);
+
     }
 
     let totalActual = 0, totalNotActual = 0;
+
+    let total = 0;
 
     for (let i = 0; i < totalStatistic.length; i++) {
         total += totalStatistic[i].count_actual + totalStatistic[i].count_not_actual;
@@ -145,29 +148,25 @@
     insertRow("Всего заявок", total, "text-center font-weight-bold");
     insertRow("Всего актуальных заявок", totalActual, "text-center font-weight-bold");
     insertRow("Всего не актуальных заявок", totalNotActual, "text-center font-weight-bold");
-
+    // let totalActualWorkersOffice = 0, totalActualWorkersRemote = 0;
+    // let totalWorkers = totalActualWorkersRemote + totalActualWorkersOffice;
     for(let i = 0; i < totalStatistic.length; i++) {
-        // const totalWorkersDepartment = totalStatistic[i].count_worker_office + totalStatistic[i].count_worker_remote;
-        // const totalOfficeWorkersDepartmentPercent = totalStatistic[i].count_worker_office * 100 / totalWorkersDepartment,
-        //     totalRemoteWorkersDepartmentPercent = totalStatistic[i].count_worker_remote * 100/ totalWorkersDepartment;
-        const totalOfficeWorkersDepartmentPercent = totalStatistic[i].count_worker_office,
-            totalRemoteWorkersDepartmentPercent = totalStatistic[i].count_worker_remote;
+        let count_worker_office = totalStatistic[i].count_worker_office, count_worker_remote = totalStatistic[i].count_worker_remote;
+        if (count_worker_office == null) count_worker_office = 0;
+        if (count_worker_remote == null) count_worker_remote = 0;
         insertSecondRow(
             totalStatistic[i].name,
             totalStatistic[i].count_actual,
             totalStatistic[i].count_not_actual,
-            totalOfficeWorkersDepartmentPercent,
-            totalRemoteWorkersDepartmentPercent,
+            count_worker_office,
+            count_worker_remote,
             "text-center font-weight-bold"
         );
     }
-    let totalActualWorkersOffice = 0, totalActualWorkersRemote = 0, totalWorkers = 0;
-    for(let i = 0; i < totalWorkersStatistic.length; i++) {
-        totalWorkers += totalWorkersStatistic[i].count_office + totalWorkersStatistic[i].count_remote;
-        totalActualWorkersOffice += totalWorkersStatistic[i].count_office;
-        totalActualWorkersRemote += totalWorkersStatistic[i].count_remote;
-    }
-    const totalActualWorkersOfficePercent = totalActualWorkersOffice * 100 / totalWorkers, totalActualWorkersRemotePercent = totalActualWorkersRemote * 100 / totalWorkers;
+    let totalActualWorkersOffice = totalWorkersStatistic.count_worker_office, totalActualWorkersRemote = totalWorkersStatistic.count_worker_remote;
+    let totalWorkers = totalActualWorkersRemote + totalActualWorkersOffice;
+    const totalActualWorkersOfficePercent = totalActualWorkersOffice * 100 / totalWorkers,
+        totalActualWorkersRemotePercent = totalActualWorkersRemote * 100 / totalWorkers;
     insertThirdRow("Всего работников", totalWorkers, "100%", "text-center font-weight-bold");
     insertThirdRow("Работников в офисе", totalActualWorkersOffice, Math.round(totalActualWorkersOfficePercent) + "%", "text-center font-weight-bold");
     insertThirdRow("Работников на удаленной", totalActualWorkersRemote, Math.round(totalActualWorkersRemotePercent) + "%", "text-center font-weight-bold");

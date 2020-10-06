@@ -126,35 +126,41 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "    select id_organization,  max(time_create) as time_create\n" +
             "    from doc_request\n" +
             "    group by id_organization\n" +
+            "),\n" +
+            "\n" +
+            "sr as (\n" +
+            "    select co.inn,\n" +
+            "       count(*) filter ( where not dr.is_actualization ) as count_not_actual,\n" +
+            "       count(*) filter ( where dr.is_actualization ) as count_actual\n" +
+            "    from slice_doc_request as sdr\n" +
+            "        inner join cls_organization as co\n" +
+            "            on (sdr.id_organization = co.id)\n" +
+            "        inner join doc_request dr\n" +
+            "            on (co.id, sdr.time_create) = (dr.id_organization, dr.time_create)\n" +
+            "    group by co.inn\n" +
             ")\n" +
             "\n" +
-            "select co.inn, count(*) filter ( where not dr.is_actualization ) as count_not_actual, count(*) filter ( where dr.is_actualization ) as count_actual\n" +
-            "from slice_doc_request as sdr\n" +
-            "         inner join cls_organization as co\n" +
-            "                    on (sdr.id_organization = co.id)\n" +
-            "         inner join doc_request dr\n" +
-            "                    on (co.id, sdr.time_create) = (dr.id_organization, dr.time_create)\n" +
-            "group by co.inn\n" +
-            "order by co.inn;")
-    public List<Map<String, Object>> getActualRequestStatisticForEeachOrganization();
+            "select sum(sr.count_not_actual) as count_not_actual, sum(sr.count_actual) as count_actual\n" +
+            "from sr;")
+    public Map<String, Object> getActualRequestStatisticForEeachOrganization();
 
     @Query(nativeQuery = true, value = "with slice_doc_request as (\n" +
-            "    select id_department, max(time_create) as time_create\n" +
+            "    select id_organization, max(time_create) as time_create\n" +
             "    from doc_request\n" +
-            "    group by id_department\n" +
+            "    group by id_organization\n" +
             ")\n" +
             "select cd.name,\n" +
-            "       count(*) filter ( where dr.is_actualization ) as count_actual,\n" +
             "       count(*) filter ( where not dr.is_actualization ) as count_not_actual,\n" +
-            "       sum(dr.person_remote_cnt) as count_worker_remote,\n" +
-            "       sum(dr.person_office_cnt) as count_worker_office\n" +
+            "       count(*) filter ( where dr.is_actualization )     as count_actual,\n" +
+            "       sum(dr.person_office_cnt) filter ( where dr.is_actualization )   as count_worker_office,\n" +
+            "       sum(dr.person_remote_cnt) filter ( where dr.is_actualization )   as count_worker_remote\n" +
             "from slice_doc_request as sdr\n" +
             "         inner join doc_request as dr\n" +
-            "                    on (sdr.id_department, sdr.time_create) = (dr.id_department, dr.time_create)\n" +
+            "                    on (sdr.id_organization, sdr.time_create) = (dr.id_organization, dr.time_create)\n" +
             "         inner join cls_department as cd\n" +
-            "                    on (sdr.id_department) = (cd.id)\n" +
+            "                    on (dr.id_department) = (cd.id)\n" +
             "group by cd.name\n" +
-            "order by cd.name;")
+            "\n")
     public List<Map<String, Object>> getActualRequestStatisticForEeachDepartment();
 
     @Query(nativeQuery = true, value = "with slice_doc_request as(\n" +
@@ -162,33 +168,44 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "    from doc_request\n" +
             "    where is_actualization=true\n" +
             "    group by id_organization\n" +
+            "),\n" +
+            "\n" +
+            "sr as (\n" +
+            "    select co.inn,\n" +
+            "           sum(dr.person_office_cnt) as count_office,\n" +
+            "           sum(dr.person_remote_cnt) as count_remote\n" +
+            "    from slice_doc_request as sdr\n" +
+            "        inner join cls_organization as co\n" +
+            "            on (sdr.id_organization = co.id)\n" +
+            "        inner join doc_request dr\n" +
+            "            on (co.id, sdr.time_create) = (dr.id_organization, dr.time_create)\n" +
+            "    group by co.inn\n" +
             ")\n" +
             "\n" +
-            "select co.inn, sum(dr.person_office_cnt) as count_office, sum(dr.person_remote_cnt) as count_remote\n" +
-            "from slice_doc_request as sdr\n" +
-            "         inner join cls_organization as co\n" +
-            "                    on (sdr.id_organization = co.id)\n" +
-            "         inner join doc_request dr\n" +
-            "                    on (co.id, sdr.time_create) = (dr.id_organization, dr.time_create)\n" +
-            "group by co.inn\n" +
-            "order by co.inn;")
-    public List<Map<String, Object>> getActualNumberWorkerForEachOrganization();
+            "select sum(sr.count_office) as count_office, sum(sr.count_remote) as count_remote\n" +
+            "from sr;\n")
+    public Map<String, Object> getActualNumberWorkerForEachOrganization();
 
-    @Query(nativeQuery = true, value = "with slice_doc_request as (\n" +
-            "    select id_department, max(time_create) as time_create\n" +
+    @Query(nativeQuery = true, value = "with slice_doc_request as(\n" +
+            "    select id_organization,  max(time_create) as time_create\n" +
             "    from doc_request\n" +
-            "    where doc_request.is_actualization = true\n" +
-            "    group by id_department\n" +
-            ")\n" +
+            "    where is_actualization=true\n" +
+            "    group by id_organization\n" +
+            "),\n" +
             "\n" +
-            "select cd.name, sum(dr.person_office_cnt) as count_office, sum(dr.person_remote_cnt) as count_remote\n" +
-            "from slice_doc_request as sdr\n" +
-            "         inner join doc_request as dr\n" +
-            "                    on (dr.id_department, dr.time_create) = (sdr.id_department, sdr.time_create)\n" +
-            "         inner join cls_department as cd\n" +
-            "                    on (sdr.id_department) = (cd.id)\n" +
-            "group by cd.name\n" +
-            "order by cd.name;\n")
-    public List<Map<String, Object>> getActualNumberWorkerForEachDepartment();
+            "sr as (\n" +
+            "    select co.inn,\n" +
+            "           sum(dr.person_office_cnt) as count_office,\n" +
+            "           sum(dr.person_remote_cnt) as count_remote\n" +
+            "    from slice_doc_request as sdr\n" +
+            "             inner join cls_organization as co\n" +
+            "                        on (sdr.id_organization = co.id)\n" +
+            "             inner join doc_request dr\n" +
+            "                        on (co.id, sdr.time_create) = (dr.id_organization, dr.time_create)\n" +
+            "    group by co.inn\n" +
+            ")\n" +
+            "select sum(sr.count_office) as count_worker_office, sum(sr.count_remote) as count_worker_remote\n" +
+            "from sr;")
+    public Map<String, Object> getActualNumberWorkerForEachDepartment();
 
 }

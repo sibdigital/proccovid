@@ -12,11 +12,11 @@ public interface StatisticService {
     List<Map<String, Object>> getDepartmentRequestStatistic(Integer idTypeRequest);
     List<Map<String, Object>> getDepartmentRequestStatistic();
 
-    List<Map<String, Object>> getActualRequestStatisticForEeachOrganization();
+    Map<String, Object> getActualRequestStatisticForEeachOrganization();
     List<Map<String, Object>> getActualRequestStatisticForEeachDepartment();
 
-    List<Map<String, Object>> getActualRequestNumberWorkerStatisticForEeachOrganization();
-    List<Map<String, Object>> getActualRequestNumberWorkerStatisticForEeachDepartment();
+    Map<String, Object> getActualRequestNumberWorkerStatisticForEeachOrganization();
+    Map<String, Object> getActualRequestNumberWorkerStatisticForEeachDepartment();
 
 
     Map getTotalDachaStatistic();

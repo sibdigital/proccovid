@@ -1064,11 +1064,11 @@ const statistic = {
                     },
                     {
                         view: 'label',
-                        label: "<a href='actualOrganizations/statistic'>Статистика по актуальным заявкам по организациям</a>"
+                        label: "<a href='actualOrganizations/statistic' target='_blank')>Статистика по актуальным заявкам по организациям</a>"
                     },
                     {
                         view: 'label',
-                        label: "<a href='actualDepartments/statistic'>Статистика по актуальным заявкам по подразделениям</a>"
+                        label: "<a href='actualDepartments/statistic' target='_blank'>Статистика по актуальным заявкам по подразделениям</a>"
                     }
                 ]
             }

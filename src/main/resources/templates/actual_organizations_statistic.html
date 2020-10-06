@@ -84,8 +84,6 @@
     const totalStatistic = [[${actualOrganizationsStatistic}]]
     const totalWorkersStatistic = [[${actualNumberWorkerOrganizationsStatistic}]]
 
-    let total = 0
-
     function insertRow(firstCol, secondCol, cssClass=""){
         const html = `<tr>
             <td class="${cssClass}"> ${ firstCol } </td>
@@ -105,26 +103,15 @@
         $("#totalWorkerBody").append(html);
     }
 
-    let totalActual = 0, totalNotActual = 0;
-    for (let i = 0; i < totalStatistic.length; i++) {
-        total += totalStatistic[i].count_not_actual + totalStatistic[i].count_actual;
-        totalActual += totalStatistic[i].count_actual;
-        totalNotActual += totalStatistic[i].count_not_actual;
-        // total += 3;
-        // totalActual += 2;
-        // totalNotActual += 1;
-     }
+    let totalActual = totalStatistic.count_actual, totalNotActual = totalStatistic.count_not_actual;
+    let total = totalActual + totalNotActual;
     insertRow("Всего заявок", total, "text-center font-weight-bold");
     insertRow("Всего актуальных заявок", totalActual, "text-center font-weight-bold");
     insertRow("Всего не актуальных заявок", totalNotActual, "text-center font-weight-bold");
 
 
-    let totalActualWorkersOffice = 0, totalActualWorkersRemote = 0, totalWorkers = 0;
-    for(let i = 0; i < totalWorkersStatistic.length; i++) {
-        totalWorkers += totalWorkersStatistic[i].count_office + totalWorkersStatistic[i].count_remote;
-        totalActualWorkersOffice += totalWorkersStatistic[i].count_office;
-        totalActualWorkersRemote += totalWorkersStatistic[i].count_remote;
-    }
+    let totalActualWorkersOffice = totalWorkersStatistic.count_office, totalActualWorkersRemote = totalWorkersStatistic.count_remote;
+    let totalWorkers = totalActualWorkersOffice + totalActualWorkersRemote;
     const totalActualWorkersOfficePercent = totalActualWorkersOffice * 100 / totalWorkers, totalActualWorkersRemotePercent = totalActualWorkersRemote * 100 / totalWorkers;
     insertSecondRow("Всего работников", totalWorkers, "100%", "text-center font-weight-bold");
     insertSecondRow("Работников в офисе", totalActualWorkersOffice, Math.round(totalActualWorkersOfficePercent) + "%", "text-center font-weight-bold");
