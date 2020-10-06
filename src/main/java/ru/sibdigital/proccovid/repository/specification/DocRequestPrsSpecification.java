@@ -34,6 +34,10 @@ public class DocRequestPrsSpecification implements Specification<DocRequestPrs> 
             predicates.add(criteriaBuilder.equal(
                     root.get("typeRequest").get("id"), searchCriteria.getIdTypeRequest()));
         }
+        if (searchCriteria.getActualization() != null) {
+            predicates.add(criteriaBuilder.equal(
+                    root.get("isActualization"), searchCriteria.getActualization()));
+        }
         if (searchCriteria.getIdDistrict() != null) {
             predicates.add(criteriaBuilder.equal(
                     root.get("district").get("id"), searchCriteria.getIdDistrict()));

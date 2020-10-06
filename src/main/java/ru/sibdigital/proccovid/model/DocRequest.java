@@ -47,6 +47,7 @@ public class DocRequest {
     private Timestamp timeReview;
     private Boolean isAgree;
     private Boolean isProtect;
+    private Boolean isActualization;
     private String reqBasis;
     private String orgHashCode;
     private String rejectComment;
@@ -215,6 +216,16 @@ public class DocRequest {
     }
 
     @Basic
+    @Column(name = "is_actualization", nullable = false)
+    public Boolean getActualization() {
+        return isActualization;
+    }
+
+    public void setActualization(Boolean actualization) {
+        isActualization = actualization;
+    }
+
+    @Basic
     @Column(name = "req_basis", nullable = false)
     public String getReqBasis() {
         return reqBasis;
@@ -361,6 +372,7 @@ public class DocRequest {
                 Objects.equals(timeReview, that.timeReview) &&
                 Objects.equals(isAgree, that.isAgree) &&
                 Objects.equals(isProtect, that.isProtect) &&
+                Objects.equals(isActualization, that.isActualization) &&
                 Objects.equals(reqBasis, that.reqBasis) &&
                 Objects.equals(orgHashCode, that.orgHashCode) &&
                 Objects.equals(rejectComment, that.rejectComment) &&
@@ -374,6 +386,6 @@ public class DocRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, personOfficeCnt, personRemoteCnt, personSlrySaveCnt, attachmentPath, statusReview, timeCreate, statusImport, timeImport, timeReview, isAgree, isProtect, reqBasis, orgHashCode, rejectComment, old_department_id, typeRequest, docPersonList, department, organization, docAddressFact);
+        return Objects.hash(id, personOfficeCnt, personRemoteCnt, personSlrySaveCnt, attachmentPath, statusReview, timeCreate, statusImport, timeImport, timeReview, isAgree, isProtect, isActualization, reqBasis, orgHashCode, rejectComment, old_department_id, typeRequest, docPersonList, department, organization, docAddressFact);
     }
 }

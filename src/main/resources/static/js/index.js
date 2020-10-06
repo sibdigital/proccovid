@@ -97,6 +97,11 @@
                                             params += params == '' ? '?' : '&';
                                             params += 'id_district=' + district;
                                         }
+                                        let is_actualization = $$('actualization_filter').getValue();
+                                        if (is_actualization) {
+                                            params += params == '' ? '?' : '&';
+                                            params += 'is_actualization=' + is_actualization;
+                                        }
                                         let search_text = $$('search').getValue();
                                         if (search_text) {
                                             params += params == '' ? '?' : '&';
@@ -138,6 +143,20 @@
                                 placeholder: 'Все районы',
                                 options: 'cls_districts',
                                 hidden: true,
+                                on: {
+                                    onChange() {
+                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
+                                    }
+                                }
+                            },
+                            {
+                                view: 'checkbox',
+                                id: 'actualization_filter',
+                                width: 100,
+                                css: 'smallText',
+                                placeholder: 'Is actualization',
+                                // options: 'cls_districts',
+                                hidden: false,
                                 on: {
                                     onChange() {
                                         $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])

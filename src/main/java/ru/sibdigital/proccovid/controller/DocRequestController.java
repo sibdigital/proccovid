@@ -93,6 +93,7 @@ public class DocRequestController {
                                             @PathVariable("status") Integer status,
                                             @RequestParam(value = "id_type_request", required = false) Integer idTypeRequest,
                                             @RequestParam(value = "id_district", required = false) Integer idDistrict,
+                                            @RequestParam(value = "is_actualization", required = false) Boolean isActualization,
                                             @RequestParam(value = "innOrName", required = false) String innOrName,
                                             @RequestParam(value = "start", required = false) Integer start,
                                             @RequestParam(value = "count", required = false) Integer count) {
@@ -105,6 +106,7 @@ public class DocRequestController {
         searchCriteria.setStatusReview(status);
         searchCriteria.setIdTypeRequest(idTypeRequest);
         searchCriteria.setIdDistrict(idDistrict);
+        searchCriteria.setActualization(isActualization);
         searchCriteria.setInnOrName(innOrName);
 
         Page<DocRequestPrs> docRequestPrsPage = requestService.getRequestsByCriteria(searchCriteria, page, size);
@@ -241,6 +243,7 @@ public class DocRequestController {
                          @RequestParam(value = "status") Integer status,
                          @RequestParam(value = "id_type_request", required = false) Integer idTypeRequest,
                          @RequestParam(value = "id_district", required = false) Integer idDistrict,
+                         @RequestParam(value = "is_actualization", required = false) Boolean isActualization,
                          @RequestParam(value = "innOrName", required = false) String innOrName,
                          HttpServletResponse response) throws IOException {
         DocRequestPrsSearchCriteria searchCriteria = new DocRequestPrsSearchCriteria();
@@ -248,6 +251,7 @@ public class DocRequestController {
         searchCriteria.setStatusReview(status);
         searchCriteria.setIdTypeRequest(idTypeRequest);
         searchCriteria.setIdDistrict(idDistrict);
+        searchCriteria.setActualization(isActualization);
         searchCriteria.setInnOrName(innOrName);
 
         List<DocRequest> docRequests = requestService.getRequestsByCriteria(searchCriteria);
