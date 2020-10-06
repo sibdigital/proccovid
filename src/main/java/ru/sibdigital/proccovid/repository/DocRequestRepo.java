@@ -143,8 +143,11 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "    from doc_request\n" +
             "    group by id_department\n" +
             ")\n" +
-            "select cd.name, count(*) filter ( where dr.is_actualization ) as count_actual, count(*) filter ( where not dr.is_actualization ) as count_not_actual,\n" +
-            "       count(dr.person_remote_cnt) as count_worker_remote, count(dr.person_office_cnt) as count_worker_office\n" +
+            "select cd.name,\n" +
+            "       count(*) filter ( where dr.is_actualization ) as count_actual,\n" +
+            "       count(*) filter ( where not dr.is_actualization ) as count_not_actual,\n" +
+            "       sum(dr.person_remote_cnt) as count_worker_remote,\n" +
+            "       sum(dr.person_office_cnt) as count_worker_office\n" +
             "from slice_doc_request as sdr\n" +
             "         inner join doc_request as dr\n" +
             "                    on (sdr.id_department, sdr.time_create) = (dr.id_department, dr.time_create)\n" +
@@ -178,13 +181,14 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "    group by id_department\n" +
             ")\n" +
             "\n" +
-            "select cd.name, dr.person_office_cnt as count_office, dr.person_remote_cnt as count_remote\n" +
+            "select cd.name, sum(dr.person_office_cnt) as count_office, sum(dr.person_remote_cnt) as count_remote\n" +
             "from slice_doc_request as sdr\n" +
-            "    inner join doc_request as dr\n" +
-            "        on (dr.id_department, dr.time_create) = (sdr.id_department, sdr.time_create)\n" +
-            "    inner join cls_department as cd\n" +
-            "        on (sdr.id_department) = (cd.id)\n" +
-            "order by cd.name;")
+            "         inner join doc_request as dr\n" +
+            "                    on (dr.id_department, dr.time_create) = (sdr.id_department, sdr.time_create)\n" +
+            "         inner join cls_department as cd\n" +
+            "                    on (sdr.id_department) = (cd.id)\n" +
+            "group by cd.name\n" +
+            "order by cd.name;\n")
     public List<Map<String, Object>> getActualNumberWorkerForEachDepartment();
 
 }

@@ -105,7 +105,6 @@
         $("#totalWorkerBody").append(html);
     }
 
-    console.log(totalStatistic);
     let totalActual = 0, totalNotActual = 0;
     for (let i = 0; i < totalStatistic.length; i++) {
         total += totalStatistic[i].count_not_actual + totalStatistic[i].count_actual;
@@ -128,8 +127,8 @@
     }
     const totalActualWorkersOfficePercent = totalActualWorkersOffice * 100 / totalWorkers, totalActualWorkersRemotePercent = totalActualWorkersRemote * 100 / totalWorkers;
     insertSecondRow("Всего работников", totalWorkers, "100%", "text-center font-weight-bold");
-    insertSecondRow("Работников в офисе", totalActualWorkersOffice, Math.round(totalActualWorkersOfficePercent), "text-center font-weight-bold");
-    insertSecondRow("Работников на удаленной", totalActualWorkersRemote, Math.round(totalActualWorkersRemotePercent), "text-center font-weight-bold");
+    insertSecondRow("Работников в офисе", totalActualWorkersOffice, Math.round(totalActualWorkersOfficePercent) + "%", "text-center font-weight-bold");
+    insertSecondRow("Работников на удаленной", totalActualWorkersRemote, Math.round(totalActualWorkersRemotePercent) + "%", "text-center font-weight-bold");
 
 
     chartData = {
