@@ -368,7 +368,9 @@ public class RequestService {
                         (actualizeSubject != null ? actualizeSubject.getStringValue()
                         : "актуализируйте утвержденную заявку на портале Работающая Бурятия");
                 Map<String, String> params = Map.of(":link", link, "subject", subject);
-                emailService.sendMessage(org.getEmail(), clsTemplate, params);
+                if (org.getEmail() != null) {
+                    emailService.sendMessage(org.getEmail().trim(), clsTemplate, params);
+                }
                 count++;
                 if (count % 50 == 0){
                    Thread.sleep(10_000L);
