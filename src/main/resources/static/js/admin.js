@@ -997,7 +997,6 @@ const adminRequests = {
                                         css: 'smallText',
                                         labelRight: "Актуализированные",
                                         placeholder: "Актуализированные",
-                                        // labelPosition: "right",
                                         hidden: true,
                                         on: {
                                             onChange() {
