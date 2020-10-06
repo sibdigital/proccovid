@@ -153,12 +153,14 @@
                                     }
                                 }
                             },
+                            filter.searchBar('requests_table'),
                             {
                                 view: 'checkbox',
                                 id: 'actualization_filter',
-                                width: 255,
+                                // width: 255,
                                 css: 'smallText',
                                 labelRight: "Актуализированные",
+                                labelWidth:0,
                                 placeholder: "Актуализированные",
                                 hidden: true,
                                 on: {
@@ -167,7 +169,6 @@
                                     }
                                 }
                             },
-                            filter.searchBar('requests_table'),
                             {},
                             {
                                 view: 'button',

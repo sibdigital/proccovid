@@ -142,7 +142,7 @@
                                 }
 
                                 let actualizedRequestLink = "";
-                                let actualizedRequestLinkLabel = "Актуализированная заявка №";
+                                let actualizedRequestLinkLabel = "Предыдущая утвержденная заявка: ";
                                 if (data.idActualizedRequest != null) {
                                     actualizedRequestLink = "<a target='_blank' href='/request/view?id=" + data.idActualizedRequest + "'>" + actualizedRequestLinkLabel + data.idActualizedRequest + "</a>";
                                     $$('actualizedRequestLink').setValue(actualizedRequestLink);

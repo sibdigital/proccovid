@@ -358,15 +358,14 @@
                                                                     id: 'actualization',
                                                                     name: 'actualization',
                                                                     readonly: true,
-                                                                    labelRight: 'Заявка актуализирована'
+                                                                    labelRight: 'Заявка актуализирована',
+                                                                    labelWidth:0
                                                                 },
                                                                 {
                                                                     view: 'label',
-                                                                    select: false,
                                                                     label: '',
                                                                     name: 'actualizedRequestLink',
                                                                     template: '#value#',
-                                                                    defaultData: "",
                                                                     id: 'actualizedRequestLink'
                                                                 }
                                                             ]

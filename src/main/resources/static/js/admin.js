@@ -990,21 +990,7 @@ const adminRequests = {
                                             }
                                         }
                                     },
-                                    {
-                                        view: 'checkbox',
-                                        id: 'actualization_filter',
-                                        width: 255,
-                                        css: 'smallText',
-                                        labelRight: "Актуализированные",
-                                        placeholder: "Актуализированные",
-                                        hidden: true,
-                                        on: {
-                                            onChange() {
-                                                $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
-                                            }
-                                        }
-                                    },
-                                    {
+                                                                        {
                                         view: 'search',
                                         id: 'search',
                                         maxWidth: 300,
@@ -1013,6 +999,21 @@ const adminRequests = {
                                         placeholder: "Поиск по ИНН и названию",
                                         on: {
                                             onEnter: function () {
+                                                $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
+                                            }
+                                        }
+                                    },
+                                    {
+                                        view: 'checkbox',
+                                        id: 'actualization_filter',
+                                        // width: 255,
+                                        css: 'smallText',
+                                        labelRight: "Актуализированные",
+                                        labelWidth:0,
+                                        placeholder: "Актуализированные",
+                                        hidden: true,
+                                        on: {
+                                            onChange() {
                                                 $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
                                             }
                                         }
