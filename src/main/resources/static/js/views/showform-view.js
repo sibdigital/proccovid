@@ -371,14 +371,9 @@ webix.ready(function() {
                                             {
                                                 view: 'label',
                                                 select: false,
-                                                // template: '#value#',
                                                 label: '',
                                                 name: 'actualizedRequestLink',
-                                                // borderless: true,
-                                                template: function(data) {
-                                                    if (data.idActualizedRequest != null) return webix.template('#value#');
-                                                    return "";
-                                                },
+                                                template: '#value#',
                                                 defaultData: "",
                                                 id: 'actualizedRequestLink'
                                             }

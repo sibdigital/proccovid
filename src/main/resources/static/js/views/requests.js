@@ -147,6 +147,9 @@
                                     actualizedRequestLink = "<a target='_blank' href='/request/view?id=" + data.idActualizedRequest + "'>" + actualizedRequestLinkLabel + data.idActualizedRequest + "</a>";
                                     $$('actualizedRequestLink').setValue(actualizedRequestLink);
                                 }
+                                else {
+                                    $$('actualizedRequestLink').setValue("");
+                                }
 
                                 /*
                                                             data.attachmentFilename = data.attachmentPath.split('\\').pop().split('/').pop()

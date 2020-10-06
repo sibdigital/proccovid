@@ -589,11 +589,7 @@
                                                                     select: false,
                                                                     label: '',
                                                                     name: 'actualizedRequestLink',
-                                                                    // borderless: true,
-                                                                    template: function(data) {
-                                                                        if (data.idActualizedRequest != null) return webix.template('#value#');
-                                                                        return "";
-                                                                    },
+                                                                    template: '#value#',
                                                                     id: 'actualizedRequestLink'
                                                                 }
                                                             ]
