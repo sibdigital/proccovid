@@ -572,28 +572,31 @@
                                                         */
                                                     ]
                                                 },
+                                                view_section("Актуализация заявки"),
                                                 {
-                                                    cols: [
+                                                    rows: [
                                                         {
-                                                            view: 'checkbox',
-                                                            // width:255,
-                                                            id: 'actualization',
-                                                            name: 'actualization',
-                                                            // labelPosition: 'right',
-                                                            readonly: true,
-                                                            label: 'Актуализированная'
-                                                        },
-                                                        {
-                                                            paddingLeft: 10,
-                                                            view: 'label',
-                                                            //height: 100,
-                                                            autoheight: true,
-                                                            select: false,
-                                                            template: '#value#',
-                                                            label: '',
-                                                            name: 'actualizedRequestLink',
-                                                            borderless: true,
-                                                            id: 'actualizedRequestLink'
+                                                            cols: [
+                                                                {
+                                                                    view: 'checkbox',
+                                                                    id: 'actualization',
+                                                                    name: 'actualization',
+                                                                    readonly: true,
+                                                                    labelRight: 'Заявка актуализирована'
+                                                                },
+                                                                {
+                                                                    view: 'label',
+                                                                    select: false,
+                                                                    label: '',
+                                                                    name: 'actualizedRequestLink',
+                                                                    // borderless: true,
+                                                                    template: function(data) {
+                                                                        if (data.idActualizedRequest != null) return webix.template('#value#');
+                                                                        return "";
+                                                                    },
+                                                                    id: 'actualizedRequestLink'
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },

@@ -314,7 +314,7 @@ webix.ready(function() {
                             {
                                 header: "Обоснование",
                                 body: {
-                                    rows : [
+                                    rows: [
                                         view_section('Обоснование заявки'),
                                         {
                                             rows: [
@@ -353,72 +353,77 @@ webix.ready(function() {
 
                                             ]
                                         },
-                                        {
-                                            cols: [
-                                                {
-                                                    view: 'checkbox',
-                                                    // width:255,
-                                                    id: 'actualization',
-                                                    name: 'actualization',
-                                                    // labelPosition: 'right',
-                                                    readonly: true,
-                                                    label: 'Актуализированная'
-                                                },
-                                                {
-                                                    paddingLeft: 10,
-                                                    view: 'label',
-                                                    //height: 100,
-                                                    autoheight: true,
-                                                    select: false,
-                                                    template: '#value#',
-                                                    label: '',
-                                                    name: 'actualizedRequestLink',
-                                                    borderless: true,
-                                                    id: 'actualizedRequestLink'
-                                                }
-                                            ]
-                                        },
-                                        view_section('Данные о численности работников'),
-                                        {
-                                            type: 'space',
-                                            rows: [
-                                                {
-                                                    view: 'text',
-                                                    name: 'personSlrySaveCnt',
-                                                    label: 'Суммарная численность работников, в отношении которых установлен режим работы нерабочего дня с сохранением заработной платы',
-                                                    labelPosition: 'top',
-                                                    validate: function (val) {
-                                                        return !isNaN(val * 1);
-                                                    },
-                                                    invalidMessage: 'Поле не может быть пустым',
-                                                    readonly: true
-                                                },
-                                                {
-                                                    view: 'text',
-                                                    name: 'personRemoteCnt',
-                                                    label: 'Суммарная численность работников, подлежащих переводу на дистанционный режим работы',
-                                                    invalidMessage: 'Поле не может быть пустым',
-                                                    validate: function (val) {
-                                                        return !isNaN(val * 1);
-                                                    },
-                                                    readonly: true,
-                                                    labelPosition: 'top'
-                                                },
-                                                {
-                                                    view: 'text',
-                                                    name: 'personOfficeCnt',
-                                                    label: 'Суммарная численность работников, не подлежащих переводу на дистанционный режим работы (посещающие рабочие места)',
-                                                    labelPosition: 'top',
-                                                    validate: function (val) {
-                                                        return !isNaN(val * 1);
-                                                    },
-                                                    invalidMessage: 'Поле не может быть пустым',
-                                                    readonly: true
-                                                },
-                                            ]
-                                        },
                                     ]
-                                }
+                                },
+                            },
+                            view_section("Актуализация заявки"),
+                            {
+                                rows: [
+                                    {
+                                        cols: [
+                                            {
+                                                view: 'checkbox',
+                                                id: 'actualization',
+                                                name: 'actualization',
+                                                readonly: true,
+                                                labelRight: 'Заявка актуализирована'
+                                            },
+                                            {
+                                                view: 'label',
+                                                select: false,
+                                                // template: '#value#',
+                                                label: '',
+                                                name: 'actualizedRequestLink',
+                                                // borderless: true,
+                                                template: function(data) {
+                                                    if (data.idActualizedRequest != null) return webix.template('#value#');
+                                                    return "";
+                                                },
+                                                defaultData: "",
+                                                id: 'actualizedRequestLink'
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            view_section('Данные о численности работников'),
+                            {
+                                type: 'space',
+                                rows: [
+                                    {
+                                        view: 'text',
+                                        name: 'personSlrySaveCnt',
+                                        label: 'Суммарная численность работников, в отношении которых установлен режим работы нерабочего дня с сохранением заработной платы',
+                                        labelPosition: 'top',
+                                        validate: function (val) {
+                                            return !isNaN(val * 1);
+                                        },
+                                        invalidMessage: 'Поле не может быть пустым',
+                                        readonly: true
+                                    },
+                                    {
+                                        view: 'text',
+                                        name: 'personRemoteCnt',
+                                        label: 'Суммарная численность работников, подлежащих переводу на дистанционный режим работы',
+                                        invalidMessage: 'Поле не может быть пустым',
+                                        validate: function (val) {
+                                            return !isNaN(val * 1);
+                                        },
+                                        readonly: true,
+                                        labelPosition: 'top'
+                                    },
+                                    {
+                                        view: 'text',
+                                        name: 'personOfficeCnt',
+                                        label: 'Суммарная численность работников, не подлежащих переводу на дистанционный режим работы (посещающие рабочие места)',
+                                        labelPosition: 'top',
+                                        validate: function (val) {
+                                            return !isNaN(val * 1);
+                                        },
+                                        invalidMessage: 'Поле не может быть пустым',
+                                        readonly: true
+                                    },
+                                ]
                             },
                             {
                                 header: "Сотрудники",
