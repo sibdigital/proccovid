@@ -572,6 +572,30 @@
                                                         */
                                                     ]
                                                 },
+                                                view_section("Актуализация заявки"),
+                                                {
+                                                    rows: [
+                                                        {
+                                                            cols: [
+                                                                {
+                                                                    view: 'checkbox',
+                                                                    id: 'actualization',
+                                                                    name: 'actualization',
+                                                                    readonly: true,
+                                                                    labelRight: 'Заявка актуализирована',
+                                                                    labelWidth:0
+                                                                },
+                                                                {
+                                                                    view: 'label',
+                                                                    label: '',
+                                                                    name: 'actualizedRequestLink',
+                                                                    template: '#value#',
+                                                                    id: 'actualizedRequestLink'
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
                                                 view_section('Данные о численности работников'),
                                                 {
                                                     type: 'space',

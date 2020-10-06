@@ -43,6 +43,8 @@ public class DocRequestWithPerson {
     private Timestamp timeReview;
     private Boolean isAgree;
     private Boolean isProtect;
+    private Boolean isActualization;
+    private Integer idActualizedRequest;
     private String reqBasis;
     @JsonIgnore
     private String orgHashCode;
@@ -206,6 +208,26 @@ public class DocRequestWithPerson {
     }
 
     @Basic
+    @Column(name = "is_actualization", nullable = false)
+    public Boolean getActualization() {
+        return isActualization;
+    }
+
+    public void setActualization(Boolean actualization) {
+        isActualization = actualization;
+    }
+
+    @Basic
+    @Column(name = "id_actualized_request", nullable = false)
+    public Integer getIdActualizedRequest() {
+        return idActualizedRequest;
+    }
+
+    public void setIdActualizedRequest(Integer idActualizedRequest) {
+        this.idActualizedRequest = idActualizedRequest;
+    }
+
+    @Basic
     @Column(name = "req_basis", nullable = false)
     public String getReqBasis() {
         return reqBasis;
@@ -337,6 +359,8 @@ public class DocRequestWithPerson {
                 Objects.equals(timeReview, that.timeReview) &&
                 Objects.equals(isAgree, that.isAgree) &&
                 Objects.equals(isProtect, that.isProtect) &&
+                Objects.equals(isActualization, that.isActualization) &&
+                Objects.equals(idActualizedRequest, that.idActualizedRequest) &&
                 Objects.equals(reqBasis, that.reqBasis) &&
                 Objects.equals(orgHashCode, that.orgHashCode) &&
                 Objects.equals(rejectComment, that.rejectComment) &&
@@ -350,6 +374,6 @@ public class DocRequestWithPerson {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, personOfficeCnt, personRemoteCnt, personSlrySaveCnt, attachmentPath, statusReview, timeCreate, statusImport, timeImport, timeReview, isAgree, isProtect, reqBasis, orgHashCode, rejectComment, old_department_id, typeRequest, docPersonList, department, organization, docAddressFact);
+        return Objects.hash(id, personOfficeCnt, personRemoteCnt, personSlrySaveCnt, attachmentPath, statusReview, timeCreate, statusImport, timeImport, timeReview, isAgree, isProtect, isActualization, idActualizedRequest, reqBasis, orgHashCode, rejectComment, old_department_id, typeRequest, docPersonList, department, organization, docAddressFact);
     }
 }

@@ -140,6 +140,17 @@
                                     $$('filename_label').hide()
                                     $$('filename').hide()
                                 }
+
+                                let actualizedRequestLink = "";
+                                let actualizedRequestLinkLabel = "Предыдущая утвержденная заявка: ";
+                                if (data.idActualizedRequest != null) {
+                                    actualizedRequestLink = "<a target='_blank' href='/request/view?id=" + data.idActualizedRequest + "'>" + actualizedRequestLinkLabel + data.idActualizedRequest + "</a>";
+                                    $$('actualizedRequestLink').setValue(actualizedRequestLink);
+                                }
+                                else {
+                                    $$('actualizedRequestLink').setValue("");
+                                }
+
                                 /*
                                                             data.attachmentFilename = data.attachmentPath.split('\\').pop().split('/').pop()
 
@@ -152,6 +163,7 @@
                                                                 $$('filename_label').hide()
                                                             }
                                 */
+
                                 if (data.organization.idTypeOrganization) {
                                     let typeOrg = data.organization.idTypeOrganization;
                                     if (typeOrg === 3) {

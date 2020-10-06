@@ -314,7 +314,7 @@ webix.ready(function() {
                             {
                                 header: "Обоснование",
                                 body: {
-                                    rows : [
+                                    rows: [
                                         view_section('Обоснование заявки'),
                                         {
                                             rows: [
@@ -347,9 +347,34 @@ webix.ready(function() {
                                                             borderless: true,
                                                             data: [],
                                                             id: 'filename'
+                                                        },
+                                                    ]
+                                                }
+
+                                            ]
+                                        },
+                                        view_section("Актуализация заявки"),
+                                        {
+                                            rows: [
+                                                {
+                                                    cols: [
+                                                        {
+                                                            view: 'checkbox',
+                                                            id: 'actualization',
+                                                            name: 'actualization',
+                                                            readonly: true,
+                                                            labelRight: 'Заявка актуализирована',
+                                                            labelWidth:0
+                                                        },
+                                                        {
+                                                            view: 'label',
+                                                            label: '',
+                                                            name: 'actualizedRequestLink',
+                                                            template: '#value#',
+                                                            id: 'actualizedRequestLink'
                                                         }
                                                     ]
-                                                },
+                                                }
                                             ]
                                         },
                                         view_section('Данные о численности работников'),
@@ -392,7 +417,7 @@ webix.ready(function() {
                                             ]
                                         },
                                     ]
-                                }
+                                },
                             },
                             {
                                 header: "Сотрудники",
@@ -463,6 +488,16 @@ webix.ready(function() {
         else {
             $$('filename_label').hide()
             $$('filename').hide()
+        }
+
+        let actualizedRequestLink = "";
+        let actualizedRequestLinkLabel = "Предыдущая утвержденная заявка: ";
+        if (data.idActualizedRequest != null) {
+            actualizedRequestLink = "<a target='_blank' href='/request/view?id=" + data.idActualizedRequest + "'>" + actualizedRequestLinkLabel + data.idActualizedRequest + "</a>";
+            $$('actualizedRequestLink').setValue(actualizedRequestLink);
+        }
+        else {
+            $$('actualizedRequestLink').setValue("");
         }
 
         if (data.statusReview == 0) {

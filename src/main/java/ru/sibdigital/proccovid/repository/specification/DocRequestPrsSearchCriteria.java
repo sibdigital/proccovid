@@ -7,6 +7,7 @@ public class DocRequestPrsSearchCriteria {
     private Integer idTypeRequest;
     private Integer idDistrict;
     private String innOrName;
+    private Boolean isActualization;
 
     public Long getIdDepartment() {
         return idDepartment;
@@ -38,6 +39,13 @@ public class DocRequestPrsSearchCriteria {
 
     public void setIdDistrict(Integer idDistrict) {
         this.idDistrict = idDistrict;
+    }
+
+    public Boolean getActualization() {
+        return isActualization;
+    }
+    public void setActualization(Boolean isActualization) {
+        this.isActualization = isActualization;
     }
 
     public String getInnOrName() {

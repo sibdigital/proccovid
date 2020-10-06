@@ -889,6 +889,7 @@ const adminRequests = {
                                                         $$('district_filter').hide();
                                                         $$('export_to_xlsx').hide();
                                                         $$('request_type').show();
+                                                        $$('actualization_filter').show();
                                                         break
                                                     case 'accepted':
                                                         status = 1;
@@ -896,6 +897,7 @@ const adminRequests = {
                                                         $$('district_filter').hide();
                                                         $$('export_to_xlsx').hide();
                                                         $$('request_type').show();
+                                                        $$('actualization_filter').show();
                                                         break
                                                     case 'rejected':
                                                         status = 2;
@@ -903,6 +905,7 @@ const adminRequests = {
                                                         $$('district_filter').hide();
                                                         $$('export_to_xlsx').hide();
                                                         $$('request_type').show();
+                                                        $$('actualization_filter').show();
                                                         break
                                                     case 'other':
                                                         status = 4;
@@ -910,6 +913,7 @@ const adminRequests = {
                                                         $$('export_to_xlsx').show();
                                                         $$('request_type').setValue('');
                                                         $$('request_type').hide();
+                                                        $$('actualization_filter').hide();
                                                         break
                                                 }
 
@@ -925,11 +929,18 @@ const adminRequests = {
                                                 if (request_type) {
                                                     params = '?id_type_request=' + request_type;
                                                 }
+                                                let is_actualization = $$('actualization_filter').getValue();
+                                                if (is_actualization) {
+                                                    params += params == '' ? '?' : '&';
+                                                    params += 'is_actualization=' + is_actualization ;
+                                                }
+
                                                 let district = $$('district_filter').getValue();
                                                 if (district) {
                                                     params += params == '' ? '?' : '&';
                                                     params += 'id_district=' + district;
                                                 }
+
                                                 let search_text = $$('search').getValue();
                                                 if (search_text) {
                                                     params += params == '' ? '?' : '&';
@@ -979,7 +990,7 @@ const adminRequests = {
                                             }
                                         }
                                     },
-                                    {
+                                                                        {
                                         view: 'search',
                                         id: 'search',
                                         maxWidth: 300,
@@ -988,6 +999,21 @@ const adminRequests = {
                                         placeholder: "Поиск по ИНН и названию",
                                         on: {
                                             onEnter: function () {
+                                                $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
+                                            }
+                                        }
+                                    },
+                                    {
+                                        view: 'checkbox',
+                                        id: 'actualization_filter',
+                                        // width: 255,
+                                        css: 'smallText',
+                                        labelRight: "Актуализированные",
+                                        labelWidth:0,
+                                        placeholder: "Актуализированные",
+                                        hidden: true,
+                                        on: {
+                                            onChange() {
                                                 $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
                                             }
                                         }
@@ -1021,6 +1047,7 @@ const adminRequests = {
                                             params.status = status;
                                             params.id_type_request = $$('request_type').getValue();
                                             params.id_district = $$('district_filter').getValue();
+                                            params.is_actualization = $$('actualization_filter').getValue();
                                             params.innOrName = $$('search').getValue();
                                             webix.ajax().response("blob").get('export_to_xlsx', params, function(text, data) {
                                                 webix.html.download(data, 'request.xlsx');
