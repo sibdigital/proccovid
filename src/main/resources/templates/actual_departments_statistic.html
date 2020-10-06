@@ -34,7 +34,7 @@
     </style>
 </head>
 <body>
-<div th:insert="~{navbar-bootstrap::frag ('Статистика по актуальным заявкам по подразделениям.', ${application_name})}"></div>
+<div th:insert="~{navbar-bootstrap::frag ('Статистика  актуализации по ИОГВ', ${application_name})}"></div>
 <div id="chart-dep">
 
 </div>
@@ -59,11 +59,11 @@
                 <table class=" table" id="totalDepartmentTable">
                     <thead class="thead-dark">
                     <tr>
-                        <th scope="col" class="text-center vertical-separator" style="width: 20%">Ведомство</th>
-                        <th scope="col" class="text-center" style="width: 20%">Актуальные заявки</th>
-                        <th scope="col" class="text-center" style="width: 20%">Не актуальные заявки</th>
-                        <th scope="col" class="text-center" style="width: 20%">Работников в офисе(в актуальных заявках)</th>
-                        <th scope="col" class="text-center" style="width: 20%">Работников на удаленной(в актуальных заявках)</th>
+                        <th scope="col" class="text-center vertical-separator" style="width: 20%">ИОГВ</th>
+                        <th scope="col" class="text-center" style="width: 20%">Актуализировано </th>
+                        <th scope="col" class="text-center" style="width: 20%">Не актуализировано</th>
+                        <th scope="col" class="text-center" style="width: 20%">Работников в офисе(в актуализированных)</th>
+                        <th scope="col" class="text-center" style="width: 20%">Работников на удаленной(в актуализированных)</th>
                     </tr>
                     </thead>
 
@@ -76,7 +76,7 @@
                 <table class=" table" id="totalWorkerTable">
                     <thead class="thead-dark">
                     <tr>
-                        <th scope="col" class="text-center" style="width: 40%">В актуальных заявках</th>
+                        <th scope="col" class="text-center" style="width: 40%">В актуализированных</th>
                         <th scope="col" class="text-center" style="width: 30%">Количество</th>
                         <th scope="col" class="text-center" style="width: 30%">Процент</th>
                     </tr>

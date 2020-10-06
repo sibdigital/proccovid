@@ -34,7 +34,7 @@
     </style>
 </head>
 <body>
-<div th:insert="~{navbar-bootstrap::frag ('Статистика по актуальным заявкам по организациям.', ${application_name})}"></div>
+<div th:insert="~{navbar-bootstrap::frag ('Актуализация по организациям.', ${application_name})}"></div>
 <div id="chart-dep">
 
 </div>
@@ -59,7 +59,7 @@
                 <table class=" table" id="totalWorkerTable">
                     <thead class="thead-dark">
                     <tr>
-                        <th scope="col" class="text-center" style="width: 40%"></th>
+                        <th scope="col" class="text-center" style="width: 40%">В актуализированных</th>
                         <th scope="col" class="text-center" style="width: 30%">Количество</th>
                         <th scope="col" class="text-center" style="width: 30%">Процент</th>
                     </tr>
@@ -105,9 +105,9 @@
 
     let totalActual = totalStatistic.count_actual, totalNotActual = totalStatistic.count_not_actual;
     let total = totalActual + totalNotActual;
-    insertRow("Всего заявок", total, "text-center font-weight-bold");
-    insertRow("Всего актуальных заявок", totalActual, "text-center font-weight-bold");
-    insertRow("Всего не актуальных заявок", totalNotActual, "text-center font-weight-bold");
+    insertRow("Всего ", total, "text-center font-weight-bold");
+    insertRow("Всего актуализировано", totalActual, "text-center font-weight-bold");
+    insertRow("Всего не актуализировано", totalNotActual, "text-center font-weight-bold");
 
 
     let totalActualWorkersOffice = totalWorkersStatistic.count_office, totalActualWorkersRemote = totalWorkersStatistic.count_remote;
