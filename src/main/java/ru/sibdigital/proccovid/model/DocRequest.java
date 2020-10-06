@@ -48,6 +48,7 @@ public class DocRequest {
     private Boolean isAgree;
     private Boolean isProtect;
     private Boolean isActualization;
+    private Integer idActualizedRequest;
     private String reqBasis;
     private String orgHashCode;
     private String rejectComment;
@@ -226,6 +227,16 @@ public class DocRequest {
     }
 
     @Basic
+    @Column(name = "id_actualized_request", nullable = false)
+    public Integer getIdActualizedRequest() {
+        return idActualizedRequest;
+    }
+
+    public void setIdActualizedRequest(Integer idActualizedRequest) {
+        this.idActualizedRequest = idActualizedRequest;
+    }
+
+    @Basic
     @Column(name = "req_basis", nullable = false)
     public String getReqBasis() {
         return reqBasis;
@@ -373,6 +384,7 @@ public class DocRequest {
                 Objects.equals(isAgree, that.isAgree) &&
                 Objects.equals(isProtect, that.isProtect) &&
                 Objects.equals(isActualization, that.isActualization) &&
+                Objects.equals(idActualizedRequest, that.idActualizedRequest) &&
                 Objects.equals(reqBasis, that.reqBasis) &&
                 Objects.equals(orgHashCode, that.orgHashCode) &&
                 Objects.equals(rejectComment, that.rejectComment) &&
@@ -386,6 +398,6 @@ public class DocRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, personOfficeCnt, personRemoteCnt, personSlrySaveCnt, attachmentPath, statusReview, timeCreate, statusImport, timeImport, timeReview, isAgree, isProtect, isActualization, reqBasis, orgHashCode, rejectComment, old_department_id, typeRequest, docPersonList, department, organization, docAddressFact);
+        return Objects.hash(id, personOfficeCnt, personRemoteCnt, personSlrySaveCnt, attachmentPath, statusReview, timeCreate, statusImport, timeImport, timeReview, isAgree, isProtect, isActualization, idActualizedRequest, reqBasis, orgHashCode, rejectComment, old_department_id, typeRequest, docPersonList, department, organization, docAddressFact);
     }
 }

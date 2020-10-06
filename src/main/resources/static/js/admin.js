@@ -929,10 +929,10 @@ const adminRequests = {
                                                 if (request_type) {
                                                     params = '?id_type_request=' + request_type;
                                                 }
-                                                let actualization = $$('actualization_filter').getValue();
-                                                if (actualization) {
+                                                let is_actualization = $$('actualization_filter').getValue();
+                                                if (is_actualization) {
                                                     params += params == '' ? '?' : '&';
-                                                    params += 'is_actualization=' + actualization ;
+                                                    params += 'is_actualization=' + is_actualization ;
                                                 }
 
                                                 let district = $$('district_filter').getValue();

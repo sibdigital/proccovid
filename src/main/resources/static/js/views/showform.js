@@ -572,6 +572,31 @@
                                                         */
                                                     ]
                                                 },
+                                                {
+                                                    cols: [
+                                                        {
+                                                            view: 'checkbox',
+                                                            // width:255,
+                                                            id: 'actualization',
+                                                            name: 'actualization',
+                                                            // labelPosition: 'right',
+                                                            readonly: true,
+                                                            label: 'Актуализированная'
+                                                        },
+                                                        {
+                                                            paddingLeft: 10,
+                                                            view: 'label',
+                                                            //height: 100,
+                                                            autoheight: true,
+                                                            select: false,
+                                                            template: '#value#',
+                                                            label: '',
+                                                            name: 'actualizedRequestLink',
+                                                            borderless: true,
+                                                            id: 'actualizedRequestLink'
+                                                        }
+                                                    ]
+                                                },
                                                 view_section('Данные о численности работников'),
                                                 {
                                                     type: 'space',

@@ -47,6 +47,7 @@ public class DocRequestPrs implements Serializable {
     private Boolean isAgree;
     private Boolean isProtect;
     private Boolean isActualization;
+    private Integer idActualizedRequest;
     private String reqBasis;
     private String orgHashCode;
     private String rejectComment;
@@ -225,6 +226,16 @@ public class DocRequestPrs implements Serializable {
     }
 
     @Basic
+    @Column(name = "id_actualized_request", nullable = false)
+    public Integer getIdActualizedRequest() {
+        return idActualizedRequest;
+    }
+
+    public void setIdActualizedRequest(Integer idActualizedRequest) {
+        this.idActualizedRequest = idActualizedRequest;
+    }
+
+    @Basic
     @Column(name = "req_basis", nullable = false)
     public String getReqBasis() {
         return reqBasis;
@@ -358,6 +369,7 @@ public class DocRequestPrs implements Serializable {
                 Objects.equals(isAgree, that.isAgree) &&
                 Objects.equals(isProtect, that.isProtect) &&
                 Objects.equals(isActualization, that.isActualization) &&
+                Objects.equals(idActualizedRequest, that.idActualizedRequest) &&
                 Objects.equals(reqBasis, that.reqBasis) &&
                 Objects.equals(orgHashCode, that.orgHashCode) &&
                 Objects.equals(typeRequest, that.typeRequest) &&
@@ -369,6 +381,6 @@ public class DocRequestPrs implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, personOfficeCnt, personRemoteCnt, personSlrySaveCnt, attachmentPath, statusReview, timeCreate, statusImport, timeImport, timeReview, isAgree, isProtect, isActualization, reqBasis, orgHashCode, typeRequest, department, organization);
+        return Objects.hash(id, personOfficeCnt, personRemoteCnt, personSlrySaveCnt, attachmentPath, statusReview, timeCreate, statusImport, timeImport, timeReview, isAgree, isProtect, isActualization, idActualizedRequest, reqBasis, orgHashCode, typeRequest, department, organization);
     }
 }

@@ -101,10 +101,10 @@
                                             params += params == '' ? '?' : '&';
                                             params += 'id_district=' + district;
                                         }
-                                        let actualization = $$('actualization_filter').getValue();
-                                        if (actualization) {
+                                        let is_actualization = $$('actualization_filter').getValue();
+                                        if (is_actualization) {
                                             params += params == '' ? '?' : '&';
-                                            params += 'is_actualization=' + actualization ;
+                                            params += 'is_actualization=' + is_actualization ;
                                         }
                                         let search_text = $$('search').getValue();
                                         if (search_text) {
