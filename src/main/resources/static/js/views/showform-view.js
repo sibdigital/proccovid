@@ -478,7 +478,8 @@ webix.ready(function() {
                                                             id: 'timeCreate',
                                                             header: 'Дата подачи',
                                                             adjust: true,
-                                                            sort: 'string',
+                                                            sort: 'date',
+                                                            // format:webix.Date.dateToStr("%d-%m-%Y %H:%i"),
                                                             fillspace: true
                                                         },
                                                         {
@@ -498,6 +499,17 @@ webix.ready(function() {
                                                             sort: 'string',
                                                             fillspace: true
                                                         }
+                                                        // {
+                                                        //     id: 'requestLink',
+                                                        //     name: 'requestLink',
+                                                        //     template: function (obj) {
+                                                        //         var html = "<a target='_blank' href='/request/view?id=1'>Ссылка";
+                                                        //         return html + "</a>";
+                                                        //         // return "<a target='_blank' href='/request/view?id=1'>Заявка</a>";
+                                                        //     },
+                                                        //     adjust: true,
+                                                        //     fillspace: true
+                                                        // }
                                                     ],
                                                     url: '../history_doc_request_by_id_request/' + ID
                                                 }

@@ -116,6 +116,7 @@
                                                 url: 'history_doc_request/' + data.organization.inn
                                             })
                                             $$('history_table').sync(history_table_data);
+
                                         }
                                     }
                                 });
