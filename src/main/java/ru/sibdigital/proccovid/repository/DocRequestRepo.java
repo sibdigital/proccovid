@@ -53,6 +53,18 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
     @Query(value = "SELECT dr FROM DocRequest dr WHERE  dr.organization.ogrn = :ogrn ORDER BY dr.timeCreate DESC")
     Optional<List<DocRequest>> getLastRequestByOgrn(@Param("ogrn")String ogrn);
 
+    @Query(nativeQuery = true, value = "select dr.* from doc_request dr" +
+            "                           inner join ( select co.id as id_organization" +
+            "                              from cls_organization co" +
+            "                               inner join ( select co.inn as inn" +
+            "                                   from cls_organization co" +
+            "                                   inner join doc_request dr" +
+            "                                   on co.id = dr.id_organization" +
+            "                                   where dr.id = :id_request" +
+            "                               ) as t_inn" +
+            "                               on co.inn = t_inn.inn) as  t_co" +
+            "                   on dr.id_organization = t_co.id_organization;")
+    Optional<List<DocRequest>> getLastRequestByInnOfRequest(@Param("id_request")Long id_request);
 
 
 

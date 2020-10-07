@@ -223,6 +223,16 @@ public class DocRequestController {
         return docAddressFactRepo.findByDocRequest(id_request);
     }
 
+    @GetMapping("/history_doc_request/{inn}")
+    public Optional<List<DocRequest>> getListHistoryRequestsByInn(@PathVariable("inn") String inn){
+        return docRequestRepo.getLastRequestByInn(inn);
+    }
+
+    @GetMapping("/history_doc_request_by_id_request/{id_request}")
+    public Optional<List<DocRequest>> getListHistoryRequestsByInnOfRequest(@PathVariable("id_request") Long id_request){
+        return docRequestRepo.getLastRequestByInnOfRequest(id_request);
+    }
+
     @GetMapping("/cls_departments")
     public List<ClsDepartment> getListDepartments() {
         return clsDepartmentRepo.findAll(Sort.by("id"));

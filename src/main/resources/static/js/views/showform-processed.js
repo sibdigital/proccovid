@@ -452,6 +452,54 @@
                                                 },
                                             ]
                                         }
+                                    },
+                                    {
+                                        header: "История",
+                                        body: {
+                                            rows: [
+                                                view_section('История о поданных заявках'),
+                                                {
+                                                    rows: [
+                                                        {
+                                                            id: 'history_table',
+                                                            view: 'datatable',
+                                                            height: 600,
+                                                            name: 'history_table',
+                                                            select: 'row',
+                                                            resizeColumn: true,
+                                                            readonly: true,
+                                                            columns: [
+                                                                {
+                                                                    id: 'timeCreate',
+                                                                    header: 'Дата подачи',
+                                                                    adjust: true,
+                                                                    sort: 'string',
+                                                                    fillspace: true
+                                                                },
+                                                                {
+                                                                    id: 'id',
+                                                                    header: 'Номер заявки',
+                                                                    adjust: true,
+                                                                    sort: 'string',
+                                                                    fillspace: true
+                                                                },
+                                                                {
+                                                                    id: 'organization',
+                                                                    template:function (obj) {
+                                                                        return obj.organization.name;
+                                                                    },
+                                                                    header: 'Наименование организации',
+                                                                    adjust: true,
+                                                                    sort: 'string',
+                                                                    fillspace: true
+                                                                }
+                                                            ],
+                                                            data: []
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
                                     }
                                 ]
                             }
