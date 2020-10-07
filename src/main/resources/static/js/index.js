@@ -61,7 +61,8 @@
                                                 $$('district_filter').hide();
                                                 $$('export_to_xlsx').hide();
                                                 $$('request_type').show();
-                                                $$('actualization_filter').show();
+                                                // $$('actualization_filter').show();
+                                                $$('actualization_type').show();
                                                 break
                                             case 'accepted':
                                                 status = 1;
@@ -69,7 +70,8 @@
                                                 $$('district_filter').hide();
                                                 $$('export_to_xlsx').hide();
                                                 $$('request_type').show();
-                                                $$('actualization_filter').show();
+                                                // $$('actualization_filter').show();
+                                                $$('actualization_type').show();
                                                 break
                                             case 'rejected':
                                                 status = 2;
@@ -77,7 +79,8 @@
                                                 $$('district_filter').hide();
                                                 $$('export_to_xlsx').hide();
                                                 $$('request_type').show();
-                                                $$('actualization_filter').show();
+                                                // $$('actualization_filter').show();
+                                                $$('actualization_type').show();
                                                 break
                                             case 'other':
                                                 status = 4;
@@ -85,7 +88,8 @@
                                                 $$('export_to_xlsx').show();
                                                 $$('request_type').setValue('');
                                                 $$('request_type').hide();
-                                                $$('actualization_filter').hide();
+                                                // $$('actualization_filter').hide();
+                                                $$('actualization_type').hide();
                                                 break
                                         }
 
@@ -101,11 +105,17 @@
                                             params += params == '' ? '?' : '&';
                                             params += 'id_district=' + district;
                                         }
-                                        let is_actualization = $$('actualization_filter').getValue();
-                                        if (is_actualization) {
+
+                                        let actualization = $$('actualization_type').getValue();
+                                        if (actualization) {
+                                            let boolean_actualization = 0;
+                                            if (actualization=='id_true') {
+                                                boolean_actualization = 1;
+                                            }
                                             params += params == '' ? '?' : '&';
-                                            params += 'is_actualization=' + is_actualization ;
+                                            params += 'is_actualization=' + boolean_actualization;
                                         }
+
                                         let search_text = $$('search').getValue();
                                         if (search_text) {
                                             params += params == '' ? '?' : '&';
@@ -155,14 +165,15 @@
                             },
                             filter.searchBar('requests_table'),
                             {
-                                view: 'checkbox',
-                                id: 'actualization_filter',
-                                // width: 255,
+                                view: 'combo',
+                                id: 'actualization_type',
                                 css: 'smallText',
-                                labelRight: "Актуализированные",
-                                labelWidth:0,
-                                placeholder: "Актуализированные",
+                                placeholder: 'Все виды заявок',
                                 hidden: true,
+                                options: [
+                                    { value: 'Не актуализированные', id: 'id_false'},
+                                    { value: 'Актуализированные', id: 'id_true'}
+                                ],
                                 on: {
                                     onChange() {
                                         $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
@@ -220,5 +231,6 @@
             $$('tabbar').setValue('requests');
             $$('request_type').getList().add({id:'', value:'Все типы заявок', $empty: true}, 0)
             $$('district_filter').getList().add({id:'', value:'Все районы', $empty: true}, 0)
+            $$('actualization_type').getList().add({id:'', value:'Все виды заявок', $empty: true}, 0)
         })
     // })

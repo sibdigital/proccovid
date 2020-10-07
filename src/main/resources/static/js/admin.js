@@ -889,7 +889,7 @@ const adminRequests = {
                                                         $$('district_filter').hide();
                                                         $$('export_to_xlsx').hide();
                                                         $$('request_type').show();
-                                                        $$('actualization_filter').show();
+                                                        $$('actualization_type').show();
                                                         break
                                                     case 'accepted':
                                                         status = 1;
@@ -897,7 +897,7 @@ const adminRequests = {
                                                         $$('district_filter').hide();
                                                         $$('export_to_xlsx').hide();
                                                         $$('request_type').show();
-                                                        $$('actualization_filter').show();
+                                                        $$('actualization_type').show();
                                                         break
                                                     case 'rejected':
                                                         status = 2;
@@ -905,7 +905,7 @@ const adminRequests = {
                                                         $$('district_filter').hide();
                                                         $$('export_to_xlsx').hide();
                                                         $$('request_type').show();
-                                                        $$('actualization_filter').show();
+                                                        $$('actualization_type').show();
                                                         break
                                                     case 'other':
                                                         status = 4;
@@ -913,7 +913,7 @@ const adminRequests = {
                                                         $$('export_to_xlsx').show();
                                                         $$('request_type').setValue('');
                                                         $$('request_type').hide();
-                                                        $$('actualization_filter').hide();
+                                                        $$('actualization_type').hide();
                                                         break
                                                 }
 
@@ -929,10 +929,15 @@ const adminRequests = {
                                                 if (request_type) {
                                                     params = '?id_type_request=' + request_type;
                                                 }
-                                                let is_actualization = $$('actualization_filter').getValue();
-                                                if (is_actualization) {
+
+                                                let actualization = $$('actualization_type').getValue();
+                                                if (actualization) {
+                                                    let boolean_actualization = 0;
+                                                    if (actualization=='id_true') {
+                                                        boolean_actualization = 1;
+                                                    }
                                                     params += params == '' ? '?' : '&';
-                                                    params += 'is_actualization=' + is_actualization ;
+                                                    params += 'is_actualization=' + boolean_actualization;
                                                 }
 
                                                 let district = $$('district_filter').getValue();
@@ -990,7 +995,7 @@ const adminRequests = {
                                             }
                                         }
                                     },
-                                                                        {
+                                    {
                                         view: 'search',
                                         id: 'search',
                                         maxWidth: 300,
@@ -1004,14 +1009,15 @@ const adminRequests = {
                                         }
                                     },
                                     {
-                                        view: 'checkbox',
-                                        id: 'actualization_filter',
-                                        // width: 255,
+                                        view: 'combo',
+                                        id: 'actualization_type',
                                         css: 'smallText',
-                                        labelRight: "Актуализированные",
-                                        labelWidth:0,
-                                        placeholder: "Актуализированные",
+                                        placeholder: 'Все виды заявок',
                                         hidden: true,
+                                        options: [
+                                            { value: 'Не актуализированные', id: 'id_false'},
+                                            { value: 'Актуализированные', id: 'id_true'}
+                                        ],
                                         on: {
                                             onChange() {
                                                 $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
