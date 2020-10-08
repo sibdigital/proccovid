@@ -63,7 +63,8 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "                                   where dr.id = :id_request" +
             "                               ) as t_inn" +
             "                               on co.inn = t_inn.inn) as  t_co" +
-            "                   on dr.id_organization = t_co.id_organization;")
+            "                   on dr.id_organization = t_co.id_organization" +
+            "                   order by dr.time_create desc;")
     Optional<List<DocRequest>> getLastRequestByInnOfRequest(@Param("id_request")Long id_request);
 
 
