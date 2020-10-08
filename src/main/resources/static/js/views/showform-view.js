@@ -473,20 +473,13 @@ webix.ready(function() {
                                                     select: 'row',
                                                     resizeColumn: true,
                                                     readonly: true,
+
                                                     columns: [
                                                         {
                                                             id: 'timeCreate',
                                                             header: 'Дата подачи',
-                                                            adjust: true,
                                                             sort: 'date',
-                                                            // format:webix.Date.dateToStr("%d-%m-%Y %H:%i"),
-                                                            fillspace: true
-                                                        },
-                                                        {
-                                                            id: 'id',
-                                                            header: 'Номер заявки',
-                                                            adjust: true,
-                                                            sort: 'string',
+                                                            format: webix.Date.dateToStr("%d.%m.%Y %H:%i:%s"),
                                                             fillspace: true
                                                         },
                                                         {
@@ -494,23 +487,29 @@ webix.ready(function() {
                                                             template:function (obj) {
                                                                 return obj.organization.name;
                                                             },
-                                                            header: 'Наименование организации',
+                                                            header: 'Организация',
                                                             adjust: true,
                                                             sort: 'string',
                                                             fillspace: true
+                                                        },
+                                                        {
+                                                            id: 'requestLink',
+                                                            view: 'label',
+                                                            header: 'Заявка',
+                                                            template: function (obj) {
+                                                                var linkLabel = "Заявка №" + obj.id;
+                                                                var link = "<a target='_blank' href='/request/view?id=" + obj.id+"'>" + linkLabel;
+                                                                return link + "</a>";
+                                                            },
+                                                            adjust: true,
+                                                            fillspace: true
                                                         }
-                                                        // {
-                                                        //     id: 'requestLink',
-                                                        //     name: 'requestLink',
-                                                        //     template: function (obj) {
-                                                        //         var html = "<a target='_blank' href='/request/view?id=1'>Ссылка";
-                                                        //         return html + "</a>";
-                                                        //         // return "<a target='_blank' href='/request/view?id=1'>Заявка</a>";
-                                                        //     },
-                                                        //     adjust: true,
-                                                        //     fillspace: true
-                                                        // }
                                                     ],
+                                                    scheme: {
+                                                        $init: function (obj) {
+                                                            obj.timeCreate = obj.timeCreate.replace("T", " ");
+                                                        }
+                                                    },
                                                     url: '../history_doc_request_by_id_request/' + ID
                                                 }
                                             ]

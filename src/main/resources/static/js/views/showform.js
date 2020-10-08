@@ -693,16 +693,12 @@
                                                                 {
                                                                     id: 'timeCreate',
                                                                     header: 'Дата подачи',
-                                                                    adjust: true,
                                                                     sort: 'date',
-                                                                    // format:webix.Date.dateToStr("%d-%m-%Y %H:%i"),
-                                                                    fillspace: true
-                                                                },
-                                                                {
-                                                                    id: 'id',
-                                                                    header: 'Номер заявки',
-                                                                    adjust: true,
-                                                                    sort: 'string',
+                                                                    template: function (obj) {
+                                                                        obj.timeCreate = obj.timeCreate.replace("T", " ");
+                                                                        var time_Create = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s") (obj.timeCreate);
+                                                                        return time_Create;
+                                                                    },
                                                                     fillspace: true
                                                                 },
                                                                 {
@@ -710,22 +706,23 @@
                                                                     template:function (obj) {
                                                                         return obj.organization.name;
                                                                     },
-                                                                    header: 'Наименование организации',
+                                                                    header: 'Организация',
                                                                     adjust: true,
                                                                     sort: 'string',
                                                                     fillspace: true
+                                                                },
+                                                                {
+                                                                    id: 'requestLink',
+                                                                    view: 'label',
+                                                                    header: 'Заявка',
+                                                                    template: function (obj) {
+                                                                        var linkLabel = "Заявка №" + obj.id;
+                                                                        var link = "<a target='_blank' href='/request/view?id=" + obj.id+"'>" + linkLabel;
+                                                                        return link + "</a>";
+                                                                    },
+                                                                    adjust: true,
+                                                                    fillspace: true
                                                                 }
-                                                                // {
-                                                                //     id: 'requestLink',
-                                                                //     name: 'requestLink',
-                                                                //     template: function (obj) {
-                                                                //         var html = "<a target='_blank' href='/request/view?id=1'>Ссылка";
-                                                                //         return html + "</a>";
-                                                                //         // return "<a target='_blank' href='/request/view?id=1'>Заявка</a>";
-                                                                //     },
-                                                                //     adjust: true,
-                                                                //     fillspace: true
-                                                                // }
                                                             ],
                                                             data: []
                                                         }
