@@ -164,11 +164,12 @@
                                 }
                             },
                             {
-                                view: 'combo',
+                                view: 'richselect',
                                 id: 'actualization_type',
                                 css: 'smallText',
                                 placeholder: 'Все заявки',
                                 hidden: true,
+                                width: 200,
                                 options: [
                                     { value: 'Не актуализированные', id: 'id_false'},
                                     { value: 'Актуализированные', id: 'id_true'}

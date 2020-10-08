@@ -481,15 +481,6 @@
                                                                     adjust: true
                                                                 },
                                                                 {
-                                                                    id: 'organization',
-                                                                    template:function (obj) {
-                                                                        return obj.organization.name;
-                                                                    },
-                                                                    header: 'Организация',
-                                                                    sort: 'string',
-                                                                    adjust: true
-                                                                },
-                                                                {
                                                                     id: 'requestLink',
                                                                     view: 'label',
                                                                     header: 'Заявка',
@@ -500,6 +491,15 @@
                                                                     },
                                                                     adjust: true,
                                                                     fillspace: true
+                                                                },
+                                                                {
+                                                                    id: 'organization',
+                                                                    template:function (obj) {
+                                                                        return obj.organization.name;
+                                                                    },
+                                                                    header: 'Организация',
+                                                                    sort: 'string',
+                                                                    adjust: true
                                                                 }
                                                             ],
                                                             data: []
