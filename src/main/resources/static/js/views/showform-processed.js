@@ -478,7 +478,7 @@
                                                                         var time_Create = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s") (obj.timeCreate);
                                                                         return time_Create;
                                                                     },
-                                                                    fillspace: true
+                                                                    adjust: true
                                                                 },
                                                                 {
                                                                     id: 'organization',
@@ -486,9 +486,8 @@
                                                                         return obj.organization.name;
                                                                     },
                                                                     header: 'Организация',
-                                                                    adjust: true,
                                                                     sort: 'string',
-                                                                    fillspace: true
+                                                                    adjust: true
                                                                 },
                                                                 {
                                                                     id: 'requestLink',

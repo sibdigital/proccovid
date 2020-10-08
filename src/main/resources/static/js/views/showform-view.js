@@ -473,24 +473,13 @@ webix.ready(function() {
                                                     select: 'row',
                                                     resizeColumn: true,
                                                     readonly: true,
-
                                                     columns: [
                                                         {
                                                             id: 'timeCreate',
                                                             header: 'Дата подачи',
                                                             sort: 'date',
                                                             format: webix.Date.dateToStr("%d.%m.%Y %H:%i:%s"),
-                                                            fillspace: true
-                                                        },
-                                                        {
-                                                            id: 'organization',
-                                                            template:function (obj) {
-                                                                return obj.organization.name;
-                                                            },
-                                                            header: 'Организация',
-                                                            adjust: true,
-                                                            sort: 'string',
-                                                            fillspace: true
+                                                            adjust: true
                                                         },
                                                         {
                                                             id: 'requestLink',
@@ -501,6 +490,15 @@ webix.ready(function() {
                                                                 var link = "<a target='_blank' href='/request/view?id=" + obj.id+"'>" + linkLabel;
                                                                 return link + "</a>";
                                                             },
+                                                            adjust: true
+                                                        },
+                                                        {
+                                                            id: 'organization',
+                                                            template:function (obj) {
+                                                                return obj.organization.name;
+                                                            },
+                                                            header: 'Организация',
+                                                            sort: 'string',
                                                             adjust: true,
                                                             fillspace: true
                                                         }

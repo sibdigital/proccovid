@@ -699,17 +699,7 @@
                                                                         var time_Create = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s") (obj.timeCreate);
                                                                         return time_Create;
                                                                     },
-                                                                    fillspace: true
-                                                                },
-                                                                {
-                                                                    id: 'organization',
-                                                                    template:function (obj) {
-                                                                        return obj.organization.name;
-                                                                    },
-                                                                    header: 'Организация',
-                                                                    adjust: true,
-                                                                    sort: 'string',
-                                                                    fillspace: true
+                                                                    adjust: true
                                                                 },
                                                                 {
                                                                     id: 'requestLink',
@@ -720,6 +710,15 @@
                                                                         var link = "<a target='_blank' href='/request/view?id=" + obj.id+"'>" + linkLabel;
                                                                         return link + "</a>";
                                                                     },
+                                                                    adjust: true
+                                                                },
+                                                                {
+                                                                    id: 'organization',
+                                                                    template:function (obj) {
+                                                                        return obj.organization.name;
+                                                                    },
+                                                                    header: 'Организация',
+                                                                    sort: 'string',
                                                                     adjust: true,
                                                                     fillspace: true
                                                                 }
