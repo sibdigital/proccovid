@@ -996,6 +996,22 @@ const adminRequests = {
                                         }
                                     },
                                     {
+                                        view: 'combo',
+                                        id: 'actualization_type',
+                                        css: 'smallText',
+                                        placeholder: 'Все заявки',
+                                        hidden: true,
+                                        options: [
+                                            { value: 'Не актуализированные', id: 'id_false'},
+                                            { value: 'Актуализированные', id: 'id_true'}
+                                        ],
+                                        on: {
+                                            onChange() {
+                                                $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
+                                            }
+                                        }
+                                    },
+                                    {
                                         view: 'search',
                                         id: 'search',
                                         maxWidth: 300,
@@ -1004,22 +1020,6 @@ const adminRequests = {
                                         placeholder: "Поиск по ИНН и названию",
                                         on: {
                                             onEnter: function () {
-                                                $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
-                                            }
-                                        }
-                                    },
-                                    {
-                                        view: 'combo',
-                                        id: 'actualization_type',
-                                        css: 'smallText',
-                                        placeholder: 'Все виды заявок',
-                                        hidden: true,
-                                        options: [
-                                            { value: 'Не актуализированные', id: 'id_false'},
-                                            { value: 'Актуализированные', id: 'id_true'}
-                                        ],
-                                        on: {
-                                            onChange() {
                                                 $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
                                             }
                                         }
@@ -1193,6 +1193,7 @@ webix.ready(function() {
                                     $$('department_filter').getList().add({id:'', value:'Все подразделения', $empty: true}, 0);
                                     $$('request_type').getList().add({id:'', value:'Все типы заявок', $empty: true}, 0);
                                     $$('district_filter').getList().add({id:'', value:'Все районы', $empty: true}, 0);
+                                    $$('actualization_type').getList().add({id:'', value:'Все заявки', $empty: true}, 0)
                                 }
                             }
                         }

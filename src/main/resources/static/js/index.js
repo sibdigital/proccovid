@@ -163,12 +163,11 @@
                                     }
                                 }
                             },
-                            filter.searchBar('requests_table'),
                             {
                                 view: 'combo',
                                 id: 'actualization_type',
                                 css: 'smallText',
-                                placeholder: 'Все виды заявок',
+                                placeholder: 'Все заявки',
                                 hidden: true,
                                 options: [
                                     { value: 'Не актуализированные', id: 'id_false'},
@@ -180,6 +179,7 @@
                                     }
                                 }
                             },
+                            filter.searchBar('requests_table'),
                             {},
                             {
                                 view: 'button',
@@ -231,6 +231,6 @@
             $$('tabbar').setValue('requests');
             $$('request_type').getList().add({id:'', value:'Все типы заявок', $empty: true}, 0)
             $$('district_filter').getList().add({id:'', value:'Все районы', $empty: true}, 0)
-            $$('actualization_type').getList().add({id:'', value:'Все виды заявок', $empty: true}, 0)
+            $$('actualization_type').getList().add({id:'', value:'Все заявки', $empty: true}, 0)
         })
     // })
