@@ -472,7 +472,7 @@
                                                                 {
                                                                     id: 'timeCreate',
                                                                     header: 'Дата подачи',
-                                                                    sort: 'date',
+                                                                    sort: 'string',
                                                                     template: function (obj) {
                                                                         obj.timeCreate = obj.timeCreate.replace("T", " ");
                                                                         var time_Create = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s") (obj.timeCreate);
@@ -489,6 +489,7 @@
                                                                         var link = "<a target='_blank' href='/request/view?id=" + obj.id+"'>" + linkLabel;
                                                                         return link + "</a>";
                                                                     },
+                                                                    sort:'string',
                                                                     adjust: true,
                                                                     fillspace: true
                                                                 },
@@ -498,7 +499,7 @@
                                                                         return obj.organization.name;
                                                                     },
                                                                     header: 'Организация',
-                                                                    sort: 'string',
+                                                                    sort: 'text',
                                                                     adjust: true
                                                                 }
                                                             ],

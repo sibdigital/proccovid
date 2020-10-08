@@ -477,7 +477,7 @@ webix.ready(function() {
                                                         {
                                                             id: 'timeCreate',
                                                             header: 'Дата подачи',
-                                                            sort: 'date',
+                                                            sort: 'string',
                                                             format: webix.Date.dateToStr("%d.%m.%Y %H:%i:%s"),
                                                             adjust: true
                                                         },
@@ -490,6 +490,7 @@ webix.ready(function() {
                                                                 var link = "<a target='_blank' href='/request/view?id=" + obj.id+"'>" + linkLabel;
                                                                 return link + "</a>";
                                                             },
+                                                            sort:'string',
                                                             adjust: true
                                                         },
                                                         {
@@ -498,7 +499,7 @@ webix.ready(function() {
                                                                 return obj.organization.name;
                                                             },
                                                             header: 'Организация',
-                                                            sort: 'string',
+                                                            sort: 'text',
                                                             adjust: true,
                                                             fillspace: true
                                                         }
