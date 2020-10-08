@@ -600,16 +600,16 @@
                                                 {
                                                     type: 'space',
                                                     rows: [
-                                                        {
-                                                            view: 'text', name: 'personSlrySaveCnt',
-                                                            label: 'Суммарная численность работников, в отношении которых установлен режим работы нерабочего дня с сохранением заработной платы',
-                                                            labelPosition: 'top',
-                                                            validate: function (val) {
-                                                                return !isNaN(val * 1);
-                                                            },
-                                                            invalidMessage: 'Поле не может быть пустым',
-                                                            readonly: true
-                                                        },
+                                                        // {
+                                                        //     view: 'text', name: 'personSlrySaveCnt',
+                                                        //     label: 'Суммарная численность работников, в отношении которых установлен режим работы нерабочего дня с сохранением заработной платы',
+                                                        //     labelPosition: 'top',
+                                                        //     validate: function (val) {
+                                                        //         return !isNaN(val * 1);
+                                                        //     },
+                                                        //     invalidMessage: 'Поле не может быть пустым',
+                                                        //     readonly: true
+                                                        // },
                                                         {
                                                             view: 'text', name: 'personRemoteCnt',
                                                             label: 'Суммарная численность работников, подлежащих переводу на дистанционный режим работы',
