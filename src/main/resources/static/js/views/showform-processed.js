@@ -490,8 +490,7 @@
                                                                         return link + "</a>";
                                                                     },
                                                                     sort:'string',
-                                                                    adjust: true,
-                                                                    fillspace: true
+                                                                    adjust: true
                                                                 },
                                                                 {
                                                                     id: 'organization',
@@ -500,7 +499,8 @@
                                                                     },
                                                                     header: 'Организация',
                                                                     sort: 'text',
-                                                                    adjust: true
+                                                                    adjust: true,
+                                                                    fillspace: true
                                                                 }
                                                             ],
                                                             data: []
