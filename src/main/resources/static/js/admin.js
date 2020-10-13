@@ -10,6 +10,20 @@ function view_section(title) {
     }
 }
 
+function addOkved(){
+    let values = $$('form_okved').getValues()
+    if(values.okved == ''){
+        webix.message('не заполнены обязательные поля')
+        return;
+    }
+
+    $$('okved_table').add({
+        okved: values.okved,
+    }, $$('okved_table').count() + 1)
+
+    $$('form_okved').clear()
+}
+
 const departments = {
     view: 'scrollview',
     scroll: 'xy',
@@ -144,6 +158,59 @@ const departmentForm = {
                 elements: [
                     { view: 'text', label: 'Наименование', labelPosition: 'top', name: 'name', required: true, validate: webix.rules.isNotEmpty },
                     { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', required: true, validate: webix.rules.isNotEmpty },
+                    {
+                        rows: [
+                            {
+                                view: 'label',
+                                label: 'ОКВЭД',
+                                align: 'left',
+                            },
+                            {
+                                view: 'datatable', name: 'okved_table', label: '', labelPosition: 'top',
+                                height: 200,
+                                select: 'row',
+                                editable: true,
+                                id: 'okved_table',
+                                columns: [
+                                    {
+                                        id: 'okved',
+                                        header: 'ОКВЭД',
+                                    },
+                                ],
+                                data: [],
+                            },
+                            {
+                                view: 'form',
+                                id: 'form_okved',
+                                elements: [
+                                    {
+                                        type: 'space',
+                                        cols: [
+                                            {   view: 'richselect',
+                                                name: 'okved',
+                                                label: 'ОКВЭД',
+                                                labelPosition: 'top',
+                                                fillspace: true,
+                                                required: true,
+                                                options: 'okveds',
+                                                on: {
+                                                    onChange() {
+                                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
+                                                    }
+                                                }},
+                                        ]
+                                    },
+                                    {
+                                        margin: 5,
+                                        cols: [
+                                            {view: 'button', value: 'Добавить',  click: addOkved},
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    // { view: ''},
                     { view: 'checkbox', label: 'Удален', labelPosition: 'top', name: 'deleted' },
                     {
                         view: 'button',

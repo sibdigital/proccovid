@@ -15,10 +15,15 @@ import ru.sibdigital.proccovid.dto.ClsUserDto;
 import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.ClsTemplate;
 import ru.sibdigital.proccovid.model.ClsUser;
+import ru.sibdigital.proccovid.dto.ClsOkvedDto;
+import ru.sibdigital.proccovid.repository.OkvedRepo;
+import ru.sibdigital.proccovid.service.OkvedServiceImpl;
 import ru.sibdigital.proccovid.service.RequestService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -29,6 +34,10 @@ public class AdminController {
 
     @Autowired
     private RequestService requestService;
+
+    @Autowired
+    private OkvedServiceImpl okvedServiceImpl;
+
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -150,4 +159,13 @@ public class AdminController {
         }
         return "Пользователь сохранен";
     }
+
+    @GetMapping("/okveds")
+    public @ResponseBody List<ClsOkvedDto> getOkveds() {
+        List<ClsOkvedDto> list = okvedServiceImpl.getOkveds().stream()
+                .map( ctr -> new ClsOkvedDto(Long.valueOf(ctr.hashCode()), ctr.getKindCode() + " " + ctr.getKindName(), ctr.getId()))
+                .collect(Collectors.toList());
+        return list;
+    }
+
 }
