@@ -20,17 +20,20 @@
     <script src="/libs/webix.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        /*.test .webix_canvas_text {*/
-        /*   font-size: 15px !important;-->*/
-        /*    offset: 1.5em !important;-->*/
-        /*}*/
-
-    /*tr {*/
-    /*    line-height: 10px;*/
-    /*    min-height: 10px;*/
-    /*    height: 10px;*/
-    /*}*/
+    <style type="text/css">
+        .activecustom {
+            color: #000000;
+        }
+        .align-nav-items-center {
+            display: flex;
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+        .a-href-nav {
+            margin-right: 2px;
+            font-size: 110%;
+        }
     </style>
 </head>
 <body>
@@ -42,7 +45,7 @@
     <div class="row my-2 justify-content-center">
         <div class="col-8">
             <div class="table-responsive-sm">
-                <table class=" table" id="totalTable">
+                <table class="table" id="totalTable">
                     <thead class="thead-dark">
                     <tr>
                         <th scope="col" class="text-center" style="width: 70%"></th>
@@ -89,6 +92,29 @@
 </div>
 
 <script th:inline="javascript">
+    $(document).ready(function(){
+        $('#totalTable').after('<div id="nav" class="align-nav-items-center"></div>');
+        var rowsShown = 12;
+        var rowsTotal = $('#totalBody tr').length;
+        var numPages = rowsTotal/rowsShown;
+        for(i = 0;i < numPages;i++) {
+            var pageNum = i + 1;
+            $('#nav').append('<a href="#" rel="'+i+'" class="a-href-nav">'+pageNum+ '    ' + '</a> ');
+        }
+        $('#totalBody tr').hide();
+        $('#totalBody tr').slice(0, rowsShown).show();
+        $('#nav a:first').addClass('activecustom');
+        $('#nav a').bind('click', function(evt){
+            $('#nav a').removeClass('activecustom');
+            $(this).addClass('activecustom');
+            var currPage = $(this).attr('rel');
+            var startItem = currPage * rowsShown;
+            var endItem = startItem + rowsShown;
+            $('#totalTable tbody tr').css('opacity','0.0').hide().slice(startItem, endItem).
+            css('display','table-row').animate({opacity:1}, 300);
+            evt.preventDefault();
+        });
+    });
 
     const totalStatistic = [[${totalStatistic}]]
     const departmentStatistic = [[${departmentStatistic}]]

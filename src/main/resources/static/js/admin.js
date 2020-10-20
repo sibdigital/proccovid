@@ -1086,15 +1086,15 @@ const statistic = {
                 rows: [
                     {
                         view: 'label',
-                        label: "<a href='statistic'>Статистика по заявкам</a>"
+                        label: "<a href='statistic' target='_blank'>Статистика по заявкам</a>"
                     },
                     {
                         view: 'label',
-                        label: "<a href='dacha/statistic'>Статистика по заявкам от дачников</a>"
+                        label: "<a href='dacha/statistic' target='_blank'>Статистика по заявкам от дачников</a>"
                     },
                     {
                         view: 'label',
-                        label: "<a href='barber/statistic'>Статистика по заявкам от парикмахерских</a>"
+                        label: "<a href='barber/statistic' target='_blank'>Статистика по заявкам от парикмахерских</a>"
                     },
                     {
                         view: 'label',
