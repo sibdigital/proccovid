@@ -16,13 +16,12 @@ import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.ClsTemplate;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.dto.ClsOkvedDto;
+import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.service.OkvedServiceImpl;
 import ru.sibdigital.proccovid.service.RequestService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +36,10 @@ public class AdminController {
 
     @Autowired
     private OkvedServiceImpl okvedServiceImpl;
+
+    @Autowired
+    private ClsDepartmentOkvedRepo clsDepartmentOkvedRepo;
+
 
 
     @GetMapping("/admin")
@@ -163,9 +166,16 @@ public class AdminController {
     @GetMapping("/okveds")
     public @ResponseBody List<ClsOkvedDto> getOkveds() {
         List<ClsOkvedDto> list = okvedServiceImpl.getOkveds().stream()
-                .map( ctr -> new ClsOkvedDto(Long.valueOf(ctr.hashCode()), ctr.getKindCode() + " " + ctr.getKindName(), ctr.getId()))
+                .map( ctr -> new ClsOkvedDto(ctr.getPath(), ctr.getKindCode() + " " + ctr.getKindName()))
                 .collect(Collectors.toList());
         return list;
     }
 
+    @GetMapping("/dep_okveds/{id_department}")
+    public List<ClsOkvedDto> getListOkvedsDto(@PathVariable("id_department") Long id_department){
+        List<ClsOkvedDto> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment_Id(id_department).stream()
+                                .map(ctr -> new ClsOkvedDto(ctr.getOkved().getPath(), ctr.getOkved().getKindCode()+ " " + ctr.getOkved().getKindName()))
+                                .collect(Collectors.toList());
+        return list;
+    }
 }

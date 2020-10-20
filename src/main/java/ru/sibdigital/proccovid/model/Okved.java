@@ -20,6 +20,7 @@ public class Okved {
     private Short status;
     private String kindName;
     private String description;
+    private String version;
 
     @Id
     @Column(name = "id")
@@ -133,6 +134,16 @@ public class Okved {
         this.description = description;
     }
 
+    @Basic
+    @Column(name = "version")
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -147,11 +158,12 @@ public class Okved {
                 Objects.equals(path, okved.path) &&
                 Objects.equals(status, okved.status) &&
                 Objects.equals(kindName, okved.kindName) &&
-                Objects.equals(description, okved.description);
+                Objects.equals(description, okved.description) &&
+                Objects.equals(version, okved.version);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(classCode, subclassCode, groupCode, subgroupCode, kindCode, typeCode, path, status, kindName, description);
+        return Objects.hash(classCode, subclassCode, groupCode, subgroupCode, kindCode, typeCode, path, status, kindName, description, version);
     }
 }

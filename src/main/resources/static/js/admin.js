@@ -10,20 +10,6 @@ function view_section(title) {
     }
 }
 
-function addOkved(){
-    let values = $$('form_okved').getValues()
-    if(values.okved == ''){
-        webix.message('не заполнены обязательные поля')
-        return;
-    }
-
-    $$('okved_table').add({
-        okved: values.okved,
-    }, $$('okved_table').count() + 1)
-
-    $$('form_okved').clear()
-}
-
 const departments = {
     view: 'scrollview',
     scroll: 'xy',
@@ -86,6 +72,10 @@ const departments = {
                                     body: departmentForm,
                                     on: {
                                         'onShow': function () {
+                                            let okved_table_data = new webix.DataCollection({
+                                                url: 'dep_okveds/' + data.id
+                                            })
+                                            $$('okved_table').sync(okved_table_data);
                                         }
                                     }
                                 });
@@ -173,8 +163,12 @@ const departmentForm = {
                                 id: 'okved_table',
                                 columns: [
                                     {
-                                        id: 'okved',
+                                        id: 'name_okved',
                                         header: 'ОКВЭД',
+                                    },
+                                    {
+                                        id: 'path',
+                                        visible: true,
                                     },
                                 ],
                                 data: [],
@@ -187,7 +181,8 @@ const departmentForm = {
                                         type: 'space',
                                         cols: [
                                             {   view: 'richselect',
-                                                name: 'okved',
+                                                name: 'okved_richselect',
+                                                id: 'okved_richselect',
                                                 label: 'ОКВЭД',
                                                 labelPosition: 'top',
                                                 fillspace: true,
@@ -203,7 +198,21 @@ const departmentForm = {
                                     {
                                         margin: 5,
                                         cols: [
-                                            {view: 'button', value: 'Добавить',  click: addOkved},
+                                            {view: 'button', value: 'Добавить',  click: function () {
+                                                    let values = $$('form_okved').getValues()
+                                                    if(values.okved_richselect == ''){
+                                                        webix.message('не заполнены обязательные поля')
+                                                        return;
+                                                    }
+
+                                                    $$('okved_table').add({
+                                                        okved: $$('okved_richselect').getText(),
+                                                        path: values.okved_richselect
+                                                    }, $$('okved_table').count() + 1)
+
+                                                    $$('form_okved').clear()
+                                                }},
+
                                         ]
                                     }
                                 ]
@@ -220,11 +229,20 @@ const departmentForm = {
                             if ($$('departmentForm').validate()) {
                                 let params = $$('departmentForm').getValues();
 
+                                let okveds = []
+                                $$('okved_table').data.each(function (obj) {
+                                    let okved = {
+                                        id: obj.path,
+                                        value: obj.name_okved
+                                    }
+                                    okveds.push(okved);
+                                })
+                                params.okveds = okveds;
+
                                 webix.ajax().headers({
                                     'Content-Type': 'application/json'
                                 }).post('/save_cls_department',
-                                    JSON.stringify(params)
-                                ).then(function (data) {
+                                    params).then(function (data) {
                                     if (data.text() === 'Подразделение сохранено') {
                                         webix.message({text: data.text(), type: 'success'});
 

@@ -1,35 +1,28 @@
 package ru.sibdigital.proccovid.dto;
 
-import java.util.UUID;
 
 public class ClsOkvedDto {
-    private Long id;
+    private String id;
     private String value;
-    private UUID uuid;
+    private String path;
+    private String name_okved;
 
     public ClsOkvedDto(){
 
     }
 
-    public ClsOkvedDto(Long id, String value, UUID uuid){
+    public ClsOkvedDto(String id, String value){
         this.id = id;
         this.value = value;
-        this.uuid = uuid;
+        this.path = id;
+        this.name_okved = value;
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setType(UUID uuid) {
-        this.uuid = uuid;
-    }
-
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -1,0 +1,1 @@
+alter table okved add column  if not exists  version varchar(4);
