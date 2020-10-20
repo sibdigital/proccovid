@@ -165,10 +165,12 @@ const departmentForm = {
                                     {
                                         id: 'name_okved',
                                         header: 'ОКВЭД',
+                                        fillspace: true,
                                     },
                                     {
                                         id: 'path',
                                         visible: true,
+                                        fillspace: true,
                                     },
                                 ],
                                 data: [],
@@ -206,7 +208,7 @@ const departmentForm = {
                                                     }
 
                                                     $$('okved_table').add({
-                                                        okved: $$('okved_richselect').getText(),
+                                                        name_okved: $$('okved_richselect').getText(),
                                                         path: values.okved_richselect
                                                     }, $$('okved_table').count() + 1)
 

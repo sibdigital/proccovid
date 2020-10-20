@@ -429,6 +429,10 @@ public class RequestService {
 
         clsDepartmentRepo.save(clsDepartment);
 
+
+        // Завернуть в функцию
+        List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
+        clsDepartmentOkvedRepo.deleteAll(list);
         List<ClsOkvedDto> okvedsDto = clsDepartmentDto.getOkveds();
         for (ClsOkvedDto okvedDto: okvedsDto) {
             String path = okvedDto.getId();
