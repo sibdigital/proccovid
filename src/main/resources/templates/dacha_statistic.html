@@ -19,6 +19,22 @@
     <link type="text/css" rel="stylesheet" href="/libs/webix.min.css">
     <script src="/libs/webix.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style type="text/css">
+        .activecustom {
+            color: #000000;
+        }
+        .align-nav-items-center {
+            display: flex;
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+        .a-href-nav {
+            margin-right: 2px;
+            font-size: 110%;
+        }
+    </style>
 </head>
 <body>
 <div th:insert="~{navbar-bootstrap::frag ('Статистика. Дачники.', ${application_name})}"></div>
@@ -119,6 +135,34 @@
 </div>
 
 <script th:inline="javascript">
+    $(document).ready(function(){
+        addPagination("totalTable", "totalBody", "nav");
+        addPagination("valiDateTable", "validDateBody", "nav-second");
+    });
+
+    function addPagination(tableName, tableTBody, cssTag) {
+        $('#' + tableName).after('<div id=' + cssTag + ' class="align-nav-items-center"></div>');
+        var rowsShown = 12;
+        var rowsTotal = $('#' + tableTBody + ' tr').length;
+        var numPages = rowsTotal/rowsShown;
+        for(i = 0;i < numPages;i++) {
+            var pageNum = i + 1;
+            $('#' + cssTag).append('<a href="#" rel="'+i+'" class="a-href-nav">'+pageNum+ '    ' + '</a> ');
+        }
+        $('#' + tableTBody + ' tr').hide();
+        $('#' + tableTBody + ' tr').slice(0, rowsShown).show();
+        $('#' + cssTag +' a:first').addClass('activecustom');
+        $('#' + cssTag + ' a').bind('click', function(evt){
+            $('#' + cssTag + ' a').removeClass('activecustom');
+            $(this).addClass('activecustom');
+            var currPage = $(this).attr('rel');
+            var startItem = currPage * rowsShown;
+            var endItem = startItem + rowsShown;
+            $('#' + tableName +' tbody tr').css('opacity','0.0').hide().slice(startItem, endItem).
+            css('display','table-row').animate({opacity:1}, 300);
+            evt.preventDefault();
+        });
+    }
 
     const totalStatistic = [[${totalStatistic}]]
     const nearestDaysStatistic = [[${nearestDaysStatistic}]]
