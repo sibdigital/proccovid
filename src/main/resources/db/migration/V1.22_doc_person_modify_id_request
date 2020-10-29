@@ -1,0 +1,1 @@
+ALTER TABLE doc_person alter column id_request drop not null;
