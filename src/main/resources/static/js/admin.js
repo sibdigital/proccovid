@@ -690,6 +690,9 @@ const typeRequests = {
     }
 }
 
+//fix for paste into nic-editor pane
+webix.html.addStyle(".myClass p{margin-top: 0px !important;line-height: 16px !important;}");
+
 const typeRequestForm = {
     view: 'scrollview',
     scroll: 'y',
@@ -718,6 +721,7 @@ const typeRequestForm = {
                         view: 'nic-editor',
                         id: 'prescription',
                         height: 200,
+                        css: "myClass",
                         cdn: false,
                         config: {
                             iconsPath: '../libs/nicedit/nicEditorIcons.gif'
@@ -1212,4 +1216,5 @@ webix.ready(function() {
         layout.define("height",window.innerHeight);
         layout.resize();
     });
+
 })
