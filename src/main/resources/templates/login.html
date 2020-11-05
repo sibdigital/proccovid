@@ -11,56 +11,121 @@
 <div id="login"></div>
 <!--<div th:text="${message}" style="color: red;"></div>-->
 
+
 <script th:inline="javascript">
     const APPLICATION_NAME = [[${application_name}]]
     let message = [[${message}]] || ''
 
     console.log(message)
 
+    webix.html.addStyle(".myClass .webix_button{  background: #475466; color: #FFFFFF;} .myClass .webix_button:hover {background-color: #586980;}");
+
     webix.ui(
         {
+            type: "form",
+            css: {
+                "background": "#ccd7e6 !important" //#323B55"#ccd7e6
+            },
             rows: [
+                /* {
+                     view: 'toolbar',
+                     //height: 40,
+                     autoheight: true,
+                     cols: [
+                         {
+                             view: 'label',
+                             label: `<span style="font-size: 1.5rem">${APPLICATION_NAME}. Список заявок.</span>`,
+                         },
+                     ]
+                 },*/
                 {
-                    view: 'toolbar',
-                    //height: 40,
-                    autoheight: true,
-                    cols: [
-                        {
-                            view: 'label',
-                            label: `<span style="font-size: 1.5rem">${APPLICATION_NAME}. Список заявок.</span>`,
-                        },
-                    ]
+                    gravity: 0.9,
                 },
                 {
-                    gravity: 0.2,
-                },
-                {
-                    cols: [
-                        {},
-                        {
-                            container: 'login',
-                            view: "form",
-                            id: "log_form",
-                            width: 400,
-                            height: 200,
-                            margintop: 50,
-                            elements: [
-                                {view: "text", label: "Имя пользователя", name: "username", labelWidth: 150},
-                                {view: "text", type: "password", label: "Пароль", name: "password", labelWidth: 150},
-                                {
-                                    margin: 5, cols: [
-                                        {view: "button", value: "Войти", css: "webix_primary", click: submit},
-                                        //{ view:"button", value:"Cancel"}
-                                    ]
+                    view: "align",
+                    align: "middle,center",
+                    body: {
+                        cols: [
+                            {
+
+                                margin: 0,
+                                padding: {
+                                    top: 55, bottom: 25
                                 },
-                                {
-                                    view: 'label',
-                                    label: message //'<span style="color: red;"' + message + '</span>'
-                                }
+                                width: 400,
+                                css: {
+                                    "background": "#475466 !important" //#2b334a
+                                },
+                                rows: [
+                                    {
+                                        view: "label",
+                                        height: 200,
+                                        align: "center",
+                                        template: "<img src = \"/logo.png\">"
+                                    },
+                                    {
+                                        view: "label",
+                                        label: `<span style="font-size: 1.5rem; color: #ccd7e6">Добро пожаловать!</span>`,
+                                        height: 50,
+                                        align: "center"
+                                    },
+                                    {
+                                        view: "label",
+                                        label: `<span style="font-size: 1rem; color: #fff6f6">Информационная система</span>`,
+                                        height: 50,
+                                        align: "center"
+                                    },
+                                    {
+                                        view: "label",
+                                        label: `<span style="font-size: 1rem; color: #fff6f6">Работающая Бурятия</span>`,
+                                        height: 50,
+                                        align: "center"
+                                    },
+                                    {
+                                        view: "label",
+                                        label: `<span style="font-size: 0.8rem; color: #fff6f6">©2020</span>`,
+                                        height: 50,
+                                        align: "center"
+                                    },
+                                ]
+
+                            },
+                            {
+                                container: 'login',
+                                view: "form",
+                                align: 'center',
+                                id: "log_form",
+                                width: 350,
+                                autoheight: true,
+                                elements: [
+                                    {},
+                                    {
+                                        view:"label",
+                                        label:`<span style="font-size: 1.1rem; color: #6e6e6e">Вход</span>`
+                                    },
+                                    {view: "text", placeholder: "Имя пользователя", name: "username"},
+                                    {
+                                        view: "text",
+                                        type: "password",
+                                        placeholder: "Пароль",
+                                        name: "password",
+                                    },
+                                    {
+                                        margin: 5, cols: [
+                                            {view: "button", value: "Войти",width: 100, css: "myClass", click: submit},
+                                            //{ view:"button", value:"Cancel"}
+                                        ]
+                                    },
+                                    /*{
+                                        view: 'label',
+                                        label: message //'<span style="color: red;"' + message + '</span>'
+                                    },*/
+                                    {}
                             ]
                         },
                         {}
                     ]
+                    }
                 },
                 {}
         ]
