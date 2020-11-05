@@ -17,5 +17,5 @@ public class ClsDepartmentDto {
     private String name;
     private String description;
     private Boolean deleted;
-    private List<ClsOkvedDto> okveds;
+    private List<IdValue> okveds;
 }

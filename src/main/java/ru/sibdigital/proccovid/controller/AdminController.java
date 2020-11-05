@@ -12,12 +12,11 @@ import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.dto.ClsUserDto;
+import ru.sibdigital.proccovid.dto.IdValue;
 import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.ClsTemplate;
 import ru.sibdigital.proccovid.model.ClsUser;
-import ru.sibdigital.proccovid.dto.ClsOkvedDto;
 import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
-import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.service.OkvedServiceImpl;
 import ru.sibdigital.proccovid.service.RequestService;
 
@@ -164,17 +163,17 @@ public class AdminController {
     }
 
     @GetMapping("/okveds")
-    public @ResponseBody List<ClsOkvedDto> getOkveds() {
-        List<ClsOkvedDto> list = okvedServiceImpl.getOkveds().stream()
-                .map( ctr -> new ClsOkvedDto(ctr.getPath(), ctr.getKindCode() + " " + ctr.getKindName()))
+    public @ResponseBody List<IdValue> getOkveds() {
+        List<IdValue> list = okvedServiceImpl.getOkveds().stream()
+                .map( ctr -> new IdValue(ctr.getPath(), ctr.getKindCode() + " " + ctr.getKindName()))
                 .collect(Collectors.toList());
         return list;
     }
 
-    @GetMapping("/dep_okveds/{id_department}")
-    public @ResponseBody List<ClsOkvedDto> getListOkvedsDto(@PathVariable("id_department") Long id_department){
-        List<ClsOkvedDto> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment_Id(id_department).stream()
-                                .map(ctr -> new ClsOkvedDto(ctr.getOkved().getPath(), ctr.getOkved().getKindCode()+ " " + ctr.getOkved().getKindName()))
+    @GetMapping("/department_okveds/{id_department}")
+    public @ResponseBody List<IdValue> getListOkvedsDto(@PathVariable("id_department") Long id_department){
+        List<IdValue> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment_Id(id_department).stream()
+                                .map(ctr -> new IdValue(ctr.getOkved().getPath(), ctr.getOkved().getKindCode()+ " " + ctr.getOkved().getKindName()))
                                 .collect(Collectors.toList());
         return list;
     }

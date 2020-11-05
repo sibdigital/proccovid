@@ -76,7 +76,7 @@ const departments = {
                                         //         url: 'dep_okveds/' + data.id
                                         //     })
                                         //     $$('okved_table').sync(okved_table_data);
-                                            var xhr = webix.ajax().sync().get('dep_okveds/' + data.id);
+                                            var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
                                             var jsonResponse = JSON.parse(xhr.responseText);
                                             for (var k in jsonResponse) {
                                                 var row = {
@@ -199,7 +199,7 @@ const departmentForm = {
                                                 id: 'okved_version',
                                                 label: 'Версия',
                                                 labelPosition: 'top',
-                                                fillspace: true,
+                                                width: 200,
                                                 required: true,
                                                 options: [
                                                     {id: '2001', value:'2001'},
@@ -266,7 +266,6 @@ const departmentForm = {
                                                             }
                                                         )
                                                 }},
-
                                         ]
                                     }
                                 ]

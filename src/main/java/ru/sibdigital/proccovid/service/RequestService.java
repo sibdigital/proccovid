@@ -14,9 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
-import ru.sibdigital.proccovid.dto.ClsOkvedDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.dto.ClsUserDto;
+import ru.sibdigital.proccovid.dto.IdValue;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
@@ -433,12 +433,12 @@ public class RequestService {
         // Завернуть в функцию
         List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
         clsDepartmentOkvedRepo.deleteAll(list);
-        List<ClsOkvedDto> okvedsDto = clsDepartmentDto.getOkveds();
-        for (ClsOkvedDto okvedDto: okvedsDto) {
-            String path = okvedDto.getId();
+        List<IdValue> idValues = clsDepartmentDto.getOkveds();
+        for (IdValue idValue: idValues) {
+            String path = idValue.getId();
             String version = path.substring(0, 4);
             String kind_code = path.substring(5);
-            String kind_name = okvedDto.getValue().substring(kind_code.length()+1);
+            String kind_name = idValue.getValue().substring(kind_code.length()+1);
             List<Okved> okvedList = okvedRepo.findOkvedByKindCodeAndKindNameAAndVersion(kind_code, kind_name, version);
             if (!okvedList.isEmpty()) {
                 ClsDepartmentOkved clsDepartmentOkved = new ClsDepartmentOkved();
