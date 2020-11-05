@@ -72,10 +72,22 @@ const departments = {
                                     body: departmentForm,
                                     on: {
                                         'onShow': function () {
-                                            let okved_table_data = new webix.DataCollection({
-                                                url: 'dep_okveds/' + data.id
-                                            })
-                                            $$('okved_table').sync(okved_table_data);
+                                        //     let okved_table_data = new webix.DataCollection({
+                                        //         url: 'dep_okveds/' + data.id
+                                        //     })
+                                        //     $$('okved_table').sync(okved_table_data);
+                                            var xhr = webix.ajax().sync().get('dep_okveds/' + data.id);
+                                            var jsonResponse = JSON.parse(xhr.responseText);
+                                            for (var k in jsonResponse) {
+                                                var row = {
+                                                    name_okved: jsonResponse[k].value,
+                                                    path: jsonResponse[k].id
+                                                }
+                                                $$('okved_table').add(row);
+                                            }
+                                        },
+                                        'onHide': function(){
+                                            window.destructor();
                                         }
                                     }
                                 });
@@ -183,13 +195,43 @@ const departmentForm = {
                                         type: 'space',
                                         cols: [
                                             {   view: 'richselect',
+                                                name: 'okved_version',
+                                                id: 'okved_version',
+                                                label: 'Версия',
+                                                labelPosition: 'top',
+                                                fillspace: true,
+                                                required: true,
+                                                options: [
+                                                    {id: '2001', value:'2001'},
+                                                    {id: '2014', value:'2014'}
+                                                    ],
+                                                on: {
+                                                    onChange() {
+                                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
+                                                    }
+                                                }},
+                                            {   view: 'richselect',
                                                 name: 'okved_richselect',
                                                 id: 'okved_richselect',
                                                 label: 'ОКВЭД',
                                                 labelPosition: 'top',
                                                 fillspace: true,
                                                 required: true,
-                                                options: 'okveds',
+                                                options: {
+                                                    url: 'okveds',
+                                                    on: {
+                                                        onShow: function () {
+                                                            let values = $$('form_okved').getValues();
+                                                            let version = values.okved_version;
+                                                            if (version == '') {
+                                                                webix.message('Выберите версию ОКВЭДа')
+                                                                return;
+                                                            }
+                                                            this.getBody().filter(function (obj) {
+                                                                return obj.id.substring(0,4) == version;
+                                                        })}
+                                                    },
+                                                },
                                                 on: {
                                                     onChange() {
                                                         $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
@@ -211,8 +253,18 @@ const departmentForm = {
                                                         name_okved: $$('okved_richselect').getText(),
                                                         path: values.okved_richselect
                                                     }, $$('okved_table').count() + 1)
-
-                                                    $$('form_okved').clear()
+                                                }},
+                                            {view: 'button', value: 'Удалить',  click: function () {
+                                                    if(!$$("okved_table").getSelectedId()){
+                                                        webix.message("Ничего не выбрано!");
+                                                        return;
+                                                    }
+                                                    webix.confirm('Вы действительно хотите удалить выбранный ОКВЭД?')
+                                                        .then(
+                                                            function () {
+                                                                $$("okved_table").remove($$("okved_table").getSelectedId());
+                                                            }
+                                                        )
                                                 }},
 
                                         ]
@@ -1291,4 +1343,13 @@ webix.ready(function() {
         layout.define("height",window.innerHeight);
         layout.resize();
     });
+
+    // $$('okved_table').load('../dep_okveds/7').then(function (data) {
+    //     data = data.json();
+    //     // let okved_table_data = new webix.DataCollection({
+    //     //     url: 'dep_okveds/' + data.id
+    //     // })
+    //     // $$('okved_table').sync(okved_table_data);
+    // });
 })
+

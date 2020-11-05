@@ -172,7 +172,7 @@ public class AdminController {
     }
 
     @GetMapping("/dep_okveds/{id_department}")
-    public List<ClsOkvedDto> getListOkvedsDto(@PathVariable("id_department") Long id_department){
+    public @ResponseBody List<ClsOkvedDto> getListOkvedsDto(@PathVariable("id_department") Long id_department){
         List<ClsOkvedDto> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment_Id(id_department).stream()
                                 .map(ctr -> new ClsOkvedDto(ctr.getOkved().getPath(), ctr.getOkved().getKindCode()+ " " + ctr.getOkved().getKindName()))
                                 .collect(Collectors.toList());
