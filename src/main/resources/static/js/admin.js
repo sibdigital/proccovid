@@ -552,6 +552,7 @@ const templates = {
 const typeRequests = {
     view: 'scrollview',
     scroll: 'xy',
+    id: "typeRequestsId",
     body: {
         type: 'space',
         rows: [
@@ -594,12 +595,11 @@ const typeRequests = {
                                 this.hideOverlay();
                             },
                             onItemDblClick: function (id) {
-
                                 let data = $$('type_requests_table').getItem(id);
                                 if (data.department) {
                                     data.departmentId = data.department.id;
                                 }
-
+/*
                                 let window = webix.ui({
                                     view: 'window',
                                     id: 'window',
@@ -614,8 +614,8 @@ const typeRequests = {
                                         'onShow': function () {
                                         }
                                     }
-                                });
-
+                                });*/
+                                webix.ui(typeRequestForm, $$('typeRequestsId'));
                                 $$('typeRequestForm').parse(data);
 
                                 $$('departments').getList().add({ id: '', value: '' });
@@ -636,7 +636,6 @@ const typeRequests = {
                                     $$('endVisible').setValue(new Date(data.endVisible));
                                 }
 
-                                window.show();
                             }
                         },
                         url: 'cls_type_requests'
@@ -659,28 +658,30 @@ const typeRequests = {
                                 view: 'button',
                                 css: 'webix_primary',
                                 value: 'Добавить',
+                                href: "/type_request",
                                 click: function () {
-
-                                    let window = webix.ui({
-                                        view: 'window',
-                                        id: 'window',
-                                        head: 'Добавление типа заявки',
-                                        close: true,
-                                        width: 1000,
-                                        height: 800,
-                                        position: 'center',
-                                        modal: true,
-                                        body: typeRequestForm,
-                                        on: {
-                                            'onShow': function () {
-                                            }
-                                        }
-                                    });
-
-                                    $$('departments').getList().add({ id: '', value: '' });
-
-                                    window.show();
+                                    webix.ui(typeRequestForm, $$('typeRequestsId'));
                                 }
+                                /*let window = webix.ui({
+                                    view: 'window',
+                                    id: 'window',
+                                    head: 'Добавление типа заявки',
+                                    close: true,
+                                    width: 1000,
+                                    height: 800,
+                                    position: 'center',
+                                    modal: true,
+                                    body: typeRequestForm,
+                                    on: {
+                                        'onShow': function () {
+                                        }
+                                    }
+                                });
+
+                                $$('departments').getList().add({ id: '', value: '' });
+
+                                window.show();*/
+
                             }
                         ]
                     }
@@ -695,7 +696,7 @@ webix.html.addStyle(".myClass p{margin-top: 0px !important;line-height: 16px !im
 
 const typeRequestForm = {
     view: 'scrollview',
-    scroll: 'y',
+    scroll: 'xy',
     id: 'show_layout',
     autowidth: true,
     autoheight: true,
@@ -705,38 +706,54 @@ const typeRequestForm = {
                 view: 'form',
                 id: 'typeRequestForm',
                 elements: [
-                    { view: 'text', label: 'Наименование', labelPosition: 'top', name: 'activityKind', required: true, validate: webix.rules.isNotEmpty },
-                    { view: 'text', label: 'Краткое наименование', labelPosition: 'top', name: 'shortName', required: true, validate: webix.rules.isNotEmpty },
+                    { view: 'text', labelWidth:190,label: 'Наименование',  name: 'activityKind', required: true, validate: webix.rules.isNotEmpty },
+                    { view: 'text', labelWidth:190,label: 'Краткое наименование', name: 'shortName', required: true, validate: webix.rules.isNotEmpty },
                     {
                         view: 'combo',
                         id: 'departments',
                         name: 'departmentId',
                         label: 'Подразделение, к которому по умолчанию будут направляться заявки',
-                        labelPosition: 'top',
+                        labelWidth:500,
                         invalidMessage: 'Поле не может быть пустым',
                         options: 'cls_departments'
                     },
-                    { view: 'label', label: 'Предписание' },
+
                     {
-                        view: 'nic-editor',
-                        id: 'prescription',
-                        height: 200,
-                        css: "myClass",
-                        cdn: false,
-                        config: {
-                            iconsPath: '../libs/nicedit/nicEditorIcons.gif'
-                        }
+                        view:"tabview",
+                        id:"tabs",
+                        cells: [
+                            //{ view: 'label', label: 'Предписание' },
+                            {
+                                header: "Предписание",
+                                body:
+                                {
+                                    view: 'nic-editor',
+                                    id: 'prescription',
+                                    height: 450,
+                                    css: "myClass",
+                                    cdn: false,
+                                    config: {
+                                        iconsPath: '../libs/nicedit/nicEditorIcons.gif'
+                                    }
+                                }
+                            },
+                            // { view: 'text', label: 'PrescriptionLink', labelPosition: 'top', name: 'prescriptionLink' },
+                            //{ view: 'label', label: 'Дополнительные настройки' },
+                            {
+                                header: "Предписание",
+                                body:
+                                {
+                                    view: 'ace-editor',
+                                    id: 'settings',
+                                    theme: 'github',
+                                    mode: 'json',
+                                    height: 450,
+                                    cdn: false
+                                }
+                            },
+                        ]
                     },
-                    // { view: 'text', label: 'PrescriptionLink', labelPosition: 'top', name: 'prescriptionLink' },
-                    { view: 'label', label: 'Дополнительные настройки' },
-                    {
-                        view: 'ace-editor',
-                        id: 'settings',
-                        theme: 'github',
-                        mode: 'json',
-                        height: 150,
-                        cdn: false
-                    },
+
                     {
                         cols: [
                             {
@@ -801,39 +818,59 @@ const typeRequestForm = {
                             { view: 'datepicker', label: 'Дата конца видимости', labelPosition: 'top', name: 'endVisible', timepicker: true, id: 'endVisible'},
                         ]
                     },
-                    { view: 'text', label: 'Вес сортировки', labelPosition: 'top', name: 'sortWeight', required: true, validate: webix.rules.isNumber },
+                    { view: 'text', label: 'Вес сортировки',labelWidth:190, name: 'sortWeight', required: true, validate: webix.rules.isNumber }, //
                     {
-                        view: 'button',
-                        css: 'webix_primary',
-                        value: 'Сохранить',
-                        click: function () {
-                            if ($$('typeRequestForm').validate()) {
-                                let params = $$('typeRequestForm').getValues();
-                                params.prescription = $$('prescription').getValue();
-                                params.settings = $$('settings').getValue();
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                align: 'right',
+                                css: 'webix_primary',
+                                value: 'Сохранить',
+                                maxWidth: 300,
+                                click: function () {
+                                    if ($$('typeRequestForm').validate()) {
+                                        let params = $$('typeRequestForm').getValues();
+                                        params.prescription = $$('prescription').getValue();
+                                        params.settings = $$('settings').getValue();
 
-                                webix.ajax().headers({
-                                    'Content-Type': 'application/json'
-                                }).post('/save_cls_type_request',
-                                    JSON.stringify(params)
-                                ).then(function (data) {
-                                    if (data.text() === 'Тип заявки сохранен') {
-                                        webix.message({text: data.text(), type: 'success'});
-
-                                        $$('window').close();
-
-                                        const typeRequestTable = $$('type_requests_table');
-                                        const url = typeRequestTable.data.url;
-                                        typeRequestTable.clearAll();
-                                        typeRequestTable.load(url);
+                                        webix.ajax().headers({
+                                            'Content-Type': 'application/json'
+                                        }).post('/save_cls_type_request',
+                                            JSON.stringify(params)
+                                        ).then(function (data) {
+                                            if (data.text() === 'Тип заявки сохранен') {
+                                                webix.message({text: data.text(), type: 'success'});
+                                                //$$('window').close();
+                                                //const typeRequestTable = $$('type_requests_table');
+                                                //const url = typeRequestTable.data.url;
+                                                //typeRequestTable.clearAll();
+                                                //typeRequestTable.load(url);
+                                                //webix.ui(typeRequests, $$('show_layout'));
+                                                setTimeout(function() {
+                                                    window.location.reload(true)
+                                                }, 500)
+                                            } else {
+                                                webix.message({text: data.text(), type: 'error'});
+                                            }
+                                        })
                                     } else {
-                                        webix.message({text: data.text(), type: 'error'});
+                                        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
                                     }
-                                })
-                            } else {
-                                webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                }
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                css: 'webix_primary',
+                                value: 'Отмена',
+                                maxWidth: 300   ,
+                                click: function (){
+                                    window.location.reload(true)
+                                    //webix.ui(typeRequests, $$('show_layout'));
+                                }
                             }
-                        }
+                        ]
                     }
                 ]
             }
@@ -1144,6 +1181,7 @@ webix.ready(function() {
                 cols: [
                     {
                         view: 'sidebar',
+                        id: 'sidebar',
                         css: 'webix_dark',
                         data: [
                             { id: "Departments", value: 'Подразделения' },
