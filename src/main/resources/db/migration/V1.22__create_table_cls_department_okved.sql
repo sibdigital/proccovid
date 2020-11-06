@@ -1,6 +1,6 @@
-create table if not exists cls_department_okved(
+create table if not exists reg_department_okved(
    id uuid not null
-       constraint cls_department_okved_pkey
+       constraint reg_department_okved_pkey
            primary key,
    id_department integer
        constraint fk_cls_department

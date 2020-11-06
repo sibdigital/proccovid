@@ -10,6 +10,44 @@ function view_section(title) {
     }
 }
 
+function addOkved(){
+    let values = $$('form_okved').getValues()
+    if(values.okved_richselect == ''){
+        webix.message('не заполнены обязательные поля')
+        return;
+    }
+
+    var name_okved = $$('okved_richselect').getText();
+    var path = values.okved_richselect;
+    var found_element = $$('okved_table').find(function (obj) {
+        return obj.name_okved == name_okved && obj.path == path;
+    })
+
+    if (found_element.length == 0) {
+        $$('okved_table').add({
+            name_okved: name_okved,
+            path: path
+        }, $$('okved_table').count() + 1)
+    }
+    else {
+        webix.message('Уже добавлен этот ОКВЭД')
+        return;
+    }
+}
+
+function removeOkved() {
+    if(!$$("okved_table").getSelectedId()){
+        webix.message("Ничего не выбрано!");
+        return;
+    }
+    webix.confirm('Вы действительно хотите удалить выбранный ОКВЭД?')
+        .then(
+            function () {
+                $$("okved_table").remove($$("okved_table").getSelectedId());
+            }
+        )
+}
+
 const departments = {
     view: 'scrollview',
     scroll: 'xy',
@@ -85,6 +123,7 @@ const departments = {
                                                 }
                                                 $$('okved_table').add(row);
                                             }
+                                            $$('okved_version').setValue('2014');
                                         },
                                         'onHide': function(){
                                             window.destructor();
@@ -224,12 +263,14 @@ const departmentForm = {
                                                             let values = $$('form_okved').getValues();
                                                             let version = values.okved_version;
                                                             if (version == '') {
-                                                                webix.message('Выберите версию ОКВЭДа')
+                                                                webix.message('Выберите версию ОКВЭДа');
                                                                 return;
                                                             }
-                                                            this.getBody().filter(function (obj) {
-                                                                return obj.id.substring(0,4) == version;
-                                                        })}
+                                                            this.getBody().filter(
+                                                                function (obj) {
+                                                                    return obj.id.substring(0,4) == version;
+                                                                })
+                                                        }
                                                     },
                                                 },
                                                 on: {
@@ -242,30 +283,8 @@ const departmentForm = {
                                     {
                                         margin: 5,
                                         cols: [
-                                            {view: 'button', value: 'Добавить',  click: function () {
-                                                    let values = $$('form_okved').getValues()
-                                                    if(values.okved_richselect == ''){
-                                                        webix.message('не заполнены обязательные поля')
-                                                        return;
-                                                    }
-
-                                                    $$('okved_table').add({
-                                                        name_okved: $$('okved_richselect').getText(),
-                                                        path: values.okved_richselect
-                                                    }, $$('okved_table').count() + 1)
-                                                }},
-                                            {view: 'button', value: 'Удалить',  click: function () {
-                                                    if(!$$("okved_table").getSelectedId()){
-                                                        webix.message("Ничего не выбрано!");
-                                                        return;
-                                                    }
-                                                    webix.confirm('Вы действительно хотите удалить выбранный ОКВЭД?')
-                                                        .then(
-                                                            function () {
-                                                                $$("okved_table").remove($$("okved_table").getSelectedId());
-                                                            }
-                                                        )
-                                                }},
+                                            {view: 'button', value: 'Добавить',  click: addOkved },
+                                            {view: 'button', value: 'Удалить',  click: removeOkved},
                                         ]
                                     }
                                 ]
