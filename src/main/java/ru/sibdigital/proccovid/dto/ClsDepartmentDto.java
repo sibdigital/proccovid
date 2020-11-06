@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -15,5 +17,5 @@ public class ClsDepartmentDto {
     private String name;
     private String description;
     private Boolean deleted;
-
+    private List<IdValue> okveds;
 }

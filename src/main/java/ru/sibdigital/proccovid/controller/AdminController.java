@@ -12,13 +12,16 @@ import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.dto.ClsUserDto;
+import ru.sibdigital.proccovid.dto.IdValue;
 import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.ClsTemplate;
 import ru.sibdigital.proccovid.model.ClsUser;
+import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
+import ru.sibdigital.proccovid.service.OkvedServiceImpl;
 import ru.sibdigital.proccovid.service.RequestService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -29,6 +32,14 @@ public class AdminController {
 
     @Autowired
     private RequestService requestService;
+
+    @Autowired
+    private OkvedServiceImpl okvedServiceImpl;
+
+    @Autowired
+    private ClsDepartmentOkvedRepo clsDepartmentOkvedRepo;
+
+
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -149,5 +160,21 @@ public class AdminController {
             return "Не удалось сохранить пользователя";
         }
         return "Пользователь сохранен";
+    }
+
+    @GetMapping("/okveds")
+    public @ResponseBody List<IdValue> getOkveds() {
+        List<IdValue> list = okvedServiceImpl.getOkveds().stream()
+                .map( ctr -> new IdValue(ctr.getPath(), ctr.getKindCode() + " " + ctr.getKindName()))
+                .collect(Collectors.toList());
+        return list;
+    }
+
+    @GetMapping("/department_okveds/{id_department}")
+    public @ResponseBody List<IdValue> getListOkvedsDto(@PathVariable("id_department") Long id_department){
+        List<IdValue> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment_Id(id_department).stream()
+                                .map(ctr -> new IdValue(ctr.getOkved().getPath(), ctr.getOkved().getKindCode()+ " " + ctr.getOkved().getKindName()))
+                                .collect(Collectors.toList());
+        return list;
     }
 }
