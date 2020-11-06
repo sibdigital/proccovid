@@ -19,6 +19,7 @@ function addOkved(){
 
     var name_okved = $$('okved_richselect').getText();
     var path = values.okved_richselect;
+    var version = path.substring(0, 4);
     var found_element = $$('okved_table').find(function (obj) {
         return obj.name_okved == name_okved && obj.path == path;
     })
@@ -26,7 +27,8 @@ function addOkved(){
     if (found_element.length == 0) {
         $$('okved_table').add({
             name_okved: name_okved,
-            path: path
+            path: path,
+            version: version
         }, $$('okved_table').count() + 1)
     }
     else {
@@ -119,7 +121,8 @@ const departments = {
                                             for (var k in jsonResponse) {
                                                 var row = {
                                                     name_okved: jsonResponse[k].value,
-                                                    path: jsonResponse[k].id
+                                                    path: jsonResponse[k].id,
+                                                    version: jsonResponse[k].id.substring(0, 4)
                                                 }
                                                 $$('okved_table').add(row);
                                             }
@@ -220,6 +223,13 @@ const departmentForm = {
                                     },
                                     {
                                         id: 'path',
+                                        visible: true,
+                                        hidden: true,
+                                        fillspace: true,
+                                    },
+                                    {
+                                        id: 'version',
+                                        header: 'Версия',
                                         visible: true,
                                         fillspace: true,
                                     },
