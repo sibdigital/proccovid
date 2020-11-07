@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.dto.ClsUserDto;
+import ru.sibdigital.proccovid.dto.IdValue;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
@@ -69,6 +70,12 @@ public class RequestService {
 
     @Autowired
     private ClsPrincipalRepo clsPrincipalRepo;
+
+    @Autowired
+    private OkvedRepo okvedRepo;
+
+    @Autowired
+    private ClsDepartmentOkvedRepo clsDepartmentOkvedRepo;
 
     @Autowired
     private EmailService emailService;
@@ -422,6 +429,23 @@ public class RequestService {
 
         clsDepartmentRepo.save(clsDepartment);
 
+        List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
+        clsDepartmentOkvedRepo.deleteAll(list);
+        List<IdValue> idValues = clsDepartmentDto.getOkveds();
+        for (IdValue idValue: idValues) {
+            String path = idValue.getId();
+            String version = path.substring(0, 4);
+            String kind_code = path.substring(5);
+            String kind_name = idValue.getValue().substring(kind_code.length()+1);
+            List<Okved> okvedList = okvedRepo.findOkvedByKindCodeAndKindNameAAndVersion(kind_code, kind_name, version);
+            if (!okvedList.isEmpty()) {
+                ClsDepartmentOkved clsDepartmentOkved = new ClsDepartmentOkved();
+                clsDepartmentOkved.setDepartment(clsDepartment);
+                clsDepartmentOkved.setOkved(okvedList.get(0));
+                clsDepartmentOkvedRepo.save(clsDepartmentOkved);
+            }
+        }
+
         return clsDepartment;
     }
 
@@ -462,4 +486,5 @@ public class RequestService {
 
         return clsUser;
     }
+
 }
