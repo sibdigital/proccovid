@@ -60,7 +60,7 @@ public class OkvedController {
                 okvedServiceImpl.changeOkved(okvedDto);
             }
             else {
-                okvedServiceImpl.createSyntOkved(okvedDto);
+                okvedServiceImpl.createOkved(okvedDto);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
