@@ -42,13 +42,13 @@ public class OkvedServiceImpl implements OkvedService {
         return okved;
     }
 
-    public Okved createSyntOkved(OkvedDto okvedDto) {
+    public Okved createOkved(OkvedDto okvedDto) {
         Okved okved = new Okved();
         okved.setKindName(okvedDto.getKindName());
         okved.setKindCode(okvedDto.getKindCode());
         okved.setDescription(okvedDto.getDescription());
         okved.setStatus(okvedDto.getStatus());
-        okved.setVersion("synt");
+        okved.setVersion(okvedDto.getVersion());
         okvedRepo.save(okved);
         okvedRepo.setTsVectorsById(okved.getId());
 

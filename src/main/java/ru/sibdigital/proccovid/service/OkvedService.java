@@ -15,7 +15,7 @@ public interface OkvedService {
 
     Okved findOkvedById(UUID id);
 
-    String createOkved(String kind_name, String kind_code, String description, Short status);
+    Okved createOkved(OkvedDto okvedDto);
 
     Okved changeOkved(OkvedDto okvedDto);
 
