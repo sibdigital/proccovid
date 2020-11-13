@@ -9,6 +9,7 @@ function saveOkved() {
             webix.message({text: data.text(), type: 'success'});
 
             $$('window').close();
+            $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()]);
         } else {
             webix.message({text: data.text(), type: 'error'});
         }
@@ -32,6 +33,7 @@ function deleteOkved() {
                         if (data.text() === 'ОКВЭД удален') {
                             webix.message({text: data.text(), type: 'success'});
                             $$('window').close();
+                            $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()]);
                         } else {
                             webix.message({text: data.text(), type: 'error'});
                         }

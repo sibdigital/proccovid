@@ -20,6 +20,8 @@ function createOkved() {
         if (data.text() === 'ОКВЭД сохранен') {
             webix.message({text: data.text(), type: 'success'});
             $$('window').close();
+            $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()]);
+
         } else {
             webix.message({text: data.text(), type: 'error'});
         }
@@ -1432,7 +1434,7 @@ const okveds = {
                                                 height: 800,
                                                 position: 'center',
                                                 modal: true,
-                                                body: okvedCreateForm
+                                                body: okvedCreateForm,
                                             });
 
                                             $$('okvedCreateForm').parse(data);

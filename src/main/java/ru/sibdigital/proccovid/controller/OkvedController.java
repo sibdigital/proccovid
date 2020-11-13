@@ -49,23 +49,24 @@ public class OkvedController {
     @PostMapping("/save_okved")
     public @ResponseBody String changeOkved(@RequestBody OkvedDto okvedDto) {
         String path = okvedDto.getVersion() + '.' + okvedDto.getKindCode().trim();
-        if (okvedServiceImpl.findOkvedByPathCode(path) == null) {
-            try {
-                if (okvedDto.getId() != null) {
-                    okvedServiceImpl.changeOkved(okvedDto);
-                }
-                else {
+        try {
+            if (okvedDto.getId() != null) {
+                okvedServiceImpl.changeOkved(okvedDto);
+            }
+            else {
+                if (okvedServiceImpl.findOkvedByPathCode(path) == null) {
                     okvedServiceImpl.createOkved(okvedDto);
                 }
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                return "Не удалось сохранить ОКВЭД";
+                else {
+                    return "ОКВЭД с таким кодом уже существует!";
+                }
             }
-            return "ОКВЭД сохранен";
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить ОКВЭД";
         }
-        else {
-           return "ОКВЭД с таким кодом уже существует!";
-        }
+        return "ОКВЭД сохранен";
+
     }
 
     @PostMapping("/delete_okved")
