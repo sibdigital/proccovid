@@ -32,10 +32,11 @@ public class OkvedServiceImpl implements OkvedService {
 
     public Okved changeOkved(OkvedDto okvedDto) {
         Okved okved = okvedRepo.findOkvedById(okvedDto.getId());
-        okved.setKindName(okvedDto.getKindName());
-        okved.setKindCode(okvedDto.getKindCode());
+        okved.setKindName(okvedDto.getKindName().trim());
+        okved.setKindCode(okvedDto.getKindCode().trim());
         okved.setDescription(okvedDto.getDescription());
         okved.setStatus(okvedDto.getStatus());
+        okved.setPath(okvedDto.getVersion() + "." + okvedDto.getKindCode().trim());
         okvedRepo.save(okved);
         okvedRepo.setTsVectorsById(okved.getId());
 
@@ -44,11 +45,12 @@ public class OkvedServiceImpl implements OkvedService {
 
     public Okved createOkved(OkvedDto okvedDto) {
         Okved okved = new Okved();
-        okved.setKindName(okvedDto.getKindName());
-        okved.setKindCode(okvedDto.getKindCode());
+        okved.setKindName(okvedDto.getKindName().trim());
+        okved.setKindCode(okvedDto.getKindCode().trim());
         okved.setDescription(okvedDto.getDescription());
         okved.setStatus(okvedDto.getStatus());
         okved.setVersion(okvedDto.getVersion());
+        okved.setPath(okvedDto.getVersion() + "." + okvedDto.getKindCode().trim());
         okvedRepo.save(okved);
         okvedRepo.setTsVectorsById(okved.getId());
 
@@ -61,6 +63,7 @@ public class OkvedServiceImpl implements OkvedService {
         return "";
     }
 
+
     @Transactional
     public String processFile(MultipartFile multipartFile, String version) {
         try {
@@ -68,7 +71,7 @@ public class OkvedServiceImpl implements OkvedService {
             List<OkvedDto> dtos = ExcelParser.parseFile(multipartFile.getInputStream());
 
             // сброс статуса на 0
-            okvedRepo.resetStatus();
+//            okvedRepo.resetStatus();
 
             // импорт данных в базу
             List<Okved> models = new ArrayList<>();
@@ -146,5 +149,7 @@ public class OkvedServiceImpl implements OkvedService {
         return okvedRepo.findOkvedById(id);
     }
 
-
+    public Okved findOkvedByPathCode(String path) {
+        return okvedRepo.findByPath(path);
+    }
 }

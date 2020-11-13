@@ -5,15 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
-import ru.sibdigital.proccovid.dto.IdValue;
+import org.springframework.web.servlet.ModelAndView;
 import ru.sibdigital.proccovid.dto.OkvedDto;
-import ru.sibdigital.proccovid.model.ClsDepartment;
 import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.service.OkvedServiceImpl;
@@ -21,8 +16,6 @@ import ru.sibdigital.proccovid.service.OkvedServiceImpl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 public class OkvedController {
@@ -55,18 +48,24 @@ public class OkvedController {
 
     @PostMapping("/save_okved")
     public @ResponseBody String changeOkved(@RequestBody OkvedDto okvedDto) {
-        try {
-            if (okvedDto.getId() != null) {
-                okvedServiceImpl.changeOkved(okvedDto);
+        String path = okvedDto.getVersion() + '.' + okvedDto.getKindCode().trim();
+        if (okvedServiceImpl.findOkvedByPathCode(path) == null) {
+            try {
+                if (okvedDto.getId() != null) {
+                    okvedServiceImpl.changeOkved(okvedDto);
+                }
+                else {
+                    okvedServiceImpl.createOkved(okvedDto);
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return "Не удалось сохранить ОКВЭД";
             }
-            else {
-                okvedServiceImpl.createOkved(okvedDto);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return "Не удалось сохранить ОКВЭД";
+            return "ОКВЭД сохранен";
         }
-        return "ОКВЭД сохранен";
+        else {
+           return "ОКВЭД с таким кодом уже существует!";
+        }
     }
 
     @PostMapping("/delete_okved")
@@ -78,11 +77,6 @@ public class OkvedController {
             return "Не удалось удалить ОКВЭД";
         }
         return "ОКВЭД удален";
-    }
-
-    @GetMapping("/upload")
-    public String upload() {
-        return "upload";
     }
 
     @PostMapping("/process_file")
@@ -97,31 +91,5 @@ public class OkvedController {
         List<Okved> result = okvedServiceImpl.findOkvedsBySearchText(text);
         return result;
     }
-
-    @GetMapping("/new_okved")
-    public String newOkved(@RequestParam(name = "okved_name") String kind_name, Model model) {
-        model.addAttribute("kind_name", kind_name);
-        model.addAttribute("version", "Синтетический ОКВЭД");
-        return "new_okved";
-    }
-
-    @GetMapping("/okvedform")
-    public String okvedForm(@RequestParam(name = "id") String id, Model model) {
-        Okved okved = okvedServiceImpl.findOkvedById(UUID.fromString(id));
-        model.addAttribute("kind_code", okved.getKindCode());
-        model.addAttribute("kind_name", okved.getKindName());
-        model.addAttribute("version", okved.getVersion().equals("synt") ? "Синтетический ОКВЭД": okved.getVersion());
-        model.addAttribute("status", okved.getStatus());
-        model.addAttribute("description", (okved.getDescription() != null) ? okved.getDescription() : "");
-        model.addAttribute("okved_id", id);
-        return "okvedform";
-    }
-
-    @PostMapping("/create_okved")
-    public @ResponseBody String addOkved(@RequestParam(name = "kind_name") String kind_name, @RequestParam(name = "kind_code") String kind_code,
-                                         @RequestParam(name = "description") String description, @RequestParam(name = "status") Short status) {
-        return okvedServiceImpl.createOkved(kind_name, kind_code, description, status);
-    }
-
 
 }

@@ -177,4 +177,14 @@ public class AdminController {
                                 .collect(Collectors.toList());
         return list;
     }
+
+    @GetMapping("/upload")
+    public String upload() {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+        if (clsUser.getLogin().equals("fin")) {
+            return "upload";
+        }
+        return "403";
+    }
 }

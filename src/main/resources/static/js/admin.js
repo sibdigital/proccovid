@@ -128,10 +128,6 @@ const departments = {
                                     body: departmentForm,
                                     on: {
                                         'onShow': function () {
-                                        //     let okved_table_data = new webix.DataCollection({
-                                        //         url: 'dep_okveds/' + data.id
-                                        //     })
-                                        //     $$('okved_table').sync(okved_table_data);
                                             var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
                                             var jsonResponse = JSON.parse(xhr.responseText);
                                             for (var k in jsonResponse) {
@@ -268,7 +264,8 @@ const departmentForm = {
                                                 required: true,
                                                 options: [
                                                     {id: '2001', value:'2001'},
-                                                    {id: '2014', value:'2014'}
+                                                    {id: '2014', value:'2014'},
+                                                    {id: 'synt', value:'Синтетический'},
                                                     ],
                                                 on: {
                                                     onChange() {
@@ -294,7 +291,11 @@ const departmentForm = {
                                                             }
                                                             this.getBody().filter(
                                                                 function (obj) {
-                                                                    return obj.id.substring(0,4) == version;
+                                                                    if (typeof obj.id == 'string') {
+                                                                        return obj.id.substring(0,4) == version;
+                                                                    }
+                                                                    else
+                                                                        return false;
                                                                 })
                                                         }
                                                     },
@@ -1363,7 +1364,7 @@ const okveds = {
                             {
                                 cols: [
                                     {
-                                        view: 'segmented', id:'tabbar', value: 'requests', multiview: true,
+                                        view: 'segmented', id:'tabbar',  multiview: true,
                                         width: 600,
                                         optionWidth: 150,  align: 'left', padding: 10,
                                         options: [
@@ -1373,24 +1374,21 @@ const okveds = {
                                         ],
                                         on: {
                                             onAfterRender() {
-                                                this.callEvent('onChange', ['requests']);
+                                                this.callEvent('onChange', ['2001']);
                                             },
                                             onChange: function (id) {
                                                 let version = '2001';
                                                 switch (id) {
                                                     case '2001':
                                                         version = '2001';
-                                                        $$('import_from_xlsx').show();
                                                         $$('create_okved').hide();
                                                         break
                                                     case '2014':
                                                         version = '2014';
-                                                        $$('import_from_xlsx').show();
                                                         $$('create_okved').hide();
                                                         break
                                                     case 'synt':
                                                         version = 'synt';
-                                                        $$('import_from_xlsx').hide();
                                                         $$('create_okved').show();
                                                         break
                                                 }
@@ -1416,38 +1414,6 @@ const okveds = {
                                         }
                                     },
                                     {},
-                                    {
-                                        view: 'button',
-                                        align: 'right',
-                                        id: 'import_from_xlsx',
-                                        value: 'Загрузить',
-                                        width: 140,
-                                        hidden: true,
-                                        click: function() {
-                                            let params = {};
-                                            // params.id_department = $$('department_filter').getValue();
-                                            let status = $$('tabbar').getValue();
-                                            switch (status) {
-                                                case '2001':
-                                                    status = 0;
-                                                    break
-                                                case '2014':
-                                                    status = 1;
-                                                    break
-                                                case 'synt':
-                                                    status = 2;
-                                                    break
-                                            }
-                                            // params.status = status;
-                                            // params.id_type_request = $$('request_type').getValue();
-                                            // params.id_district = $$('district_filter').getValue();
-                                            // params.is_actualization = $$('actualization_filter').getValue();
-                                            // params.innOrName = $$('search').getValue();
-                                            webix.ajax().response("blob").get('import_from_xlsx', params, function(text, data) {
-                                                webix.html.download(data, 'request.xlsx');
-                                            });
-                                        }
-                                    },
                                     {
                                         view: 'button',
                                         align: 'right',
