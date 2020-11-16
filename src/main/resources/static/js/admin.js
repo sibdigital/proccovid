@@ -1383,14 +1383,17 @@ const okveds = {
                                                 switch (id) {
                                                     case '2001':
                                                         version = '2001';
+                                                        $$('upload_okved').show();
                                                         $$('create_okved').hide();
                                                         break
                                                     case '2014':
                                                         version = '2014';
+                                                        $$('upload_okved').show()
                                                         $$('create_okved').hide();
                                                         break
                                                     case 'synt':
                                                         version = 'synt';
+                                                        $$('upload_okved').hide()
                                                         $$('create_okved').show();
                                                         break
                                                 }
@@ -1439,6 +1442,18 @@ const okveds = {
 
                                             $$('okvedCreateForm').parse(data);
                                             window.show();
+                                        }
+                                    },
+                                    {
+                                        view: 'button',
+                                        align: 'right',
+                                        id: 'upload_okved',
+                                        value: 'Загрузить',
+                                        width: 140,
+                                        hidden: true,
+                                        click: function() {
+                                            var version = $$('tabbar').getValue();
+                                            window.open('/upload?version=' + version);
                                         }
                                     }
                                 ],

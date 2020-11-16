@@ -179,10 +179,11 @@ public class AdminController {
     }
 
     @GetMapping("/upload")
-    public String upload() {
+    public String upload(@RequestParam(value = "version") String version, Model model) {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ClsUser clsUser = currentUser.getClsUser();
-        if (clsUser.getLogin().equals("fin")) {
+        if (currentUser.getClsUser().getAdmin())
+        {
+            model.addAttribute("version", version);
             return "upload";
         }
         return "403";
