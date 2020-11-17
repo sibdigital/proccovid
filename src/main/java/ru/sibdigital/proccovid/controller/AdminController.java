@@ -3,20 +3,19 @@ package ru.sibdigital.proccovid.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
-import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
-import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
-import ru.sibdigital.proccovid.dto.ClsUserDto;
-import ru.sibdigital.proccovid.dto.IdValue;
-import ru.sibdigital.proccovid.model.ClsPrincipal;
-import ru.sibdigital.proccovid.model.ClsTemplate;
-import ru.sibdigital.proccovid.model.ClsUser;
+import ru.sibdigital.proccovid.dto.*;
+import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
+import ru.sibdigital.proccovid.repository.ClsMailingListOkvedRepo;
+import ru.sibdigital.proccovid.repository.ClsMailingListRepo;
+import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
 import ru.sibdigital.proccovid.service.OkvedServiceImpl;
 import ru.sibdigital.proccovid.service.RequestService;
 
@@ -38,6 +37,15 @@ public class AdminController {
 
     @Autowired
     private ClsDepartmentOkvedRepo clsDepartmentOkvedRepo;
+
+    @Autowired
+    private ClsMailingListRepo clsMailingListRepo;
+
+    @Autowired
+    private ClsMailingListOkvedRepo clsMailingListOkvedRepo;
+
+    @Autowired
+    private RegMailingMessageRepo regMailingMessageRepo;
 
 
 
@@ -187,5 +195,70 @@ public class AdminController {
             return "upload";
         }
         return "403";
+    }
+
+    @GetMapping("/cls_mailing_list")
+    public @ResponseBody List<ClsMailingList> getListMailing() {
+        return clsMailingListRepo.findAll(Sort.by("id"));
+    }
+
+    @GetMapping("/cls_mailing_list/{id_mailing}")
+    public @ResponseBody List<IdValue> getListOkvedsDtoByMailing(@PathVariable("id_mailing") Long id_mailing){
+        List<IdValue> list = clsMailingListOkvedRepo.findClsMailingListOkvedByClsMailingList_Id(id_mailing).stream()
+                .map(ctr -> new IdValue(ctr.getOkved().getPath(), ctr.getOkved().getKindCode()+ " " + ctr.getOkved().getKindName()))
+                .collect(Collectors.toList());
+        return list;
+    }
+
+    @PostMapping("/save_cls_mailing_list")
+    public @ResponseBody String saveClsMailingList(@RequestBody ClsMailingListDto clsMailingListDto) {
+        try {
+            requestService.saveClsMailingList(clsMailingListDto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить рассылку";
+        }
+        return "Рассылка сохранена";
+    }
+
+    @GetMapping("/reg_mailing_message")
+    public @ResponseBody List<RegMailingMessage> getListMailingMessages() {
+        return regMailingMessageRepo.findAll(Sort.by("id"));
+    }
+
+    @GetMapping("/reg_mailing_message/{id_message}")
+    public @ResponseBody RegMailingMessage getMailingMessages(@PathVariable("id_message") Long id_message) {
+        return regMailingMessageRepo.findById(id_message).orElse(null);
+    }
+
+    @GetMapping("/mailing_list_short")
+    public @ResponseBody List<KeyValue> getMailingMessagesForRichselect() {
+        List<KeyValue> list = requestService.getClsMailingList().stream()
+                .map(ctr -> new KeyValue(ctr.getClass().getSimpleName(), ctr.getId(), ctr.getName()))
+                .collect(Collectors.toList());
+        return list;
+    }
+
+    @PostMapping("/save_reg_mailing_message")
+    public @ResponseBody String saveRegMailingMessage(@RequestBody RegMailingMessageDto regMailingMessageDto) {
+        try {
+            requestService.saveRegMailingMessage(regMailingMessageDto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить сообщение";
+        }
+        return "Сообщение сохранено";
+    }
+
+
+    @GetMapping("/change_status")
+    public @ResponseBody String changeStatusRegMailingMessage(@RequestParam("id") Long id_mailing_message, @RequestParam("status") Long status) {
+        try {
+            requestService.setStatusToMailingMessage(id_mailing_message, status);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось изменить статус у сообщения (id: " + id_mailing_message + ")";
+        }
+        return "Статус изменен";
     }
 }

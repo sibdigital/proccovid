@@ -13,10 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
-import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
-import ru.sibdigital.proccovid.dto.ClsUserDto;
-import ru.sibdigital.proccovid.dto.IdValue;
+import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
@@ -29,6 +26,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -85,6 +84,15 @@ public class RequestService {
 
     @Autowired
     private SettingService settingService;
+
+    @Autowired
+    private ClsMailingListRepo clsMailingListRepo;
+
+    @Autowired
+    private ClsMailingListOkvedRepo clsMailingListOkvedRepo;
+
+    @Autowired
+    private RegMailingMessageRepo regMailingMessageRepo;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -485,6 +493,67 @@ public class RequestService {
         clsUserRepo.save(clsUser);
 
         return clsUser;
+    }
+
+    public ClsMailingList saveClsMailingList(ClsMailingListDto clsMailingListDto) {
+
+        ClsMailingList clsMailingList = ClsMailingList.builder()
+                .id(clsMailingListDto.getId())
+                .name(clsMailingListDto.getName())
+                .description(clsMailingListDto.getDescription())
+                .status(clsMailingListDto.getStatus())
+                .build();
+
+        clsMailingListRepo.save(clsMailingList);
+
+        List<ClsMailingListOkved> list = clsMailingListOkvedRepo.findClsMailingListOkvedByClsMailingList(clsMailingList);
+        clsMailingListOkvedRepo.deleteAll(list);
+        List<IdValue> idValues = clsMailingListDto.getOkveds();
+        for (IdValue idValue: idValues) {
+            String path = idValue.getId();
+            String version = path.substring(0, 4);
+            String kind_code = path.substring(5);
+            String kind_name = idValue.getValue().substring(kind_code.length()+1);
+            List<Okved> okvedList = okvedRepo.findOkvedByKindCodeAndKindNameAAndVersion(kind_code, kind_name, version);
+            if (!okvedList.isEmpty()) {
+                ClsMailingListOkved clsMailingListOkved = new ClsMailingListOkved();
+                clsMailingListOkved.setClsMailingList(clsMailingList);
+                clsMailingListOkved.setOkved(okvedList.get(0));
+                clsMailingListOkvedRepo.save(clsMailingListOkved);
+            }
+        }
+
+        return clsMailingList;
+    }
+
+    public List<ClsMailingList> getClsMailingList() {
+        return StreamSupport.stream(clsMailingListRepo.findAllByOrderByIdAsc().spliterator(), false)
+                .collect(Collectors.toList());
+    }
+
+    public RegMailingMessage saveRegMailingMessage(RegMailingMessageDto regMailingMessageDto) throws ParseException {
+        ClsMailingList clsMailing = clsMailingListRepo.findById(regMailingMessageDto.getMailingId()).orElse(null);;
+        Date time = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(regMailingMessageDto.getSendingTime()).getTime());
+
+        RegMailingMessage regMailingMessage = RegMailingMessage.builder()
+                .id(regMailingMessageDto.getId())
+                .clsMailingList(clsMailing)
+                .message(regMailingMessageDto.getMessage())
+                .sendingTime(time)
+                .status(regMailingMessageDto.getStatus())
+                .build();
+
+        regMailingMessageRepo.save(regMailingMessage);
+
+        return regMailingMessage;
+    }
+
+    public RegMailingMessage setStatusToMailingMessage(Long id, Long status) {
+        RegMailingMessage regMailingMessage = regMailingMessageRepo.findById(id).orElse(null);
+        regMailingMessage.setStatus(Short.parseShort("" + status));
+        regMailingMessageRepo.save(regMailingMessage);
+
+        return regMailingMessage;
     }
 
 }
