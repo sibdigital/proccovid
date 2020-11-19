@@ -1658,7 +1658,7 @@ const mailingList = {
 const mailingForm = {
     view: 'scrollview',
     scroll: 'y',
-    id: 'show_layout',
+    id: 'mailingFormId',
     autowidth: true,
     autoheight: true,
     body: {
@@ -1785,45 +1785,60 @@ const mailingForm = {
                             }
                         ]
                     },
-                    {
-                        view: 'button',
-                        css: 'webix_primary',
-                        value: 'Сохранить',
-                        click: function () {
-                            if ($$('mailingForm').validate()) {
-                                let params = $$('mailingForm').getValues();
+                    { cols: [
+                            {},
+                        {
+                            view: 'button',
+                            align: 'right',
+                            maxWidth: 200,
+                            css: 'webix_primary',
+                            value: 'Сохранить',
+                            click: function () {
+                                if ($$('mailingForm').validate()) {
+                                    let params = $$('mailingForm').getValues();
 
-                                let okveds = []
-                                $$('okved_table').data.each(function (obj) {
-                                    let okved = {
-                                        id: obj.path,
-                                        value: obj.name_okved
-                                    }
-                                    okveds.push(okved);
-                                })
-                                params.okveds = okveds;
-                                params.status = parseInt(params.status);
+                                    let okveds = []
+                                    $$('okved_table').data.each(function (obj) {
+                                        let okved = {
+                                            id: obj.path,
+                                            value: obj.name_okved
+                                        }
+                                        okveds.push(okved);
+                                    })
+                                    params.okveds = okveds;
+                                    params.status = parseInt(params.status);
 
-                                webix.ajax().headers({
-                                    'Content-Type': 'application/json'
-                                }).post('/save_cls_mailing_list',
-                                    params).then(function (data) {
-                                    if (data.text() === 'Рассылка сохранена') {
-                                        webix.message({text: data.text(), type: 'success'});
+                                    webix.ajax().headers({
+                                        'Content-Type': 'application/json'
+                                    }).post('/save_cls_mailing_list',
+                                        params).then(function (data) {
+                                        if (data.text() === 'Рассылка сохранена') {
+                                            webix.message({text: data.text(), type: 'success'});
 
-                                        $$('window').close();
 
-                                        $$('mailing_table').clearAll();
-                                        $$('mailing_table').load('cls_mailing_list');
-                                    } else {
-                                        webix.message({text: data.text(), type: 'error'});
-                                    }
-                                })
-                            } else {
-                                webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                            webix.ui(mailingList, $$('mailingFormId'));
+                                            $$('mailing_table').clearAll();
+                                            $$('mailing_table').load('cls_mailing_list');
+                                        } else {
+                                            webix.message({text: data.text(), type: 'error'});
+                                        }
+                                    })
+                                } else {
+                                    webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                }
+                            }
+                        },
+                        {
+                            view: 'button',
+                            align: 'right',
+                            maxWidth: 200,
+                            css: 'webix_secondary',
+                            value: 'Отмена',
+                            click: function () {
+                                webix.ui(mailingList, $$('mailingFormId'));
                             }
                         }
-                    }
+                        ]}
                 ]
             }
         ]
@@ -1944,7 +1959,7 @@ const mailingMessages = {
 const mailingMessageForm = {
     view: 'scrollview',
     scroll: 'y',
-    id: 'show_layout',
+    id: 'mailingMessageFormId',
     autowidth: true,
     autoheight: true,
     body: {
@@ -1981,34 +1996,50 @@ const mailingMessageForm = {
                             {id: "1", value:'В очереди на отправку'},
                             {id: "2", value: 'Отправка проведена'}
                         ]},
-                    {
-                        view: 'button',
-                        css: 'webix_primary',
-                        value: 'Сохранить',
-                        click: function () {
-                            if ($$('mailingMessageForm').validate()) {
-                                let params = $$('mailingMessageForm').getValues();
-                                params.status = parseInt(params.status);
+                    { cols: [
+                        {},
+                        {
+                            view: 'button',
+                            align: 'right',
+                            maxWidth: 200,
+                            css: 'webix_primary',
+                            value: 'Сохранить',
+                            click: function () {
+                                if ($$('mailingMessageForm').validate()) {
+                                    let params = $$('mailingMessageForm').getValues();
+                                    params.status = parseInt(params.status);
 
-                                webix.ajax().headers({
-                                    'Content-Type': 'application/json'
-                                }).post('/save_reg_mailing_message',
-                                    params).then(function (data) {
-                                    if (data.text() === 'Сообщение сохранено') {
-                                        webix.message({text: data.text(), type: 'success'});
+                                    webix.ajax().headers({
+                                        'Content-Type': 'application/json'
+                                    }).post('/save_reg_mailing_message',
+                                        params).then(function (data) {
+                                        if (data.text() === 'Сообщение сохранено') {
+                                            webix.message({text: data.text(), type: 'success'});
 
-                                        $$('window').close();
+                                            webix.ui(mailingMessages, $$('mailingMessageFormId'));
+                                            $$('mailing_messages_table').clearAll();
+                                            $$('mailing_messages_table').load('reg_mailing_message');
 
-                                        $$('mailing_messages_table').clearAll();
-                                        $$('mailing_messages_table').load('reg_mailing_message');
-                                    } else {
-                                        webix.message({text: data.text(), type: 'error'});
-                                    }
-                                })
-                            } else {
-                                webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                        } else {
+                                            webix.message({text: data.text(), type: 'error'});
+                                        }
+                                    })
+                                } else {
+                                    webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                }
                             }
-                        }
+                        },
+                        {
+                            view: 'button',
+                            align: 'right',
+                            maxWidth: 200,
+                            css: 'webix_secondary',
+                            value: 'Отмена',
+                            click: function () {
+                                webix.ui(mailingMessages, $$('mailingMessageFormId'));
+                            }
+                        }]
+
                     }
                 ]
             }
