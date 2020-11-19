@@ -70,39 +70,58 @@ function removeOkved() {
 }
 
 function queueUp() {
-    var selectedRows = $$('mailing_messages_table').getSelectedId(true);
-    selectedRows.forEach(element => {
-        var item = $$('mailing_messages_table').getItem(element.id);
-        params = {id: item.id, status: 1};
-        webix.ajax().get('/change_status', params).then(function (data) {
-            if (data.text() === 'Статус изменен') {
-                webix.message({text:'Сообщение (id: ' + item.id + ') поставлено в очередь', type: 'success'});
+    webix.confirm('Вы действительно хотите поставить в очередь?')
+        .then(
+            function () {
+                var selectedRows = $$('mailing_messages_table').getSelectedId(true);
+                selectedRows.forEach(element => {
+                    var item = $$('mailing_messages_table').getItem(element.id);
+                    params = {id: item.id, status: 1};
+                    webix.ajax().get('/change_status', params).then(function (data) {
+                        if (data.text() === 'Статус изменен') {
+                            webix.message({
+                                text: 'Сообщение (id: ' + item.id + ') поставлено в очередь',
+                                type: 'success'
+                            });
 
-                $$('mailing_messages_table').clearAll();
-                $$('mailing_messages_table').load('reg_mailing_message');
-            } else {
-                webix.message({text: 'Не получилось поставить в очередь сообщение (id: ' + item.id + ')', type: 'error'});
+                            $$('mailing_messages_table').clearAll();
+                            $$('mailing_messages_table').load('reg_mailing_message');
+                        } else {
+                            webix.message({
+                                text: 'Не получилось поставить в очередь сообщение (id: ' + item.id + ')',
+                                type: 'error'
+                            });
+                        }
+                    })
+                })
             }
-        })})
+        )
 }
 
 function deleteFromQueue() {
-    var selectedRows = $$('mailing_messages_table').getSelectedId(true);
-    selectedRows.forEach(element => {
-        var item = $$('mailing_messages_table').getItem(element.id);
-        params = {id: item.id, status: 0};
-        webix.ajax().get('/change_status', params).then(function (data) {
-            if (data.text() === 'Статус изменен') {
-                webix.message({text: 'Сообщение (id: ' + item.id + ') удалено из очереди', type: 'success'});
-                $$('mailing_messages_table').clearAll();
-                $$('mailing_messages_table').load('reg_mailing_message');
-            } else {
-                webix.message({
-                    text: 'Не получилось удалить из очереди сообщение (id: ' + item.id + ')', type: 'error'
-                });
-            }
-        })
-    })
+    webix.confirm('Вы действительно хотите удалить из очереди?')
+        .then(
+            function () {
+                var selectedRows = $$('mailing_messages_table').getSelectedId(true);
+                selectedRows.forEach(element => {
+                    var item = $$('mailing_messages_table').getItem(element.id);
+                    params = {id: item.id, status: 0};
+                    webix.ajax().get('/change_status', params).then(function (data) {
+                        if (data.text() === 'Статус изменен') {
+                            webix.message({
+                                text: 'Сообщение (id: ' + item.id + ') удалено из очереди',
+                                type: 'success'
+                            });
+                            $$('mailing_messages_table').clearAll();
+                            $$('mailing_messages_table').load('reg_mailing_message');
+                        } else {
+                            webix.message({
+                                text: 'Не получилось удалить из очереди сообщение (id: ' + item.id + ')', type: 'error'
+                            });
+                        }
+                    })
+                })
+            })
 }
 
 const departments = {
@@ -1542,6 +1561,7 @@ const okvedCreateForm = {
 
 const mailingList = {
     view: 'scrollview',
+    id: 'mailingListId',
     scroll: 'xy',
     body: {
         type: 'space',
@@ -1575,39 +1595,23 @@ const mailingList = {
                                 let data = $$('mailing_table').getItem(id);
                                 data.status = '' + data.status;
 
-                                let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Редактирование рассылки (id: ' + data.id + ').',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: mailingForm,
-                                    on: {
-                                        'onShow': function () {
-                                            var xhr = webix.ajax().sync().get('cls_mailing_list/' + data.id);
-                                            var jsonResponse = JSON.parse(xhr.responseText);
-                                            for (var k in jsonResponse) {
-                                                var row = {
-                                                    name_okved: jsonResponse[k].value,
-                                                    path: jsonResponse[k].id,
-                                                    version: jsonResponse[k].id.substring(0, 4)
-                                                }
-                                                $$('okved_table').add(row);
-                                            }
-                                            $$('okved_version').setValue('synt');
-                                        },
-                                        'onHide': function(){
-                                            window.destructor();
-                                        }
-                                    }
-                                });
+                                webix.ui(mailingForm, $$('mailingListId'));
 
                                 $$('mailingForm').parse(data);
-
-                                window.show();
+                                $$('mailingForm').load(
+                                    function (){
+                                        var xhr = webix.ajax().sync().get('cls_mailing_list/' + data.id);
+                                        var jsonResponse = JSON.parse(xhr.responseText);
+                                        for (var k in jsonResponse) {
+                                            var row = {
+                                                name_okved: jsonResponse[k].value,
+                                                path: jsonResponse[k].id,
+                                                version: jsonResponse[k].id.substring(0, 4)
+                                            }
+                                            $$('okved_table').add(row);
+                                        }
+                                        $$('okved_version').setValue('synt');
+                                    });
                             }
                         },
                         data: [],
@@ -1828,6 +1832,7 @@ const mailingForm = {
 
 const mailingMessages = {
     view: 'scrollview',
+    id: 'mailingMessagesId',
     scroll: 'xy',
     body: {
         type: 'space',
@@ -1893,17 +1898,7 @@ const mailingMessages = {
                                     status: ''+jsonResponse.status
                                 };
 
-                                let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Редактирование сообщения рассылки (id: ' + item.id + ').',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: mailingMessageForm,
-                                });
+                                webix.ui(mailingMessageForm, $$('mailingMessagesId'));
 
                                 $$('mailingMessageForm').parse(data);
 
