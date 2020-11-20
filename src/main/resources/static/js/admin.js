@@ -56,7 +56,33 @@ function addOkved(){
     }
 }
 
-function changeLinkedOkveds(){
+function changeLinkedDepartmentOkveds(){
+    let departmentFormValues = $$('departmentForm').getValues();
+    let data = $$('okved_table').serialize();
+
+    let window = webix.ui({
+        view: 'window',
+        id: 'windowCLO',
+        head: 'ОКВЭДы подразделения \"' + departmentFormValues.name + '\" (id: '+ departmentFormValues.id +')',
+        close: true,
+        width: 1000,
+        height: 800,
+        position: 'center',
+        modal: true,
+        body: linkedOkvedsForm,
+        on: {
+            'onHide': function() {
+                window.destructor();
+            }
+        }
+
+    });
+    $$('linked_okved_table').parse(data);
+
+    window.show();
+}
+
+function changeLinkedMailingOkveds(){
     let mailingFormValues = $$('mailingForm').getValues();
     let data = $$('okved_table').serialize();
 
@@ -152,6 +178,7 @@ function deleteFromQueue() {
 
 const departments = {
     view: 'scrollview',
+    id: 'departmentsId',
     scroll: 'xy',
     body: {
         type: 'space',
@@ -199,38 +226,49 @@ const departments = {
                             onItemDblClick: function (id) {
 
                                 let data = $$('departments_table').getItem(id);
+                                webix.ui(departmentForm, $$('departmentsId'));
 
-                                let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Редактирование подразделения (id: ' + data.id + ').',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: departmentForm,
-                                    on: {
-                                        'onShow': function () {
-                                            var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
-                                            var jsonResponse = JSON.parse(xhr.responseText);
-                                            for (var k in jsonResponse) {
-                                                var row = {
-                                                    name_okved: jsonResponse[k].value,
-                                                    path: jsonResponse[k].id,
-                                                    version: jsonResponse[k].id.substring(0, 4)
-                                                }
-                                                $$('okved_table').add(row);
-                                            }
-                                            $$('okved_version').setValue('2014');
-                                        },
-                                        'onHide': function(){
-                                            window.destructor();
-                                        }
-                                    }
-                                });
+                                // let window = webix.ui({
+                                //     view: 'window',
+                                //     id: 'window',
+                                //     head: 'Редактирование подразделения (id: ' + data.id + ').',
+                                //     close: true,
+                                //     width: 1000,
+                                //     height: 800,
+                                //     position: 'center',
+                                //     modal: true,
+                                //     body: departmentForm,
+                                //     on: {
+                                //         'onShow': function () {
+                                //             var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
+                                //             var jsonResponse = JSON.parse(xhr.responseText);
+                                //             for (var k in jsonResponse) {
+                                //                 var row = {
+                                //                     name_okved: jsonResponse[k].value,
+                                //                     path: jsonResponse[k].id,
+                                //                     version: jsonResponse[k].id.substring(0, 4)
+                                //                 }
+                                //                 $$('okved_table').add(row);
+                                //             }
+                                //             $$('okved_version').setValue('2014');
+                                //         },
+                                //         'onHide': function(){
+                                //             window.destructor();
+                                //         }
+                                //     }
+                                // });
 
                                 $$('departmentForm').parse(data);
+                                $$('departmentForm').load(
+                                    function (){
+                                        var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
+                                        var responseText = xhr.responseText.replace("\"id\":", "\"index\":");
+                                        var jsonResponse = JSON.parse(responseText);
+                                        for (var k in jsonResponse) {
+                                            var row = jsonResponse[k].okved;
+                                            $$('okved_table').add(row);
+                                        }
+                                    });
 
                                 window.show();
                             }
@@ -287,7 +325,7 @@ const departments = {
 const departmentForm = {
     view: 'scrollview',
     scroll: 'y',
-    id: 'show_layout',
+    id: 'departmentFormId',
     autowidth: true,
     autoheight: true,
     body: {
@@ -307,142 +345,95 @@ const departmentForm = {
                             },
                             {
                                 view: 'datatable', name: 'okved_table', label: '', labelPosition: 'top',
-                                height: 200,
+                                // autoheight: true,
+                                minHeight: 200,
                                 select: 'row',
                                 editable: true,
                                 id: 'okved_table',
                                 columns: [
                                     {
-                                        id: 'name_okved',
-                                        header: 'ОКВЭД',
-                                        fillspace: true,
+                                        id: 'index',
+                                        hidden: true
                                     },
                                     {
-                                        id: 'path',
-                                        visible: true,
-                                        hidden: true,
-                                        fillspace: true,
+                                        id: 'kindCode',
+                                        header: 'Код',
                                     },
                                     {
                                         id: 'version',
                                         header: 'Версия',
-                                        visible: true,
+                                    },
+                                    {
+                                        id: 'kindName',
+                                        header: 'ОКВЭД',
                                         fillspace: true,
                                     },
                                 ],
                                 data: [],
                             },
-                            {
-                                view: 'form',
-                                id: 'form_okved',
-                                elements: [
+                            {cols: [
+                                    {},
                                     {
-                                        type: 'space',
-                                        cols: [
-                                            {   view: 'richselect',
-                                                name: 'okved_version',
-                                                id: 'okved_version',
-                                                label: 'Версия',
-                                                labelPosition: 'top',
-                                                width: 200,
-                                                required: true,
-                                                options: [
-                                                    {id: '2001', value:'2001'},
-                                                    {id: '2014', value:'2014'},
-                                                    {id: 'synt', value:'Синтетический'},
-                                                    ],
-                                                on: {
-                                                    onChange() {
-                                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
-                                                    }
-                                                }},
-                                            {   view: 'richselect',
-                                                name: 'okved_richselect',
-                                                id: 'okved_richselect',
-                                                label: 'ОКВЭД',
-                                                labelPosition: 'top',
-                                                fillspace: true,
-                                                required: true,
-                                                options: {
-                                                    url: 'okveds',
-                                                    on: {
-                                                        onShow: function () {
-                                                            let values = $$('form_okved').getValues();
-                                                            let version = values.okved_version;
-                                                            if (version == '') {
-                                                                webix.message('Выберите версию ОКВЭДа');
-                                                                return;
-                                                            }
-                                                            this.getBody().filter(
-                                                                function (obj) {
-                                                                    if (typeof obj.id == 'string') {
-                                                                        return obj.id.substring(0,4) == version;
-                                                                    }
-                                                                    else
-                                                                        return false;
-                                                                })
-                                                        }
-                                                    },
-                                                },
-                                                on: {
-                                                    onChange() {
-                                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
-                                                    }
-                                                }},
-                                        ]
-                                    },
-                                    {
-                                        margin: 5,
-                                        cols: [
-                                            {view: 'button', value: 'Добавить',  click: addOkved },
-                                            {view: 'button', value: 'Удалить',  click: removeOkved},
-                                        ]
-                                    }
+                                        view: 'button',
+                                        value: 'Изменить ОКВЭДы',
+                                        align: 'right',
+                                        css: 'webix_primary',
+                                        maxWidth: 200,
+                                        click: changeLinkedDepartmentOkveds},
                                 ]
-                            }
+                            },
                         ]
                     },
                     // { view: ''},
                     { view: 'checkbox', label: 'Удален', labelPosition: 'top', name: 'deleted' },
                     {
-                        view: 'button',
-                        css: 'webix_primary',
-                        value: 'Сохранить',
-                        click: function () {
-                            if ($$('departmentForm').validate()) {
-                                let params = $$('departmentForm').getValues();
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                align: 'right',
+                                maxWidth: 200,
+                                value: 'Сохранить',
+                                click: function () {
+                                    if ($$('departmentForm').validate()) {
+                                        let params = $$('departmentForm').getValues();
 
-                                let okveds = []
-                                $$('okved_table').data.each(function (obj) {
-                                    let okved = {
-                                        id: obj.path,
-                                        value: obj.name_okved
-                                    }
-                                    okveds.push(okved);
-                                })
-                                params.okveds = okveds;
+                                        let okveds = $$('okved_table').serialize();
+                                        params.okveds = okveds;
 
-                                webix.ajax().headers({
-                                    'Content-Type': 'application/json'
-                                }).post('/save_cls_department',
-                                    params).then(function (data) {
-                                    if (data.text() === 'Подразделение сохранено') {
-                                        webix.message({text: data.text(), type: 'success'});
+                                        webix.ajax().headers({
+                                            'Content-Type': 'application/json'
+                                        }).post('/save_cls_department',
+                                            params).then(function (data) {
+                                            if (data.text() === 'Подразделение сохранено') {
+                                                webix.message({text: data.text(), type: 'success'});
 
-                                        $$('window').close();
-
-                                        const departmentsTable = $$('departments_table');
-                                        const url = departmentsTable.data.url;
-                                        departmentsTable.clearAll();
-                                        departmentsTable.load(url);
+                                                webix.ui(departments, $$('departmentFormId'));
+                                                const departmentsTable = $$('departments_table');
+                                                const url = departmentsTable.data.url;
+                                                departmentsTable.clearAll();
+                                                departmentsTable.load(url);
+                                            } else {
+                                                webix.message({text: data.text(), type: 'error'});
+                                            }
+                                        })
                                     } else {
-                                        webix.message({text: data.text(), type: 'error'});
+                                        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
                                     }
-                                })
-                            } else {
-                                webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
-                            }
-                        }
+                                }
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                maxWidth: 200,
+                                css: 'webix_secondary',
+                                value: 'Отмена',
+                                click: function () {
+                                    webix.ui(departments, $$('departmentFormId'));
+                                }
+                            },
+                        ]
                     }
                 ]
             }
@@ -1637,6 +1628,7 @@ const linkedOkvedsForm = {
                                 value: 'Сохранить изменения',
                                 click: function () {
                                     var data = $$('linked_okved_table').serialize();
+                                    $$('okved_table').clearAll();
                                     $$('okved_table').parse(data);
                                     $$('windowCLO').close();
                                 }
@@ -1789,24 +1781,7 @@ const mailingList = {
                                 align: 'right',
                                 value: 'Добавить',
                                 click: function () {
-                                    let window = webix.ui({
-                                        view: 'window',
-                                        id: 'window',
-                                        head: 'Добавление рассылки',
-                                        close: true,
-                                        width: 1000,
-                                        height: 800,
-                                        position: 'center',
-                                        modal: true,
-                                        body: mailingForm,
-                                        on: {
-                                            'onShow': function () {
-                                                $$('okved_version').setValue('synt');
-                                            }
-                                        }
-                                    });
-
-                                    window.show();
+                                    webix.ui(mailingForm, $$('mailingListId'));
                                 }
                             }
                         ]
@@ -1853,7 +1828,7 @@ const mailingForm = {
                             },
                             {
                                 view: 'datatable', name: 'okved_table', label: '', labelPosition: 'top',
-                                autoheight: true,
+                                // autoheight: true,
                                 minHeight: 200,
                                 select: 'row',
                                 editable: true,
@@ -1887,7 +1862,7 @@ const mailingForm = {
                                         align: 'right',
                                         css: 'webix_primary',
                                         maxWidth: 200,
-                                        click: changeLinkedOkveds},
+                                        click: changeLinkedMailingOkveds},
                                 ]
                             },
 

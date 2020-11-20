@@ -170,19 +170,11 @@ public class AdminController {
         return "Пользователь сохранен";
     }
 
-    @GetMapping("/okveds")
-    public @ResponseBody List<IdValue> getOkveds() {
-        List<IdValue> list = okvedServiceImpl.getOkveds().stream()
-                .map( ctr -> new IdValue(ctr.getPath(), ctr.getKindCode() + " " + ctr.getKindName()))
-                .collect(Collectors.toList());
-        return list;
-    }
+
 
     @GetMapping("/department_okveds/{id_department}")
-    public @ResponseBody List<IdValue> getListOkvedsDto(@PathVariable("id_department") Long id_department){
-        List<IdValue> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment_Id(id_department).stream()
-                                .map(ctr -> new IdValue(ctr.getOkved().getPath(), ctr.getOkved().getKindCode()+ " " + ctr.getOkved().getKindName()))
-                                .collect(Collectors.toList());
+    public @ResponseBody List<ClsDepartmentOkved> getListOkvedsDto(@PathVariable("id_department") Long id_department){
+        List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment_Id(id_department);
         return list;
     }
 

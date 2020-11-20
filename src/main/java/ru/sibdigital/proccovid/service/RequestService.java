@@ -439,19 +439,13 @@ public class RequestService {
 
         List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
         clsDepartmentOkvedRepo.deleteAll(list);
-        List<IdValue> idValues = clsDepartmentDto.getOkveds();
-        for (IdValue idValue: idValues) {
-            String path = idValue.getId();
-            String version = path.substring(0, 4);
-            String kind_code = path.substring(5);
-            String kind_name = idValue.getValue().substring(kind_code.length()+1);
-            List<Okved> okvedList = okvedRepo.findOkvedByKindCodeAndKindNameAAndVersion(kind_code, kind_name, version);
-            if (!okvedList.isEmpty()) {
-                ClsDepartmentOkved clsDepartmentOkved = new ClsDepartmentOkved();
-                clsDepartmentOkved.setDepartment(clsDepartment);
-                clsDepartmentOkved.setOkved(okvedList.get(0));
-                clsDepartmentOkvedRepo.save(clsDepartmentOkved);
-            }
+
+        List<Okved> listOkveds = clsDepartmentDto.getOkveds();
+        for (Okved okved : listOkveds) {
+            ClsDepartmentOkved clsDepartmentOkved = new ClsDepartmentOkved();
+            clsDepartmentOkved.setDepartment(clsDepartment);
+            clsDepartmentOkved.setOkved(okved);
+            clsDepartmentOkvedRepo.save(clsDepartmentOkved);
         }
 
         return clsDepartment;
@@ -505,6 +499,9 @@ public class RequestService {
                 .build();
 
         clsMailingListRepo.save(clsMailingList);
+
+        List<ClsMailingListOkved> list = clsMailingListOkvedRepo.findClsMailingListOkvedByClsMailingList(clsMailingList);
+        clsMailingListOkvedRepo.deleteAll(list);
 
         List<Okved> listOkveds = clsMailingListDto.getOkveds();
         for (Okved okved : listOkveds) {
