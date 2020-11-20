@@ -202,11 +202,9 @@ public class AdminController {
         return clsMailingListRepo.findAll(Sort.by("id"));
     }
 
-    @GetMapping("/cls_mailing_list/{id_mailing}")
-    public @ResponseBody List<IdValue> getListOkvedsDtoByMailing(@PathVariable("id_mailing") Long id_mailing){
-        List<IdValue> list = clsMailingListOkvedRepo.findClsMailingListOkvedByClsMailingList_Id(id_mailing).stream()
-                .map(ctr -> new IdValue(ctr.getOkved().getPath(), ctr.getOkved().getKindCode()+ " " + ctr.getOkved().getKindName()))
-                .collect(Collectors.toList());
+    @GetMapping("/mailing_list_okveds/{id_mailing}")
+    public @ResponseBody List<ClsMailingListOkved> getListOkvedsDtoByMailing(@PathVariable("id_mailing") Long id_mailing){
+        List<ClsMailingListOkved> list = clsMailingListOkvedRepo.findClsMailingListOkvedByClsMailingList_Id(id_mailing);
         return list;
     }
 

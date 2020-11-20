@@ -506,21 +506,12 @@ public class RequestService {
 
         clsMailingListRepo.save(clsMailingList);
 
-        List<ClsMailingListOkved> list = clsMailingListOkvedRepo.findClsMailingListOkvedByClsMailingList(clsMailingList);
-        clsMailingListOkvedRepo.deleteAll(list);
-        List<IdValue> idValues = clsMailingListDto.getOkveds();
-        for (IdValue idValue: idValues) {
-            String path = idValue.getId();
-            String version = path.substring(0, 4);
-            String kind_code = path.substring(5);
-            String kind_name = idValue.getValue().substring(kind_code.length()+1);
-            List<Okved> okvedList = okvedRepo.findOkvedByKindCodeAndKindNameAAndVersion(kind_code, kind_name, version);
-            if (!okvedList.isEmpty()) {
-                ClsMailingListOkved clsMailingListOkved = new ClsMailingListOkved();
-                clsMailingListOkved.setClsMailingList(clsMailingList);
-                clsMailingListOkved.setOkved(okvedList.get(0));
-                clsMailingListOkvedRepo.save(clsMailingListOkved);
-            }
+        List<Okved> listOkveds = clsMailingListDto.getOkveds();
+        for (Okved okved : listOkveds) {
+            ClsMailingListOkved clsMailingListOkved = new ClsMailingListOkved();
+            clsMailingListOkved.setClsMailingList(clsMailingList);
+            clsMailingListOkved.setOkved(okved);
+            clsMailingListOkvedRepo.save(clsMailingListOkved);
         }
 
         return clsMailingList;

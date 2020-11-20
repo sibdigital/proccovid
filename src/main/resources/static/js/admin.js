@@ -56,6 +56,32 @@ function addOkved(){
     }
 }
 
+function changeLinkedOkveds(){
+    let mailingFormValues = $$('mailingForm').getValues();
+    let data = $$('okved_table').serialize();
+
+    let window = webix.ui({
+        view: 'window',
+        id: 'windowCLO',
+        head: 'ОКВЭДы рассылки \"' + mailingFormValues.name + '\" (id: '+ mailingFormValues.id +')',
+        close: true,
+        width: 1000,
+        height: 800,
+        position: 'center',
+        modal: true,
+        body: linkedOkvedsForm,
+        on: {
+            'onHide': function() {
+                window.destructor();
+            }
+        }
+
+    });
+    $$('linked_okved_table').parse(data);
+
+    window.show();
+}
+
 function removeOkved() {
     if(!$$("okved_table").getSelectedId()){
         webix.message("Ничего не выбрано!");
@@ -1559,6 +1585,144 @@ const okvedCreateForm = {
     }
 }
 
+const linkedOkvedsForm = {
+    view: 'scrollview',
+    id: 'linkedOkvedsForm',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            {
+                autowidth: true,
+                autoheight: true,
+                rows: [
+                    { template:"Редактируемая таблица ОКВЭДов", type:"section" },
+                    {
+                        view: 'datatable',
+                        id: 'linked_okved_table',
+                        columns: [
+                            {
+                                id: 'kindCode',
+                                header: 'Код'
+                            },
+                            {
+                                id: 'version',
+                                header: 'Версия',
+                            },
+                            {
+                                id: 'kindName',
+                                header: 'Наименование',
+                                fillspace: true,
+                            },
+                            {
+                                id: 'btnDelete',
+                                header: 'Удалить',
+                                template:"{common.trashIcon()}"
+                            },
+                        ],
+                        onClick:{
+                            "wxi-trash":function(event, id, node){
+                                this.remove(id)
+                            }
+                        }
+                    },
+                    {
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                align: 'right',
+                                maxWidth: 200,
+                                value: 'Сохранить изменения',
+                                click: function () {
+                                    var data = $$('linked_okved_table').serialize();
+                                    $$('okved_table').parse(data);
+                                    $$('windowCLO').close();
+                                }
+                            }
+                        ]
+                    },
+                    { template:"Поиск и добавление ОКВЭДов", type:"section" },
+                    {
+                        view: 'toolbar',
+                        rows: [
+                            {
+                                view: 'search',
+                                id: 'search',
+                                maxWidth: 300,
+                                minWidth: 100,
+                                tooltip: 'После ввода значения нажмите Enter',
+                                placeholder: "Введите код или наименование из ОКВЭД",
+                                on: {
+                                    onEnter: function () {
+                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
+                                    }
+                                }
+                            },
+                            {
+                                cols: [
+                                    {
+                                        view: 'segmented', id:'tabbar',  multiview: true,
+                                        width: 600,
+                                        optionWidth: 150,  align: 'left', padding: 10,
+                                        options: [
+                                            { value: '2001', id: '2001'},
+                                            { value: '2014', id: '2014'},
+                                            { value: 'Синтетические', id: 'synt'}
+                                        ],
+                                        on: {
+                                            onAfterRender() {
+                                                this.callEvent('onChange', ['2001']);
+                                            },
+                                            onChange: function (id) {
+                                                let version = '2001';
+                                                switch (id) {
+                                                    case '2001':
+                                                        version = '2001';
+                                                        break
+                                                    case '2014':
+                                                        version = '2014';
+                                                        break
+                                                    case 'synt':
+                                                        version = 'synt';
+                                                        break
+                                                }
+
+                                                let params = '';
+                                                let search_text = $$('search').getValue();
+                                                if (search_text) {
+                                                    params += params == '' ? '?' : '&';
+                                                    params += 'searchText=' + search_text;
+                                                }
+
+                                                let view = okvedslist_chooseOkved('list_okved/' + version + params, version, true);
+
+                                                webix.delay(function () {
+                                                    webix.ui({
+                                                        id: 'subContentOkved',
+                                                        rows: [
+                                                            view
+                                                        ]
+                                                    }, $$('subContentOkved'))
+                                                })
+                                            }
+                                        }
+                                    },
+
+                                ],
+                            }
+                        ]
+                    },
+                    {
+                        id: 'subContentOkved'
+                    }
+                ]
+            }
+        ]
+    }
+}
+
 const mailingList = {
     view: 'scrollview',
     id: 'mailingListId',
@@ -1600,17 +1764,13 @@ const mailingList = {
                                 $$('mailingForm').parse(data);
                                 $$('mailingForm').load(
                                     function (){
-                                        var xhr = webix.ajax().sync().get('cls_mailing_list/' + data.id);
-                                        var jsonResponse = JSON.parse(xhr.responseText);
+                                        var xhr = webix.ajax().sync().get('mailing_list_okveds/' + data.id);
+                                        var responseText = xhr.responseText.replace("\"id\":", "\"index\":");
+                                        var jsonResponse = JSON.parse(responseText);
                                         for (var k in jsonResponse) {
-                                            var row = {
-                                                name_okved: jsonResponse[k].value,
-                                                path: jsonResponse[k].id,
-                                                version: jsonResponse[k].id.substring(0, 4)
-                                            }
+                                            var row = jsonResponse[k].okved;
                                             $$('okved_table').add(row);
                                         }
-                                        $$('okved_version').setValue('synt');
                                     });
                             }
                         },
@@ -1666,9 +1826,10 @@ const mailingForm = {
             {
                 view: 'form',
                 id: 'mailingForm',
+                autoheight: true,
                 rows: [
                     { cols: [
-                            { view: 'text', label: 'Наименование', labelPosition: 'top', name: 'name', required: true, validate: webix.rules.isNotEmpty },
+                            { view: 'text', label: 'Наименование', labelPosition: 'top', id: 'name', name: 'name', required: true, validate: webix.rules.isNotEmpty },
                             { view: 'richselect',
                                 name: 'status',
                                 id: 'status',
@@ -1680,109 +1841,56 @@ const mailingForm = {
                                     {id: "1", value:'Действует'}
                                 ]},
                         ]},
-                    { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description'},
+                    { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', autoheight: true},
                     {
+                        view: 'form',
+                        autoheight: true,
                         rows: [
                             {
                                 view: 'label',
-                                label: 'ОКВЭД',
+                                label: 'ОКВЭДы',
                                 align: 'left',
                             },
                             {
                                 view: 'datatable', name: 'okved_table', label: '', labelPosition: 'top',
-                                height: 200,
+                                autoheight: true,
+                                minHeight: 200,
                                 select: 'row',
                                 editable: true,
                                 id: 'okved_table',
                                 columns: [
                                     {
-                                        id: 'name_okved',
-                                        header: 'ОКВЭД',
-                                        fillspace: true,
+                                        id: 'index',
+                                        hidden: true
                                     },
                                     {
-                                        id: 'path',
-                                        visible: true,
-                                        hidden: true,
-                                        fillspace: true,
+                                        id: 'kindCode',
+                                        header: 'Код',
                                     },
                                     {
                                         id: 'version',
                                         header: 'Версия',
-                                        visible: true,
+                                    },
+                                    {
+                                        id: 'kindName',
+                                        header: 'ОКВЭД',
                                         fillspace: true,
                                     },
                                 ],
                                 data: [],
                             },
-                            {
-                                view: 'form',
-                                id: 'form_okved',
-                                elements: [
+                            {cols: [
+                                    {},
                                     {
-                                        type: 'space',
-                                        cols: [
-                                            {   view: 'richselect',
-                                                name: 'okved_version',
-                                                id: 'okved_version',
-                                                label: 'Версия',
-                                                labelPosition: 'top',
-                                                width: 200,
-                                                required: true,
-                                                options: [
-                                                    {id: '2001', value:'2001'},
-                                                    {id: '2014', value:'2014'},
-                                                    {id: 'synt', value:'Синтетический'}
-                                                ],
-                                                on: {
-                                                    onChange() {
-                                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
-                                                    }
-                                                }},
-                                            {   view: 'richselect',
-                                                name: 'okved_richselect',
-                                                id: 'okved_richselect',
-                                                label: 'ОКВЭД',
-                                                labelPosition: 'top',
-                                                fillspace: true,
-                                                required: true,
-                                                options: {
-                                                    url: 'okveds',
-                                                    on: {
-                                                        onShow: function () {
-                                                            let values = $$('form_okved').getValues();
-                                                            let version = values.okved_version;
-                                                            if (version == '') {
-                                                                webix.message('Выберите версию ОКВЭДа');
-                                                                return;
-                                                            }
-                                                            this.getBody().filter(
-                                                                function (obj) {
-                                                                    if (typeof obj.id == 'string') {
-                                                                        return obj.id.substring(0,4) == version;
-                                                                    }
-                                                                    else
-                                                                        return false;
-                                                                })
-                                                        }
-                                                    },
-                                                },
-                                                on: {
-                                                    onChange() {
-                                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
-                                                    }
-                                                }},
-                                        ]
-                                    },
-                                    {
-                                        margin: 5,
-                                        cols: [
-                                            {view: 'button', value: 'Добавить',  click: addOkved },
-                                            {view: 'button', value: 'Удалить',  click: removeOkved},
-                                        ]
-                                    }
+                                        view: 'button',
+                                        value: 'Изменить ОКВЭДы',
+                                        align: 'right',
+                                        css: 'webix_primary',
+                                        maxWidth: 200,
+                                        click: changeLinkedOkveds},
                                 ]
-                            }
+                            },
+
                         ]
                     },
                     { cols: [
@@ -1792,19 +1900,12 @@ const mailingForm = {
                             align: 'right',
                             maxWidth: 200,
                             css: 'webix_primary',
-                            value: 'Сохранить',
+                            value: 'Сохранить рассылку',
                             click: function () {
                                 if ($$('mailingForm').validate()) {
                                     let params = $$('mailingForm').getValues();
 
-                                    let okveds = []
-                                    $$('okved_table').data.each(function (obj) {
-                                        let okved = {
-                                            id: obj.path,
-                                            value: obj.name_okved
-                                        }
-                                        okveds.push(okved);
-                                    })
+                                    let okveds = $$('okved_table').serialize();
                                     params.okveds = okveds;
                                     params.status = parseInt(params.status);
 
