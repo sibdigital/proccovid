@@ -2099,9 +2099,9 @@ const mailingMessageForm = {
                                         if (data.text() === 'Сообщение сохранено') {
                                             webix.message({text: data.text(), type: 'success'});
 
-                                            webix.ui(mailingMessages, $$('mailingMessageFormId'));
                                             $$('mailing_messages_table').clearAll();
                                             $$('mailing_messages_table').load('reg_mailing_message');
+                                            $$('window').close();
 
                                         } else {
                                             webix.message({text: data.text(), type: 'error'});
@@ -2119,7 +2119,7 @@ const mailingMessageForm = {
                             css: 'webix_secondary',
                             value: 'Отмена',
                             click: function () {
-                                webix.ui(mailingMessages, $$('mailingMessageFormId'));
+                                $$('window').close();
                             }
                         }]
 
