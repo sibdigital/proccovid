@@ -18,6 +18,7 @@ import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSpecification;
+import ru.sibdigital.proccovid.scheduling.ScheduleTasks;
 import ru.sibdigital.proccovid.utils.DateUtils;
 
 import javax.servlet.http.HttpServletResponse;
@@ -93,6 +94,9 @@ public class RequestService {
 
     @Autowired
     private RegMailingMessageRepo regMailingMessageRepo;
+
+    @Autowired
+    private ScheduleTasks scheduleTasks;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -520,7 +524,7 @@ public class RequestService {
     }
 
     public RegMailingMessage saveRegMailingMessage(RegMailingMessageDto regMailingMessageDto) throws ParseException {
-        ClsMailingList clsMailing = clsMailingListRepo.findById(regMailingMessageDto.getMailingId()).orElse(null);;
+        ClsMailingList clsMailing = clsMailingListRepo.findById(regMailingMessageDto.getMailingId()).orElse(null);
         Date time = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(regMailingMessageDto.getSendingTime()).getTime());
 
         RegMailingMessage regMailingMessage = RegMailingMessage.builder()
@@ -531,14 +535,26 @@ public class RequestService {
                 .status(regMailingMessageDto.getStatus())
                 .build();
 
+        scheduleTasks.removeTaskFromScheduler(regMailingMessageDto.getId());
+        if (regMailingMessageDto.getStatus() == 1) {
+            scheduleTasks.addTaskToScheduler(regMailingMessageDto.getId(), regMailingMessage, time);
+        }
+
         regMailingMessageRepo.save(regMailingMessage);
 
         return regMailingMessage;
     }
 
-    public RegMailingMessage setStatusToMailingMessage(Long id, Long status) {
+    public RegMailingMessage setStatusToMailingMessage(Long id, Long status, String sendingTime) throws ParseException {
         RegMailingMessage regMailingMessage = regMailingMessageRepo.findById(id).orElse(null);
         regMailingMessage.setStatus(Short.parseShort("" + status));
+
+        scheduleTasks.removeTaskFromScheduler(id);
+        if (status == 1) {
+            Date time = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(sendingTime).getTime());
+            scheduleTasks.addTaskToScheduler(id, regMailingMessage, time);
+        }
+
         regMailingMessageRepo.save(regMailingMessage);
 
         return regMailingMessage;

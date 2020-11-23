@@ -128,7 +128,7 @@ function queueUp() {
                 var selectedRows = $$('mailing_messages_table').getSelectedId(true);
                 selectedRows.forEach(element => {
                     var item = $$('mailing_messages_table').getItem(element.id);
-                    params = {id: item.id, status: 1};
+                    params = {id: item.id, status: 1, sendingTime: item.sendingTime};
                     webix.ajax().get('/change_status', params).then(function (data) {
                         if (data.text() === 'Статус изменен') {
                             webix.message({
@@ -157,7 +157,7 @@ function deleteFromQueue() {
                 var selectedRows = $$('mailing_messages_table').getSelectedId(true);
                 selectedRows.forEach(element => {
                     var item = $$('mailing_messages_table').getItem(element.id);
-                    params = {id: item.id, status: 0};
+                    params = {id: item.id, status: 0, sendingTime: item.sendingTime};
                     webix.ajax().get('/change_status', params).then(function (data) {
                         if (data.text() === 'Статус изменен') {
                             webix.message({
@@ -1952,8 +1952,15 @@ const mailingMessages = {
                         resizeColumn:true,
                         readonly: true,
                         columns: [
-                            { id: 'sendingTime', header: 'Время начала отправки', adjust: true, format: dateFormat, fillspace: true, sort: "date",},
+                            { id: 'sendingTime', header: 'Время начала отправки', adjust: true, format: dateFormat, sort: "date", fillspace: true },
                             { id: 'mailing', header: 'Тип рассылки', template: '#clsMailingList.name#', adjust: true, sort: 'string', fillspace: true },
+                            { id: 'statusMailing', header: 'Статус типа рассылки', template: function (obj) {
+                                    if (obj.clsMailingList.status == 0) {
+                                        return 'Не действует';
+                                    }
+                                    else {
+                                        return 'Действует';
+                                    }}, adjust: true, sort: 'string', fillspace: true },
                             { id: 'message', header: 'Текст сообщения', adjust: true, fillspace: true, sort: 'text'},
                             { id: 'status', template: function (obj) {
                                     switch (obj.status) {

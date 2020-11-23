@@ -197,6 +197,60 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    public void sendMessage(List<ClsPrincipal> principals, RegMailingMessage regMailingMessage, Map<String, String> params) {
+        Map<Integer, RegMailingHistory> histories = new HashMap<>();
+
+        List<MimeMessage> messages = new ArrayList<>();
+        for (ClsPrincipal principal : principals) {
+            ClsOrganization organization = principal.getOrganization();
+            if (organization != null) {
+                int code = principal.hashCode();
+
+                Short exception = MailingStatuses.EMAIL_SENT.value();
+                try {
+                    InternetAddress address = new InternetAddress(organization.getEmail()); // validate
+
+                    params.put("organizationName", organization.getName() == null ? "" : organization.getName());
+                    params.put("inn", organization.getInn() == null ? "" : organization.getInn());
+
+                    MimeMessage message = prepareMimeMessage(address, regMailingMessage, params);
+                    message.setDescription(String.valueOf(code));
+                    messages.add(message);
+                } catch (AddressException e) {
+                    exception = MailingStatuses.INVALID_ADDRESS.value();
+                } catch (MessagingException messagingException) {
+                    exception = MailingStatuses.EMAIL_NOT_CREATED.value();
+                }
+
+                RegMailingHistory history = new RegMailingHistory();
+                history.setClsMailingList(regMailingMessage.getClsMailingList());
+                history.setRegMailingMessage(regMailingMessage);
+                history.setClsPrincipal(principal);
+                history.setTimeSend(new Timestamp(System.currentTimeMillis()));
+                history.setStatus(exception);
+                histories.put(code, history);
+            }
+        }
+
+        if (!messages.isEmpty()) {
+            try {
+                javaMailSender.send(messages.toArray(new MimeMessage[0]));
+            } catch (MailSendException mailSendException) {
+                Map<Object, Exception> failedMessages = mailSendException.getFailedMessages();
+                for (Map.Entry<Object, Exception> failedMessage : failedMessages.entrySet()) {
+                    MimeMessage message = (MimeMessage) failedMessage.getKey();
+                    try {
+                        RegMailingHistory history = histories.get(Integer.valueOf(message.getDescription()));
+                        history.setStatus(MailingStatuses.EMAIL_NOT_SENT.value());
+                    } catch (MessagingException messagingException) {
+                        log.error(messagingException.getMessage());
+                    }
+                }
+            }
+
+            regMailingHistoryRepo.saveAll(histories.values());
+        }
+    }
 
     private MimeMessage prepareMimeMessage(InternetAddress address, ClsTemplate clsTemplate, Map<String, String> params) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -211,6 +265,21 @@ public class EmailServiceImpl implements EmailService {
         for (Map.Entry<String, String> param : params.entrySet()) {
             text = text.replaceAll(param.getKey(), param.getValue());
         }
+        helper.setText(text, true);
+
+        return message;
+    }
+
+    private MimeMessage prepareMimeMessage(InternetAddress address, RegMailingMessage regMailingMessage, Map<String, String> params) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setTo(address.getAddress());
+        String subject = params.get("subject") == null ? "Работающая Бурятия" : params.get("subject");
+        helper.setSubject(subject);
+        helper.setFrom(fromAdress);
+
+        String text = regMailingMessage.getMessage();
         helper.setText(text, true);
 
         return message;

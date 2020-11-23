@@ -1,20 +1,26 @@
 package ru.sibdigital.proccovid.scheduling;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
-import ru.sibdigital.proccovid.model.RegMailingMessage;
+import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.ClsPrincipalRepo;
+import ru.sibdigital.proccovid.repository.RegMailingHistoryRepo;
 import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
+import ru.sibdigital.proccovid.service.EmailServiceImpl;
 
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
 
+@Slf4j
 @Component
 public class ScheduleTasks {
+
     @Autowired
     private ThreadPoolTaskScheduler taskScheduler;
 
@@ -24,12 +30,20 @@ public class ScheduleTasks {
     @Autowired
     private ClsPrincipalRepo clsPrincipalRepo;
 
+    @Autowired
+    private EmailServiceImpl emailService;
+
+    @Autowired
+    private RegMailingHistoryRepo regMailingHistoryRepo;
+
     Map<Long, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
     public void addTaskToScheduler(Long id, RegMailingMessage regMailingMessage, Date date) {
-        Runnable task = new SendingMailingMessageTask(regMailingMessage);
-        ScheduledFuture<?> scheduledTask = taskScheduler.schedule(task, date);
-        jobsMap.put(id, scheduledTask);
+        if (date.compareTo(new Date()) >= 0) {
+            Runnable task = new SendingMailingMessageTask(regMailingMessage);
+            ScheduledFuture<?> scheduledTask = taskScheduler.schedule(task, date);
+            jobsMap.put(id, scheduledTask);
+        }
     }
 
     public void removeTaskFromScheduler(Long id) {
@@ -42,8 +56,6 @@ public class ScheduleTasks {
 
     @EventListener({ ContextRefreshedEvent.class })
     void contextRefreshedEvent() {
-        // Проверка на время: sendingTime > currentTime,
-        // иначе старые сообщения, если у них статус = 1, отправляются.
         Date currentTime = new Date();
         jobsMap.clear();
         List<RegMailingMessage> listMailingMessage = regMailingMessageRepo.findAllByStatusAndCurrentTime(Short.parseShort("1"), currentTime);
@@ -64,22 +76,35 @@ public class ScheduleTasks {
 
         @Override
         public void run() {
-            List<String> emailList = null;
+            List<ClsPrincipal> principals = null;
+            log.info("Старт рассылки: " + message.getClsMailingList().getName());
 
-            if (message.getClsMailingList().getStatus() == 1) {  // Если рассылка действует
-                if (message.getClsMailingList().getId() == 1) { // Системная рассылка
-                    emailList = clsPrincipalRepo.findAllEmails();
+            try {
+                if (message.getClsMailingList().getStatus() == MailingListStatuses.VALID.value()) {
+                    if (message.getClsMailingList().getId() == 1) { // Системная рассылка
+                        principals = clsPrincipalRepo.findAll();
+                    } else {
+                        principals = clsPrincipalRepo.getClsPrincipalsByMessage_Id(message.getId());
+                    }
+
+                    emailService.sendMessage(principals, message, new HashMap<>());
+
+                    message.setStatus(MailingMessageStatuses.IS_SENT.value());
+                    regMailingMessageRepo.save(message);
                 }
                 else {
-                    emailList = regMailingMessageRepo.getFollowersEmailsByMessage_Id(message.getId());
-                }
-                for (String email : emailList) {
-                    System.out.println("Send message to " + email + ": " + message.getMessage());
-//                emailService.sendSimpleMessage(email, message.getClsMailingList().getName(), message.getMessage());
+                    RegMailingHistory history = new RegMailingHistory();
+                    history.setClsMailingList(message.getClsMailingList());
+                    history.setRegMailingMessage(message);
+                    history.setTimeSend(new Timestamp(System.currentTimeMillis()));
+                    history.setStatus(MailingStatuses.MAILING_LIST_NOT_VALID.value());
+                    regMailingHistoryRepo.save(history);
                 }
 
-                message.setStatus(Short.parseShort("2")); // Статус = отправлено
-                regMailingMessageRepo.save(message);
+                log.info("Конец рассылки: " + message.getClsMailingList().getName());
+            } catch (Exception e) {
+                log.info("Рассылка закончилась ошибками:");
+                log.error(e.getMessage(), e);
             }
         }
     }

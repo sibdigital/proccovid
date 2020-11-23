@@ -242,9 +242,10 @@ public class AdminController {
 
 
     @GetMapping("/change_status")
-    public @ResponseBody String changeStatusRegMailingMessage(@RequestParam("id") Long id_mailing_message, @RequestParam("status") Long status) {
+    public @ResponseBody String changeStatusRegMailingMessage(@RequestParam("id") Long id_mailing_message, @RequestParam("status") Long status,
+                                                              @RequestParam("sendingTime") String sendingTime) {
         try {
-            requestService.setStatusToMailingMessage(id_mailing_message, status);
+            requestService.setStatusToMailingMessage(id_mailing_message, status, sendingTime);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return "Не удалось изменить статус у сообщения (id: " + id_mailing_message + ")";
