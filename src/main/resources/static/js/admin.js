@@ -785,23 +785,9 @@ const typeRequests = {
                                 if (data.department) {
                                     data.departmentId = data.department.id;
                                 }
-/*
-                                let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Редактирование типа заявки (id: ' + data.id + ').',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: typeRequestForm,
-                                    on: {
-                                        'onShow': function () {
-                                        }
-                                    }
-                                });*/
-                                webix.ui(typeRequestForm, $$('typeRequestsId'));
+
+                                loadTypeRequestFormInContent()
+
                                 $$('typeRequestForm').parse(data);
 
                                 $$('departments').getList().add({ id: '', value: '' });
@@ -846,28 +832,11 @@ const typeRequests = {
                                 value: 'Добавить',
                                 href: "/type_request",
                                 click: function () {
-                                    webix.ui(typeRequestForm, $$('typeRequestsId'));
+
+                                    loadTypeRequestFormInContent()
+
+                                    $$('departments').getList().add({ id: '', value: '' });
                                 }
-                                /*let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Добавление типа заявки',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: typeRequestForm,
-                                    on: {
-                                        'onShow': function () {
-                                        }
-                                    }
-                                });
-
-                                $$('departments').getList().add({ id: '', value: '' });
-
-                                window.show();*/
-
                             }
                         ]
                     }
@@ -875,6 +844,19 @@ const typeRequests = {
             }
         ]
     }
+}
+
+//Загрузка формы в контент сайта
+function loadTypeRequestFormInContent(){
+    webix.ui({
+        id: 'content',
+        rows: [
+            typeRequestForm
+        ]
+    }, $$('content'))
+
+    $$("tabs").addOption('settings', 'Дополнительные настройки', true);
+    $$("tabs").addOption('prescription', 'Предписание', true,0);
 }
 
 //fix for paste into nic-editor pane
@@ -903,40 +885,37 @@ const typeRequestForm = {
                         invalidMessage: 'Поле не может быть пустым',
                         options: 'cls_departments'
                     },
-
                     {
-                        view:"tabview",
-                        id:"tabs",
+                        view: "tabbar",
+                        id: "tabs",
+                        multiview: true,
+                        borderless:true,
+                        width: 350,
+                        options: []
+                    },
+                    {
+                        id:"views",
+                        animate:false,
+                        minHeight: 300,
                         cells: [
-                            //{ view: 'label', label: 'Предписание' },
                             {
-                                header: "Предписание",
-                                body:
-                                {
-                                    view: 'nic-editor',
-                                    id: 'prescription',
-                                    height: 450,
-                                    css: "myClass",
-                                    cdn: false,
-                                    config: {
-                                        iconsPath: '../libs/nicedit/nicEditorIcons.gif'
-                                    }
+                                view: 'nic-editor',
+                                id: 'prescription',
+                                css: "myClass",
+                                cdn: false,
+                                config: {
+                                    iconsPath: '../libs/nicedit/nicEditorIcons.gif'
                                 }
+
                             },
-                            // { view: 'text', label: 'PrescriptionLink', labelPosition: 'top', name: 'prescriptionLink' },
-                            //{ view: 'label', label: 'Дополнительные настройки' },
                             {
-                                header: "Предписание",
-                                body:
-                                {
-                                    view: 'ace-editor',
-                                    id: 'settings',
-                                    theme: 'github',
-                                    mode: 'json',
-                                    height: 450,
-                                    cdn: false
-                                }
-                            },
+                                view: 'ace-editor',
+                                id: 'settings',
+                                theme: 'github',
+                                mode: 'json',
+                                cdn: false
+
+                            }
                         ]
                     },
 
@@ -1033,9 +1012,12 @@ const typeRequestForm = {
                                                 //typeRequestTable.clearAll();
                                                 //typeRequestTable.load(url);
                                                 //webix.ui(typeRequests, $$('show_layout'));
-                                                setTimeout(function() {
-                                                    window.location.reload(true)
-                                                }, 500)
+                                                webix.ui({
+                                                    id: 'content',
+                                                    rows: [
+                                                        typeRequests
+                                                    ]
+                                                }, $$('content'))
                                             } else {
                                                 webix.message({text: data.text(), type: 'error'});
                                             }
@@ -1052,8 +1034,14 @@ const typeRequestForm = {
                                 value: 'Отмена',
                                 maxWidth: 300   ,
                                 click: function (){
-                                    window.location.reload(true)
-                                    //webix.ui(typeRequests, $$('show_layout'));
+                                    //window.location.reload(true)
+
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            typeRequests
+                                        ]
+                                    }, $$('content'))
                                 }
                             }
                         ]
@@ -1516,6 +1504,11 @@ webix.ready(function() {
                         cols: [
                             {
                                 view: 'label',
+                                width: 40,
+                                template: "<img height='35px' width='35px' src = \"favicon.ico\">"
+                            },
+                            {
+                                view: 'label',
                                 minWidth: 400,
                                 label: '<span style="font-size: 1.0rem">Личный кабинет администратора</span>',
                             },
@@ -1536,13 +1529,13 @@ webix.ready(function() {
                         id: 'sidebar',
                         css: 'webix_dark',
                         data: [
-                            { id: "Departments", value: 'Подразделения' },
-                            { id: "DepartmentUsers", value: 'Пользователи подразделений' },
-                            { id: "Requests", value: 'Заявки' },
-                            { id: "TypeRequests", value: 'Типы заявок' },
-                            { id: "Principals", value: 'Пользователи' },
-                            { id: "Templates", value: 'Шаблоны сообщений' },
-                            { id: "Statistic", value: 'Статистика' },
+                            { id: "Departments", icon: "fas fa-globe", value: 'Подразделения' },
+                            { id: "DepartmentUsers", icon: "fas fa-user-tie",  value: 'Пользователи подразделений' },
+                            { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
+                            { id: "TypeRequests",icon: "fas fa-file-alt", value: 'Типы заявок' },
+                            { id: "Principals",icon: "fas fa-user", value: 'Пользователи' },
+                            { id: "Templates",icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
+                            { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
                             { id: "Okveds", value: 'ОКВЭДы' },
                         ],
                         on: {
