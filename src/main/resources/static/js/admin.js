@@ -1999,8 +1999,6 @@ const mailingMessages = {
                                 webix.ui(mailingMessageForm, $$('mailingMessagesId'));
 
                                 $$('mailingMessageForm').parse(data);
-
-                                window.show();
                             }
                         },
                         data: [],
@@ -2018,19 +2016,7 @@ const mailingMessages = {
                                 align: 'right',
                                 value: 'Добавить',
                                 click: function () {
-                                    let window = webix.ui({
-                                        view: 'window',
-                                        id: 'window',
-                                        head: 'Добавление сообщения рассылки',
-                                        close: true,
-                                        width: 1000,
-                                        height: 800,
-                                        position: 'center',
-                                        modal: true,
-                                        body: mailingMessageForm
-                                    });
-
-                                    window.show();
+                                    webix.ui(mailingMessageForm, $$('mailingMessagesId'));
                                 }
                             }
                         ]
@@ -2099,9 +2085,9 @@ const mailingMessageForm = {
                                         if (data.text() === 'Сообщение сохранено') {
                                             webix.message({text: data.text(), type: 'success'});
 
+                                            webix.ui(mailingMessages, $$('mailingMessageFormId'));
                                             $$('mailing_messages_table').clearAll();
                                             $$('mailing_messages_table').load('reg_mailing_message');
-                                            $$('window').close();
 
                                         } else {
                                             webix.message({text: data.text(), type: 'error'});
@@ -2119,7 +2105,7 @@ const mailingMessageForm = {
                             css: 'webix_secondary',
                             value: 'Отмена',
                             click: function () {
-                                $$('window').close();
+                                webix.ui(mailingMessages, $$('mailingMessageFormId'));
                             }
                         }]
 
