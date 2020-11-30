@@ -2128,6 +2128,11 @@ webix.ready(function() {
                         cols: [
                             {
                                 view: 'label',
+                                width: 40,
+                                template: "<img height='35px' width='35px' src = \"favicon.ico\">"
+                            },
+                            {
+                                view: 'label',
                                 minWidth: 400,
                                 label: '<span style="font-size: 1.0rem">Личный кабинет администратора</span>',
                             },
@@ -2148,16 +2153,16 @@ webix.ready(function() {
                         id: 'sidebar',
                         css: 'webix_dark',
                         data: [
-                            { id: "Departments", value: 'Подразделения' },
-                            { id: "DepartmentUsers", value: 'Пользователи подразделений' },
-                            { id: "Requests", value: 'Заявки' },
-                            { id: "TypeRequests", value: 'Типы заявок' },
-                            { id: "Principals", value: 'Пользователи' },
-                            { id: "Templates", value: 'Шаблоны сообщений' },
-                            { id: "Statistic", value: 'Статистика' },
-                            { id: "Okveds", value: 'ОКВЭДы' },
-                            { id: "Mailing", value: 'Типы рассылок'},
-                            { id: "MailingMessages", value: 'Сообщения рассылок'},
+                            { id: "Departments", icon: "fas fa-globe", value: 'Подразделения' },
+                            { id: "DepartmentUsers", icon: "fas fa-user-tie", value: 'Пользователи подразделений' },
+                            { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
+                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Типы заявок' },
+                            { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
+                            { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
+                            { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
+                            { id: "Okveds", icon: "fas fa-folder", value: 'ОКВЭДы' },
+                            { id: "Mailing", icon: "fas fa-paper-plane", value: 'Типы рассылок'},
+                            { id: "MailingMessages", icon: "fas fa-envelope", value: 'Сообщения рассылок'},
                         ],
                         on: {
                             onAfterSelect: function(id) {
