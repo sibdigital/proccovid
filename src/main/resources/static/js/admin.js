@@ -858,23 +858,9 @@ const typeRequests = {
                                 if (data.department) {
                                     data.departmentId = data.department.id;
                                 }
-/*
-                                let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Редактирование типа заявки (id: ' + data.id + ').',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: typeRequestForm,
-                                    on: {
-                                        'onShow': function () {
-                                        }
-                                    }
-                                });*/
-                                webix.ui(typeRequestForm, $$('typeRequestsId'));
+
+                                loadTypeRequestFormInContent()
+
                                 $$('typeRequestForm').parse(data);
 
                                 $$('departments').getList().add({ id: '', value: '' });
@@ -919,7 +905,9 @@ const typeRequests = {
                                 value: 'Добавить',
                                 href: "/type_request",
                                 click: function () {
-                                    webix.ui(typeRequestForm, $$('typeRequestsId'));
+                                     loadTypeRequestFormInContent()
+
+                                    $$('departments').getList().add({ id: '', value: '' });
                                 }
                                 /*let window = webix.ui({
                                     view: 'window',
@@ -949,7 +937,18 @@ const typeRequests = {
         ]
     }
 }
+//Загрузка формы в контент сайта
+function loadTypeRequestFormInContent(){
+    webix.ui({
+        id: 'content',
+        rows: [
+            typeRequestForm
+        ]
+    }, $$('content'))
 
+    $$("tabs").addOption('settings', 'Дополнительные настройки', true);
+    $$("tabs").addOption('prescription', 'Предписание', true,0);
+}
 //fix for paste into nic-editor pane
 webix.html.addStyle(".myClass p{margin-top: 0px !important;line-height: 16px !important;}");
 
@@ -976,43 +975,38 @@ const typeRequestForm = {
                         invalidMessage: 'Поле не может быть пустым',
                         options: 'cls_departments'
                     },
-
                     {
-                        view:"tabview",
-                        id:"tabs",
+                        view: "tabbar",
+                        id: "tabs",
+                        multiview: true,
+                        borderless:true,
+                        width: 350,
+                        options: []
+                    },
+                    {
+                        id:"views",
+                        animate:false,
+                        minHeight: 300,
                         cells: [
-                            //{ view: 'label', label: 'Предписание' },
                             {
-                                header: "Предписание",
-                                body:
-                                {
-                                    view: 'nic-editor',
-                                    id: 'prescription',
-                                    height: 450,
-                                    css: "myClass",
-                                    cdn: false,
-                                    config: {
-                                        iconsPath: '../libs/nicedit/nicEditorIcons.gif'
-                                    }
+                                view: 'nic-editor',
+                                id: 'prescription',
+                                css: "myClass",
+                                cdn: false,
+                                config: {
+                                    iconsPath: '../libs/nicedit/nicEditorIcons.gif'
                                 }
                             },
-                            // { view: 'text', label: 'PrescriptionLink', labelPosition: 'top', name: 'prescriptionLink' },
-                            //{ view: 'label', label: 'Дополнительные настройки' },
                             {
-                                header: "Предписание",
-                                body:
-                                {
-                                    view: 'ace-editor',
-                                    id: 'settings',
-                                    theme: 'github',
-                                    mode: 'json',
-                                    height: 450,
-                                    cdn: false
-                                }
-                            },
+                                view: 'ace-editor',
+                                id: 'settings',
+                                theme: 'github',
+                                mode: 'json',
+                                cdn: false
+
+                            }
                         ]
                     },
-
                     {
                         cols: [
                             {
@@ -1106,9 +1100,12 @@ const typeRequestForm = {
                                                 //typeRequestTable.clearAll();
                                                 //typeRequestTable.load(url);
                                                 //webix.ui(typeRequests, $$('show_layout'));
-                                                setTimeout(function() {
-                                                    window.location.reload(true)
-                                                }, 500)
+                                                webix.ui({
+                                                    id: 'content',
+                                                    rows: [
+                                                        typeRequests
+                                                    ]
+                                                }, $$('content'))
                                             } else {
                                                 webix.message({text: data.text(), type: 'error'});
                                             }
@@ -1125,8 +1122,10 @@ const typeRequestForm = {
                                 value: 'Отмена',
                                 maxWidth: 300   ,
                                 click: function (){
-                                    window.location.reload(true)
-                                    //webix.ui(typeRequests, $$('show_layout'));
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [typeRequests]
+                                    }, $$('content'))
                                 }
                             }
                         ]
