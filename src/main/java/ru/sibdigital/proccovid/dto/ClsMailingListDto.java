@@ -12,11 +12,11 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClsDepartmentDto {
+public class ClsMailingListDto {
 
     private Long id;
     private String name;
     private String description;
-    private Boolean deleted;
+    private Short status;
     private List<Okved> okveds;
 }

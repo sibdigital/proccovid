@@ -13,14 +13,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.sibdigital.proccovid.dto.ClsDepartmentDto;
-import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
-import ru.sibdigital.proccovid.dto.ClsUserDto;
-import ru.sibdigital.proccovid.dto.IdValue;
+import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSpecification;
+import ru.sibdigital.proccovid.scheduling.ScheduleTasks;
 import ru.sibdigital.proccovid.utils.DateUtils;
 
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +27,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -85,6 +85,18 @@ public class RequestService {
 
     @Autowired
     private SettingService settingService;
+
+    @Autowired
+    private ClsMailingListRepo clsMailingListRepo;
+
+    @Autowired
+    private ClsMailingListOkvedRepo clsMailingListOkvedRepo;
+
+    @Autowired
+    private RegMailingMessageRepo regMailingMessageRepo;
+
+    @Autowired
+    private ScheduleTasks scheduleTasks;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -431,19 +443,13 @@ public class RequestService {
 
         List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
         clsDepartmentOkvedRepo.deleteAll(list);
-        List<IdValue> idValues = clsDepartmentDto.getOkveds();
-        for (IdValue idValue: idValues) {
-            String path = idValue.getId();
-            String version = path.substring(0, 4);
-            String kind_code = path.substring(5);
-            String kind_name = idValue.getValue().substring(kind_code.length()+1);
-            List<Okved> okvedList = okvedRepo.findOkvedByKindCodeAndKindNameAAndVersion(kind_code, kind_name, version);
-            if (!okvedList.isEmpty()) {
-                ClsDepartmentOkved clsDepartmentOkved = new ClsDepartmentOkved();
-                clsDepartmentOkved.setDepartment(clsDepartment);
-                clsDepartmentOkved.setOkved(okvedList.get(0));
-                clsDepartmentOkvedRepo.save(clsDepartmentOkved);
-            }
+
+        List<Okved> listOkveds = clsDepartmentDto.getOkveds();
+        for (Okved okved : listOkveds) {
+            ClsDepartmentOkved clsDepartmentOkved = new ClsDepartmentOkved();
+            clsDepartmentOkved.setDepartment(clsDepartment);
+            clsDepartmentOkved.setOkved(okved);
+            clsDepartmentOkvedRepo.save(clsDepartmentOkved);
         }
 
         return clsDepartment;
@@ -485,6 +491,73 @@ public class RequestService {
         clsUserRepo.save(clsUser);
 
         return clsUser;
+    }
+
+    public ClsMailingList saveClsMailingList(ClsMailingListDto clsMailingListDto) {
+
+        ClsMailingList clsMailingList = ClsMailingList.builder()
+                .id(clsMailingListDto.getId())
+                .name(clsMailingListDto.getName())
+                .description(clsMailingListDto.getDescription())
+                .status(clsMailingListDto.getStatus())
+                .build();
+
+        clsMailingListRepo.save(clsMailingList);
+
+        List<ClsMailingListOkved> list = clsMailingListOkvedRepo.findClsMailingListOkvedByClsMailingList(clsMailingList);
+        clsMailingListOkvedRepo.deleteAll(list);
+
+        List<Okved> listOkveds = clsMailingListDto.getOkveds();
+        for (Okved okved : listOkveds) {
+            ClsMailingListOkved clsMailingListOkved = new ClsMailingListOkved();
+            clsMailingListOkved.setClsMailingList(clsMailingList);
+            clsMailingListOkved.setOkved(okved);
+            clsMailingListOkvedRepo.save(clsMailingListOkved);
+        }
+
+        return clsMailingList;
+    }
+
+    public List<ClsMailingList> getClsMailingList() {
+        return StreamSupport.stream(clsMailingListRepo.findAllByOrderByIdAsc().spliterator(), false)
+                .collect(Collectors.toList());
+    }
+
+    public RegMailingMessage saveRegMailingMessage(RegMailingMessageDto regMailingMessageDto) throws ParseException {
+        ClsMailingList clsMailing = clsMailingListRepo.findById(regMailingMessageDto.getMailingId()).orElse(null);
+        Date time = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(regMailingMessageDto.getSendingTime()).getTime());
+
+        RegMailingMessage regMailingMessage = RegMailingMessage.builder()
+                .id(regMailingMessageDto.getId())
+                .clsMailingList(clsMailing)
+                .message(regMailingMessageDto.getMessage())
+                .sendingTime(time)
+                .status(regMailingMessageDto.getStatus())
+                .build();
+
+        scheduleTasks.removeTaskFromScheduler(regMailingMessageDto.getId());
+        if (regMailingMessageDto.getStatus() == 1) {
+            scheduleTasks.addTaskToScheduler(regMailingMessageDto.getId(), regMailingMessage, time);
+        }
+
+        regMailingMessageRepo.save(regMailingMessage);
+
+        return regMailingMessage;
+    }
+
+    public RegMailingMessage setStatusToMailingMessage(Long id, Long status, String sendingTime) throws ParseException {
+        RegMailingMessage regMailingMessage = regMailingMessageRepo.findById(id).orElse(null);
+        regMailingMessage.setStatus(Short.parseShort("" + status));
+
+        scheduleTasks.removeTaskFromScheduler(id);
+        if (status == 1) {
+            Date time = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(sendingTime).getTime());
+            scheduleTasks.addTaskToScheduler(id, regMailingMessage, time);
+        }
+
+        regMailingMessageRepo.save(regMailingMessage);
+
+        return regMailingMessage;
     }
 
 }

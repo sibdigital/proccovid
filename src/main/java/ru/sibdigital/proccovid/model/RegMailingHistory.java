@@ -25,6 +25,14 @@ public class RegMailingHistory {
     @JoinColumn(name = "id_template", referencedColumnName = "id")
     private ClsTemplate clsTemplate;
 
+    @OneToOne
+    @JoinColumn(name = "id_mailing_list", referencedColumnName = "id")
+    private ClsMailingList clsMailingList;
+
+    @OneToOne
+    @JoinColumn(name = "id_mailing_message", referencedColumnName = "id")
+    private RegMailingMessage regMailingMessage;
+
     public Long getId() {
         return id;
     }
@@ -67,6 +75,22 @@ public class RegMailingHistory {
 
     public void setClsTemplate(ClsTemplate clsTemplate) {
         this.clsTemplate = clsTemplate;
+    }
+
+    public ClsMailingList getClsMailingList() {
+        return clsMailingList;
+    }
+
+    public void setClsMailingList(ClsMailingList clsMailingList) {
+        this.clsMailingList = clsMailingList;
+    }
+
+    public RegMailingMessage getRegMailingMessage() {
+        return regMailingMessage;
+    }
+
+    public void setRegMailingMessage(RegMailingMessage regMailingMessage) {
+        this.regMailingMessage = regMailingMessage;
     }
 
     @Override

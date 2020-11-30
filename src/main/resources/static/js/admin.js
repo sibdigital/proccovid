@@ -1,6 +1,7 @@
 webix.i18n.setLocale("ru-RU");
 
 const dateFormat = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s")
+const xml_format =  webix.Date.strToDate("%Y-%m-%d %H:%i:%s.S");
 
 function view_section(title) {
     return {
@@ -55,6 +56,58 @@ function addOkved(){
     }
 }
 
+function changeLinkedDepartmentOkveds(){
+    let departmentFormValues = $$('departmentForm').getValues();
+    let data = $$('okved_table').serialize();
+
+    let window = webix.ui({
+        view: 'window',
+        id: 'windowCLO',
+        head: 'ОКВЭДы подразделения \"' + departmentFormValues.name + '\" (id: '+ departmentFormValues.id +')',
+        close: true,
+        width: 1000,
+        height: 800,
+        position: 'center',
+        modal: true,
+        body: linkedOkvedsForm,
+        on: {
+            'onHide': function() {
+                window.destructor();
+            }
+        }
+
+    });
+    $$('linked_okved_table').parse(data);
+
+    window.show();
+}
+
+function changeLinkedMailingOkveds(){
+    let mailingFormValues = $$('mailingForm').getValues();
+    let data = $$('okved_table').serialize();
+
+    let window = webix.ui({
+        view: 'window',
+        id: 'windowCLO',
+        head: 'ОКВЭДы рассылки \"' + mailingFormValues.name + '\" (id: '+ mailingFormValues.id +')',
+        close: true,
+        width: 1000,
+        height: 800,
+        position: 'center',
+        modal: true,
+        body: linkedOkvedsForm,
+        on: {
+            'onHide': function() {
+                window.destructor();
+            }
+        }
+
+    });
+    $$('linked_okved_table').parse(data);
+
+    window.show();
+}
+
 function removeOkved() {
     if(!$$("okved_table").getSelectedId()){
         webix.message("Ничего не выбрано!");
@@ -68,8 +121,64 @@ function removeOkved() {
         )
 }
 
+function queueUp() {
+    webix.confirm('Вы действительно хотите поставить в очередь?')
+        .then(
+            function () {
+                var selectedRows = $$('mailing_messages_table').getSelectedId(true);
+                selectedRows.forEach(element => {
+                    var item = $$('mailing_messages_table').getItem(element.id);
+                    params = {id: item.id, status: 1, sendingTime: item.sendingTime};
+                    webix.ajax().get('/change_status', params).then(function (data) {
+                        if (data.text() === 'Статус изменен') {
+                            webix.message({
+                                text: 'Сообщение (id: ' + item.id + ') поставлено в очередь',
+                                type: 'success'
+                            });
+
+                            $$('mailing_messages_table').clearAll();
+                            $$('mailing_messages_table').load('reg_mailing_message');
+                        } else {
+                            webix.message({
+                                text: 'Не получилось поставить в очередь сообщение (id: ' + item.id + ')',
+                                type: 'error'
+                            });
+                        }
+                    })
+                })
+            }
+        )
+}
+
+function deleteFromQueue() {
+    webix.confirm('Вы действительно хотите удалить из очереди?')
+        .then(
+            function () {
+                var selectedRows = $$('mailing_messages_table').getSelectedId(true);
+                selectedRows.forEach(element => {
+                    var item = $$('mailing_messages_table').getItem(element.id);
+                    params = {id: item.id, status: 0, sendingTime: item.sendingTime};
+                    webix.ajax().get('/change_status', params).then(function (data) {
+                        if (data.text() === 'Статус изменен') {
+                            webix.message({
+                                text: 'Сообщение (id: ' + item.id + ') удалено из очереди',
+                                type: 'success'
+                            });
+                            $$('mailing_messages_table').clearAll();
+                            $$('mailing_messages_table').load('reg_mailing_message');
+                        } else {
+                            webix.message({
+                                text: 'Не получилось удалить из очереди сообщение (id: ' + item.id + ')', type: 'error'
+                            });
+                        }
+                    })
+                })
+            })
+}
+
 const departments = {
     view: 'scrollview',
+    id: 'departmentsId',
     scroll: 'xy',
     body: {
         type: 'space',
@@ -117,38 +226,49 @@ const departments = {
                             onItemDblClick: function (id) {
 
                                 let data = $$('departments_table').getItem(id);
+                                webix.ui(departmentForm, $$('departmentsId'));
 
-                                let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Редактирование подразделения (id: ' + data.id + ').',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: departmentForm,
-                                    on: {
-                                        'onShow': function () {
-                                            var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
-                                            var jsonResponse = JSON.parse(xhr.responseText);
-                                            for (var k in jsonResponse) {
-                                                var row = {
-                                                    name_okved: jsonResponse[k].value,
-                                                    path: jsonResponse[k].id,
-                                                    version: jsonResponse[k].id.substring(0, 4)
-                                                }
-                                                $$('okved_table').add(row);
-                                            }
-                                            $$('okved_version').setValue('2014');
-                                        },
-                                        'onHide': function(){
-                                            window.destructor();
-                                        }
-                                    }
-                                });
+                                // let window = webix.ui({
+                                //     view: 'window',
+                                //     id: 'window',
+                                //     head: 'Редактирование подразделения (id: ' + data.id + ').',
+                                //     close: true,
+                                //     width: 1000,
+                                //     height: 800,
+                                //     position: 'center',
+                                //     modal: true,
+                                //     body: departmentForm,
+                                //     on: {
+                                //         'onShow': function () {
+                                //             var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
+                                //             var jsonResponse = JSON.parse(xhr.responseText);
+                                //             for (var k in jsonResponse) {
+                                //                 var row = {
+                                //                     name_okved: jsonResponse[k].value,
+                                //                     path: jsonResponse[k].id,
+                                //                     version: jsonResponse[k].id.substring(0, 4)
+                                //                 }
+                                //                 $$('okved_table').add(row);
+                                //             }
+                                //             $$('okved_version').setValue('2014');
+                                //         },
+                                //         'onHide': function(){
+                                //             window.destructor();
+                                //         }
+                                //     }
+                                // });
 
                                 $$('departmentForm').parse(data);
+                                $$('departmentForm').load(
+                                    function (){
+                                        var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
+                                        var responseText = xhr.responseText.replace("\"id\":", "\"index\":");
+                                        var jsonResponse = JSON.parse(responseText);
+                                        for (var k in jsonResponse) {
+                                            var row = jsonResponse[k].okved;
+                                            $$('okved_table').add(row);
+                                        }
+                                    });
 
                                 window.show();
                             }
@@ -205,7 +325,7 @@ const departments = {
 const departmentForm = {
     view: 'scrollview',
     scroll: 'y',
-    id: 'show_layout',
+    id: 'departmentFormId',
     autowidth: true,
     autoheight: true,
     body: {
@@ -225,142 +345,95 @@ const departmentForm = {
                             },
                             {
                                 view: 'datatable', name: 'okved_table', label: '', labelPosition: 'top',
-                                height: 200,
+                                // autoheight: true,
+                                minHeight: 200,
                                 select: 'row',
                                 editable: true,
                                 id: 'okved_table',
                                 columns: [
                                     {
-                                        id: 'name_okved',
-                                        header: 'ОКВЭД',
-                                        fillspace: true,
+                                        id: 'index',
+                                        hidden: true
                                     },
                                     {
-                                        id: 'path',
-                                        visible: true,
-                                        hidden: true,
-                                        fillspace: true,
+                                        id: 'kindCode',
+                                        header: 'Код',
                                     },
                                     {
                                         id: 'version',
                                         header: 'Версия',
-                                        visible: true,
+                                    },
+                                    {
+                                        id: 'kindName',
+                                        header: 'ОКВЭД',
                                         fillspace: true,
                                     },
                                 ],
                                 data: [],
                             },
-                            {
-                                view: 'form',
-                                id: 'form_okved',
-                                elements: [
+                            {cols: [
+                                    {},
                                     {
-                                        type: 'space',
-                                        cols: [
-                                            {   view: 'richselect',
-                                                name: 'okved_version',
-                                                id: 'okved_version',
-                                                label: 'Версия',
-                                                labelPosition: 'top',
-                                                width: 200,
-                                                required: true,
-                                                options: [
-                                                    {id: '2001', value:'2001'},
-                                                    {id: '2014', value:'2014'},
-                                                    {id: 'synt', value:'Синтетический'},
-                                                    ],
-                                                on: {
-                                                    onChange() {
-                                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
-                                                    }
-                                                }},
-                                            {   view: 'richselect',
-                                                name: 'okved_richselect',
-                                                id: 'okved_richselect',
-                                                label: 'ОКВЭД',
-                                                labelPosition: 'top',
-                                                fillspace: true,
-                                                required: true,
-                                                options: {
-                                                    url: 'okveds',
-                                                    on: {
-                                                        onShow: function () {
-                                                            let values = $$('form_okved').getValues();
-                                                            let version = values.okved_version;
-                                                            if (version == '') {
-                                                                webix.message('Выберите версию ОКВЭДа');
-                                                                return;
-                                                            }
-                                                            this.getBody().filter(
-                                                                function (obj) {
-                                                                    if (typeof obj.id == 'string') {
-                                                                        return obj.id.substring(0,4) == version;
-                                                                    }
-                                                                    else
-                                                                        return false;
-                                                                })
-                                                        }
-                                                    },
-                                                },
-                                                on: {
-                                                    onChange() {
-                                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
-                                                    }
-                                                }},
-                                        ]
-                                    },
-                                    {
-                                        margin: 5,
-                                        cols: [
-                                            {view: 'button', value: 'Добавить',  click: addOkved },
-                                            {view: 'button', value: 'Удалить',  click: removeOkved},
-                                        ]
-                                    }
+                                        view: 'button',
+                                        value: 'Изменить ОКВЭДы',
+                                        align: 'right',
+                                        css: 'webix_primary',
+                                        maxWidth: 200,
+                                        click: changeLinkedDepartmentOkveds},
                                 ]
-                            }
+                            },
                         ]
                     },
                     // { view: ''},
                     { view: 'checkbox', label: 'Удален', labelPosition: 'top', name: 'deleted' },
                     {
-                        view: 'button',
-                        css: 'webix_primary',
-                        value: 'Сохранить',
-                        click: function () {
-                            if ($$('departmentForm').validate()) {
-                                let params = $$('departmentForm').getValues();
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                align: 'right',
+                                maxWidth: 200,
+                                value: 'Сохранить',
+                                click: function () {
+                                    if ($$('departmentForm').validate()) {
+                                        let params = $$('departmentForm').getValues();
 
-                                let okveds = []
-                                $$('okved_table').data.each(function (obj) {
-                                    let okved = {
-                                        id: obj.path,
-                                        value: obj.name_okved
-                                    }
-                                    okveds.push(okved);
-                                })
-                                params.okveds = okveds;
+                                        let okveds = $$('okved_table').serialize();
+                                        params.okveds = okveds;
 
-                                webix.ajax().headers({
-                                    'Content-Type': 'application/json'
-                                }).post('/save_cls_department',
-                                    params).then(function (data) {
-                                    if (data.text() === 'Подразделение сохранено') {
-                                        webix.message({text: data.text(), type: 'success'});
+                                        webix.ajax().headers({
+                                            'Content-Type': 'application/json'
+                                        }).post('/save_cls_department',
+                                            params).then(function (data) {
+                                            if (data.text() === 'Подразделение сохранено') {
+                                                webix.message({text: data.text(), type: 'success'});
 
-                                        $$('window').close();
-
-                                        const departmentsTable = $$('departments_table');
-                                        const url = departmentsTable.data.url;
-                                        departmentsTable.clearAll();
-                                        departmentsTable.load(url);
+                                                webix.ui(departments, $$('departmentFormId'));
+                                                const departmentsTable = $$('departments_table');
+                                                const url = departmentsTable.data.url;
+                                                departmentsTable.clearAll();
+                                                departmentsTable.load(url);
+                                            } else {
+                                                webix.message({text: data.text(), type: 'error'});
+                                            }
+                                        })
                                     } else {
-                                        webix.message({text: data.text(), type: 'error'});
+                                        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
                                     }
-                                })
-                            } else {
-                                webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
-                            }
-                        }
+                                }
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                maxWidth: 200,
+                                css: 'webix_secondary',
+                                value: 'Отмена',
+                                click: function () {
+                                    webix.ui(departments, $$('departmentFormId'));
+                                }
+                            },
+                        ]
                     }
                 ]
             }
@@ -832,11 +905,30 @@ const typeRequests = {
                                 value: 'Добавить',
                                 href: "/type_request",
                                 click: function () {
-
-                                    loadTypeRequestFormInContent()
+                                     loadTypeRequestFormInContent()
 
                                     $$('departments').getList().add({ id: '', value: '' });
                                 }
+                                /*let window = webix.ui({
+                                    view: 'window',
+                                    id: 'window',
+                                    head: 'Добавление типа заявки',
+                                    close: true,
+                                    width: 1000,
+                                    height: 800,
+                                    position: 'center',
+                                    modal: true,
+                                    body: typeRequestForm,
+                                    on: {
+                                        'onShow': function () {
+                                        }
+                                    }
+                                });
+
+                                $$('departments').getList().add({ id: '', value: '' });
+
+                                window.show();*/
+
                             }
                         ]
                     }
@@ -845,7 +937,6 @@ const typeRequests = {
         ]
     }
 }
-
 //Загрузка формы в контент сайта
 function loadTypeRequestFormInContent(){
     webix.ui({
@@ -858,7 +949,6 @@ function loadTypeRequestFormInContent(){
     $$("tabs").addOption('settings', 'Дополнительные настройки', true);
     $$("tabs").addOption('prescription', 'Предписание', true,0);
 }
-
 //fix for paste into nic-editor pane
 webix.html.addStyle(".myClass p{margin-top: 0px !important;line-height: 16px !important;}");
 
@@ -906,7 +996,6 @@ const typeRequestForm = {
                                 config: {
                                     iconsPath: '../libs/nicedit/nicEditorIcons.gif'
                                 }
-
                             },
                             {
                                 view: 'ace-editor',
@@ -918,7 +1007,6 @@ const typeRequestForm = {
                             }
                         ]
                     },
-
                     {
                         cols: [
                             {
@@ -1034,13 +1122,9 @@ const typeRequestForm = {
                                 value: 'Отмена',
                                 maxWidth: 300   ,
                                 click: function (){
-                                    //window.location.reload(true)
-
                                     webix.ui({
                                         id: 'content',
-                                        rows: [
-                                            typeRequests
-                                        ]
+                                        rows: [typeRequests]
                                     }, $$('content'))
                                 }
                             }
@@ -1491,6 +1575,546 @@ const okvedCreateForm = {
     }
 }
 
+const linkedOkvedsForm = {
+    view: 'scrollview',
+    id: 'linkedOkvedsForm',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            {
+                autowidth: true,
+                autoheight: true,
+                rows: [
+                    { template:"Редактируемая таблица ОКВЭДов", type:"section" },
+                    {
+                        view: 'datatable',
+                        id: 'linked_okved_table',
+                        columns: [
+                            {
+                                id: 'kindCode',
+                                header: 'Код'
+                            },
+                            {
+                                id: 'version',
+                                header: 'Версия',
+                            },
+                            {
+                                id: 'kindName',
+                                header: 'Наименование',
+                                fillspace: true,
+                            },
+                            {
+                                id: 'btnDelete',
+                                header: 'Удалить',
+                                template:"{common.trashIcon()}"
+                            },
+                        ],
+                        onClick:{
+                            "wxi-trash":function(event, id, node){
+                                this.remove(id)
+                            }
+                        }
+                    },
+                    {
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                align: 'right',
+                                maxWidth: 200,
+                                value: 'Сохранить изменения',
+                                click: function () {
+                                    var data = $$('linked_okved_table').serialize();
+                                    $$('okved_table').clearAll();
+                                    $$('okved_table').parse(data);
+                                    $$('windowCLO').close();
+                                }
+                            }
+                        ]
+                    },
+                    { template:"Поиск и добавление ОКВЭДов", type:"section" },
+                    {
+                        view: 'toolbar',
+                        rows: [
+                            {
+                                view: 'search',
+                                id: 'search',
+                                maxWidth: 300,
+                                minWidth: 100,
+                                tooltip: 'После ввода значения нажмите Enter',
+                                placeholder: "Введите код или наименование из ОКВЭД",
+                                on: {
+                                    onEnter: function () {
+                                        $$('tabbar').callEvent('onChange', [$$('tabbar').getValue()])
+                                    }
+                                }
+                            },
+                            {
+                                cols: [
+                                    {
+                                        view: 'segmented', id:'tabbar',  multiview: true,
+                                        width: 600,
+                                        optionWidth: 150,  align: 'left', padding: 10,
+                                        options: [
+                                            { value: '2001', id: '2001'},
+                                            { value: '2014', id: '2014'},
+                                            { value: 'Синтетические', id: 'synt'}
+                                        ],
+                                        on: {
+                                            onAfterRender() {
+                                                this.callEvent('onChange', ['2001']);
+                                            },
+                                            onChange: function (id) {
+                                                let version = '2001';
+                                                switch (id) {
+                                                    case '2001':
+                                                        version = '2001';
+                                                        break
+                                                    case '2014':
+                                                        version = '2014';
+                                                        break
+                                                    case 'synt':
+                                                        version = 'synt';
+                                                        break
+                                                }
+
+                                                let params = '';
+                                                let search_text = $$('search').getValue();
+                                                if (search_text) {
+                                                    params += params == '' ? '?' : '&';
+                                                    params += 'searchText=' + search_text;
+                                                }
+
+                                                let view = okvedslist_chooseOkved('list_okved/' + version + params, version, true);
+
+                                                webix.delay(function () {
+                                                    webix.ui({
+                                                        id: 'subContentOkved',
+                                                        rows: [
+                                                            view
+                                                        ]
+                                                    }, $$('subContentOkved'))
+                                                })
+                                            }
+                                        }
+                                    },
+
+                                ],
+                            }
+                        ]
+                    },
+                    {
+                        id: 'subContentOkved'
+                    }
+                ]
+            }
+        ]
+    }
+}
+
+const mailingList = {
+    view: 'scrollview',
+    id: 'mailingListId',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            {
+                autowidth: true,
+                autoheight: true,
+                rows: [
+                    {
+                        id: 'mailing_table',
+                        view: 'datatable',
+                        select: 'row',
+                        resizeColumn:true,
+                        readonly: true,
+                        columns: [
+                            { id: 'name', header: 'Наименование', adjust: true, sort: 'string', fillspace: true },
+                            { id: 'description', header: 'Описание', adjust: true, sort: 'string', fillspace: true },
+                            { id: 'status', template: function (obj) {
+                                    if (obj.status == 0) {
+                                        return 'Не действует';
+                                    }
+                                    else {
+                                        return 'Действует';
+                                    }}, header: 'Статус', adjust: true, sort: 'string' },
+                        ],
+                        on: {
+                            onChange: function () {
+                                window.location.reload();
+                            },
+                            onItemDblClick: function (id) {
+                                let data = $$('mailing_table').getItem(id);
+                                data.status = '' + data.status;
+
+                                webix.ui(mailingForm, $$('mailingListId'));
+
+                                $$('mailingForm').parse(data);
+                                $$('mailingForm').load(
+                                    function (){
+                                        var xhr = webix.ajax().sync().get('mailing_list_okveds/' + data.id);
+                                        var responseText = xhr.responseText.replace("\"id\":", "\"index\":");
+                                        var jsonResponse = JSON.parse(responseText);
+                                        for (var k in jsonResponse) {
+                                            var row = jsonResponse[k].okved;
+                                            $$('okved_table').add(row);
+                                        }
+                                    });
+                            }
+                        },
+                        data: [],
+                        url: 'cls_mailing_list',
+                    },
+                    {
+                        cols: [
+                            {},
+                            {},
+                            {},
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                align: 'right',
+                                value: 'Добавить',
+                                click: function () {
+                                    webix.ui(mailingForm, $$('mailingListId'));
+                                }
+                            }
+                        ]
+                    }]
+            }]
+    }
+}
+
+const mailingForm = {
+    view: 'scrollview',
+    scroll: 'y',
+    id: 'mailingFormId',
+    autowidth: true,
+    autoheight: true,
+    body: {
+        rows: [
+            {
+                view: 'form',
+                id: 'mailingForm',
+                autoheight: true,
+                rows: [
+                    { cols: [
+                            { view: 'text', label: 'Наименование', labelPosition: 'top', id: 'name', name: 'name', required: true, validate: webix.rules.isNotEmpty },
+                            { view: 'richselect',
+                                name: 'status',
+                                id: 'status',
+                                label: 'Статус',
+                                labelPosition: 'top',
+                                required: true,
+                                options: [
+                                    {id: "0", value:'Не действует'},
+                                    {id: "1", value:'Действует'}
+                                ]},
+                        ]},
+                    { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', autoheight: true},
+                    {
+                        view: 'form',
+                        autoheight: true,
+                        rows: [
+                            {
+                                view: 'label',
+                                label: 'ОКВЭДы',
+                                align: 'left',
+                            },
+                            {
+                                view: 'datatable', name: 'okved_table', label: '', labelPosition: 'top',
+                                // autoheight: true,
+                                minHeight: 200,
+                                select: 'row',
+                                editable: true,
+                                id: 'okved_table',
+                                columns: [
+                                    {
+                                        id: 'index',
+                                        hidden: true
+                                    },
+                                    {
+                                        id: 'kindCode',
+                                        header: 'Код',
+                                    },
+                                    {
+                                        id: 'version',
+                                        header: 'Версия',
+                                    },
+                                    {
+                                        id: 'kindName',
+                                        header: 'ОКВЭД',
+                                        fillspace: true,
+                                    },
+                                ],
+                                data: [],
+                            },
+                            {cols: [
+                                    {},
+                                    {
+                                        view: 'button',
+                                        value: 'Изменить ОКВЭДы',
+                                        align: 'right',
+                                        css: 'webix_primary',
+                                        maxWidth: 200,
+                                        click: changeLinkedMailingOkveds},
+                                ]
+                            },
+
+                        ]
+                    },
+                    { cols: [
+                            {},
+                        {
+                            view: 'button',
+                            align: 'right',
+                            maxWidth: 200,
+                            css: 'webix_primary',
+                            value: 'Сохранить рассылку',
+                            click: function () {
+                                if ($$('mailingForm').validate()) {
+                                    let params = $$('mailingForm').getValues();
+
+                                    let okveds = $$('okved_table').serialize();
+                                    params.okveds = okveds;
+                                    params.status = parseInt(params.status);
+
+                                    webix.ajax().headers({
+                                        'Content-Type': 'application/json'
+                                    }).post('/save_cls_mailing_list',
+                                        params).then(function (data) {
+                                        if (data.text() === 'Рассылка сохранена') {
+                                            webix.message({text: data.text(), type: 'success'});
+
+
+                                            webix.ui(mailingList, $$('mailingFormId'));
+                                            $$('mailing_table').clearAll();
+                                            $$('mailing_table').load('cls_mailing_list');
+                                        } else {
+                                            webix.message({text: data.text(), type: 'error'});
+                                        }
+                                    })
+                                } else {
+                                    webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                }
+                            }
+                        },
+                        {
+                            view: 'button',
+                            align: 'right',
+                            maxWidth: 200,
+                            css: 'webix_secondary',
+                            value: 'Отмена',
+                            click: function () {
+                                webix.ui(mailingList, $$('mailingFormId'));
+                            }
+                        }
+                        ]}
+                ]
+            }
+        ]
+    }
+}
+
+const mailingMessages = {
+    view: 'scrollview',
+    id: 'mailingMessagesId',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            {
+                autowidth: true,
+                autoheight: true,
+                rows: [
+                    {
+                        view: 'toolbar',
+                        id: 'mMToolbar',
+                        cols:[
+                            {},
+                            {},
+                            {},
+                            {},
+                            { view: 'button', id: 'BtnQueueUp', value: 'Поставить в очередь', align: 'right', click: queueUp},
+                            { view: 'button', id: 'BtnDeleteFromQueue', value: 'Удалить из очереди', align: 'right', click: deleteFromQueue}
+                            ]
+                    },
+                    {
+                        id: 'mailing_messages_table',
+                        view: 'datatable',
+                        select: 'row',
+                        multiselect: true,
+                        resizeColumn:true,
+                        readonly: true,
+                        columns: [
+                            { id: 'sendingTime', header: 'Время начала отправки', adjust: true, format: dateFormat, sort: "date", fillspace: true },
+                            { id: 'mailing', header: 'Тип рассылки', template: '#clsMailingList.name#', adjust: true, sort: 'string', fillspace: true },
+                            { id: 'statusMailing', header: 'Статус типа рассылки', template: function (obj) {
+                                    if (obj.clsMailingList.status == 0) {
+                                        return 'Не действует';
+                                    }
+                                    else {
+                                        return 'Действует';
+                                    }}, adjust: true, sort: 'string', fillspace: true },
+                            { id: 'message', header: 'Текст сообщения', adjust: true, fillspace: true, sort: 'text'},
+                            { id: 'status', template: function (obj) {
+                                    switch (obj.status) {
+                                        case 0: return 'Создано';
+                                            break;
+                                        case 1: return 'В очереди на отправку';
+                                            break;
+                                        case 2: return 'Отправка проведена';
+                                            break;
+                                    }}, header: 'Статус', adjust: true, sort: 'string' },
+                        ],
+                        scheme: {
+                            $init: function (obj) {
+                                obj.sendingTime = obj.sendingTime.replace("T", " ");
+                                obj.sendingTime = xml_format(obj.sendingTime);
+                            },
+                            $update:function (obj) {
+                                obj.sendingTime = obj.sendingTime.replace("T", " ");
+                                obj.sendingTime = xml_format(obj.sendingTime);
+                            },
+
+                        },
+                        on: {
+                            onItemDblClick: function (id) {
+                                let item = $$('mailing_messages_table').getItem(id);
+                                var xhr = webix.ajax().sync().get('reg_mailing_message/' + item.id);
+                                var jsonResponse = JSON.parse(xhr.responseText);
+                                var data = {
+                                    id: item.id,
+                                    mailingId: jsonResponse.clsMailingList.id,
+                                    message: jsonResponse.message,
+                                    sendingTime: jsonResponse.sendingTime.replace("T", " "),
+                                    status: ''+jsonResponse.status
+                                };
+
+                                webix.ui(mailingMessageForm, $$('mailingMessagesId'));
+
+                                $$('mailingMessageForm').parse(data);
+                            }
+                        },
+                        data: [],
+                        url: 'reg_mailing_message',
+                    },
+                    {
+                        cols: [
+                            {},
+                            {},
+                            {},
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                align: 'right',
+                                value: 'Добавить',
+                                click: function () {
+                                    webix.ui(mailingMessageForm, $$('mailingMessagesId'));
+                                }
+                            }
+                        ]
+                    }]
+            }]
+    }
+}
+
+const mailingMessageForm = {
+    view: 'scrollview',
+    scroll: 'y',
+    id: 'mailingMessageFormId',
+    autowidth: true,
+    autoheight: true,
+    body: {
+        rows: [
+            {
+                view: 'form',
+                id: 'mailingMessageForm',
+                rows: [
+                    {
+                        view: 'richselect',
+                        name: 'mailingId',
+                        id: 'mailingId',
+                        label: 'Тип рассылки',
+                        labelPosition: 'top',
+                        required: true,
+                        options: 'mailing_list_short',
+                    },
+                    { view: 'textarea', label: 'Текст сообщения', labelPosition: 'top', name: 'message', required: true,},
+                    { view: 'datepicker',
+                        label: 'Время начала отправки',
+                        labelPosition: 'top',
+                        name: 'sendingTime',
+                        stringResult:true,
+                        timepicker:true,
+                        format:webix.i18n.fullDateFormat},
+                    { view: 'richselect',
+                        name: 'status',
+                        id: 'status',
+                        label: 'Статус',
+                        labelPosition: 'top',
+                        required: true,
+                        options: [
+                            {id: "0", value:'Создано'},
+                            {id: "1", value:'В очереди на отправку'},
+                            {id: "2", value: 'Отправка проведена'}
+                        ]},
+                    { cols: [
+                        {},
+                        {
+                            view: 'button',
+                            align: 'right',
+                            maxWidth: 200,
+                            css: 'webix_primary',
+                            value: 'Сохранить',
+                            click: function () {
+                                if ($$('mailingMessageForm').validate()) {
+                                    let params = $$('mailingMessageForm').getValues();
+                                    params.status = parseInt(params.status);
+
+                                    webix.ajax().headers({
+                                        'Content-Type': 'application/json'
+                                    }).post('/save_reg_mailing_message',
+                                        params).then(function (data) {
+                                        if (data.text() === 'Сообщение сохранено') {
+                                            webix.message({text: data.text(), type: 'success'});
+
+                                            webix.ui(mailingMessages, $$('mailingMessageFormId'));
+                                            $$('mailing_messages_table').clearAll();
+                                            $$('mailing_messages_table').load('reg_mailing_message');
+
+                                        } else {
+                                            webix.message({text: data.text(), type: 'error'});
+                                        }
+                                    })
+                                } else {
+                                    webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                }
+                            }
+                        },
+                        {
+                            view: 'button',
+                            align: 'right',
+                            maxWidth: 200,
+                            css: 'webix_secondary',
+                            value: 'Отмена',
+                            click: function () {
+                                webix.ui(mailingMessages, $$('mailingMessageFormId'));
+                            }
+                        }]
+
+                    }
+                ]
+            }
+        ]
+    }
+}
+
 webix.ready(function() {
     let layout = webix.ui({
         rows: [
@@ -1530,13 +2154,15 @@ webix.ready(function() {
                         css: 'webix_dark',
                         data: [
                             { id: "Departments", icon: "fas fa-globe", value: 'Подразделения' },
-                            { id: "DepartmentUsers", icon: "fas fa-user-tie",  value: 'Пользователи подразделений' },
+                            { id: "DepartmentUsers", icon: "fas fa-user-tie", value: 'Пользователи подразделений' },
                             { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
-                            { id: "TypeRequests",icon: "fas fa-file-alt", value: 'Типы заявок' },
-                            { id: "Principals",icon: "fas fa-user", value: 'Пользователи' },
-                            { id: "Templates",icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
+                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Типы заявок' },
+                            { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
+                            { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
                             { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
-                            { id: "Okveds", value: 'ОКВЭДы' },
+                            { id: "Okveds", icon: "fas fa-folder", value: 'ОКВЭДы' },
+                            { id: "Mailing", icon: "fas fa-paper-plane", value: 'Типы рассылок'},
+                            { id: "MailingMessages", icon: "fas fa-envelope", value: 'Сообщения рассылок'},
                         ],
                         on: {
                             onAfterSelect: function(id) {
@@ -1572,6 +2198,14 @@ webix.ready(function() {
                                     }
                                     case 'Okveds': {
                                         view = okveds;
+                                        break;
+                                    }
+                                    case 'Mailing': {
+                                        view = mailingList;
+                                        break;
+                                    }
+                                    case 'MailingMessages': {
+                                        view = mailingMessages;
                                         break;
                                     }
                                 }

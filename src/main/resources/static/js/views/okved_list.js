@@ -169,4 +169,68 @@ function okvedslist(param_url, version, view_item_another_page) {
     }
 }
 
+function okvedslist_chooseOkved(param_url, version, view_item_another_page) {
+    return {
+        autowidth: true,
+        autoheight: true,
+        rows: [
+            {
+                view: 'datatable',
+                id: 'okveds_table',
+                select: 'row',
+                navigation: true,
+                resizeColumn: true,
+                pager: 'Pager',
+                datafetch: 25,
+                tooltip: {
+                    template: "<span class='webix_light'>Для добавления ОКВЭДа дважды щелкните по нему</span>"
+                },
+                columns: [
+                    {id: "kindCode", header: "Код", adjust: true},
+                    {id: "version", header: "Версия", adjust: true},
+                    {id: "kindName", header: "Наименование", adjust: true, fillspace: true},
+                    {id: "status", header: "Статус", template: function (obj) {
+                            if (obj.status == 1) {
+                                return 'Работа разрешена';
+                            }
+                            else {
+                                return 'Работа приостановлена';
+                            }
+                        }, adjust: true}
+                ],
+                scheme: {
+                    $init: function (obj) {},
+                },
+                on: {
+                    onBeforeLoad: function () {
+                        this.showOverlay("Загружаю...");
+                    },
+                    onAfterLoad: function () {
+                        this.hideOverlay();
+                        if (!this.count()) {
+                            this.showOverlay("Отсутствуют данные")
+                        }
+                    },
+                    onLoadError: function () {
+                        this.hideOverlay();
+                    },
+                    onItemDblClick: function (id) {
+                        let data = $$('okveds_table').getItem(id);
+                        $$('linked_okved_table').add(data);
+                    }
+                },
+                url: param_url
+            },
+            {
+                view: 'pager',
+                id: 'Pager',
+                height: 38,
+                size: 25,
+                group: 7,
+                template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+            }
+        ]
+    }
+}
+
 
