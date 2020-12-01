@@ -104,7 +104,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public List<ClsOrganization> findSelectedOrganizations(ClsTypeRequestDto dto) {
         if (dto.getAdditionalFields().getOkvedIds() != null || dto.getAdditionalFields().getOrganizationIds() != null) {
-            return clsOrganizationRepo.getSelectedOrganizations(dto.getAdditionalFields().getOkvedIds(), dto.getAdditionalFields().getOrganizationIds());
+            return clsOrganizationRepo.getSelectedOrganizations(dto.getAdditionalFields().getOkvedIds());
         }
         return null;
     }
