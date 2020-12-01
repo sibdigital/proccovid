@@ -1,15 +1,18 @@
 package ru.sibdigital.proccovid.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.sibdigital.proccovid.model.ClsOrganization;
+import ru.sibdigital.proccovid.model.DocRequestPrs;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long> {
+public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long>, JpaSpecificationExecutor<ClsOrganization> {
     @Query(nativeQuery = true, value = "select distinct inn, email, max(name) as name from cls_organization as co\n" +
             "            inner join (select *\n" +
             "                    from doc_request\n" +
@@ -48,4 +51,32 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
             "         group by co.inn, co.email\n" +
             "     ) as mails\n")
     List<Object[]> getOrganizationsEmailsByDocRequestStatusLast24HoursNotMailing(int reviewStatus, int mailingStatus, Date currDate);
+
+    @Query(nativeQuery = true, value = "select count(*) " +
+            "from " +
+            "   cls_organization org join reg_organization_okved orgOkved on org.id = orgOkved.id_organization " +
+            "where " +
+            "   id_okved in (:okvedIds) and not org.is_deleted")
+    Long getCountSelectedOrganizations(UUID[] okvedIds);
+
+    @Query(nativeQuery = true, value = "select count(*) " +
+            "from " +
+            "   cls_organization org  " +
+            "where " +
+            "   id in (:organizationIds) and not org.is_deleted")
+    Long getCountSelectedOrganizations(Long[] organizationIds);
+
+    @Query(nativeQuery = true, value = "select org.* " +
+            "from " +
+            "   cls_organization org join reg_organization_okved orgOkved on org.id = orgOkved.id_organization " +
+            "where" +
+            "   id_okved in (:okvedIds) and not org.is_deleted")
+    List<ClsOrganization> getSelectedOrganizations(UUID[] okvedIds);
+
+    @Query(nativeQuery = true, value = "select org.* " +
+            "from " +
+            "   cls_organization org join reg_organization_okved orgOkved on org.id = orgOkved.id_organization " +
+            "where" +
+            "   org.id in (:organizationIds) and not org.is_deleted")
+    List<ClsOrganization> getSelectedOrganizations(Long[] organizationIds);
 }

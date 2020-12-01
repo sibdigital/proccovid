@@ -1,18 +1,32 @@
 package ru.sibdigital.proccovid.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "cls_type_request", schema = "public")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
+@TypeDefs({
+        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+})
 public class ClsTypeRequest {
 
     @Id
@@ -32,10 +46,18 @@ public class ClsTypeRequest {
     private Timestamp beginVisible;
     private Timestamp endVisible;
     private int sortWeight;
+    private String consent;
 
     @OneToOne
     @JoinColumn(name = "id_department", referencedColumnName = "id")
     private ClsDepartment department;
+
+    @OneToMany(mappedBy = "regTypeRequestRestrictionTypeId.clsTypeRequest")
+    private Set<RegTypeRequestRestrictionType> regTypeRequestRestrictionTypes;
+
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private AdditionalFields additionalFields;
 
     public Long getId() {
         return id;
@@ -149,12 +171,38 @@ public class ClsTypeRequest {
         this.sortWeight = sortWeight;
     }
 
+    @Basic
+    @Column(name = "consent")
+    public String getConsent() {
+        return consent;
+    }
+
+    public void setConsent(String consent) {
+        this.consent = consent;
+    }
+
     public ClsDepartment getDepartment() {
         return department;
     }
 
     public void setDepartment(ClsDepartment department) {
         this.department = department;
+    }
+
+    public Set<RegTypeRequestRestrictionType> getRegTypeRequestRestrictionTypes() {
+        return regTypeRequestRestrictionTypes;
+    }
+
+    public void setRegTypeRequestRestrictionTypes(Set<RegTypeRequestRestrictionType> regTypeRequestRestrictionTypes) {
+        this.regTypeRequestRestrictionTypes = regTypeRequestRestrictionTypes;
+    }
+
+    public AdditionalFields getAdditionalFields() {
+        return additionalFields;
+    }
+
+    public void setAdditionalFields(AdditionalFields additionalFields) {
+        this.additionalFields = additionalFields;
     }
 
     public String getValue() {

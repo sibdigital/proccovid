@@ -1,6 +1,8 @@
 package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -16,15 +18,24 @@ import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
 import ru.sibdigital.proccovid.repository.ClsMailingListOkvedRepo;
 import ru.sibdigital.proccovid.repository.ClsMailingListRepo;
 import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
-import ru.sibdigital.proccovid.service.OkvedServiceImpl;
+import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
+import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
+import ru.sibdigital.proccovid.service.OkvedService;
+import ru.sibdigital.proccovid.service.OrganizationService;
+import ru.sibdigital.proccovid.service.PrescriptionService;
 import ru.sibdigital.proccovid.service.RequestService;
 
+import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
 public class AdminController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
+
+    private static boolean publicationPrescriptionInProgress = false;
 
     @Autowired
     private ApplicationConstants applicationConstants;
@@ -33,7 +44,7 @@ public class AdminController {
     private RequestService requestService;
 
     @Autowired
-    private OkvedServiceImpl okvedServiceImpl;
+    private OkvedService okvedService;
 
     @Autowired
     private ClsDepartmentOkvedRepo clsDepartmentOkvedRepo;
@@ -47,7 +58,11 @@ public class AdminController {
     @Autowired
     private RegMailingMessageRepo regMailingMessageRepo;
 
+    @Autowired
+    private PrescriptionService prescriptionService;
 
+    @Autowired
+    private OrganizationService organizationService;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -121,7 +136,7 @@ public class AdminController {
     @PostMapping("/save_cls_type_request")
     public @ResponseBody String saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
         try {
-            requestService.saveClsTypeRequest(clsTypeRequestDto);
+            prescriptionService.saveClsTypeRequest(clsTypeRequestDto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return "Не удалось сохранить тип заявки";
@@ -170,7 +185,12 @@ public class AdminController {
         return "Пользователь сохранен";
     }
 
-
+    @GetMapping("/okveds")
+    public @ResponseBody List<OkvedDto> getOkveds() {
+        List<OkvedDto> list = okvedService.getOkveds()
+                .stream().map(okved -> new OkvedDto(okved.getId(), okved.getKindCode(), okved.getKindName())).collect(Collectors.toList());
+        return list;
+    }
 
     @GetMapping("/department_okveds/{id_department}")
     public @ResponseBody List<ClsDepartmentOkved> getListOkvedsDto(@PathVariable("id_department") Long id_department){
@@ -251,5 +271,64 @@ public class AdminController {
             return "Не удалось изменить статус у сообщения (id: " + id_mailing_message + ")";
         }
         return "Статус изменен";
+    }
+
+    @GetMapping("/cls_restriction_types")
+    public @ResponseBody List<ClsRestrictionType> getListRestrictionTypes() {
+        return prescriptionService.getClsRestrictionTypes();
+    }
+
+    @PostMapping("/save_cls_restriction_type")
+    public @ResponseBody String saveClsRestrictionType(@RequestBody ClsRestrictionTypeDto clsRestrictionTypeDto) {
+        try {
+            prescriptionService.saveClsRestrictionType(clsRestrictionTypeDto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить тип ограничения";
+        }
+        return "Тип ограничения сохранен";
+    }
+
+    @PostMapping("/selected_organizations/count")
+    public @ResponseBody Long getCountSelectedOrganizations(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+        return prescriptionService.getCountSelectedOrganizations(clsTypeRequestDto);
+    }
+
+    @GetMapping("/selected_organizations")
+    public @ResponseBody List<ClsOrganization> getSelectedOrganizations(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+        return prescriptionService.findSelectedOrganizations(clsTypeRequestDto);
+    }
+
+    @GetMapping("/cls_organizations")
+    public @ResponseBody Map<String, Object> getListOrganizations(@RequestParam(value = "inn", required = false) String inn,
+                                           @RequestParam(value = "start", required = false) Integer start,
+                                           @RequestParam(value = "count", required = false) Integer count) {
+
+        int page = start == null ? 0 : start / 25;
+        int size = count == null ? 25 : count;
+
+        ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
+        searchCriteria.setInn(inn);
+
+        Page<ClsOrganization> docRequestPrsPage = organizationService.getOrganizationsByCriteria(searchCriteria, page, size);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", docRequestPrsPage.getContent());
+        result.put("pos", (long) page * size);
+        result.put("total_count", docRequestPrsPage.getTotalElements());
+        return result;
+    }
+
+    @GetMapping("publish_prescription")
+    public @ResponseBody String publishPrescription(@RequestParam(value = "id") Long id) {
+        publicationPrescriptionInProgress = true;
+        try {
+            prescriptionService.publishPrescription(id);
+        } catch (Exception e) {
+            publicationPrescriptionInProgress = false;
+            log.error(e.getMessage(), e);
+        }
+
+        return "";
     }
 }

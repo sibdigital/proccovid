@@ -1,6 +1,7 @@
 package ru.sibdigital.proccovid.model;
 
 public enum ReviewStatuses {
+    NEW(100),
     OPENED(0),
     CONFIRMED(1),
     REJECTED(2),

@@ -329,6 +329,7 @@ const departmentForm = {
     autowidth: true,
     autoheight: true,
     body: {
+        type: 'space',
         rows: [
             {
                 view: 'form',
@@ -581,6 +582,7 @@ const departmentUserForm = {
     autowidth: true,
     autoheight: true,
     body: {
+        type: 'space',
         rows: [
             {
                 view: 'form',
@@ -829,7 +831,7 @@ const typeRequests = {
                         // pager: 'Pager',
                         datafetch: 25,
                         columns: [
-                            {id: "activityKind", header: "Наименование", template: "#activityKind#", width: 1000},
+                            {id: "activityKind", header: "Наименование", template: "#activityKind#", adjust: true, maxWidth: 500},
                             // {id: "shortName", header: "Краткое наименование", template: "#shortName#", width: 300},
                             // {id: "prescription", header: "Prescription", template: "#prescription#", adjust: true},
                             // {id: "prescriptionLink", header: "PrescriptionLink", template: "#prescriptionLink#", adjust: true},
@@ -838,7 +840,12 @@ const typeRequests = {
                             // {id: "statusVisible", header: "Статус видимости", template: "#statusVisible#", adjust: true},
                             // {id: "beginVisible", header: "Дата начала видимости", template: "#beginVisible#", adjust: true},
                             // {id: "endVisible", header: "Дата конца видимости", template: "#endVisible#", adjust: true},
-                            {id: "sortWeight", header: "Вес сортировки", template: "#sortWeight#", adjust: true},
+                            {id: "sortWeight", header: "Вес сортировки", template: "#sortWeight#"},
+                            {id: "publication",
+                                template:function(obj){
+                                    return "<div class='webix_el_button'><button class='webixtype_base'>Click me</button></div>";
+                                }
+                            }
                         ],
                         on: {
                             onBeforeLoad: function () {
@@ -853,7 +860,7 @@ const typeRequests = {
                             onLoadError: function () {
                                 this.hideOverlay();
                             },
-                            onItemDblClick: function (id) {
+                            onItemClick: function (id) {
                                 let data = $$('type_requests_table').getItem(id);
                                 if (data.department) {
                                     data.departmentId = data.department.id;
@@ -881,7 +888,12 @@ const typeRequests = {
                                     $$('endVisible').setValue(new Date(data.endVisible));
                                 }
 
-                            }
+                            },
+                            onClick: {
+                                webixtype_base:function(ev, id, html){
+                                    webix.alert("Clicked row "+id);
+                                }
+                            },
                         },
                         url: 'cls_type_requests'
                     },
@@ -952,6 +964,11 @@ function loadTypeRequestFormInContent(){
 //fix for paste into nic-editor pane
 webix.html.addStyle(".myClass p{margin-top: 0px !important;line-height: 16px !important;}");
 
+const customFields = {
+    okveds: [],
+    organizations: []
+};
+
 const typeRequestForm = {
     view: 'scrollview',
     scroll: 'xy',
@@ -959,6 +976,7 @@ const typeRequestForm = {
     autowidth: true,
     autoheight: true,
     body: {
+        type: 'space',
         rows: [
             {
                 view: 'form',
@@ -974,6 +992,15 @@ const typeRequestForm = {
                         labelWidth:500,
                         invalidMessage: 'Поле не может быть пустым',
                         options: 'cls_departments'
+                    },
+                    {
+                        view: 'combo',
+                        id: 'restrictionTypeId',
+                        name: 'restrictionTypeIds',
+                        label: 'Тип ограничения',
+                        labelWidth: 190,
+                        invalidMessage: 'Поле не может быть пустым',
+                        options: 'cls_restriction_types'
                     },
                     {
                         view: "tabbar",
@@ -1003,7 +1030,6 @@ const typeRequestForm = {
                                 theme: 'github',
                                 mode: 'json',
                                 cdn: false
-
                             }
                         ]
                     },
@@ -1073,6 +1099,238 @@ const typeRequestForm = {
                     },
                     { view: 'text', label: 'Вес сортировки',labelWidth:190, name: 'sortWeight', required: true, validate: webix.rules.isNumber }, //
                     {
+                        id: 'organizations',
+                        rows: [
+                            { template: 'Условия выбора организаций', type: 'section' },
+                            { view: 'label', id: 'selectedOkveds', hidden: true },
+                            { view: 'label', id: 'selectedInns', hidden: true },
+                            {
+                                id: 'searchByOkved',
+                                hidden: true,
+                                rows: [
+                                    {
+                                        view: 'tree',
+                                        id: 'treeOkveds',
+                                        template: '{common.checkbox()}   #value#',
+                                        threeState: true,
+                                        minHeight: 450,
+                                        scheme: {
+                                            $group: '#id#'
+                                        },
+                                        on: {
+                                            onItemCheck(id, state) {
+                                                let okved = this.getItem(id);
+                                                if (state) {
+                                                    customFields.okveds.push(okved);
+                                                } else {
+                                                    customFields.okveds = customFields.okveds.filter(okved => okved.id != id);
+                                                }
+                                            }
+                                        },
+                                        url: 'okveds',
+                                    },
+                                    {
+                                        cols: [
+                                            {
+                                                view: 'button',
+                                                // align: 'right',
+                                                css: 'webix_primary',
+                                                value: 'Выбрать',
+                                                maxWidth: 300,
+                                                click: function () {
+                                                    $$('searchByOkved').hide();
+                                                    $$('addButtons').show();
+
+                                                    let treeOkveds = $$('treeOkveds');
+
+                                                    const params = {};
+                                                    params.additionalFields = {};
+                                                    params.additionalFields.okvedIds = treeOkveds.getChecked();
+
+                                                    webix.ajax()
+                                                        .headers({'Content-type': 'application/json'})
+                                                        .post('selected_organizations/count', params).then(data => {
+                                                            $$('countOrganizations').setHTML('Количество организаций: ' + data.json());
+                                                            if (customFields.okveds.length > 0) {
+                                                                let html = '';
+                                                                customFields.okveds.forEach(okved => {
+                                                                    html += okved.value + ' ';
+                                                                })
+                                                                $$('selectedOkveds').setHTML(html);
+                                                                $$('selectedOkveds').show();
+                                                            } else {
+                                                                $$('selectedOkveds').hide();
+                                                            }
+                                                    });
+                                                }
+                                            },
+                                            {
+                                                view: 'button',
+                                                // align: 'right',
+                                                css: 'webix_primary',
+                                                value: 'Отмена',
+                                                maxWidth: 300,
+                                                click: function () {
+                                                    $$('searchByOkved').hide();
+                                                    $$('addButtons').show();
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'searchByInn',
+                                hidden: true,
+                                rows: [
+                                    {
+                                        view: 'label',
+                                        label: 'Выбранные организации:',
+                                        hidden: true,
+                                    },
+                                    {
+                                        view: 'search',
+                                        id: 'search',
+                                        maxWidth: 300,
+                                        minWidth: 100,
+                                        tooltip: 'после ввода значения нажмите Enter',
+                                        placeholder: "ИНН",
+                                        on: {
+                                            onEnter: function () {
+                                                if ($$('organizations')) {
+                                                    $$('searchByInn').removeView('organizations');
+                                                }
+                                                $$('searchByInn').addView({
+                                                    id: 'organizations',
+                                                    rows: [
+                                                        {
+                                                            view: 'datatable',
+                                                            id: 'organizations_table',
+                                                            minHeight: 450,
+                                                            select: 'row',
+                                                            navigation: true,
+                                                            resizeColumn: true,
+                                                            pager: 'Pager',
+                                                            datafetch: 25,
+                                                            columns: [
+                                                                {id: "orgId", checkValue:'on', uncheckValue:'off', template: '{common.checkbox()}' },
+                                                                {id: "inn", header: "ИНН", template: "#inn#", adjust: true},
+                                                                {id: "name", header: "Наименование организации/ИП", template: "#name#", adjust: true},
+                                                            ],
+                                                            on: {
+                                                                onBeforeLoad: function () {
+                                                                    this.showOverlay("Загружаю...");
+                                                                },
+                                                                onAfterLoad: function () {
+                                                                    this.hideOverlay();
+                                                                    if (!this.count()) {
+                                                                        this.showOverlay("Отсутствуют данные")
+                                                                    }
+                                                                },
+                                                                onLoadError: function () {
+                                                                    this.hideOverlay();
+                                                                },
+                                                                onCheck: function (rowId, colId, state) {
+                                                                    let organization = this.getItem(rowId);
+                                                                    if (state === 'on') {
+                                                                        customFields.organizations.push(organization);
+                                                                    } else {
+                                                                        customFields.organizations = customFields.organizations.filter(organization => organization.id != rowId);
+                                                                    }
+                                                                }
+                                                            },
+                                                            url: 'cls_organizations?inn=' + $$('search').getValue()
+                                                        },
+                                                        {
+                                                            view: 'pager',
+                                                            id: 'Pager',
+                                                            height: 38,
+                                                            size: 25,
+                                                            group: 5,
+                                                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                                                        }
+                                                    ],
+                                                }, 2);
+                                                $$('buttonSelectInns').show();
+                                            }
+                                        }
+                                    },
+                                    {
+                                        cols: [
+                                            {
+                                                view: 'button',
+                                                id: 'buttonSelectInns',
+                                                hidden: true,
+                                                // align: 'right',
+                                                css: 'webix_primary',
+                                                value: 'Выбрать',
+                                                maxWidth: 300,
+                                                click: function () {
+                                                    $$('searchByInn').hide();
+                                                    $$('addButtons').show();
+
+                                                    if (customFields.organizations.length > 0) {
+                                                        let html = '';
+                                                        customFields.organizations.forEach(organization => {
+                                                            html += organization.inn + ' ';
+                                                        })
+                                                        $$('selectedInns').setHTML(html);
+                                                        $$('selectedInns').show();
+                                                    } else {
+                                                        $$('selectedInns').setHTML('');
+                                                        $$('selectedInns').hide();
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                view: 'button',
+                                                // align: 'right',
+                                                css: 'webix_primary',
+                                                value: 'Отмена',
+                                                maxWidth: 300,
+                                                click: function () {
+                                                    $$('searchByInn').hide();
+                                                    $$('addButtons').show();
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'addButtons',
+                                cols: [
+                                    {
+                                        view: 'button',
+                                        // align: 'right',
+                                        css: 'webix_primary',
+                                        value: 'Выбрать по ОКВЭД',
+                                        maxWidth: 300,
+                                        click: function () {
+                                            $$('addButtons').hide();
+                                            $$('searchByOkved').show();
+                                            // webix.ajax().get('department_okveds/' + $$('departments').getValue()).then(function (data) {
+                                            //     $$('treeOkveds').parse(data.json());
+                                            // })
+                                        }
+                                    },
+                                    {
+                                        view: 'button',
+                                        // align: 'right',
+                                        css: 'webix_primary',
+                                        value: 'Выбрать по ИНН',
+                                        maxWidth: 300,
+                                        click: function () {
+                                            $$('addButtons').hide();
+                                            $$('searchByInn').show();
+                                        }
+                                    }
+                                ]
+                            },
+                            { view: 'label', id: 'countOrganizations', label: 'Количество организаций: 0' },
+                        ]
+                    },
+                    {
                         cols: [
                             {},
                             {
@@ -1086,6 +1344,9 @@ const typeRequestForm = {
                                         let params = $$('typeRequestForm').getValues();
                                         params.prescription = $$('prescription').getValue();
                                         params.settings = $$('settings').getValue();
+                                        params.additionalFields = {};
+                                        params.additionalFields.okvedIds = customFields.okveds.map(okved => okved.id);
+                                        params.additionalFields.organizationIds = customFields.organizations.map(organizations => organizations.id);
 
                                         webix.ajax().headers({
                                             'Content-Type': 'application/json'
@@ -1132,6 +1393,171 @@ const typeRequestForm = {
                     }
                 ]
             }
+        ]
+    }
+}
+
+const restrictionTypes = {
+    view: 'scrollview',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            {
+                autowidth: true,
+                autoheight: true,
+                rows: [
+                    {
+                        view: 'datatable',
+                        id: 'restriction_types_table',
+                        minHeight: 570,
+                        select: 'row',
+                        navigation: true,
+                        resizeColumn: true,
+                        // pager: 'Pager',
+                        datafetch: 25,
+                        columns: [
+                            {id: "name", header: "Наименование", template: "#name#", width: 1000},
+                        ],
+                        on: {
+                            onBeforeLoad: function () {
+                                this.showOverlay("Загружаю...");
+                            },
+                            onAfterLoad: function () {
+                                this.hideOverlay();
+                                if (!this.count()) {
+                                    this.showOverlay("Отсутствуют данные")
+                                }
+                            },
+                            onLoadError: function () {
+                                this.hideOverlay();
+                            },
+                            onItemClick: function (id) {
+                                let data = $$('restriction_types_table').getItem(id);
+
+                                webix.ui({
+                                    id: 'content',
+                                    rows: [
+                                        restrictionTypeForm
+                                    ]
+                                }, $$('content'));
+
+                                $$('restrictionTypeForm').parse(data);
+                            }
+                        },
+                        url: 'cls_restriction_types'
+                    },
+                    {
+                        cols: [
+                            // {
+                            //     view: 'pager',
+                            //     id: 'Pager',
+                            //     height: 38,
+                            //     size: 25,
+                            //     group: 5,
+                            //     template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                            // },
+                            {},
+                            {},
+                            {},
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                value: 'Добавить',
+                                click: function () {
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            restrictionTypeForm
+                                        ]
+                                    }, $$('content'));
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+
+const restrictionTypeForm = {
+    view: 'scrollview',
+    scroll: 'y',
+    id: 'show_layout',
+    autowidth: true,
+    autoheight: true,
+    body: {
+        type: 'space',
+        rows: [
+            {
+                view: 'form',
+                id: 'restrictionTypeForm',
+                elements: [
+                    { view: 'text', label: 'Наименование', labelPosition: 'top', name: 'name', required: true, validate: webix.rules.isNotEmpty },
+                    {
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                value: 'Сохранить',
+                                maxWidth: 300,
+                                click: function () {
+                                    if ($$('restrictionTypeForm').validate()) {
+                                        let params = $$('restrictionTypeForm').getValues();
+
+                                        webix.ajax().headers({
+                                            'Content-Type': 'application/json'
+                                        }).post('/save_cls_restriction_type',
+                                            params).then(function (data) {
+                                            if (data.text() === 'Тип ограничения сохранен') {
+                                                webix.message({text: data.text(), type: 'success'});
+
+                                                webix.ui({
+                                                    id: 'content',
+                                                    rows: [
+                                                        restrictionTypes
+                                                    ]
+                                                }, $$('content'));
+                                            } else {
+                                                webix.message({text: data.text(), type: 'error'});
+                                            }
+                                        })
+                                    } else {
+                                        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                    }
+                                }
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                css: 'webix_primary',
+                                value: 'Отмена',
+                                maxWidth: 300,
+                                click: function () {
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [typeRequests]
+                                    }, $$('content'))
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+
+const organizations = {
+    view: 'scrollview',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            { view: 'label', label: 'Раздел в разработке.' },
         ]
     }
 }
@@ -2155,8 +2581,10 @@ webix.ready(function() {
                         data: [
                             { id: "Departments", icon: "fas fa-globe", value: 'Подразделения' },
                             { id: "DepartmentUsers", icon: "fas fa-user-tie", value: 'Пользователи подразделений' },
+                            { id: "Organizations",icon: "fas fa-file-alt", value: 'Организации' },
                             { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
-                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Типы заявок' },
+                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Предписания' },
+                            { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
                             { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
                             { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
                             { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
@@ -2206,6 +2634,14 @@ webix.ready(function() {
                                     }
                                     case 'MailingMessages': {
                                         view = mailingMessages;
+                                        break;
+                                    }
+                                    case 'RestrictionTypes': {
+                                        view = restrictionTypes;
+                                        break;
+                                    }
+                                    case 'Organizations': {
+                                        view = organizations;
                                         break;
                                     }
                                 }
