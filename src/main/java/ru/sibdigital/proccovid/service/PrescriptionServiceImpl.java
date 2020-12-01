@@ -133,8 +133,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     }
 
     private void createRequest(ClsTypeRequest prescription, ClsOrganization organization) {
-        docRequestRepo.find
-
         ClsDepartment department = prescription.getDepartment();
 
 //        RegOrganizationOkved mainOrganizationOkved = organization.getRegOrganizationOkveds()
