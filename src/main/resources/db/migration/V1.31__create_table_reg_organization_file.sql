@@ -14,5 +14,5 @@ create table if not exists reg_organization_file
     original_file_name text, -- имя файла при загрузке
     file_extension varchar(16), --расширение файла
     hash text, -- хэшсумма файла
-    file_size long -- размер файла
+    file_size integer -- размер файла
 );
