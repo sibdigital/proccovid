@@ -1403,6 +1403,14 @@ const statistic = {
                     {
                         view: 'label',
                         label: "<a href='actualDepartments/statistic' target='_blank'>Статистика по актуальным заявкам по подразделениям</a>"
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='numberOfSubscribersForEachMailing/statistic' target='_blank'>Количество подписчиков на каждый вид рассылки</a>"
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='numberOfMailsSent/statistic' target='_blank'>Количество отправленных сообщений</a>"
                     }
                 ]
             }

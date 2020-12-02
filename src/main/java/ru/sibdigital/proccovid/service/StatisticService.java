@@ -18,6 +18,12 @@ public interface StatisticService {
     Map<String, Object> getActualRequestNumberWorkerStatisticForEeachOrganization();
     Map<String, Object> getActualRequestNumberWorkerStatisticForEeachDepartment();
 
+    List<Map<String, Object>> getNumberOfSubscribersStatisticForEachMailing();
+    Integer getCountOfSubscribers();
+
+    List<Map<String, Object>> getNumberOfMailSentForEachMailing(String dateStart, String dateEnd);
+    List<Map<String, Object>> getNumberOfMailSentForEachMailing(Integer status, String dateStart, String dateEnd);
+
 
     Map getTotalDachaStatistic();
     Map getTotalStatistic(Integer idTypeRequest);
