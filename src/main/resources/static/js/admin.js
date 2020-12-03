@@ -176,6 +176,29 @@ function deleteFromQueue() {
             })
 }
 
+function processFiles() {
+    webix.confirm('Вы действительно хотите запустить загрузку ЕГРЮЛ/ЕГРИП?')
+        .then(
+            function () {
+                webix.ajax().sync().get('/process_egrul_egrip_files');
+                // webix.ajax().get('/process_egrul_egrip_files', )
+                    // .then(function (data) {
+                    // if (data.text() === 'Ok') {
+                    //     webix.message({
+                    //         text: 'Запущена загрузка',
+                    //         type: 'success'
+                    //     });
+                    // } else {
+                    //     webix.message({
+                    //         text: 'Не удалось запустить загрузку',
+                    //         type: 'error'
+                    //     });
+                    // }
+                // })
+            }
+        )
+}
+
 const departments = {
     view: 'scrollview',
     id: 'departmentsId',
@@ -2115,6 +2138,73 @@ const mailingMessageForm = {
     }
 }
 
+const fias = {
+    view: 'scrollview',
+    scroll: 'xy',
+    body: {
+        type: 'space',
+        rows: [
+            {
+                id: 'formFias',
+                view: 'form',
+                complexData: true,
+                rows: [
+                    view_section('Загрузка ФИАС'),
+                    {
+                        cols: [
+                            {
+                                view: 'button',
+                                value: 'Загрузка ФИАС',
+                                align: 'left',
+                                maxWidth: 400,
+                                css: 'webix_primary',
+                                click: function (){
+                                    window.open('/upload_fias');
+                                }
+                            },
+                            {},
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'formEgrulEgrip',
+                view: 'form',
+                complexData: true,
+                rows: [
+                    view_section('Загрузка ЕГРЮЛ/ЕГРИП'),
+                    {
+                        cols: [
+                            {
+                                view: 'button',
+                                value: 'Загрузка ЕГРЮЛ/ЕГРИП',
+                                align: 'left',
+                                maxWidth: 400,
+                                css: 'webix_primary',
+                                click: processFiles
+                            }
+                        ],
+                    },
+                    {
+                        cols: [
+                            {
+                                view: 'button',
+                                value: 'Получить данные таблицы миграции',
+                                align: 'left',
+                                maxWidth: 400,
+                                css: 'webix_primary',
+                                click: function () {
+                                    window.open('/migration_data');
+                                }
+                            }
+                        ],
+                    },
+                ]
+            },
+        ]
+    }
+}
+
 webix.ready(function() {
     let layout = webix.ui({
         rows: [
@@ -2163,6 +2253,7 @@ webix.ready(function() {
                             { id: "Okveds", icon: "fas fa-folder", value: 'ОКВЭДы' },
                             { id: "Mailing", icon: "fas fa-paper-plane", value: 'Типы рассылок'},
                             { id: "MailingMessages", icon: "fas fa-envelope", value: 'Сообщения рассылок'},
+                            { id: "Fias", icon: "fas fa-download", value: 'Загрузка ФИАС, ЕГРЮЛ'}
                         ],
                         on: {
                             onAfterSelect: function(id) {
@@ -2206,6 +2297,10 @@ webix.ready(function() {
                                     }
                                     case 'MailingMessages': {
                                         view = mailingMessages;
+                                        break;
+                                    }
+                                    case 'Fias': {
+                                        view = fias;
                                         break;
                                     }
                                 }

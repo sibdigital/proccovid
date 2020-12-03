@@ -252,4 +252,14 @@ public class AdminController {
         }
         return "Статус изменен";
     }
+
+    @GetMapping("/upload_fias")
+    public String upload() {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser.getClsUser().getAdmin())
+        {
+            return "upload_fias";
+        }
+        return "403";
+    }
 }
