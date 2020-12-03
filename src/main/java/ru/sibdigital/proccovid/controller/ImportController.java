@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import ru.sibdigital.proccovid.service.ImportEgrulEgripService;
+//import ru.sibdigital.proccovid.service.ImportEgrulEgripService;
 import ru.sibdigital.proccovid.service.ImportFiasService;
 
 import javax.annotation.Resource;
@@ -21,8 +21,8 @@ public class ImportController {
     @Autowired
     private ImportFiasService importFiasService;
 
-    @Autowired
-    private ImportEgrulEgripService imortEgrulEgripService;
+//    @Autowired
+//    private ImportEgrulEgripService imortEgrulEgripService;
 
     @PostMapping("/process_fias_file")
     public @ResponseBody
@@ -37,13 +37,13 @@ public class ImportController {
         return importFiasService.importData(file);
     }
 
-    @GetMapping("/process_egrul_egrip_files")
-    String processFiles() {
-        try {
-            imortEgrulEgripService.importData();
-        } catch (Exception e) {
-            return "Не удалось запустить загрузку";
-        }
-        return "Ok";
-    }
+//    @GetMapping("/process_egrul_egrip_files")
+//    String processFiles() {
+//        try {
+//            imortEgrulEgripService.importData();
+//        } catch (Exception e) {
+//            return "Не удалось запустить загрузку";
+//        }
+//        return "Ok";
+//    }
 }
