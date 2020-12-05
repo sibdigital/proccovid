@@ -177,24 +177,46 @@ function deleteFromQueue() {
 }
 
 function processFiles() {
-    webix.confirm('Вы действительно хотите запустить загрузку ЕГРЮЛ/ЕГРИП?')
+    webix.confirm('Вы действительно хотите запустить загрузку ЕГРЮЛ?')
         .then(
             function () {
-                webix.ajax().sync().get('/process_egrul_egrip_files');
-                // webix.ajax().get('/process_egrul_egrip_files', )
-                    // .then(function (data) {
-                    // if (data.text() === 'Ok') {
-                    //     webix.message({
-                    //         text: 'Запущена загрузка',
-                    //         type: 'success'
-                    //     });
-                    // } else {
-                    //     webix.message({
-                    //         text: 'Не удалось запустить загрузку',
-                    //         type: 'error'
-                    //     });
-                    // }
-                // })
+                // webix.ajax().sync().get('/process_egrul_egrip_files');
+                // webix.ajax().get('/process_egrul_egrip_files');
+                webix.ajax().get('/process_egrul_files', )
+                    .then(function (data) {
+                    if (data.text() === 'Ok') {
+                        webix.message({
+                            text: 'Запущена загрузка',
+                            type: 'success'
+                        });
+                    } else {
+                        webix.message({
+                            text: 'Не удалось запустить загрузку',
+                            type: 'error'
+                        });
+                    }
+                })
+            }
+        )
+}
+function processFilesEgrip() {
+    webix.confirm('Вы действительно хотите запустить загрузку ЕГРИП?')
+        .then(
+            function () {
+                webix.ajax().get('/process_egrip_files', )
+                    .then(function (data) {
+                        if (data.text() === 'Ok') {
+                            webix.message({
+                                text: 'Запущена загрузка',
+                                type: 'success'
+                            });
+                        } else {
+                            webix.message({
+                                text: 'Не удалось запустить загрузку',
+                                type: 'error'
+                            });
+                        }
+                    })
             }
         )
 }
@@ -2177,12 +2199,21 @@ const fias = {
                         cols: [
                             {
                                 view: 'button',
-                                value: 'Загрузка ЕГРЮЛ/ЕГРИП',
+                                value: 'Загрузка ЕГРЮЛ',
                                 align: 'left',
                                 maxWidth: 400,
                                 css: 'webix_primary',
                                 click: processFiles
+                            },
+                            {
+                                view: 'button',
+                                value: 'Загрузка ЕГРИП',
+                                align: 'left',
+                                maxWidth: 400,
+                                css: 'webix_primary',
+                                click: processFilesEgrip
                             }
+
                         ],
                     },
                     {

@@ -12,6 +12,7 @@ import ru.sibdigital.proccovid.repository.ClsPrincipalRepo;
 import ru.sibdigital.proccovid.repository.RegMailingHistoryRepo;
 import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
 import ru.sibdigital.proccovid.service.EmailServiceImpl;
+import ru.sibdigital.proccovid.service.ImportEgrulEgripService;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -36,6 +37,10 @@ public class ScheduleTasks {
     @Autowired
     private RegMailingHistoryRepo regMailingHistoryRepo;
 
+    @Autowired
+    private ImportEgrulEgripService importEgrulEgripService;
+
+
     Map<Long, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
     public void addTaskToScheduler(Long id, RegMailingMessage regMailingMessage, Date date) {
@@ -52,6 +57,11 @@ public class ScheduleTasks {
             scheduledTask.cancel(true);
             jobsMap.put(id, null);
         }
+    }
+
+    public void startImportEgrulEgrip(boolean isEgrul, boolean isEgrip) {
+        Runnable task = new ImportEgrulEgrip(isEgrul, isEgrip);
+        taskScheduler.schedule(task, new Date());
     }
 
     @EventListener({ ContextRefreshedEvent.class })
@@ -109,4 +119,19 @@ public class ScheduleTasks {
         }
     }
 
+    class ImportEgrulEgrip implements Runnable {
+
+        private boolean isEgrul;
+        private boolean isEgrip;
+
+        public ImportEgrulEgrip(boolean isEgrul, boolean isEgrip) {
+            this.isEgrip = isEgrip;
+            this.isEgrul = isEgrul;
+        }
+
+        @Override
+        public void run() {
+            importEgrulEgripService.importData(isEgrul, isEgrip);
+        }
+    }
 }
