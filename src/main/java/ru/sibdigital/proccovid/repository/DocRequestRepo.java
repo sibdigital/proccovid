@@ -5,10 +5,13 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.sibdigital.proccovid.model.ClsDepartment;
 import ru.sibdigital.proccovid.model.ClsOrganization;
 import ru.sibdigital.proccovid.model.DocRequest;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -244,4 +247,52 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "from sr;")
     public Map<String, Object> getActualNumberWorkerForEachDepartment();
 
+    @Query(nativeQuery = true, value = "with slice_mails as (\n" +
+            "    select sr.id_principal, id_mailing_list\n" +
+            "    from reg_mailing_list_follower as sr\n" +
+            "    group by sr.id_mailing_list, sr.id_principal\n" +
+            "), cal_mails as (\n" +
+            "    select id_mailing_list, count(id_mailing_list) as cm\n" +
+            "    from slice_mails\n" +
+            "    group by id_mailing_list\n" +
+            "    order by cm desc\n" +
+            ")\n" +
+            "select name, cm\n" +
+            "from cls_mailing_list as cml\n" +
+            "    inner join cal_mails as cam\n" +
+            "        on (cam.id_mailing_list) = (cml.id)")
+    public List<Map<String, Object>> getNumberOfSubscribersForEachMailing();
+
+    @Query(nativeQuery = true, value = "select count(id)\n" +
+            "from cls_principal")
+    public Integer getCountOfSubscribers();
+
+    @Query(value = "with sdr as (\n" +
+            "    select id_mailing, count(id_mailing) as cnt\n" +
+            "    from reg_mailing_message as rmm\n" +
+            "    where rmm.id_mailing is not null and rmm.status = :status and rmm.sending_time between :dateStart and :dateEnd\n" +
+            "    group by rmm.id_mailing\n" +
+            "    order by id_mailing\n" +
+            ")\n" +
+            "select name, cnt\n" +
+            "from cls_mailing_list\n" +
+            "         inner join sdr\n" +
+            "                    on (cls_mailing_list.id) = (sdr.id_mailing)",
+            nativeQuery = true)
+    public List<Map<String, Object>> getNumberOfMailSentForEachMailing(@PathVariable("status") Integer status,
+                                                                                 @RequestParam(value = "dateStart") Date dateStart,
+                                                                                 @RequestParam(value = "dateEnd") Date dateEnd);
+    @Query(nativeQuery = true, value = "with sdr as (\n" +
+            "    select id_mailing, count(id_mailing) as cnt\n" +
+            "    from reg_mailing_message as rmm\n" +
+            "    where rmm.id_mailing is not null and rmm.sending_time between :dateStart and :dateEnd\n" +
+            "    group by rmm.id_mailing\n" +
+            "    order by id_mailing\n" +
+            ")\n" +
+            "select name, cnt\n" +
+            "from cls_mailing_list\n" +
+            "         inner join sdr\n" +
+            "                    on (cls_mailing_list.id) = (sdr.id_mailing);")
+    public List<Map<String, Object>> getNumberOfMailSentForEachMailing(@RequestParam(value = "dateStart") Date dateStart,
+                                                                       @RequestParam(value = "dateEnd") Date dateEnd);
 }

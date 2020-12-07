@@ -8,9 +8,7 @@ import ru.sibdigital.proccovid.repository.DocDachaRepo;
 import ru.sibdigital.proccovid.repository.DocPersonRepo;
 import ru.sibdigital.proccovid.repository.DocRequestRepo;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -95,6 +93,32 @@ public class StatisticServiceImpl implements StatisticService {
     @Override
     public Map<String, Object> getActualRequestNumberWorkerStatisticForEeachDepartment() {
         Map<String, Object> rawStatistic = docRequestRepo.getActualNumberWorkerForEachDepartment();
+        return rawStatistic;
+    }
+
+    @Override
+    public List<Map<String, Object>> getNumberOfSubscribersStatisticForEachMailing() {
+        List<Map<String, Object>> rawStatistic = docRequestRepo.getNumberOfSubscribersForEachMailing();
+        return rawStatistic;
+    }
+
+    @Override
+    public Integer getCountOfSubscribers() {
+        Integer rawStatistic = docRequestRepo.getCountOfSubscribers();
+        return rawStatistic;
+    }
+
+    @Override
+    public List<Map<String, Object>> getNumberOfMailSentForEachMailing(String dateStart, String dateEnd) {
+        List<Map<String, Object>> rawStatistic = docRequestRepo.getNumberOfMailSentForEachMailing(new Date(Long.parseLong(dateStart)), new Date(Long.parseLong(dateEnd)));
+        return rawStatistic;
+    }
+
+    @Override
+    public List<Map<String, Object>> getNumberOfMailSentForEachMailing(Integer status,
+                                                                                 String dateStart,
+                                                                                 String dateEnd) {
+        List<Map<String, Object>> rawStatistic = docRequestRepo.getNumberOfMailSentForEachMailing(status, new Date(Long.parseLong(dateStart)), new Date(Long.parseLong(dateEnd)));
         return rawStatistic;
     }
 
