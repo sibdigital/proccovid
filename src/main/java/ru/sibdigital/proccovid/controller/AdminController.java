@@ -12,13 +12,11 @@ import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
-import ru.sibdigital.proccovid.repository.ClsMailingListOkvedRepo;
-import ru.sibdigital.proccovid.repository.ClsMailingListRepo;
-import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
+import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.service.OkvedServiceImpl;
 import ru.sibdigital.proccovid.service.RequestService;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,7 +45,17 @@ public class AdminController {
     @Autowired
     private RegMailingMessageRepo regMailingMessageRepo;
 
+    @Autowired
+    private ClsNewsRepo clsNewsRepo;
 
+    @Autowired
+    private RegNewsOkvedRepo regNewsOkvedRepo;
+
+    @Autowired
+    private RegNewsOrganizationRepo regNewsOrganizationRepo;
+
+    @Autowired
+    private RegNewsStatusRepo regNewsStatusRepo;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -261,5 +269,54 @@ public class AdminController {
             return "upload_fias";
         }
         return "403";
+    }
+
+    @GetMapping("/news")
+    public @ResponseBody List<ClsNews> getListNews() {
+        return clsNewsRepo.findAll(Sort.by("id"));
+    }
+
+    @GetMapping("/news/{id_news}")
+    public @ResponseBody ClsNews getNews(@PathVariable("id_news") Long id_news) {
+        return clsNewsRepo.findById(id_news).orElse(null);
+    }
+
+    @GetMapping("/news_okveds/{id_news}")
+    public @ResponseBody List<RegNewsOkved> getListOkvedsDtoByNews(@PathVariable("id_news") Long id_news){
+        List<RegNewsOkved> list = regNewsOkvedRepo.findClsNewsOkvedByNews_Id(id_news);
+        return list;
+    }
+
+    @GetMapping("/news_inn/{id_news}")
+    public @ResponseBody List<String> getListInnByNews(@PathVariable("id_news") Long id_news){
+        List<String> list = regNewsOrganizationRepo.findInnByNews(id_news);
+        return list;
+    }
+
+    @GetMapping("/news_statuses/{id_news}")
+    public @ResponseBody List<CheckedReviewStatusDto> getListStatusesByNews(@PathVariable("id_news") Long id_news){
+        List<CheckedReviewStatusDto> initList = CheckedReviewStatusDto.getInitList();
+
+        if (id_news != Long.parseLong("-1")) {
+            Long checkedValue = Long.parseLong("1");
+            List<RegNewsStatus> list = regNewsStatusRepo.findRegNewsStatusByNews_Id(id_news);
+            for (RegNewsStatus regNewsStatus : list) {
+                int rowsId = Integer.parseInt("" + regNewsStatus.getStatusReview());
+                initList.get(rowsId).setChecked(checkedValue);
+            }
+        }
+
+        return initList;
+    }
+
+    @PostMapping("/save_news")
+    public @ResponseBody String saveNews(@RequestBody ClsNewsDto clsNewsDto) {
+        try {
+            requestService.saveNews(clsNewsDto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить новость";
+        }
+        return "Новость сохранена";
     }
 }

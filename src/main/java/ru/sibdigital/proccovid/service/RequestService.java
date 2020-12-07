@@ -99,6 +99,18 @@ public class RequestService {
     @Autowired
     private ScheduleTasks scheduleTasks;
 
+    @Autowired
+    private ClsNewsRepo clsNewsRepo;
+
+    @Autowired
+    private RegNewsOkvedRepo regNewsOkvedRepo;
+
+    @Autowired
+    private RegNewsOrganizationRepo regNewsOrganizationRepo;
+
+    @Autowired
+    private RegNewsStatusRepo regNewsStatusRepo;
+
     @Value("${upload.path:/uploads}")
     String uploadingDir;
 
@@ -559,6 +571,65 @@ public class RequestService {
         regMailingMessageRepo.save(regMailingMessage);
 
         return regMailingMessage;
+    }
+
+    public ClsNews saveNews(ClsNewsDto clsNewsDto) throws ParseException {
+        Date startTime = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(clsNewsDto.getStartTime()).getTime());
+        Date endTime = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(clsNewsDto.getEndTime()).getTime());
+
+        ClsNews clsNews = ClsNews.builder()
+                .id(clsNewsDto.getId())
+                .heading(clsNewsDto.getHeading())
+                .message(clsNewsDto.getMessage())
+                .startTime(startTime)
+                .endTime(endTime)
+                .build();
+
+        clsNewsRepo.save(clsNews);
+
+        List<RegNewsOkved> list = regNewsOkvedRepo.findClsNewsOkvedByNews(clsNews);
+        regNewsOkvedRepo.deleteAll(list);
+
+        List<Okved> listOkveds = clsNewsDto.getOkveds();
+        for (Okved okved : listOkveds) {
+            RegNewsOkved regNewsOkvedNewsOkved = new RegNewsOkved();
+            regNewsOkvedNewsOkved.setNews(clsNews);
+            regNewsOkvedNewsOkved.setOkved(okved);
+            regNewsOkvedRepo.save(regNewsOkvedNewsOkved);
+        }
+
+        List<RegNewsOrganization> list1 = regNewsOrganizationRepo.findRegNewsOrganizationByNews(clsNews);
+        regNewsOrganizationRepo.deleteAll(list1);
+
+        List<KeyValue> listInn = clsNewsDto.getInnList();
+        List<RegNewsOrganization> regNewsOrganizationList = new ArrayList<>();
+        for (KeyValue inn : listInn) {
+            List<ClsOrganization> organizationList = clsOrganizationRepo.findAllByInn(inn.getValue());
+            for (ClsOrganization organization : organizationList) {
+                RegNewsOrganization regNewsOrganization = new RegNewsOrganization();
+                regNewsOrganization.setNews(clsNews);
+                regNewsOrganization.setOrganization(organization);
+                regNewsOrganizationList.add(regNewsOrganization);
+            }
+        }
+        if (regNewsOrganizationList != null) {
+            regNewsOrganizationRepo.saveAll(regNewsOrganizationList);
+        }
+
+        List<RegNewsStatus> list3 = regNewsStatusRepo.findRegNewsStatusByNews(clsNews);
+        regNewsStatusRepo.deleteAll(list3);
+
+        List<CheckedReviewStatusDto> crsList = clsNewsDto.getStatuses();
+        for (CheckedReviewStatusDto status : crsList){
+            if (status.getChecked() == 1) {
+                RegNewsStatus regNewsStatus = new RegNewsStatus();
+                regNewsStatus.setNews(clsNews);
+                regNewsStatus.setStatusReview(status.getReviewStatus());
+                regNewsStatusRepo.save(regNewsStatus);
+            }
+        }
+
+        return clsNews;
     }
 
 }

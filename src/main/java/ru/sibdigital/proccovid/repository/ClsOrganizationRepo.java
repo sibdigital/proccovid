@@ -48,4 +48,6 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
             "         group by co.inn, co.email\n" +
             "     ) as mails\n")
     List<Object[]> getOrganizationsEmailsByDocRequestStatusLast24HoursNotMailing(int reviewStatus, int mailingStatus, Date currDate);
+
+    List<ClsOrganization> findAllByInn(String inn);
 }
