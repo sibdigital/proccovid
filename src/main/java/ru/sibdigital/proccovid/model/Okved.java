@@ -28,6 +28,7 @@ public class Okved {
     private String kindName;
     private String description;
     private String version;
+    private Long idSerial;
 
     @Id
     @Column(name = "id")
@@ -172,5 +173,16 @@ public class Okved {
     @Override
     public int hashCode() {
         return Objects.hash(classCode, subclassCode, groupCode, subgroupCode, kindCode, typeCode, path, status, kindName, description, version);
+    }
+
+    @Column(name = "id_serial")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_okved_key")
+    @SequenceGenerator(name="seq_okved_key", sequenceName = "seq_okved_key", allocationSize=1)
+    public Long getIdSerial() {
+        return idSerial;
+    }
+
+    public void setIdSerial(Long idSerial) {
+        this.idSerial = idSerial;
     }
 }

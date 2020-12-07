@@ -1,41 +1,71 @@
 package ru.sibdigital.proccovid.model;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "reg_egrul_okved", schema = "public")
 public class RegEgrulOkved {
 
-    @EmbeddedId
-    private RegEgrulOkvedId regEgrulOkvedId;
-    @Column(name = "is_main")
+    private Long id;
+    private Long idOkved;
     private Boolean isMain;
+    private RegEgrul regEgrul;
 
-    public RegEgrulOkved() {
-
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = "REG_EGRUL_OKVED_SEQ_GEN", sequenceName = "reg_egrul_okved_id_seq", allocationSize = 1, schema = "public")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REG_EGRUL_OKVED_SEQ_GEN")
+    public Long getId() {
+        return id;
     }
 
-    public RegEgrulOkved(RegEgrulOkvedId regEgrulOkvedId, Boolean isMain) {
-        this.regEgrulOkvedId = regEgrulOkvedId;
-        this.isMain = isMain;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public RegEgrulOkvedId getRegEgrulOkvedId() {
-        return regEgrulOkvedId;
+    @Basic
+    @Column(name = "id_okved")
+    public Long getIdOkved() {
+        return idOkved;
     }
 
-    public void setRegEgrulOkvedId(RegEgrulOkvedId regEgrulOkvedId) {
-        this.regEgrulOkvedId = regEgrulOkvedId;
+    public void setIdOkved(Long idOkved) {
+        this.idOkved = idOkved;
     }
 
+    @Basic
+    @Column(name = "is_main")
     public Boolean getMain() {
         return isMain;
     }
 
     public void setMain(Boolean main) {
         isMain = main;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegEgrulOkved that = (RegEgrulOkved) o;
+        return id == that.id &&
+                Objects.equals(idOkved, that.idOkved) &&
+                Objects.equals(isMain, that.isMain);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, idOkved, isMain);
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "id_egrul", referencedColumnName = "id")
+    public RegEgrul getRegEgrul() {
+        return regEgrul;
+    }
+
+    public void setRegEgrul(RegEgrul regEgrul) {
+        this.regEgrul = regEgrul;
     }
 }

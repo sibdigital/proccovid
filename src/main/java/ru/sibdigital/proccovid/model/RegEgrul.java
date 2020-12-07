@@ -7,8 +7,6 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "reg_egrul", schema = "public")
@@ -19,30 +17,32 @@ public class RegEgrul {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_reg_egrul_pk")
+    @SequenceGenerator(name="seq_reg_egrul_pk", sequenceName = "seq_reg_egrul_pk", allocationSize=1)
+    private Long id;
     @Basic
     @Column(name = "load_date", nullable = true)
     private Timestamp loadDate;
     @Basic
-    @Column(name = "inn", nullable = true, length = 20)
+    @Column(name = "inn", nullable = true, length = 10)
     private String inn;
     @Basic
     @Column(name = "data", nullable = true, columnDefinition = "jsonb")
     @Type(type = "JsonbType")
     private String data;
     @Basic
-    @Column(name = "file_path", nullable = true)
-    private String filePath;
+    @Column(name = "id_migration")
+    private Long idMigration;
 
-    @OneToMany(mappedBy = "regEgrulOkvedId.regEgrul")
-    private Set<RegEgrulOkved> regEgrulOkveds;
 
-    public UUID getId() {
+//    @OneToMany(mappedBy = "regEgrulOkvedId.regEgrul")
+//    private Set<RegEgrulOkved> regEgrulOkveds;
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -70,20 +70,21 @@ public class RegEgrul {
         this.data = data;
     }
 
-    public String getFilePath() {
-        return filePath;
+
+//    public Set<RegEgrulOkved> getRegEgrulOkveds() {
+//        return regEgrulOkveds;
+//    }
+//
+//    public void setRegEgrulOkveds(Set<RegEgrulOkved> regEgrulOkveds) {
+//        this.regEgrulOkveds = regEgrulOkveds;
+//    }
+
+    public Long getIdMigration() {
+        return idMigration;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public Set<RegEgrulOkved> getRegEgrulOkveds() {
-        return regEgrulOkveds;
-    }
-
-    public void setRegEgrulOkveds(Set<RegEgrulOkved> regEgrulOkveds) {
-        this.regEgrulOkveds = regEgrulOkveds;
+    public void setIdMigration(Long idMigration) {
+        this.idMigration = idMigration;
     }
 
     @Override
@@ -91,14 +92,11 @@ public class RegEgrul {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RegEgrul regEgrul = (RegEgrul) o;
-        return Objects.equals(id, regEgrul.id) &&
-                Objects.equals(loadDate, regEgrul.loadDate) &&
-                Objects.equals(inn, regEgrul.inn) &&
-                Objects.equals(filePath, regEgrul.filePath);
+        return Objects.equals(inn, regEgrul.inn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, loadDate, inn, filePath);
+        return Objects.hash(inn);
     }
 }

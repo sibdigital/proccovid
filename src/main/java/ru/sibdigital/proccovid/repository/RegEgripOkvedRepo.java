@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.model.RegEgripOkved;
 
-import java.util.UUID;
+import java.util.List;
+
 
 @Repository
 public interface RegEgripOkvedRepo extends JpaRepository<RegEgripOkved, Long> {
@@ -18,6 +19,13 @@ public interface RegEgripOkvedRepo extends JpaRepository<RegEgripOkved, Long> {
     @Query(value = "DELETE FROM reg_egrip_okved\n" +
             "WHERE id_egrip = :id_egrip",
             nativeQuery = true)
-    void deleteRegEgripOkved(@Param("id_egrip") UUID id_egrip);
+    void deleteRegEgripOkved(@Param("id_egrip") Long id_egrip);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM reg_egrip_okved\n" +
+            "WHERE id_egrip in (:id_egrips)",
+            nativeQuery = true)
+    void deleteRegEgrulOkveds(@Param("id_egrips") List<Long> id_egrips);
 
 }

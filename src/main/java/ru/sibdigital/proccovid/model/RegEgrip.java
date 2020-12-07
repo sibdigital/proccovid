@@ -16,30 +16,31 @@ public class RegEgrip {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_reg_egrip_pk")
+    @SequenceGenerator(name="seq_reg_egrip_pk", sequenceName = "seq_reg_egrip_pk", allocationSize=1)
+    private Long id;
     @Basic
     @Column(name = "load_date", nullable = true)
     private Timestamp loadDate;
     @Basic
-    @Column(name = "inn", nullable = true, length = 20)
+    @Column(name = "inn", nullable = true, length = 12)
     private String inn;
     @Basic
     @Column(name = "data", nullable = true, columnDefinition = "jsonb")
     @Type(type = "Jsonb")
     private String data;
     @Basic
-    @Column(name = "file_path", nullable = true)
-    private String filePath;
+    @Column(name = "id_migration")
+    private Long idMigration;
 
-    @OneToMany(mappedBy = "regEgripOkvedId.regEgrip")
-    private Set<RegEgripOkved> regEgripOkveds;
+//    @OneToMany(mappedBy = "regEgripOkvedId.regEgrip")
+//    private Set<RegEgripOkved> regEgripOkveds;
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -67,20 +68,21 @@ public class RegEgrip {
         this.data = data;
     }
 
-    public String getFilePath() {
-        return filePath;
+
+//    public Set<RegEgripOkved> getRegEgripOkveds() {
+//        return regEgripOkveds;
+//    }
+//
+//    public void setRegEgripOkveds(Set<RegEgripOkved> regEgripOkveds) {
+//        this.regEgripOkveds = regEgripOkveds;
+//    }
+
+    public Long getIdMigration() {
+        return idMigration;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public Set<RegEgripOkved> getRegEgripOkveds() {
-        return regEgripOkveds;
-    }
-
-    public void setRegEgripOkveds(Set<RegEgripOkved> regEgripOkveds) {
-        this.regEgripOkveds = regEgripOkveds;
+    public void setIdMigration(Long idMigration) {
+        this.idMigration = idMigration;
     }
 
     @Override
@@ -88,14 +90,13 @@ public class RegEgrip {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RegEgrip regEgrip = (RegEgrip) o;
-        return Objects.equals(id, regEgrip.id) &&
-                Objects.equals(loadDate, regEgrip.loadDate) &&
-                Objects.equals(inn, regEgrip.inn) &&
-                Objects.equals(filePath, regEgrip.filePath);
+        return Objects.equals(inn, regEgrip.inn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, loadDate, inn, filePath);
+        return Objects.hash(inn);
     }
+
+
 }

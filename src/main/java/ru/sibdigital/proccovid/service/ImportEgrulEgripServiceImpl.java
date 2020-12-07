@@ -155,13 +155,15 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
      * Метод импорта данных ЕГРЮЛ
      */
     private void importEgrulData() {
-        egrulLogger.info("Импорт ЕГРЮЛ начат");
-        egrulFilesLogger.info("Импорт ЕГРЮЛ начат");
+        egrulLogger.info("Импорт ЕГРЮЛ начат из " + egrulPath);
+        egrulFilesLogger.info("Импорт ЕГРЮЛ начат из " + egrulPath);
 
         Collection<File> zipFiles = null;
         try {
             zipFiles = FileUtils.listFiles(new File(egrulPath),
                     new RegexFileFilter("^(.*?)"), DirectoryFileFilter.DIRECTORY);
+            egrulLogger.info("Всего файлов " + zipFiles.size());
+            egrulFilesLogger.info("Всего файлов " + zipFiles.size());
         } catch (Exception e) {
             egrulFilesLogger.error("Не удалось получить доступ к " + egrulPath);
             e.printStackTrace();
@@ -173,8 +175,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 .collect(Collectors.toList());
 
         Collections.sort(zipFullFiles, compareByFileName);
+        egrulLogger.info("Всего файлов ПОЛНОГО " + zipFullFiles.size());
+        egrulFilesLogger.info("Всего файлов ПОЛНОГО " + zipFullFiles.size());
 
-        if (zipFiles != null && !zipFiles.isEmpty()) {
+        if (zipFullFiles != null && !zipFullFiles.isEmpty()) {
             loadEGRULFiles(zipFullFiles);
         }
 
@@ -185,8 +189,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 .collect(Collectors.toList());
 
         Collections.sort(zipUpdateFiles, compareByFileName);
+        egrulLogger.info("Всего файлов ОБНОВЛЕНИЙ " + zipUpdateFiles.size());
+        egrulFilesLogger.info("Всего файлов ОБНОВЛЕНИЙ " + zipUpdateFiles.size());
 
-        if (zipFiles != null && !zipFiles.isEmpty()) {
+        if (zipUpdateFiles != null && !zipUpdateFiles.isEmpty()) {
             loadEGRULFiles(zipUpdateFiles);
         }
 
@@ -224,9 +230,6 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     while (entries.hasMoreElements()) {
                         ZipEntry zipEntry = entries.nextElement();
 
-                        egrulFilesLogger.info("Обработка xml файла " + zipEntry.getName());
-                        egrulLogger.info("Обработка xml файла " + zipEntry.getName());
-
                         InputStream is = zipFile.getInputStream(zipEntry);
                         //EGRUL egrul = (EGRUL) unmarshaller.unmarshal(is);
                         saveEgrulData(file, zipFile, zipEntry, unmarshaller, migration);
@@ -235,10 +238,6 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     egrulFilesLogger.error("Не удалось прочитать xml-файл из zip-файла");
                     changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
                     e.printStackTrace();
-//                } catch (JAXBException e) {
-//                    egrulFilesLogger.error("Не удалось демаршализовать xml-файл из zip-файла");
-//                    changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось демаршализовать xml-файл из zip-файла");
-//                    e.printStackTrace();
                 } finally {
                     try {
                         zipFile.close();
@@ -269,16 +268,8 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             is = zipFile.getInputStream(zipEntry);
             EGRUL egrul = (EGRUL) unmarshaller.unmarshal(is);
 
-            List<EgrulContainer> list = parseEgrulData(egrul, file.getPath(), migration);
-            final List<RegEgrul> rel = list.stream().map(c -> c.getRegEgrul()).collect(Collectors.toList());
-            regEgrulRepo.saveAll(rel);
-
-            final List<Set<RegEgrulOkved>> reos = list.stream().map(c -> c.getRegEgrulOkved()).collect(Collectors.toList());
-            for (Set<RegEgrulOkved> reo : reos) {
-                if (reo != null) {
-                    regEgrulOkvedRepo.saveAll(reo);
-                }
-            }
+            List<EgrulContainer> list = parseEgrulData(egrul, migration);
+            saveEgruls(list);
 
             result = true;
         } catch (IOException e) {
@@ -293,45 +284,40 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         return result;
     }
 
-    private List<EgrulContainer> parseEgrulData(EGRUL egrul, String filePath, ClsMigration migration) {
-//        egrulFilesLogger.info("Обработка xml файла " + filePath);
-//        egrulLogger.info("Обработка xml файла " + filePath);
+    private List<EgrulContainer> parseEgrulData(EGRUL egrul, ClsMigration migration) {
+
         List<EgrulContainer> containerList = new ArrayList<>();
         for (EGRUL.СвЮЛ свЮЛ : egrul.getСвЮЛ()) {
-            egrulLogger.info("Обработка ЕГРЮЛ ИНН: " + свЮЛ.getИНН());
+            //egrulLogger.info("ИНН: " + свЮЛ.getИНН());
 
+            EGRUL.СвЮЛ.СвОКВЭД свОКВЭД = свЮЛ.getСвОКВЭД();
             RegEgrul newRegEgrul = new RegEgrul();
             newRegEgrul.setLoadDate(new Timestamp(System.currentTimeMillis()));
             newRegEgrul.setInn(свЮЛ.getИНН());
             try {
+                свЮЛ.setСвОКВЭД(null);
                 newRegEgrul.setData(mapper.writeValueAsString(свЮЛ));
             } catch (JsonProcessingException e) {
                 egrulLogger.error("Не удалось преобразовать данные к JSON для ИНН " + свЮЛ.getИНН());
                 e.printStackTrace();
             }
-            newRegEgrul.setFilePath(filePath);
-
-//            RegEgrul regEgrul = regEgrulRepo.findByInn(свЮЛ.getИНН());
-//            if (regEgrul != null) {
-//                newRegEgrul.setId(regEgrul.getId());
-//                regEgrulOkvedRepo.deleteRegEgrulOkved(regEgrul.getId());
-//            }
+            newRegEgrul.setIdMigration(migration.getId());
 
             EgrulContainer ec = new EgrulContainer(newRegEgrul);
-            //regEgrulRepo.save(newRegEgrul);
 
-            EGRUL.СвЮЛ.СвОКВЭД свОКВЭД = свЮЛ.getСвОКВЭД();
             if (свОКВЭД != null) {
                 Set<RegEgrulOkved> regEgrulOkveds = new HashSet<>();
 
-                //Okved okved = okvedRepo.findByKindCodeAndVersion(свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД(), свОКВЭД.getСвОКВЭДОсн().getПрВерсОКВЭД() != null ? свОКВЭД.getСвОКВЭДОсн().getПрВерсОКВЭД() : "2001");
                 if (свОКВЭД.getСвОКВЭДОсн() != null) {
                     String ver = свОКВЭД.getСвОКВЭДОсн().getПрВерсОКВЭД() != null ? свОКВЭД.getСвОКВЭДОсн().getПрВерсОКВЭД() : "2001";
                     String okey = свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД() + ver;
                     final Okved okved = okvedsMap.get(okey);
                     if (okved != null) {
-                        RegEgrulOkvedId regEgrulOkvedId = new RegEgrulOkvedId(newRegEgrul, okved);
-                        regEgrulOkveds.add(new RegEgrulOkved(regEgrulOkvedId, true));
+                        RegEgrulOkved reo = new RegEgrulOkved();
+                        reo.setMain(true);
+                        reo.setRegEgrul(newRegEgrul);
+                        reo.setIdOkved(okved.getIdSerial());
+                        regEgrulOkveds.add(reo);
                     } else {
                         egrulLogger.error("ОКВЭД" + свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД() + "версии " + ver + " не найден для ИНН " + свЮЛ.getИНН());
                     }
@@ -340,11 +326,14 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     for (СвОКВЭДТип свОКВЭДТип : свОКВЭД.getСвОКВЭДДоп()) {
                         String version = свОКВЭДТип.getПрВерсОКВЭД() != null ? свОКВЭДТип.getПрВерсОКВЭД() : "2001";
                         String dokey = свОКВЭДТип.getКодОКВЭД() + version;
-                        final Okved dokved =okvedsMap.get(dokey);
-                        //okved = okvedRepo.findByKindCodeAndVersion(свОКВЭДТип.getКодОКВЭД(), version);
+                        final Okved dokved = okvedsMap.get(dokey);
+
                         if (dokved != null) {
-                            RegEgrulOkvedId regEgrulOkvedId = new RegEgrulOkvedId(newRegEgrul, dokved);
-                            regEgrulOkveds.add(new RegEgrulOkved(regEgrulOkvedId, false));
+                            RegEgrulOkved dreo = new RegEgrulOkved();
+                            dreo.setMain(false);
+                            dreo.setRegEgrul(newRegEgrul);
+                            dreo.setIdOkved(dokved.getIdSerial());
+                            regEgrulOkveds.add(dreo);
                         } else {
                             egrulLogger.error("ОКВЭД" + свОКВЭДТип.getКодОКВЭД() + "версии " + version + " не найден для ИНН " + свЮЛ.getИНН());
                         }
@@ -352,12 +341,63 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
                 }
 
-                //regEgrulOkvedRepo.saveAll(regEgrulOkveds);
                 ec.setRegEgrulOkved(regEgrulOkveds);
             }
             containerList.add(ec);
         }
         return containerList;
+    }
+
+    private void saveEgruls(List<EgrulContainer> list){
+
+        Map<String, RegEgrul> earlier = findSavedEarlierEgrul(list);
+        List<Long> deletedOkveds = new ArrayList<>();
+
+        if (!earlier.isEmpty()) {
+            for (EgrulContainer ec : list) {
+                RegEgrul r = ec.getRegEgrul();
+                RegEgrul earl = earlier.get(r.getInn());
+                if (earl != null) {
+                    r.setId(earl.getId());
+                    deletedOkveds.add(earl.getId());
+                }
+            }
+        }
+
+        if (!deletedOkveds.isEmpty()) {
+            regEgrulOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
+        }
+
+        final List<RegEgrul> rel = list.stream().map(c -> c.getRegEgrul()).collect(Collectors.toList());
+        regEgrulRepo.saveAll(rel);
+
+        final List<Set<RegEgrulOkved>> reos = list.stream().map(c -> c.getRegEgrulOkved()).collect(Collectors.toList());
+        Set<RegEgrulOkved> granula = new HashSet<>();
+        int count = 1;
+        for (Set<RegEgrulOkved> reo : reos) {
+            if (reo != null) {
+                granula.addAll(reo);
+                count ++;
+                //regEgrulOkvedRepo.saveAll(reo);
+            }
+            if (count % 10 == 0 && !granula.isEmpty()){
+                regEgrulOkvedRepo.saveAll(granula);
+                granula.clear();
+            }
+        }
+        if (!granula.isEmpty()){
+            regEgrulOkvedRepo.saveAll(granula);
+        }
+    }
+
+    private Map<String, RegEgrul> findSavedEarlierEgrul(List<EgrulContainer> list){
+        final List<String> inns = list.stream().map(m -> m.getRegEgrul().getInn()).collect(Collectors.toList());
+        final List<RegEgrul> rel = regEgrulRepo.findAllByInnList(inns);
+        Map<String, RegEgrul> result = new HashMap<>();
+        rel.stream().forEach(r -> {
+            result.put(r.getInn(), r);
+        });
+        return result;
     }
 
     ////////////////////////////// ЕГРИП /////////////////////////////
@@ -427,12 +467,6 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     Enumeration<? extends ZipEntry> entries = zipFile.entries();
                     while (entries.hasMoreElements()) {
                         ZipEntry zipEntry = entries.nextElement();
-
-//                        egripFilesLogger.info("Обработка xml файла " + zipEntry.getName());
-//                        egripLogger.info("Обработка xml файла " + zipEntry.getName());
-
-//                        InputStream is = zipFile.getInputStream(zipEntry);
-//                        EGRIP egrip = (EGRIP) unmarshaller.unmarshal(is);
                         saveEgripData(file, zipFile, zipEntry, unmarshaller, migration);
                     }
                 } finally {
@@ -466,16 +500,9 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             is = zipFile.getInputStream(zipEntry);
             EGRIP egrip = (EGRIP) unmarshaller.unmarshal(is);
 
-            List<EgripContainer> list = parseEgripData(egrip, file.getPath(), migration);
-            final List<RegEgrip> rel = list.stream().map(c -> c.getRegEgrip()).collect(Collectors.toList());
-            regEgripRepo.saveAll(rel);
+            List<EgripContainer> list = parseEgripData(egrip, migration);
+            saveEgrips(list);
 
-            final List<Set<RegEgripOkved>> reos = list.stream().map(c -> c.getRegEgripOkved()).collect(Collectors.toList());
-            for (Set<RegEgripOkved> reo : reos) {
-                if (reo != null) {
-                    regEgripOkvedRepo.saveAll(reo);
-                }
-            }
         }  catch (IOException e) {
             egripFilesLogger.error("Не удалось прочитать xml-файл из zip-файла");
             changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
@@ -488,32 +515,77 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     }
 
-    private  List<EgripContainer> parseEgripData(EGRIP egrip, String filePath, ClsMigration migration) {
+    private void saveEgrips(List<EgripContainer> list){
+
+        Map<String, RegEgrip> earlier = findSavedEarlierEgrips(list);
+        List<Long> deletedOkveds = new ArrayList<>();
+
+        if (!earlier.isEmpty()) {
+            for (EgripContainer ec : list) {
+                RegEgrip r = ec.getRegEgrip();
+                RegEgrip earl = earlier.get(r.getInn());
+                if (earl != null) {
+                    r.setId(earl.getId());
+                    deletedOkveds.add(earl.getId());
+                }
+            }
+        }
+
+        if (!deletedOkveds.isEmpty()) {
+            regEgripOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
+        }
+
+        final List<RegEgrip> rel = list.stream().map(c -> c.getRegEgrip()).collect(Collectors.toList());
+        regEgripRepo.saveAll(rel);
+
+        final List<Set<RegEgripOkved>> reos = list.stream().map(c -> c.getRegEgripOkved()).collect(Collectors.toList());
+        Set<RegEgripOkved> granula = new HashSet<>();
+        int count = 1;
+        for (Set<RegEgripOkved> reo : reos) {
+            if (reo != null) {
+                granula.addAll(reo);
+                count ++;
+                //regEgrulOkvedRepo.saveAll(reo);
+            }
+            if (count % 10 == 0 && !granula.isEmpty()){
+                regEgripOkvedRepo.saveAll(granula);
+                granula.clear();
+            }
+        }
+        if (!granula.isEmpty()){
+            regEgripOkvedRepo.saveAll(granula);
+        }
+    }
+
+    private Map<String, RegEgrip> findSavedEarlierEgrips(List<EgripContainer> list){
+        final List<String> inns = list.stream().map(m -> m.getRegEgrip().getInn()).collect(Collectors.toList());
+        final List<RegEgrip> rel = regEgripRepo.findAllByInnList(inns);
+        Map<String, RegEgrip> result = new HashMap<>();
+        rel.stream().forEach(r -> {
+            result.put(r.getInn(), r);
+        });
+        return result;
+    }
+
+    private  List<EgripContainer> parseEgripData(EGRIP egrip, ClsMigration migration) {
         List<EgripContainer> containerList = new ArrayList<>();
         for (EGRIP.СвИП свИП : egrip.getСвИП()) {
-            egripLogger.info("Обработка ЕГРИП ИНН: " + свИП.getИННФЛ());
+            //egripLogger.info("ИНН: " + свИП.getИННФЛ());
 
+            EGRIP.СвИП.СвОКВЭД свОКВЭД = свИП.getСвОКВЭД();
             RegEgrip newRegEgrip = new RegEgrip();
             newRegEgrip.setLoadDate(new Timestamp(System.currentTimeMillis()));
             newRegEgrip.setInn(свИП.getИННФЛ());
             try {
+                свИП.setСвОКВЭД(null);
                 newRegEgrip.setData(mapper.writeValueAsString(свИП));
             } catch (JsonProcessingException e) {
                 egripLogger.error("Не удалось преобразовать данные к JSON для ИНН " + свИП.getИННФЛ());
                 e.printStackTrace();
             }
-            newRegEgrip.setFilePath(filePath);
-
-//            RegEgrip regEgrip = regEgripRepo.findByInn(свИП.getИННФЛ());
-//            if (regEgrip != null) {
-//                newRegEgrip.setId(regEgrip.getId());
-//                regEgripOkvedRepo.deleteRegEgripOkved(regEgrip.getId());
-//            }
-
+            newRegEgrip.setIdMigration(migration.getId());
             EgripContainer ec = new EgripContainer(newRegEgrip);
-            regEgripRepo.save(newRegEgrip);
 
-            EGRIP.СвИП.СвОКВЭД свОКВЭД = свИП.getСвОКВЭД();
             if (свОКВЭД != null) {
                 Set<RegEgripOkved> regEgripOkveds = new HashSet<>();
 
@@ -522,8 +594,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     String okey = свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД() + version;
                     final Okved okved = okvedsMap.get(okey);
                     if (okved != null) {
-                        RegEgripOkvedId regEgripOkvedId = new RegEgripOkvedId(newRegEgrip, okved);
-                        regEgripOkveds.add(new RegEgripOkved(regEgripOkvedId, true));
+                        RegEgripOkved reo = new RegEgripOkved();
+                        reo.setMain(true);
+                        reo.setRegEgrip(newRegEgrip);
+                        reo.setIdOkved(okved.getIdSerial());
+                        regEgripOkveds.add(reo);
                     } else {
                         egripLogger.error("ОКВЭД " +свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД() + "версии " + version + " не найден для ИНН " +  свИП.getИННФЛ());
                     }
@@ -535,8 +610,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                         String dokey = свОКВЭДТип.getКодОКВЭД() + version;
                         final Okved dokved = okvedsMap.get(dokey);
                         if (dokved != null) {
-                            RegEgripOkvedId regEgrulOkvedId = new RegEgripOkvedId(newRegEgrip, dokved);
-                            regEgripOkveds.add(new RegEgripOkved(regEgrulOkvedId, false));
+                            RegEgripOkved dreo = new RegEgripOkved();
+                            dreo.setMain(false);
+                            dreo.setRegEgrip(newRegEgrip);
+                            dreo.setIdOkved(dokved.getIdSerial());
+                            regEgripOkveds.add(dreo);
                         } else {
                             egripLogger.error("ОКВЭД " + свОКВЭДТип.getКодОКВЭД() + "версии " + version + "не найден для ИНН " + свИП.getИННФЛ());
                         }
