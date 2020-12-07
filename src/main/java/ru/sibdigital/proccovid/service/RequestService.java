@@ -590,13 +590,13 @@ public class RequestService {
         List<RegNewsOkved> list = regNewsOkvedRepo.findClsNewsOkvedByNews(clsNews);
         regNewsOkvedRepo.deleteAll(list);
 
-        List<Okved> listOkveds = clsNewsDto.getOkveds();
-        for (Okved okved : listOkveds) {
-            RegNewsOkved regNewsOkvedNewsOkved = new RegNewsOkved();
-            regNewsOkvedNewsOkved.setNews(clsNews);
-            regNewsOkvedNewsOkved.setOkved(okved);
-            regNewsOkvedRepo.save(regNewsOkvedNewsOkved);
-        }
+        //TODO Надо переписывать в подобном стиле
+        List<RegNewsOkved> listOkveds = clsNewsDto.getOkveds().stream()
+                .map(o -> RegNewsOkved.builder()
+                        .news(clsNews)
+                        .okved(o).build()
+                ).collect(Collectors.toList());
+        regNewsOkvedRepo.saveAll(listOkveds);
 
         List<RegNewsOrganization> list1 = regNewsOrganizationRepo.findRegNewsOrganizationByNews(clsNews);
         regNewsOrganizationRepo.deleteAll(list1);
@@ -612,9 +612,7 @@ public class RequestService {
                 regNewsOrganizationList.add(regNewsOrganization);
             }
         }
-        if (regNewsOrganizationList != null) {
-            regNewsOrganizationRepo.saveAll(regNewsOrganizationList);
-        }
+        regNewsOrganizationRepo.saveAll(regNewsOrganizationList);
 
         List<RegNewsStatus> list3 = regNewsStatusRepo.findRegNewsStatusByNews(clsNews);
         regNewsStatusRepo.deleteAll(list3);

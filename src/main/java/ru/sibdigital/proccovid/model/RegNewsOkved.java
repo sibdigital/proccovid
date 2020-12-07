@@ -14,6 +14,7 @@ import java.util.Objects;
 @Builder(toBuilder = true)
 public class RegNewsOkved {
 
+
     @Id
     @Column(name = "id", nullable = false)
     @SequenceGenerator(name = "REG_NEWS_OKVED_GEN", sequenceName = "reg_news_okved_id_seq", allocationSize = 1, schema = "public")
