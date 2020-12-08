@@ -2,11 +2,15 @@ package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
+import ru.sibdigital.proccovid.config.CurrentUser;
+import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.RequestTypes;
+import ru.sibdigital.proccovid.service.RequestService;
 import ru.sibdigital.proccovid.service.StatisticService;
 
 @Log4j2
@@ -14,10 +18,13 @@ import ru.sibdigital.proccovid.service.StatisticService;
 public class StatisticController {
 
     @Autowired
-    StatisticService statisticService;
+    private StatisticService statisticService;
 
     @Autowired
     private ApplicationConstants applicationConstants;
+
+    @Autowired
+    private RequestService requestService;
 
     @GetMapping(value = "/statistic")
     public String getStatisticPage(Model model){
@@ -62,8 +69,29 @@ public class StatisticController {
         return "actual_departments_statistic";
     }
 
+    @GetMapping(value = "/numberOfSubscribersForEachMailing/statistic")
+    public String getNumberOfSubscribersForEachMailingStatisticPage(Model model) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+        model.addAttribute("user_lastname", clsUser.getLastname());
+        model.addAttribute("user_firstname", clsUser.getFirstname());
+        model.addAttribute("numberOfSubscribersForEachMailing", statisticService.getNumberOfSubscribersStatisticForEachMailing());
+        model.addAttribute("countOfSubscribers", statisticService.getCountOfSubscribers());
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "numberOfSubscribersForEachMailing_statistic";
+    }
 
-
-
-
+    @GetMapping(value = "/numberOfMailsSent/statistic")
+    public String getNumberOfMailsSentStatisticPage(Model model) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+        model.addAttribute("user_lastname", clsUser.getLastname());
+        model.addAttribute("user_firstname", clsUser.getFirstname());
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "numberOfMailsSent_statistic";
+    }
 }

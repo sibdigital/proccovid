@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Количество подписчиков на каждый вид рассылки</title>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+
+    <link type="text/css" rel="stylesheet" href="/js/">
+    <script src="/libs/webix.min.js"></script>
+
+
+    <script src="/libs/popper.min.js"></script>
+    <script src="/libs/jquery-3.4.1.min.js"></script>
+    <script src="/libs/bootstrap.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/libs/webix.min.css">
+    <script src="/libs/webix.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        .align-nav-items-center {
+            display: flex;
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+        .a-href-nav {
+            margin-right: 2px;
+            font-size: 110%;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="~{navbar-bootstrap::frag ('Количество подписчиков на каждый вид рассылки', ${application_name})}"></div>
+<div id="chart-dep">
+
+</div>
+<div class="container">
+    <div class="row my-2 justify-content-center">
+        <div class="col-8">
+            <div class="table-responsive-sm">
+                <table class=" table" id="totalTable">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 70%"></th>
+                        <th scope="col" class="text-center" style="width: 30%">Количество подписчиков</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="totalBody">
+
+                    </tbody>
+                    <span class="text-center" style="display:none" id="noResults">Нет результатов</span>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="dropdown-divider"></div>
+
+
+</div>
+
+<script th:inline="javascript">
+
+    $(document).ready(function(){
+        addPagination("totalTable", "totalBody", "nav");
+    });
+
+    function addPagination(tableName, tableTBody, cssTag) {
+        $('#' + tableName).after('<div id=' + cssTag + ' class="align-nav-items-center"></div>');
+        var rowsShown = 12;
+        var rowsTotal = $('#' + tableTBody + ' tr').length;
+        var numPages = rowsTotal/rowsShown;
+        for(i = 0;i < numPages;i++) {
+            var pageNum = i + 1;
+            $('#' + cssTag).append('<a href="#" rel="'+i+'" class="a-href-nav">'+pageNum+ '    ' + '</a> ');
+        }
+        $('#' + tableTBody + ' tr').hide();
+        $('#' + tableTBody + ' tr').slice(0, rowsShown).show();
+        $('#' + cssTag +' a:first').addClass('activecustom');
+        $('#' + cssTag + ' a').bind('click', function(evt){
+            $('#' + cssTag + ' a').removeClass('activecustom');
+            $(this).addClass('activecustom');
+            var currPage = $(this).attr('rel');
+            var startItem = currPage * rowsShown;
+            var endItem = startItem + rowsShown;
+            $('#' + tableName +' tbody tr').css('opacity','0.0').hide().slice(startItem, endItem).
+            css('display','table-row').animate({opacity:1}, 300);
+            evt.preventDefault();
+        });
+    }
+    const numberOfSubscribersForEachMailing = [[${numberOfSubscribersForEachMailing}]];
+    const countOfSubscribers = [[${countOfSubscribers}]];
+
+    function insertRow(firstCol, secondCol, cssClass="") {
+
+        const html = `<tr>
+            <td class="${cssClass}"> ${ firstCol } </td>
+            <td class="${cssClass}"> ${ secondCol } </td>
+        </tr>`;
+        $("#totalBody").append(html);
+
+    }
+
+    function insertSecondRow(firstCol, secondCol, index, cssClass="") {
+
+        const html = `<tr>
+            <td class="${cssClass}"> ${ firstCol } </td>
+            <td class="${cssClass}"> ${ secondCol } </td>
+        </tr>`;
+        $("#totalBody").append(html);
+
+    }
+
+    let totalSubs = 0;
+
+    for (let i = 0; i < numberOfSubscribersForEachMailing.length; i++) {
+        totalSubs += numberOfSubscribersForEachMailing[i].cm;
+    }
+
+    const totalNotSubs = countOfSubscribers - totalSubs;
+
+    console.log(numberOfSubscribersForEachMailing);
+
+    insertRow("Всего подписчиков", totalSubs, "text-center font-weight-bold");
+    for(let i = 0; i < numberOfSubscribersForEachMailing.length; i++) {
+        insertSecondRow(
+            numberOfSubscribersForEachMailing[i].name,
+            numberOfSubscribersForEachMailing[i].cm,
+            i + 1,
+            "text-center font-weight-bold"
+        );
+    }
+
+
+    chartData = {
+        statistic: [
+            { value: totalSubs, legend: "подписаны", color: "#ee3639" },
+            { value: totalNotSubs, legend: "не подписаны", color: "#ee9e36" },
+        ]
+    }
+
+    webix.ready(function() {
+        webix.ui({
+            container: 'chart-dep',
+            width: document.body.clientWidth,
+            type:'clean',
+            // height:250,
+            rows: [
+                {
+                    rows:[
+                        {
+                            template:"<div style='width:100%; font-weight: bold; text-align:center'>Подписчики</div>",
+                            height:30
+                        },
+                        {
+                            height:250,
+                            view: "chart",
+                            type:"pie",
+                            value:"#value#",
+                            color:"#color#",
+                            label:"#legend#",
+                            pieInnerText:"#value#",
+                            shadow:0,
+                            data: chartData.statistic
+                        },
+                        {
+                            template:`<div style='width:100%;text-align:center'>Всего: ${countOfSubscribers}</div>`,
+                            height:30
+                        },
+                    ]
+                }
+            ]
+        })
+    });
+
+</script>
+
+</body>
+</html>

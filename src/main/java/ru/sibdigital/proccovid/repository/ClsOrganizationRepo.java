@@ -52,6 +52,8 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
             "     ) as mails\n")
     List<Object[]> getOrganizationsEmailsByDocRequestStatusLast24HoursNotMailing(int reviewStatus, int mailingStatus, Date currDate);
 
+    List<ClsOrganization> findAllByInn(String inn);
+
     @Query(nativeQuery = true, value = "select count(*) " +
             "from " +
             "   cls_organization org join reg_organization_okved orgOkved on org.id = orgOkved.id_organization " +

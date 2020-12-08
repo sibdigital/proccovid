@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
@@ -97,6 +98,18 @@ public class RequestService {
 
     @Autowired
     private ScheduleTasks scheduleTasks;
+
+    @Autowired
+    private ClsNewsRepo clsNewsRepo;
+
+    @Autowired
+    private RegNewsOkvedRepo regNewsOkvedRepo;
+
+    @Autowired
+    private RegNewsOrganizationRepo regNewsOrganizationRepo;
+
+    @Autowired
+    private RegNewsStatusRepo regNewsStatusRepo;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -558,6 +571,63 @@ public class RequestService {
         regMailingMessageRepo.save(regMailingMessage);
 
         return regMailingMessage;
+    }
+
+    public ClsNews saveNews(ClsNewsDto clsNewsDto) throws ParseException {
+        Date startTime = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(clsNewsDto.getStartTime()).getTime());
+        Date endTime = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(clsNewsDto.getEndTime()).getTime());
+
+        ClsNews clsNews = ClsNews.builder()
+                .id(clsNewsDto.getId())
+                .heading(clsNewsDto.getHeading())
+                .message(clsNewsDto.getMessage())
+                .startTime(startTime)
+                .endTime(endTime)
+                .build();
+
+        clsNewsRepo.save(clsNews);
+
+        List<RegNewsOkved> list = regNewsOkvedRepo.findClsNewsOkvedByNews(clsNews);
+        regNewsOkvedRepo.deleteAll(list);
+
+        //TODO Надо переписывать в подобном стиле
+        List<RegNewsOkved> listOkveds = clsNewsDto.getOkveds().stream()
+                .map(o -> RegNewsOkved.builder()
+                        .news(clsNews)
+                        .okved(o).build()
+                ).collect(Collectors.toList());
+        regNewsOkvedRepo.saveAll(listOkveds);
+
+        List<RegNewsOrganization> list1 = regNewsOrganizationRepo.findRegNewsOrganizationByNews(clsNews);
+        regNewsOrganizationRepo.deleteAll(list1);
+
+        List<KeyValue> listInn = clsNewsDto.getInnList();
+        List<RegNewsOrganization> regNewsOrganizationList = new ArrayList<>();
+        for (KeyValue inn : listInn) {
+            List<ClsOrganization> organizationList = clsOrganizationRepo.findAllByInn(inn.getValue());
+            for (ClsOrganization organization : organizationList) {
+                RegNewsOrganization regNewsOrganization = new RegNewsOrganization();
+                regNewsOrganization.setNews(clsNews);
+                regNewsOrganization.setOrganization(organization);
+                regNewsOrganizationList.add(regNewsOrganization);
+            }
+        }
+        regNewsOrganizationRepo.saveAll(regNewsOrganizationList);
+
+        List<RegNewsStatus> list3 = regNewsStatusRepo.findRegNewsStatusByNews(clsNews);
+        regNewsStatusRepo.deleteAll(list3);
+
+        List<CheckedReviewStatusDto> crsList = clsNewsDto.getStatuses();
+        for (CheckedReviewStatusDto status : crsList){
+            if (status.getChecked() == 1) {
+                RegNewsStatus regNewsStatus = new RegNewsStatus();
+                regNewsStatus.setNews(clsNews);
+                regNewsStatus.setStatusReview(status.getReviewStatus());
+                regNewsStatusRepo.save(regNewsStatus);
+            }
+        }
+
+        return clsNews;
     }
 
 }

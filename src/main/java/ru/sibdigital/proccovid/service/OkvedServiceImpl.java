@@ -81,12 +81,13 @@ public class OkvedServiceImpl implements OkvedService {
                 Okved oldOkved = this.okvedRepo.findByPath(newOkved.getPath());
                 if (oldOkved == null) {
                     models.add(newOkved);
-                } else {
-                    if (!oldOkved.equals(newOkved)) {
-                        newOkved.setId(oldOkved.getId());
-                        models.add(newOkved);
-                    }
                 }
+//                else {
+//                    if (!oldOkved.equals(newOkved)) {
+//                        newOkved.setId(oldOkved.getId());
+//                        models.add(newOkved);
+//                    }
+//                }
             }
             okvedRepo.saveAll(models);
 

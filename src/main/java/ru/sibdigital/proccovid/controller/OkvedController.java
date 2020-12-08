@@ -80,7 +80,7 @@ public class OkvedController {
         return "ОКВЭД удален";
     }
 
-    @PostMapping("/process_file")
+    @PostMapping("/process_okved_file")
     public @ResponseBody
     String processFile(@RequestParam(name = "file") MultipartFile multipartFile, @RequestParam(name = "version") String version) {
         return okvedServiceImpl.processFile(multipartFile, version);

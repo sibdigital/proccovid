@@ -1,20 +1,23 @@
 package ru.sibdigital.proccovid.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
+import ru.sibdigital.proccovid.dto.EgripResponse;
+import ru.sibdigital.proccovid.dto.EgrulResponse;
 import ru.sibdigital.proccovid.dto.KeyValue;
-import ru.sibdigital.proccovid.model.ClsTypeRequest;
-import ru.sibdigital.proccovid.model.ClsUser;
-import ru.sibdigital.proccovid.model.DocRequest;
+import ru.sibdigital.proccovid.dto.egrip.EGRIP;
+import ru.sibdigital.proccovid.dto.egrul.EGRUL;
+import ru.sibdigital.proccovid.model.*;
+import ru.sibdigital.proccovid.repository.ClsMigrationRepo;
+import ru.sibdigital.proccovid.service.EgrulService;
 import ru.sibdigital.proccovid.service.RequestService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +35,14 @@ public class MainController {
 
     @Autowired
     private ApplicationConstants applicationConstants;
+
+    private static ObjectMapper mapper = new ObjectMapper();
+
+    @Autowired
+    private EgrulService egrulService;
+
+    @Autowired
+    private ClsMigrationRepo clsMigrationRepo;
 
     @GetMapping("/")
     public String index() {
@@ -85,5 +96,40 @@ public class MainController {
                 .map( ctr -> new KeyValue(ctr.getClass().getSimpleName(), ctr.getId(), ctr.getShortName()))
                 .collect(Collectors.toList());
         return list;
+    }
+
+    @CrossOrigin
+    @GetMapping("/egrul")
+    public @ResponseBody EgrulResponse getEgrul(@RequestParam(name = "inn") String inn) {
+        EgrulResponse response = new EgrulResponse();
+        RegEgrul egrul = egrulService.getEgrul(inn);
+        if (egrul != null) {
+            try {
+                response.setData(mapper.readValue(egrul.getData(), EGRUL.СвЮЛ.class));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
+
+    @CrossOrigin
+    @GetMapping("/egrip")
+    public @ResponseBody  EgripResponse getEgrip(@RequestParam(name = "inn") String inn) {
+        EgripResponse response = new EgripResponse();
+        RegEgrip egrip = egrulService.getEgrip(inn);
+        if (egrip != null) {
+            try {
+                response.setData(mapper.readValue(egrip.getData(), EGRIP.СвИП.class));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
+
+    @GetMapping("/migration_data")
+    public @ResponseBody  List<ClsMigration> getMigrationData() {
+        return clsMigrationRepo.findAll(Sort.by("filename"));
     }
 }

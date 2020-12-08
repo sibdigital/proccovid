@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        Количество отправленных сообщений
+    </title>
+
+    <!-- Compiled and minified JavaScript -->
+
+    <link type="text/css" rel="stylesheet" th:href="@{/libs/webix.css}">
+    <script th:src="@{/libs/webix.min.js}"></script>
+    <script th:src="@{/libs/routie.min.js}"></script>
+    <script th:src="@{/js/views/mails_list.js}"></script>
+
+    <style>body {margin: 0}
+    </style>
+</head>
+<body>
+<div id="chart-dep" style="width: 90% !important;">
+
+</div>
+
+
+<script th:inline="javascript">
+
+    function reBuild(data) {
+        return data.map((elem) => [elem.name, elem.cnt]);
+    }
+    const ID_DEPARTMENT = [[${id_department}]]
+    const USER_NAME = [[${user_lastname + " " + user_firstname}]]
+    const LINK_PREFIX = [[${link_prefix}]]
+    const LINK_SUFFIX = [[${link_suffix}]]
+    const APPLICATION_NAME = [[${application_name}]]
+
+
+</script>
+
+</body>
+</html>
