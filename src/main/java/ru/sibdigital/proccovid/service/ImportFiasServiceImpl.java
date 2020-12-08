@@ -17,19 +17,27 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+import ru.sibdigital.proccovid.utils.StaxStreamProcessor;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.XMLEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -43,6 +51,9 @@ public class ImportFiasServiceImpl implements ImportFiasService {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Value("${fias.import.directory}")
+    private String fiasPath;
 
     public String importData(File file) {
         try {
@@ -298,6 +309,294 @@ public class ImportFiasServiceImpl implements ImportFiasService {
             }
         }
         fiasLogger.info("Обработка файла " + filename + " закончена");
+    }
+
+
+
+
+    ////////////////////////////// ЗАГРУЗКА ПОЛНАЯ //////////////////////////
+    public void importFullData(){
+        fiasLogger.info("Импорт ФИАС начат из " + fiasPath);
+        try {
+            List<Path> dirs = Files.walk(Paths.get(fiasPath))
+                    .filter(Files::isDirectory)
+                    .collect(Collectors.toList());
+
+            for (Path dir : dirs) {
+                importFiasRegionData(dir);
+            }
+
+        }
+        catch (IOException e) {
+            fiasLogger.error("Не удалось прочитать файлы из каталога " + fiasPath);
+        }
+
+
+        fiasLogger.info("Импорт ФИАС окончен");
+    }
+
+    private void importFiasRegionData(Path dir) {
+        try {
+            List<Path> files = Files.walk(dir, 1)
+                    .filter(Files::isReadable)
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.toString().endsWith(".XML"))
+                    .collect(Collectors.toList());
+
+            if (files.size() > 0) {
+                Path addrObjectFilePath = null;
+                Path admHierarchyFilePath = null;
+
+                for (Path filepath : files) {
+                    if (filepath.getFileName().toString().startsWith("AS_ADDR_OBJ_2")) {
+                        addrObjectFilePath = filepath;
+                    } else if (filepath.getFileName().toString().startsWith("AS_ADM_HIERARCHY_2")) {
+                        admHierarchyFilePath = filepath;
+                    }
+                }
+                if (addrObjectFilePath != null && addrObjectFilePath != null) {
+                    fiasLogger.info(dir.toString());
+                    loadRegionData(addrObjectFilePath, admHierarchyFilePath);
+                }
+            }
+
+        } catch (IOException e) {
+            fiasLogger.error("Не удалось прочитать файлы из каталога " + dir);
+        }
+
+    }
+
+    private void loadRegionData(Path addrObjectFilePath, Path admHierarchyFilePath) {
+        Set<String> addrObjectSet = loadAddrObjectFile(addrObjectFilePath);
+        loadAdmHierarchyItem(admHierarchyFilePath, addrObjectSet);
+    }
+
+    ///////////// ЗАГРУЗКА addr_obj ////////////////////
+    private Set<String> loadAddrObjectFile(Path addrObjectFilePath) {
+        Set<String> addrObjectSet = new HashSet<>();
+        try {
+            StaxStreamProcessor processor = new StaxStreamProcessor(Files.newInputStream(addrObjectFilePath));
+
+            // Исх. данные
+            fiasLogger.info("Создание и выполнение inserts AddrObject. Начало");
+            int k = 0;
+            XMLStreamReader reader = processor.getReader();
+            if (reader.hasNext()) {
+                int event = reader.next();
+                if (event == XMLEvent.START_ELEMENT && "ADDRESSOBJECTS".equals(reader.getLocalName())) {
+                    while (reader.hasNext()) {
+                        addrObjectSet = (Set<String>) createAndExecuteAddrObjectInserts(reader, addrObjectSet);
+                    }
+                }
+            }
+
+            fiasLogger.info("Создание и выполнение inserts AddrObject. Конец");
+        }
+        catch (IOException | XMLStreamException e) {
+            fiasLogger.error("Не удалось прочитать файл " + addrObjectFilePath);
+        }
+
+        return addrObjectSet;
+    }
+
+    @Transactional
+    Object createAndExecuteAddrObjectInserts(XMLStreamReader reader, Set<String> addrObjectSet) {
+        Object obj = transactionTemplate.execute(new TransactionCallback() {
+            public Object doInTransaction(TransactionStatus status) {
+                String tableName = "fias.addr_object";
+                Set<String> set = addrObjectSet;
+                Set<String> excludedAttributes = getExcludedAttributes();
+                Set<String> excludedLevels = getExcludedLevels();
+
+                int j = 0;
+                try {
+                    while (reader.hasNext() && j < 50000) {
+                        reader.next();
+                        if (reader.getEventType() == XMLEvent.START_ELEMENT && "OBJECT".equals(reader.getLocalName())) {
+
+                            boolean loadFlag = true;
+                            int i = 0;
+                            String queryParams = "";
+                            String queryValues = "";
+
+                            String attrbValueOBJECTID = "";
+
+                            while (loadFlag && i < reader.getAttributeCount()) {
+                                String attributeName = reader.getAttributeLocalName(i);
+                                String value = reader.getAttributeValue(i);
+                                switch (attributeName) {
+                                    case "ISACTIVE":
+                                        if (!value.equals("1")) {
+                                            loadFlag = false;
+                                        }
+                                        break;
+                                    case "ISACTUAL":
+                                        if (!value.equals("1")) {
+                                            loadFlag = false;
+                                        }
+                                        break;
+                                    case "LEVEL":
+                                        if (excludedLevels.contains(value)) {
+                                            loadFlag = false;
+                                        }
+                                        break;
+                                    case "OBJECTID":
+                                        attrbValueOBJECTID = value;
+                                        break;
+                                }
+
+                                if (!excludedAttributes.contains(attributeName)) {
+                                    queryParams += "\"" + attributeName.toLowerCase() + "\",";
+                                    if (value.contains("\'")) {
+                                        value = value.replace("\'", "\"");
+                                    }
+                                    queryValues += "\'" + value + "\',";
+                                }
+                                i++;
+                            }
+                            if (loadFlag) {
+                                set.add(attrbValueOBJECTID);
+                                queryParams = queryParams.substring(0, queryParams.length() - 1);
+                                queryValues = queryValues.substring(0, queryValues.length() - 1);
+
+                                String insertQuery = String.format("INSERT INTO %s(%s) VALUES(%s);", tableName, queryParams, queryValues);
+                                Query query = entityManager.createNativeQuery(insertQuery);
+                                query.executeUpdate();
+                                j++;
+                            }
+                        }
+                    }
+                } catch (XMLStreamException e) {
+                    fiasLogger.error("Не удалось прочитать xml");
+                }
+
+                return set;
+
+            }});
+
+        return obj;
+    }
+
+    ///////////// ЗАГРУЗКА adm_hierarchy_item ////////////////////
+    private void loadAdmHierarchyItem(Path admHierarchyFilePath, Set<String> addrObjectSet){
+        try {
+            StaxStreamProcessor processor = new StaxStreamProcessor(Files.newInputStream(admHierarchyFilePath));
+
+            // Исх. данные
+            fiasLogger.info("Создание и выполнение inserts AdmHierarchyItem. Начало");
+            int k = 0;
+            XMLStreamReader reader = processor.getReader();
+            if (reader.hasNext()) {
+                int event = reader.next();
+                if (event == XMLEvent.START_ELEMENT && "ITEMS".equals(reader.getLocalName())) {
+                    while (reader.hasNext()) {
+                        createAndExecuteAdmHierarchyItemInserts(reader, addrObjectSet);
+                    }
+                }
+            }
+
+            fiasLogger.info("Создание и выполнение inserts AdmHierarchyItem. Конец");
+        }
+        catch (IOException | XMLStreamException e) {
+            fiasLogger.error("Не удалось прочитать файл " + admHierarchyFilePath);
+        }
+    }
+
+    @Transactional
+    void createAndExecuteAdmHierarchyItemInserts(XMLStreamReader reader, Set<String> addrObjectSet) {
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                String tableName = "fias.adm_hierarchy_item";
+                Set<String> excludedAttributes = getExcludedAttributes();
+
+                int j = 0;
+                try {
+                    while (reader.hasNext() && j < 1000) {
+                        reader.next();
+                        if (reader.getEventType() == XMLEvent.START_ELEMENT && "ITEM".equals(reader.getLocalName())) {
+                            boolean loadFlag = true;
+                            int i = 0;
+                            String queryParams = "";
+                            String queryValues = "";
+
+                            boolean inAddrObj = false;
+
+                            while (loadFlag && i < reader.getAttributeCount()) {
+                                String attributeName = reader.getAttributeLocalName(i);
+                                String value = reader.getAttributeValue(i);
+                                switch (attributeName) {
+                                    case "ISACTIVE":
+                                        if (!value.equals("1")) {
+                                            loadFlag = false;
+                                        }
+                                        break;
+                                    case "PARENTOBJID":
+                                        if (addrObjectSet.contains(value)) {
+                                            inAddrObj = true;
+                                        }
+                                        break;
+                                    case "OBJECTID":
+                                        if (addrObjectSet.contains(value)) {
+                                            inAddrObj = true;
+                                        }
+                                        break;
+                                }
+
+                                if (!excludedAttributes.contains(attributeName)) {
+                                    queryParams += "\"" + attributeName.toLowerCase() + "\",";
+                                    if (value.contains("\'")) {
+                                        value = value.replace("\'", "\"");
+                                    }
+                                    queryValues += "\'" + value + "\',";
+                                }
+                                i++;
+                            }
+                            if (loadFlag && inAddrObj) {
+                                queryParams = queryParams.substring(0, queryParams.length() - 1);
+                                queryValues = queryValues.substring(0, queryValues.length() - 1);
+
+                                String insertQuery = String.format("INSERT INTO %s(%s) VALUES(%s);", tableName, queryParams, queryValues);
+                                Query query = entityManager.createNativeQuery(insertQuery);
+                                query.executeUpdate();
+                                j++;
+                            }
+                        }
+                    }
+                } catch (XMLStreamException e) {
+                    fiasLogger.error("Не удалось прочитать xml");
+                }
+            }});
+    }
+
+
+    private Set<String> getExcludedAttributes(){
+        Set<String> set = new HashSet<>();
+        set.add("objectguid".toUpperCase());
+        set.add("changeid".toUpperCase());
+        set.add("previd".toUpperCase());
+        set.add("nextid".toUpperCase());
+        set.add("updatedate".toUpperCase());
+        set.add("startdate".toUpperCase());
+        set.add("enddate".toUpperCase());
+        set.add("isactual".toUpperCase());
+        set.add("isactive".toUpperCase());
+        set.add("createdate".toUpperCase());
+
+        return set;
+    }
+
+    private Set<String> getExcludedLevels(){
+        Set<String> set = new HashSet<>();
+        set.add("9");
+        set.add("11");
+        set.add("12");
+        set.add("13");
+        set.add("14");
+        set.add("15");
+        set.add("16");
+        set.add("17");
+
+        return set;
     }
 
     private void processFiasFileByStax(InputStream is, String filename) throws ParserConfigurationException, IOException, SAXException {

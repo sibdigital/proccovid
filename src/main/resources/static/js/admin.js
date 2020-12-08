@@ -203,6 +203,28 @@ function deleteFromQueue() {
             })
 }
 
+function processFilesFias() {
+    webix.confirm('Вы действительно хотите запустить загрузку ФИАС?')
+        .then(
+            function () {
+                webix.ajax().get('/process_fias_full', )
+                    .then(function (data) {
+                        if (data.text() === 'Ok') {
+                            webix.message({
+                                text: 'Запущена загрузка',
+                                type: 'success'
+                            });
+                        } else {
+                            webix.message({
+                                text: 'Не удалось запустить загрузку',
+                                type: 'error'
+                            });
+                        }
+                    })
+            }
+        )
+}
+
 function processFiles() {
     webix.confirm('Вы действительно хотите запустить загрузку ЕГРЮЛ?')
         .then(
@@ -2218,6 +2240,14 @@ const fias = {
                                 click: function (){
                                     window.open('/upload_fias');
                                 }
+                            },
+                            {
+                                view: 'button',
+                                value: 'Загрузка ФИАС через scheduler',
+                                align: 'left',
+                                maxWidth: 400,
+                                css: 'webix_primary',
+                                click: processFilesFias
                             },
                             {},
                         ]
