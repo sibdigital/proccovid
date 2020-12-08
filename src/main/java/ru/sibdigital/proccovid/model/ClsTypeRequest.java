@@ -12,6 +12,7 @@ import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -58,6 +59,10 @@ public class ClsTypeRequest {
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private AdditionalFields additionalFields;
+
+    @OrderBy("num asc")
+    @OneToMany(targetEntity = RegTypeRequestPrescription.class, mappedBy = "typeRequest", fetch = FetchType.LAZY)
+    private List<RegTypeRequestPrescription> regTypeRequestPrescriptions;
 
     public Long getId() {
         return id;
@@ -203,6 +208,14 @@ public class ClsTypeRequest {
 
     public void setAdditionalFields(AdditionalFields additionalFields) {
         this.additionalFields = additionalFields;
+    }
+
+    public List<RegTypeRequestPrescription> getRegTypeRequestPrescriptions() {
+        return regTypeRequestPrescriptions;
+    }
+
+    public void setRegTypeRequestPrescriptions(List<RegTypeRequestPrescription> regTypeRequestPrescriptions) {
+        this.regTypeRequestPrescriptions = regTypeRequestPrescriptions;
     }
 
     public String getValue() {

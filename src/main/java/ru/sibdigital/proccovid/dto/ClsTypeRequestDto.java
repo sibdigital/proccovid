@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import ru.sibdigital.proccovid.model.AdditionalFields;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -33,5 +34,7 @@ public class ClsTypeRequestDto {
     private Long restrictionTypeIds;
 
     private AdditionalFields additionalFields;
+
+    private List<RegTypeRequestPrescriptionDto> regTypeRequestPrescriptions;
 
 }
