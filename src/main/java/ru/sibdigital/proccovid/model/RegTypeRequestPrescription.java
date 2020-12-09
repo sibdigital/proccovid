@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.List;
@@ -29,7 +30,9 @@ public class RegTypeRequestPrescription {
     @JoinColumn(name = "id_type_request", nullable = false)
     private ClsTypeRequest typeRequest;
 
-    @OneToMany(targetEntity = RegTypeRequestPrescriptionFile.class, mappedBy="typeRequestPrescription", fetch = FetchType.LAZY)
+    @Where(clause = "not is_deleted")
+    @OrderBy("id asc")
+    @OneToMany(mappedBy="typeRequestPrescription")
     private List<RegTypeRequestPrescriptionFile> regTypeRequestPrescriptionFiles;
 
     public Long getId() {

@@ -20,7 +20,7 @@ public class RegTypeRequestPrescriptionFile {
     @Column(name = "id", nullable = false)
     @SequenceGenerator(name = "REG_TYPE_REQUEST_PRESCRIPTION_FILE_SEQ_GEN", sequenceName = "reg_type_request_prescription_file_id_seq", allocationSize = 1, schema = "public")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REG_TYPE_REQUEST_PRESCRIPTION_FILE_SEQ_GEN")
-    private Integer id;
+    private Long id;
     private Boolean isDeleted;
     private Timestamp timeCreate;
     private String attachmentPath;
@@ -35,11 +35,11 @@ public class RegTypeRequestPrescriptionFile {
     @JoinColumn(name = "id_type_request_prescription", nullable = false)
     private RegTypeRequestPrescription typeRequestPrescription;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

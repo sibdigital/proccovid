@@ -912,7 +912,7 @@ const typeRequests = {
                             // {id: "statusVisible", header: "Статус видимости", template: "#statusVisible#", adjust: true},
                             // {id: "beginVisible", header: "Дата начала видимости", template: "#beginVisible#", adjust: true},
                             // {id: "endVisible", header: "Дата конца видимости", template: "#endVisible#", adjust: true},
-                            {id: "sortWeight", header: "Вес сортировки", template: "#sortWeight#"},
+                            {id: "status", header: "Статус", template: "#statusPublicationName#"},
                         ],
                         on: {
                             onBeforeLoad: function () {
@@ -928,128 +928,161 @@ const typeRequests = {
                                 this.hideOverlay();
                             },
                             onItemClick: function (id) {
-                                let data = $$('type_requests_table').getItem(id);
-                                if (data.department) {
-                                    data.departmentId = data.department.id;
-                                }
+                                const item = $$('type_requests_table').getItem(id);
 
-                                loadTypeRequestFormInContent();
+                                webix.ajax().get('cls_type_request', {id: item.id}).then(function (data) {
+                                    data = data.json();
 
-                                $$('typeRequestForm').parse(data);
+                                    const published = data.statusPublication === 1 ? true : false;
 
-                                if (data.statusRegistration == 1) {
-                                    $$('searchByOkvedButton').show();
-                                    $$('searchByInnButton').show();
-                                }
-
-                                if (data.additionalFields) {
-                                    if (data.additionalFields.okvedIds && data.additionalFields.okvedIds.length > 0) {
-                                        webix.ajax().get('okveds').then(function (okvedsData) {
-                                            const okveds = okvedsData.json();
-                                            let selectedOkveds = [];
-                                            data.additionalFields.okvedIds.forEach(okvedId => {
-                                                let okved = okveds.find(okved => okved.id === okvedId);
-                                                selectedOkveds.push({
-                                                    id: okved.id,
-                                                    name: okved.kindCode + ' ' + okved.kindName
-                                                });
-                                            })
-                                            $$('selectedOkveds').parse(selectedOkveds);
-                                            $$('selectedOkveds').show();
-                                        })
+                                    if (data.department) {
+                                        data.departmentId = data.department.id;
                                     }
-                                    if (data.additionalFields.organizationIds && data.additionalFields.organizationIds.length > 0) {
-                                        const params = {
-                                            additionalFields: {
-                                                organizationIds: data.additionalFields.organizationIds
+                                    if (data.regTypeRequestRestrictionTypes && data.regTypeRequestRestrictionTypes.length > 0) {
+                                        console.log(data.regTypeRequestRestrictionTypes[0])
+                                        console.log(data.regTypeRequestRestrictionTypes[0].regTypeRequestRestrictionTypeId)
+                                        data.restrictionTypeIds = data.regTypeRequestRestrictionTypes[0].regTypeRequestRestrictionTypeId.clsRestricti
+                                        onType.id;
+                                    }
+
+                                    loadTypeRequestFormInContent();
+
+                                    $$('typeRequestForm').parse(data);
+
+                                    if (published) {
+                                        $$('addPrescriptionButton').hide();
+                                        $$('searchByOkvedButton').hide();
+                                        $$('searchByInnButton').hide();
+                                        $$('savePrescription').hide();
+                                        $$('saveAndPublishPrescription').hide();
+                                    }
+
+                                    if (data.regTypeRequestPrescriptions && data.regTypeRequestPrescriptions.length > 0) {
+                                        data.regTypeRequestPrescriptions.forEach(rtrp => {
+                                            const files = [];
+                                            if (rtrp.regTypeRequestPrescriptionFiles && rtrp.regTypeRequestPrescriptionFiles.length > 0) {
+                                                rtrp.regTypeRequestPrescriptionFiles.forEach((file) => {
+                                                    files.push({id: file.id, name: file.originalFileName});
+                                                })
                                             }
+                                            $$('prescriptions').addView({
+                                                id: 'prescription' + rtrp.num,
+                                                rows: [
+                                                    {
+                                                        view: 'text',
+                                                        id: 'prescription_id' + rtrp.num,
+                                                        value: rtrp.id,
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        cols: [
+                                                            {
+                                                                view: 'label',
+                                                                label: 'Предписание ' + rtrp.num,
+                                                                align: 'center'
+                                                            },
+                                                        ]
+                                                    },
+                                                    {
+                                                        view: 'nic-editor',
+                                                        id: 'prescription_text' + rtrp.num,
+                                                        css: "myClass",
+                                                        cdn: false,
+                                                        minHeight: 280,
+                                                        config: {
+                                                            iconsPath: '../libs/nicedit/nicEditorIcons.gif'
+                                                        },
+                                                        required: true,
+                                                    },
+                                                    {
+                                                        view: 'list',
+                                                        id: 'listFiles' + rtrp.num,
+                                                        autoheight: true,
+                                                        template: published ? '#name#' : `#name# <span class="webix_icon wxi-trash" onclick='deletePrescriptionFile(` + rtrp.num + `, #id#)'></span>`,
+                                                        data: files,
+                                                    },
+                                                    {
+                                                        view: 'list',
+                                                        id: 'prescriptionFiles' + rtrp.num,
+                                                        type: 'uploader',
+                                                        autoheight: true,
+                                                    },
+                                                    {
+                                                        view: 'uploader',
+                                                        id: 'uploader' + rtrp.num,
+                                                        css: 'webix_primary',
+                                                        value: 'Прикрепить файл(-ы)',
+                                                        autosend: false,
+                                                        upload: '/upload_prescription_file',
+                                                        required: true,
+                                                        accept: 'application/pdf, application/zip',
+                                                        multiple: true,
+                                                        link: 'prescriptionFiles' + rtrp.num,
+                                                        hidden: published
+                                                    }
+                                                ]
+                                            });
+                                            $$('prescription_text' + rtrp.num).setValue(rtrp.content);
+                                        });
+                                        $$('prescriptions').show();
+                                    }
+
+                                    if (data.additionalFields) {
+                                        if (data.additionalFields.okvedIds && data.additionalFields.okvedIds.length > 0) {
+                                            webix.ajax().get('okveds').then(function (okvedsData) {
+                                                const okveds = okvedsData.json();
+                                                let selectedOkveds = [];
+                                                data.additionalFields.okvedIds.forEach(okvedId => {
+                                                    let okved = okveds.find(okved => okved.id === okvedId);
+                                                    selectedOkveds.push({
+                                                        id: okved.id,
+                                                        name: okved.kindCode + ' ' + okved.kindName
+                                                    });
+                                                })
+                                                $$('selectedOkveds').parse(selectedOkveds);
+                                                $$('selectedOkveds').show();
+                                            })
                                         }
-                                        webix.ajax()
-                                            .headers({'Content-type': 'application/json'})
-                                            .post('selected_organizations', params).then(function (organizationsData) {
+                                        if (data.additionalFields.organizationIds && data.additionalFields.organizationIds.length > 0) {
+                                            const params = {
+                                                additionalFields: {
+                                                    organizationIds: data.additionalFields.organizationIds
+                                                }
+                                            }
+                                            webix.ajax()
+                                                .headers({'Content-type': 'application/json'})
+                                                .post('selected_organizations', params).then(function (organizationsData) {
                                                 const organizations = organizationsData.json();
                                                 let selectedOrganizations = [];
                                                 organizations.forEach(organization => {
                                                     selectedOrganizations.push({
                                                         id: organization.id,
-                                                        name: organization.inn + ' ' + organization.shortName
+                                                        name: organization.inn + ' ' + organization.name
                                                     });
                                                 })
                                                 $$('selectedOrganizations').parse(selectedOrganizations);
                                                 $$('selectedOrganizations').show();
-                                        })
-                                    }
-                                }
-
-                                if (data.regTypeRequestPrescriptions && data.regTypeRequestPrescriptions.length > 0) {
-                                    data.regTypeRequestPrescriptions.forEach(rtrp => {
-                                        const files = [];
-                                        if (rtrp.regTypeRequestPrescriptionFiles && rtrp.regTypeRequestPrescriptionFiles.length > 0) {
-                                            rtrp.regTypeRequestPrescriptionFiles.forEach((file, index) => {
-                                                files.push({id: index});
                                             })
                                         }
-                                        $$('prescriptions').addView({
-                                            id: 'prescription' + rtrp.num,
-                                            rows: [
-                                                {
-                                                    view: 'text',
-                                                    id: 'prescription_id' + rtrp.num,
-                                                    value: rtrp.id,
-                                                    hidden: true
-                                                },
-                                                {
-                                                    cols: [
-                                                        {
-                                                            view: 'label',
-                                                            label: 'Предписание ' + rtrp.num,
-                                                            align: 'center'
-                                                        },
-                                                    ]
-                                                },
-                                                {
-                                                    view: 'nic-editor',
-                                                    id: 'prescription_text' + rtrp.num,
-                                                    css: "myClass",
-                                                    cdn: false,
-                                                    minHeight: 280,
-                                                    config: {
-                                                        iconsPath: '../libs/nicedit/nicEditorIcons.gif'
-                                                    },
-                                                    required: true,
-                                                },
-                                                {
-                                                    view: 'list',
-                                                    id: 'listFiles' + rtrp.num,
-                                                    type: 'uploader',
-                                                    autoheight: true,
-                                                    template: '#id#',
-                                                    data: files,
-                                                },
-                                            ]
-                                        });
-                                        $$('prescription_text' + rtrp.num).setValue(rtrp.content);
-                                    });
-                                    $$('prescriptions').show();
-                                }
+                                    }
 
-                                // $$('departments').getList().add({ id: '', value: '' });
+                                    // $$('departments').getList().add({ id: '', value: '' });
 
-                                $$('settings').setValue(data.settings);
+                                    $$('settings').setValue(data.settings);
 
-                                if (data.beginRegistration) {
-                                    $$('beginRegistration').setValue(new Date(data.beginRegistration));
-                                }
-                                if (data.endRegistration) {
-                                    $$('endRegistration').setValue(new Date(data.endRegistration));
-                                }
-                                if (data.beginVisible) {
-                                    $$('beginVisible').setValue(new Date(data.beginVisible));
-                                }
-                                if (data.endVisible) {
-                                    $$('endVisible').setValue(new Date(data.endVisible));
-                                }
-
+                                    if (data.beginRegistration) {
+                                        $$('beginRegistration').setValue(new Date(data.beginRegistration));
+                                    }
+                                    if (data.endRegistration) {
+                                        $$('endRegistration').setValue(new Date(data.endRegistration));
+                                    }
+                                    if (data.beginVisible) {
+                                        $$('beginVisible').setValue(new Date(data.beginVisible));
+                                    }
+                                    if (data.endVisible) {
+                                        $$('endVisible').setValue(new Date(data.endVisible));
+                                    }
+                                })
                             }
                         },
                         url: 'cls_type_requests'
@@ -1076,9 +1109,6 @@ const typeRequests = {
                                 click: function () {
                                      loadTypeRequestFormInContent()
 
-                                    $$('searchByOkvedButton').show();
-                                    $$('searchByInnButton').show();
-
                                     // $$('departments').getList().add({ id: '', value: '' });
                                 }
                             }
@@ -1089,6 +1119,18 @@ const typeRequests = {
         ]
     }
 }
+
+function deletePrescriptionFile(num, id) {
+    webix.ajax().get('delete_prescription_file', {id: id}).then(function (result) {
+        result = result.text();
+        if (result === 'Файл удален') {
+            $$('listFiles' + num).remove(id);
+        } else {
+            webix.message(result, 'error');
+        }
+    });
+}
+
 //Загрузка формы в контент сайта
 function loadTypeRequestFormInContent(){
     webix.ui({
@@ -1309,6 +1351,7 @@ const typeRequestForm = {
                                                 cols: [
                                                     {
                                                         view: 'button',
+                                                        id: 'addPrescriptionButton',
                                                         css: 'webix_primary',
                                                         maxWidth: 301,
                                                         value: 'Добавить',
@@ -1355,9 +1398,6 @@ const typeRequestForm = {
                                                                         accept: 'application/pdf, application/zip',
                                                                         multiple: true,
                                                                         link: 'prescriptionFiles' + num,
-                                                                        formData: {
-                                                                            num: num,
-                                                                        }
                                                                     }
                                                                 ]
                                                             })
@@ -1475,7 +1515,7 @@ const typeRequestForm = {
                                                         view: 'list',
                                                         id: 'selectedOkveds',
                                                         autoheight: true,
-                                                        template: '#name#',
+                                                        template: `#name# <span class="webix_icon wxi-trash" onclick="deleteSelectedOkved('#id#')"></span>`,
                                                     },
                                                     {}
                                                 ]
@@ -1536,7 +1576,7 @@ const typeRequestForm = {
                                                                                                     if (!$$('selectedOrganizations').exists(rowId)) {
                                                                                                         $$('selectedOrganizations').add({
                                                                                                             id: organization.id,
-                                                                                                            name: organization.inn + ' ' + organization.shortName
+                                                                                                            name: organization.inn + ' ' + organization.name
                                                                                                         });
                                                                                                     }
                                                                                                 } else {
@@ -1596,7 +1636,7 @@ const typeRequestForm = {
                                                             view: 'list',
                                                             id: 'selectedOrganizations',
                                                             autoheight: true,
-                                                            template: '#name#',
+                                                            template: `#name# <span class="webix_icon wxi-trash" onclick="deleteSelectedOrganization('#id#')"></span>`,
                                                         },
                                                         {}
                                                     ]
@@ -1624,57 +1664,96 @@ const typeRequestForm = {
                                                     this.disable();
 
                                                     if ($$('typeRequestForm').validate()) {
-                                                        let params = $$('typeRequestForm').getValues();
-                                                        params.settings = $$('settings').getValue();
-
-                                                        params.additionalFields = {};
-                                                        params.additionalFields.okvedIds = $$('selectedOkveds').serialize().map(okved => okved.id);
-                                                        params.additionalFields.organizationIds = $$('selectedOrganizations').serialize().map(organization => organization.id);
-
-                                                        const countPrescriptions = $$('prescriptions').getChildViews().length;
-                                                        if (countPrescriptions > 0) {
-                                                            params.regTypeRequestPrescriptions = [];
-                                                            for (let num = 1; num <= countPrescriptions; num++) {
-                                                                if ($$('prescription_text' + num).getValue()) {
-                                                                    let id;
-                                                                    if ($$('prescription_id' + num)) {
-                                                                        id = $$('prescription_id' + num).getValue();
-                                                                    }
-                                                                    params.regTypeRequestPrescriptions.push({
-                                                                        id,
-                                                                        num: num,
-                                                                        content: $$('prescription_text' + num).getValue()
-                                                                    });
-                                                                }
-                                                            }
-                                                        }
-
                                                         webix.ajax().headers({
                                                             'Content-Type': 'application/json'
                                                         }).post('/save_cls_type_request',
-                                                            JSON.stringify(params)
+                                                            JSON.stringify(getTypeRequestFormParams())
                                                         ).then(function (data) {
-                                                            if (data.text() === 'Предписание сохранено') {
+                                                            const savedTypeRequest = data.json();
+                                                            if (savedTypeRequest.id && savedTypeRequest.statusPublication === 0) {
                                                                 // сохраним файлы предписаний
-                                                                // for (let num = 1; num <= countPrescriptions; num++) {
-                                                                //     $$('uploader' + num).send(function (response) {
-                                                                //         if (response) {
-                                                                //             console.log(response.status);
-                                                                //         }
-                                                                //     });
-                                                                // }
+                                                                if (savedTypeRequest.regTypeRequestPrescriptions && savedTypeRequest.regTypeRequestPrescriptions.length > 0) {
+                                                                    savedTypeRequest.regTypeRequestPrescriptions.forEach(rtrp => {
+                                                                        let uploader = $$('uploader' + rtrp.num);
+                                                                        if (uploader) {
+                                                                            uploader.define('formData', {idTypeRequestPrescription: rtrp.id})
+                                                                            uploader.send(function (response) {
+                                                                                if (response) {
+                                                                                    console.log(response.cause)
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    })
+                                                                }
                                                                 //
-                                                                webix.message({text: data.text(), type: 'success'});
+                                                                webix.message({text: 'Предписание сохранено', type: 'success'});
                                                                 webix.ui({
                                                                     id: 'content',
                                                                     rows: [
                                                                         typeRequests
                                                                     ]
-                                                                }, $$('content'))
+                                                                }, $$('content'));
                                                             } else {
-                                                                webix.message({text: data.text(), type: 'error'});
+                                                                webix.message({text: 'Не удалось сохранить предписание', type: 'error'});
                                                             }
                                                             $$('savePrescription').enable();
+                                                        })
+                                                    } else {
+                                                        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                view: 'button',
+                                                id: 'saveAndPublishPrescription',
+                                                align: 'right',
+                                                css: 'webix_primary',
+                                                value: 'Опубликовать',
+                                                maxWidth: 300,
+                                                click: function () {
+                                                    this.disable();
+
+                                                    if ($$('typeRequestForm').validate()) {
+                                                        webix.ajax().headers({
+                                                            'Content-Type': 'application/json'
+                                                        }).post('/save_cls_type_request',
+                                                            JSON.stringify(getTypeRequestFormParams())
+                                                        ).then(function (data) {
+                                                            const savedTypeRequest = data.json();
+                                                            if (savedTypeRequest.id && savedTypeRequest.statusPublication === 0) {
+                                                                // сохраним файлы предписаний
+                                                                if (savedTypeRequest.regTypeRequestPrescriptions && savedTypeRequest.regTypeRequestPrescriptions.length > 0) {
+                                                                    savedTypeRequest.regTypeRequestPrescriptions.forEach(rtrp => {
+                                                                        let uploader = $$('uploader' + rtrp.num);
+                                                                        if (uploader) {
+                                                                            uploader.define('formData', {idTypeRequestPrescription: rtrp.id})
+                                                                            uploader.send(function (response) {
+                                                                                if (response) {
+                                                                                    console.log(response.cause)
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    })
+                                                                }
+                                                            } else {
+                                                                webix.message({text: 'Не удалось сохранить предписание', type: 'error'});
+                                                            }
+                                                            $$('saveAndPublishPrescription').enable();
+                                                            return webix.ajax().get('publish_prescription', {id: savedTypeRequest.id});
+                                                        }).then(function (result) {
+                                                            result = result.text();
+                                                            if (result === 'Предписание опубликовано') {
+                                                                webix.message({text: result, type: 'success'});
+                                                                webix.ui({
+                                                                    id: 'content',
+                                                                    rows: [
+                                                                        typeRequests
+                                                                    ]
+                                                                }, $$('content'));
+                                                            } else {
+                                                                webix.message({text: result, type: 'error'});
+                                                            }
+                                                            $$('saveAndPublishPrescription').enable();
                                                         })
                                                     } else {
                                                         webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
@@ -1704,6 +1783,42 @@ const typeRequestForm = {
             }
         ]
     }
+}
+
+function deleteSelectedOrganization(id) {
+    $$('selectedOrganizations').remove(id);
+}
+
+function deleteSelectedOkved(id) {
+    $$('selectedOkveds').remove(id);
+}
+
+function getTypeRequestFormParams() {
+    let params = $$('typeRequestForm').getValues();
+    params.settings = $$('settings').getValue();
+
+    params.additionalFields = {};
+    params.additionalFields.okvedIds = $$('selectedOkveds').serialize().map(okved => okved.id);
+    params.additionalFields.organizationIds = $$('selectedOrganizations').serialize().map(organization => organization.id);
+
+    const countPrescriptions = $$('prescriptions').getChildViews().length;
+    if (countPrescriptions > 0) {
+        params.regTypeRequestPrescriptions = [];
+        for (let num = 1; num <= countPrescriptions; num++) {
+            if ($$('prescription_text' + num).getValue()) {
+                let id;
+                if ($$('prescription_id' + num)) {
+                    id = $$('prescription_id' + num).getValue();
+                }
+                params.regTypeRequestPrescriptions.push({
+                    id,
+                    num: num,
+                    content: $$('prescription_text' + num).getValue()
+                });
+            }
+        }
+    }
+    return params;
 }
 
 function back() {

@@ -16,13 +16,19 @@ public interface PrescriptionService {
 
     ClsRestrictionType saveClsRestrictionType(ClsRestrictionTypeDto dto);
 
+    ClsTypeRequest getClsTypeRequest(Long id);
+
     ClsTypeRequest saveClsTypeRequest(ClsTypeRequestDto dto);
 
     Long getCountOrganizations(ClsTypeRequestDto clsTypeRequestDto);
 
     List<ClsOrganization> findOrganizations(ClsTypeRequestDto clsTypeRequestDto);
 
-    void publishPrescription(Long id) throws Exception;
+    boolean publishPrescription(Long id);
 
-    RegTypeRequestPrescriptionFile saveRegTypeRequestPrescriptionFile(MultipartFile file, Long idTypeRequest, Long idTypeRequestPrescription, Short num);
+    void createRequestsByPrescription(Long idTypeRequest);
+
+    RegTypeRequestPrescriptionFile saveRegTypeRequestPrescriptionFile(MultipartFile file, Long idTypeRequestPrescription);
+
+    boolean deleteRegTypeRequestPrescriptionFile(Long id);
 }

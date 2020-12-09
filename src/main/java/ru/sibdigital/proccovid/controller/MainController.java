@@ -18,6 +18,7 @@ import ru.sibdigital.proccovid.dto.egrul.EGRUL;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.ClsMigrationRepo;
 import ru.sibdigital.proccovid.service.EgrulService;
+import ru.sibdigital.proccovid.service.PrescriptionService;
 import ru.sibdigital.proccovid.service.RequestService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +44,9 @@ public class MainController {
 
     @Autowired
     private ClsMigrationRepo clsMigrationRepo;
+
+    @Autowired
+    private PrescriptionService prescriptionService;
 
     @GetMapping("/")
     public String index() {
@@ -96,6 +100,11 @@ public class MainController {
                 .map( ctr -> new KeyValue(ctr.getClass().getSimpleName(), ctr.getId(), ctr.getShortName()))
                 .collect(Collectors.toList());
         return list;
+    }
+
+    @GetMapping("/cls_type_request")
+    public @ResponseBody ClsTypeRequest getClsTypeRequest(@RequestParam Long id) {
+        return prescriptionService.getClsTypeRequest(id);
     }
 
     @CrossOrigin
