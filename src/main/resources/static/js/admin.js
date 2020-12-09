@@ -225,6 +225,28 @@ function processFilesFias() {
         )
 }
 
+function processZipFias() {
+    webix.confirm('Вы действительно хотите запустить загрузку ФИАС?')
+        .then(
+            function () {
+                webix.ajax().get('/process_fias_zip_full', )
+                    .then(function (data) {
+                        if (data.text() === 'Ok') {
+                            webix.message({
+                                text: 'Запущена загрузка',
+                                type: 'success'
+                            });
+                        } else {
+                            webix.message({
+                                text: 'Не удалось запустить загрузку',
+                                type: 'error'
+                            });
+                        }
+                    })
+            }
+        )
+}
+
 function processFiles() {
     webix.confirm('Вы действительно хотите запустить загрузку ЕГРЮЛ?')
         .then(
@@ -2233,7 +2255,7 @@ const fias = {
                         cols: [
                             {
                                 view: 'button',
-                                value: 'Загрузка ФИАС',
+                                value: 'Загрузка обновлений ФИАС',
                                 align: 'left',
                                 maxWidth: 400,
                                 css: 'webix_primary',
@@ -2248,6 +2270,14 @@ const fias = {
                                 maxWidth: 400,
                                 css: 'webix_primary',
                                 click: processFilesFias
+                            },
+                            {
+                                view: 'button',
+                                value: 'Загрузка zip ФИАС через scheduler',
+                                align: 'left',
+                                maxWidth: 400,
+                                css: 'webix_primary',
+                                click: processZipFias
                             },
                             {},
                         ]
