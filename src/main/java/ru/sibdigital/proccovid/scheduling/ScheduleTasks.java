@@ -13,6 +13,7 @@ import ru.sibdigital.proccovid.repository.RegMailingHistoryRepo;
 import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
 import ru.sibdigital.proccovid.service.EmailServiceImpl;
 import ru.sibdigital.proccovid.service.ImportEgrulEgripService;
+import ru.sibdigital.proccovid.service.ImportFiasService;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -40,6 +41,9 @@ public class ScheduleTasks {
     @Autowired
     private ImportEgrulEgripService importEgrulEgripService;
 
+    @Autowired
+    private ImportFiasService importFiasService;
+
 
     Map<Long, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
@@ -61,6 +65,11 @@ public class ScheduleTasks {
 
     public void startImportEgrulEgrip(boolean isEgrul, boolean isEgrip) {
         Runnable task = new ImportEgrulEgrip(isEgrul, isEgrip);
+        taskScheduler.schedule(task, new Date());
+    }
+
+    public void startFias(){
+        Runnable task = new ImportFias();
         taskScheduler.schedule(task, new Date());
     }
 
@@ -132,6 +141,13 @@ public class ScheduleTasks {
         @Override
         public void run() {
             importEgrulEgripService.importData(isEgrul, isEgrip);
+        }
+    }
+
+    class ImportFias implements Runnable {
+        @Override
+        public void run() {
+            importFiasService.importFullData();
         }
     }
 }

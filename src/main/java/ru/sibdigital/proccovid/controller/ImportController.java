@@ -62,4 +62,14 @@ public class ImportController {
         }
         return "Ok";
     }
+
+    @GetMapping("/process_fias_full")
+    @ResponseBody String processFilesFias() {
+        try {
+            scheduleTasks.startFias();
+        } catch (Exception e) {
+            return "Не удалось запустить загрузку";
+        }
+        return "Ok";
+    }
 }
