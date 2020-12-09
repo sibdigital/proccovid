@@ -939,10 +939,7 @@ const typeRequests = {
                                         data.departmentId = data.department.id;
                                     }
                                     if (data.regTypeRequestRestrictionTypes && data.regTypeRequestRestrictionTypes.length > 0) {
-                                        console.log(data.regTypeRequestRestrictionTypes[0])
-                                        console.log(data.regTypeRequestRestrictionTypes[0].regTypeRequestRestrictionTypeId)
                                         data.restrictionTypeIds = data.regTypeRequestRestrictionTypes[0].regTypeRequestRestrictionTypeId.clsRestricti
-                                        onType.id;
                                     }
 
                                     loadTypeRequestFormInContent();
