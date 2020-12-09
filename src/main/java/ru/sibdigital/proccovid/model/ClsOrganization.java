@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "cls_organization", schema = "public")
@@ -15,7 +16,6 @@ import java.util.Objects;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 public class ClsOrganization {
-
 
     @Id
     @Column(name = "id", nullable = false)
@@ -36,11 +36,15 @@ public class ClsOrganization {
     private Integer idTypeRequest;
     private Integer idTypeOrganization;
     private Integer typeTaxReporting;
+    private Boolean isDeleted;
 
     @OneToOne
     @JoinColumn(name = "id_principal", referencedColumnName = "id")
     @JsonIgnore
     private ClsPrincipal principal;
+
+    @OneToMany(mappedBy = "regOrganizationOkvedId.clsOrganization")
+    private Set<RegOrganizationOkved> regOrganizationOkveds;
 
     public Long getId() {
         return id;
@@ -190,12 +194,30 @@ public class ClsOrganization {
         this.typeTaxReporting = typeTaxReporting;
     }
 
+    @Basic
+    @Column(name = "is_deleted")
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
+
     public ClsPrincipal getPrincipal() {
         return principal;
     }
 
     public void setPrincipal(ClsPrincipal principal) {
         this.principal = principal;
+    }
+
+    public Set<RegOrganizationOkved> getRegOrganizationOkveds() {
+        return regOrganizationOkveds;
+    }
+
+    public void setRegOrganizationOkveds(Set<RegOrganizationOkved> regOrganizationOkveds) {
+        this.regOrganizationOkveds = regOrganizationOkveds;
     }
 
     @Override
@@ -222,8 +244,4 @@ public class ClsOrganization {
     public int hashCode() {
         return Objects.hash(id, name, shortName, inn, ogrn, addressJur, okvedAdd, okved, email, phone, statusImport, timeImport, idTypeRequest);
     }
-
-
-
-
 }

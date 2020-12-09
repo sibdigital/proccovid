@@ -1,28 +1,42 @@
 package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
-import ru.sibdigital.proccovid.service.OkvedServiceImpl;
-import ru.sibdigital.proccovid.service.RequestService;
+import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
+import ru.sibdigital.proccovid.service.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.criteria.CriteriaBuilder;
+import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
 public class AdminController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
+
+    private static boolean publicationPrescriptionInProgress = false;
 
     @Autowired
     private ApplicationConstants applicationConstants;
@@ -31,7 +45,7 @@ public class AdminController {
     private RequestService requestService;
 
     @Autowired
-    private OkvedServiceImpl okvedServiceImpl;
+    private OkvedService okvedService;
 
     @Autowired
     private ClsDepartmentOkvedRepo clsDepartmentOkvedRepo;
@@ -56,6 +70,12 @@ public class AdminController {
 
     @Autowired
     private RegNewsStatusRepo regNewsStatusRepo;
+
+    @Autowired
+    private PrescriptionService prescriptionService;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -129,12 +149,29 @@ public class AdminController {
     @PostMapping("/save_cls_type_request")
     public @ResponseBody String saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
         try {
-            requestService.saveClsTypeRequest(clsTypeRequestDto);
+            prescriptionService.saveClsTypeRequest(clsTypeRequestDto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return "Не удалось сохранить тип заявки";
+            return "Не удалось сохранить предписание";
         }
-        return "Тип заявки сохранен";
+        return "Предписание сохранено";
+    }
+
+    @PostMapping(value = "/upload_prescription_file", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> uploadPrescriptionFile(@RequestParam(value = "upload") MultipartFile file,
+                                                         @RequestParam Long idTypeRequest,
+                                                         @RequestParam Long idTypeRequestPrescription,
+                                                         @RequestParam Short num) {
+        RegTypeRequestPrescriptionFile regTypeRequestPrescriptionFile = prescriptionService.saveRegTypeRequestPrescriptionFile(file, idTypeRequest, idTypeRequestPrescription, num);
+        if (regTypeRequestPrescriptionFile != null) {
+            return ResponseEntity.ok()
+                    .body("{\"cause\": \"Файл успешно загружен\"," +
+                            "\"status\": \"server\"," +
+                            "\"sname\": \"" + regTypeRequestPrescriptionFile.getOriginalFileName() + "\"}");
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("{\"status\": \"server\"," +
+                        "\"cause\":\"Ошибка сохранения\"}");
     }
 
     @PostMapping("/save_cls_department")
@@ -178,7 +215,12 @@ public class AdminController {
         return "Пользователь сохранен";
     }
 
-
+    @GetMapping("/okveds")
+    public @ResponseBody List<OkvedDto> getOkveds() {
+        List<OkvedDto> list = okvedService.getOkveds()
+                .stream().map(okved -> new OkvedDto(okved.getId(), okved.getKindCode(), okved.getKindName())).collect(Collectors.toList());
+        return list;
+    }
 
     @GetMapping("/department_okveds/{id_department}")
     public @ResponseBody List<ClsDepartmentOkved> getListOkvedsDto(@PathVariable("id_department") Long id_department){
@@ -318,5 +360,64 @@ public class AdminController {
             return "Не удалось сохранить новость";
         }
         return "Новость сохранена";
+    }
+
+    @GetMapping("/cls_restriction_types")
+    public @ResponseBody List<ClsRestrictionType> getListRestrictionTypes() {
+        return prescriptionService.getClsRestrictionTypes();
+    }
+
+    @PostMapping("/save_cls_restriction_type")
+    public @ResponseBody String saveClsRestrictionType(@RequestBody ClsRestrictionTypeDto clsRestrictionTypeDto) {
+        try {
+            prescriptionService.saveClsRestrictionType(clsRestrictionTypeDto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить тип ограничения";
+        }
+        return "Тип ограничения сохранен";
+    }
+
+    @PostMapping("/selected_organizations/count")
+    public @ResponseBody Long getCountSelectedOrganizations(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+        return prescriptionService.getCountOrganizations(clsTypeRequestDto);
+    }
+
+    @PostMapping("/selected_organizations")
+    public @ResponseBody List<ClsOrganization> getSelectedOrganizations(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+        return prescriptionService.findOrganizations(clsTypeRequestDto);
+    }
+
+    @GetMapping("/cls_organizations")
+    public @ResponseBody Map<String, Object> getListOrganizations(@RequestParam(value = "inn", required = false) String inn,
+                                           @RequestParam(value = "start", required = false) Integer start,
+                                           @RequestParam(value = "count", required = false) Integer count) {
+
+        int page = start == null ? 0 : start / 25;
+        int size = count == null ? 25 : count;
+
+        ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
+        searchCriteria.setInn(inn);
+
+        Page<ClsOrganization> clsOrganizationPage = organizationService.getOrganizationsByCriteria(searchCriteria, page, size);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", clsOrganizationPage.getContent());
+        result.put("pos", (long) page * size);
+        result.put("total_count", clsOrganizationPage.getTotalElements());
+        return result;
+    }
+
+    @GetMapping("publish_prescription")
+    public @ResponseBody String publishPrescription(@RequestParam(value = "id") Long id) {
+        publicationPrescriptionInProgress = true;
+        try {
+            prescriptionService.publishPrescription(id);
+        } catch (Exception e) {
+            publicationPrescriptionInProgress = false;
+            log.error(e.getMessage(), e);
+        }
+
+        return "";
     }
 }

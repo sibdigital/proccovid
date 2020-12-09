@@ -30,6 +30,10 @@ public class Okved {
     private String version;
     private Long idSerial;
 
+    public Okved(UUID id) {
+        this.id = id;
+    }
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
