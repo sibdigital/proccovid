@@ -1,8 +1,6 @@
 package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -20,23 +18,19 @@ import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
-import ru.sibdigital.proccovid.service.*;
+import ru.sibdigital.proccovid.service.OkvedService;
+import ru.sibdigital.proccovid.service.OrganizationService;
+import ru.sibdigital.proccovid.service.PrescriptionService;
+import ru.sibdigital.proccovid.service.RequestService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.criteria.CriteriaBuilder;
-import java.security.Key;
-import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
 public class AdminController {
-
-    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
-
-    private static boolean publicationPrescriptionInProgress = false;
 
     @Autowired
     private ApplicationConstants applicationConstants;
@@ -147,22 +141,21 @@ public class AdminController {
     }
 
     @PostMapping("/save_cls_type_request")
-    public @ResponseBody String saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+    public @ResponseBody ClsTypeRequest saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto, @RequestParam(required = false) String publish) {
+        ClsTypeRequest clsTypeRequest;
         try {
-            prescriptionService.saveClsTypeRequest(clsTypeRequestDto);
+            clsTypeRequest = prescriptionService.saveClsTypeRequest(clsTypeRequestDto);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return "Не удалось сохранить предписание";
+            clsTypeRequest = new ClsTypeRequest();
+            log.error(e.getMessage());
         }
-        return "Предписание сохранено";
+        return clsTypeRequest;
     }
 
     @PostMapping(value = "/upload_prescription_file", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> uploadPrescriptionFile(@RequestParam(value = "upload") MultipartFile file,
-                                                         @RequestParam Long idTypeRequest,
-                                                         @RequestParam Long idTypeRequestPrescription,
-                                                         @RequestParam Short num) {
-        RegTypeRequestPrescriptionFile regTypeRequestPrescriptionFile = prescriptionService.saveRegTypeRequestPrescriptionFile(file, idTypeRequest, idTypeRequestPrescription, num);
+                                                         @RequestParam Long idTypeRequestPrescription) {
+        RegTypeRequestPrescriptionFile regTypeRequestPrescriptionFile = prescriptionService.saveRegTypeRequestPrescriptionFile(file, idTypeRequestPrescription);
         if (regTypeRequestPrescriptionFile != null) {
             return ResponseEntity.ok()
                     .body("{\"cause\": \"Файл успешно загружен\"," +
@@ -171,7 +164,28 @@ public class AdminController {
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("{\"status\": \"server\"," +
-                        "\"cause\":\"Ошибка сохранения\"}");
+                        "\"cause\":\"Ошибка сохранения\"}" +
+                        "\"sname\": \"" + file.getOriginalFilename() + "\"}");
+    }
+
+    @GetMapping("/delete_prescription_file")
+    public @ResponseBody String deletePrescriptionFile(@RequestParam Long id) {
+        boolean deleted = prescriptionService.deleteRegTypeRequestPrescriptionFile(id);
+        if (deleted) {
+            return "Файл удален";
+        }
+        return "Не удалось удалить файл";
+    }
+
+    @GetMapping("/publish_prescription")
+    public @ResponseBody String publishPrescription(@RequestParam Long id) {
+        boolean published = prescriptionService.publishPrescription(id);
+        if (published) {
+            prescriptionService.createRequestsByPrescription(id);
+        } else {
+            return "Не удалось опубликовать предписание";
+        }
+        return "Предписание опубликовано";
     }
 
     @PostMapping("/save_cls_department")
@@ -406,18 +420,5 @@ public class AdminController {
         result.put("pos", (long) page * size);
         result.put("total_count", clsOrganizationPage.getTotalElements());
         return result;
-    }
-
-    @GetMapping("publish_prescription")
-    public @ResponseBody String publishPrescription(@RequestParam(value = "id") Long id) {
-        publicationPrescriptionInProgress = true;
-        try {
-            prescriptionService.publishPrescription(id);
-        } catch (Exception e) {
-            publicationPrescriptionInProgress = false;
-            log.error(e.getMessage(), e);
-        }
-
-        return "";
     }
 }
