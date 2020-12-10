@@ -48,6 +48,10 @@ public class ImportFiasServiceImpl implements ImportFiasService {
     private final static Logger fiasLogger = LoggerFactory.getLogger("fiasLogger");
 
     private final Integer MAX_NUM_QUERIES = 10000;
+    private final String ADDR_OBJ_SUBSTRING = "AS_ADDR_OBJ_2";
+    private final String ADM_HIERARCHY_SUBSTRING = "AS_ADM_HIERARCHY_2";
+    private final String ADM_HIERARCHY_TABLENAME = "fias.adm_hierarchy_item";
+    private final String ADDR_OBJ_TABLENAME = "fias.addr_object";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -61,6 +65,16 @@ public class ImportFiasServiceImpl implements ImportFiasService {
     @Value("${fiasZip.import.directory}")
     private String fiasZipPath;
 
+
+    private static ZipFile getZipFile(File file) {
+        ZipFile zipFile = null;
+        try {
+            zipFile = new ZipFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return zipFile;
+    }
 
     /////////////////////////// ЗАГРУЗКА ZIP ЗАГРУЗКА ADDR_OBJ и ADM_HIERARCHY FULL //////////////////
     public void importZipFiasData() {
@@ -80,94 +94,76 @@ public class ImportFiasServiceImpl implements ImportFiasService {
         }
     }
 
+    private Map.Entry<String, ZipEntry> createEntry(ZipEntry zipEntry){
+        String filename = zipEntry.getName().toUpperCase();
+        Map.Entry<String, ZipEntry>  me = null;
+        if (filename.contains(ADDR_OBJ_SUBSTRING)) {
+            me = Map.entry(ADDR_OBJ_SUBSTRING, zipEntry);
+        } else if (filename.contains(ADM_HIERARCHY_SUBSTRING)) {
+            me = Map.entry(ADM_HIERARCHY_SUBSTRING, zipEntry);
+        }
+        return me;
+    }
+
+    private Map<String, Map<String, ZipEntry>> createMapForLoad(List<? extends ZipEntry> zipEntriesList){
+        Map<String, Map<String, ZipEntry>> map = new HashMap<>();
+        for (ZipEntry zipEntry: zipEntriesList ) {
+            final String zen = zipEntry.getName();
+            final int lastIndex = zen.lastIndexOf('/');
+            if (lastIndex != -1) {
+                final String dir = zen.substring(0, lastIndex);
+                Map<String, ZipEntry> zeDir = map.get(dir);
+                Map.Entry<String, ZipEntry> me = createEntry(zipEntry);
+                if (me != null) {
+                    if (zeDir == null) {
+                        Map<String, ZipEntry> entr = new HashMap<>();
+                        entr.put(me.getKey(), me.getValue());
+                        map.put(dir, entr);
+                    } else {
+                        zeDir.put(me.getKey(), me.getValue());
+                    }
+                }
+            }
+        }
+        return map;
+    }
+
     private void loadFiasFiles(Collection<File> Files) {
         for (File file : Files) {
-
             ZipFile zipFile = getZipFile(file);
             Comparator<ZipEntry> byName =
                     (ze1, ze2) -> ze1.getName().compareTo(ze2.getName());
             if (zipFile != null) {
+
                 List<? extends ZipEntry> zipEntriesList = zipFile.stream()
-                                                        .sorted(byName)
-                                                        .collect(Collectors.toList());
-                int i = 0;
-                try {
-                    while (i < zipEntriesList.size()) {
-                        ZipEntry zipEntry = zipEntriesList.get(i);
-                        if (zipEntry.isDirectory()) {
-                            fiasLogger.info("Папка: " + zipEntry.getName());
-                            i = processFolders(zipEntriesList, i, zipFile);
-                        }
-                        else {
-                            i++;
-                        }
-                    }
-                }
-                 catch (IOException e) {
-                    fiasLogger.error("Не удалось прочитать xml-файл из zip-файла");
-                    e.printStackTrace();
-                }
-                finally {
-                    try {
-                        zipFile.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+                       .filter(ze -> !ze.isDirectory())
+                       .sorted(byName)
+                       .collect(Collectors.toList());
+                final Map<String, Map<String, ZipEntry>> mapForLoad = createMapForLoad(zipEntriesList);
+
+                mapForLoad.forEach((k, v) -> processRegionData(k, v, zipFile));
             }
         }
         fiasLogger.info("Импорт ФИАС окончен");
     }
 
-    private int processFolders(List<? extends ZipEntry> zipEntriesList, int i, ZipFile zipFile) throws IOException {
-        int j = i;
-        j++;
-        if (j < zipEntriesList.size()) {
-            ZipEntry zipEntry = zipEntriesList.get(j);
+    private void processRegionData(String k, Map<String, ZipEntry> map, ZipFile zipFile)  {
+        fiasLogger.info("Directory: " + k);
+        try {
+            ZipEntry aoe = map.get(ADDR_OBJ_SUBSTRING);
+            InputStream aoIS = zipFile.getInputStream(aoe);
+            Set<String> addrObjectSet = loadAddrObjectFile(aoIS);
 
-            InputStream addrObjectInputStream = null;
-            InputStream admHierarchyInputStream = null;
-
-            String addrObjectFilename = "";
-            String admHierarchyFilename  = "";
-
-            while (j < zipEntriesList.size() && !zipEntry.isDirectory()) {
-                String zipEntryName = zipEntry.getName();
-                if (zipEntryName.toLowerCase().endsWith(".xml")) {
-                    String filename = zipEntryName;
-
-                    // Находим наименование файла
-                    if (zipEntryName.lastIndexOf('/') > 0) {
-                        filename = zipEntryName.substring(zipEntryName.lastIndexOf('/') + 1);
-                    }
-
-                    if (filename.toUpperCase().startsWith("AS_ADDR_OBJ_2")) {
-                        addrObjectInputStream = zipFile.getInputStream(zipEntry);;
-                        addrObjectFilename = filename;
-                    } else if (filename.toUpperCase().startsWith("AS_ADM_HIERARCHY_2")) {
-                        admHierarchyInputStream = zipFile.getInputStream(zipEntry);;
-                        admHierarchyFilename = filename;
-                    }
-                }
-
-                j++;
-                zipEntry = zipEntriesList.get(j);
-            }
-
-            if (addrObjectInputStream != null && admHierarchyInputStream != null) {
-                processRegionData(addrObjectInputStream, addrObjectFilename, admHierarchyInputStream, admHierarchyFilename);
-            }
+            ZipEntry ahe = map.get(ADM_HIERARCHY_SUBSTRING);
+            InputStream ahIS = zipFile.getInputStream(ahe);
+            loadAdmHierarchyItem(ahIS, addrObjectSet);
+        } catch (IOException e) {
+            fiasLogger.error("Не удалось прочитать xml файл");
         }
 
-        return j;
     }
 
-    private void processRegionData(InputStream addrObjectInputStream, String addrObjectFilename, InputStream admHierarchyInputStream, String admHierarchyFilename) {
-        Set<String> addrObjectSet = loadAddrObjectFile(addrObjectInputStream, addrObjectFilename);
-        loadAdmHierarchyItem(admHierarchyInputStream, admHierarchyFilename, addrObjectSet);
-    }
-
-    private Set<String> loadAddrObjectFile(InputStream addrObjectInputStream, String addrObjectFilename) {
+    private Set<String> loadAddrObjectFile(InputStream addrObjectInputStream) {
         Set<String> addrObjectSet = new HashSet<>();
         try {
             StaxStreamProcessor processor = new StaxStreamProcessor(addrObjectInputStream);
@@ -177,137 +173,48 @@ public class ImportFiasServiceImpl implements ImportFiasService {
             XMLStreamReader reader = processor.getReader();
             if (reader.hasNext()) {
                 int event = reader.next();
-                if (event == XMLEvent.START_ELEMENT && "ADDRESSOBJECTS".equals(reader.getLocalName())) {
+                if (event == XMLEvent.START_ELEMENT) {
                     while (reader.hasNext()) {
                         addrObjectSet = (Set<String>) createAndExecuteAddrObjectInserts(reader, addrObjectSet);
                     }
                 }
             }
-
             fiasLogger.info("Создание и выполнение inserts AddrObject. Конец");
         }
         catch (XMLStreamException e) {
-            fiasLogger.error("Не удалось прочитать xml файл " + addrObjectFilename);
+            fiasLogger.error("Не удалось прочитать xml файл с ADDR_OBJECT");
         }
 
         return addrObjectSet;
     }
 
-    private void loadAdmHierarchyItem(InputStream admHierarchyInputStream, String admHierarchyFilename, Set<String> addrObjectSet){
+    private void loadAdmHierarchyItem(InputStream admHierarchyInputStream, Set<String> addrObjectSet){
         try {
             StaxStreamProcessor processor = new StaxStreamProcessor(admHierarchyInputStream);
 
             // Исх. данные
             fiasLogger.info("Создание и выполнение inserts AdmHierarchyItem. Начало");
-            int k = 0;
             XMLStreamReader reader = processor.getReader();
             if (reader.hasNext()) {
                 int event = reader.next();
-                if (event == XMLEvent.START_ELEMENT && "ITEMS".equals(reader.getLocalName())) {
+                if (event == XMLEvent.START_ELEMENT) {
                     while (reader.hasNext()) {
                         createAndExecuteAdmHierarchyItemInserts(reader, addrObjectSet);
                     }
                 }
             }
-
             fiasLogger.info("Создание и выполнение inserts AdmHierarchyItem. Конец");
         }
         catch ( XMLStreamException e) {
-            fiasLogger.error("Не удалось прочитать файл " + admHierarchyFilename);
+            fiasLogger.error("Не удалось прочитать файл c ADM_HIERARCHY");
         }
-    }
-
-
-    ////////////////////////////// ЗАГРУЗКА ADDR_OBJ и ADM_HIERARCHY FULL //////////////////////////
-    public void importFullData(){
-        fiasLogger.info("Импорт ФИАС начат из " + fiasPath);
-        try {
-            List<Path> dirs = Files.walk(Paths.get(fiasPath))
-                    .filter(Files::isDirectory)
-                    .collect(Collectors.toList());
-
-            for (Path dir : dirs) {
-                importFiasRegionData(dir);
-            }
-
-        }
-        catch (IOException e) {
-            fiasLogger.error("Не удалось прочитать файлы из каталога " + fiasPath);
-        }
-
-
-        fiasLogger.info("Импорт ФИАС окончен");
-    }
-
-    private void importFiasRegionData(Path dir) {
-        try {
-            List<Path> files = Files.walk(dir, 1)
-                    .filter(Files::isReadable)
-                    .filter(Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith(".XML"))
-                    .collect(Collectors.toList());
-
-            if (files.size() > 0) {
-                Path addrObjectFilePath = null;
-                Path admHierarchyFilePath = null;
-
-                for (Path filepath : files) {
-                    if (filepath.getFileName().toString().startsWith("AS_ADDR_OBJ_2")) {
-                        addrObjectFilePath = filepath;
-                    } else if (filepath.getFileName().toString().startsWith("AS_ADM_HIERARCHY_2")) {
-                        admHierarchyFilePath = filepath;
-                    }
-                }
-                if (addrObjectFilePath != null && addrObjectFilePath != null) {
-                    fiasLogger.info(dir.toString());
-                    loadRegionData(addrObjectFilePath, admHierarchyFilePath);
-                }
-            }
-
-        } catch (IOException e) {
-            fiasLogger.error("Не удалось прочитать файлы из каталога " + dir);
-        }
-
-    }
-
-    private void loadRegionData(Path addrObjectFilePath, Path admHierarchyFilePath) {
-        Set<String> addrObjectSet = loadAddrObjectFile(addrObjectFilePath);
-        loadAdmHierarchyItem(admHierarchyFilePath, addrObjectSet);
-    }
-
-    ///////////// ЗАГРУЗКА addr_obj ////////////////////
-    private Set<String> loadAddrObjectFile(Path addrObjectFilePath) {
-        Set<String> addrObjectSet = new HashSet<>();
-        try {
-            StaxStreamProcessor processor = new StaxStreamProcessor(Files.newInputStream(addrObjectFilePath));
-
-            // Исх. данные
-            fiasLogger.info("Создание и выполнение inserts AddrObject. Начало");
-            int k = 0;
-            XMLStreamReader reader = processor.getReader();
-            if (reader.hasNext()) {
-                int event = reader.next();
-                if (event == XMLEvent.START_ELEMENT && "ADDRESSOBJECTS".equals(reader.getLocalName())) {
-                    while (reader.hasNext()) {
-                        addrObjectSet = (Set<String>) createAndExecuteAddrObjectInserts(reader, addrObjectSet);
-                    }
-                }
-            }
-
-            fiasLogger.info("Создание и выполнение inserts AddrObject. Конец");
-        }
-        catch (IOException | XMLStreamException e) {
-            fiasLogger.error("Не удалось прочитать файл " + addrObjectFilePath);
-        }
-
-        return addrObjectSet;
     }
 
     @Transactional
     Object createAndExecuteAddrObjectInserts(XMLStreamReader reader, Set<String> addrObjectSet) {
         Object obj = transactionTemplate.execute(new TransactionCallback() {
             public Object doInTransaction(TransactionStatus status) {
-                String tableName = "fias.addr_object";
+                String tableName = ADDR_OBJ_TABLENAME;
                 Set<String> set = addrObjectSet;
                 Set<String> excludedAttributes = getExcludedAttributes();
                 Set<String> excludedLevels = getExcludedLevels();
@@ -316,15 +223,13 @@ public class ImportFiasServiceImpl implements ImportFiasService {
                 try {
                     while (reader.hasNext() && j < MAX_NUM_QUERIES) {
                         reader.next();
-                        if (reader.getEventType() == XMLEvent.START_ELEMENT && "OBJECT".equals(reader.getLocalName())) {
+                        if (reader.getEventType() == XMLEvent.START_ELEMENT) {
+                            String queryParams = "";
+                            String queryValues = "";
+                            String attrbValueOBJECTID = "";
 
                             boolean loadFlag = true;
                             int i = 0;
-                            String queryParams = "";
-                            String queryValues = "";
-
-                            String attrbValueOBJECTID = "";
-
                             while (loadFlag && i < reader.getAttributeCount()) {
                                 String attributeName = reader.getAttributeLocalName(i);
                                 String value = reader.getAttributeValue(i);
@@ -381,36 +286,11 @@ public class ImportFiasServiceImpl implements ImportFiasService {
         return obj;
     }
 
-    ///////////// ЗАГРУЗКА adm_hierarchy_item //////////
-    private void loadAdmHierarchyItem(Path admHierarchyFilePath, Set<String> addrObjectSet){
-        try {
-            StaxStreamProcessor processor = new StaxStreamProcessor(Files.newInputStream(admHierarchyFilePath));
-
-            // Исх. данные
-            fiasLogger.info("Создание и выполнение inserts AdmHierarchyItem. Начало");
-            int k = 0;
-            XMLStreamReader reader = processor.getReader();
-            if (reader.hasNext()) {
-                int event = reader.next();
-                if (event == XMLEvent.START_ELEMENT && "ITEMS".equals(reader.getLocalName())) {
-                    while (reader.hasNext()) {
-                        createAndExecuteAdmHierarchyItemInserts(reader, addrObjectSet);
-                    }
-                }
-            }
-
-            fiasLogger.info("Создание и выполнение inserts AdmHierarchyItem. Конец");
-        }
-        catch (IOException | XMLStreamException e) {
-            fiasLogger.error("Не удалось прочитать файл " + admHierarchyFilePath);
-        }
-    }
-
     @Transactional
     void createAndExecuteAdmHierarchyItemInserts(XMLStreamReader reader, Set<String> addrObjectSet) {
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
-                String tableName = "fias.adm_hierarchy_item";
+                String tableName = ADM_HIERARCHY_TABLENAME;
                 Set<String> excludedAttributes = getExcludedAttributes();
 
                 int j = 0;
@@ -472,7 +352,6 @@ public class ImportFiasServiceImpl implements ImportFiasService {
             }});
     }
 
-
     private Set<String> getExcludedAttributes(){
         Set<String> set = new HashSet<>();
         set.add("objectguid".toUpperCase());
@@ -502,265 +381,4 @@ public class ImportFiasServiceImpl implements ImportFiasService {
 
         return set;
     }
-
-
-    ///////////////////////////// ЗАГРУЗКА С ВЫБОРОМ ФАЙЛА ОБНОВЛЕНИЙ ФИАС //////////////////////////////
-
-    /**
-     * Метод импорта данных обновлений ФИАС
-     */
-
-    public String importData(File file) {
-        try {
-            importFiasData(file);
-            return ("Загрузка окончена.");
-        }
-        catch (Exception e) {
-            fiasLogger.info("Не удалось загрузить файл.");
-            e.printStackTrace();
-            return ("Ошибка. "+ e.getMessage());
-        }
-    }
-
-    private void importFiasData(File file) {
-        fiasLogger.info("Импорт ФИАС начат");
-
-        try {
-            processZipFiasFile(file);
-        }
-        catch (Exception e ) {
-            System.out.println(e);
-        }
-
-
-        fiasLogger.info("Импорт ФИАС окончен");
-    }
-
-    /**
-     * Поиск имени таблицы в БД по имени файла и имени узла
-     */
-    private String findTableName(String nodeName, String filename) {
-        String tableName = nodeName.toLowerCase();
-
-        String subFileName = filename.substring(filename.indexOf("as_")+3, filename.indexOf("_2")).toLowerCase();
-        switch (tableName) {
-            case ("item"):
-                if (subFileName.equals("address_objects_division")) {
-                    tableName = "addr_obj_division_item";
-                }
-                else {
-                    tableName = subFileName + "_item";
-                }
-                break;
-            case ("param"):
-                subFileName = subFileName.substring(0, subFileName.indexOf("_params")).toLowerCase();
-                if (subFileName.equals("address_objects")) {
-                    tableName = "addr_obj_param";
-                }
-                else {
-                    tableName = subFileName + "_param";
-                }
-                break;
-            case ("object"):
-                if (subFileName.equals("address_objects")) {
-                    tableName = "addr_object";
-                }
-                else {
-                    subFileName = subFileName.substring(0, subFileName.indexOf("_obj")).toLowerCase();
-                    tableName = subFileName + "_object";
-                }
-                break;
-        }
-        tableName = "fias." + tableName;
-        return tableName;
-    }
-
-    /**
-     * Метод получения имени ключа таблицы
-     */
-    private String getPrimaryKeyName(String tableName) {
-        String primaryKey;
-        switch (tableName) {
-            case ("fias.change_history_item"):
-                primaryKey = "changeid";
-                break;
-            case ("fias.objectlevel"):
-                primaryKey = "level";
-                break;
-            case ("fias.reestr_object"):
-                primaryKey = "objectid";
-                break;
-            default:
-                primaryKey =  "id";
-                break;
-        }
-        return primaryKey;
-    }
-
-    private static ZipFile getZipFile(File file) {
-        ZipFile zipFile = null;
-        try {
-            zipFile = new ZipFile(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return zipFile;
-    }
-
-    /**
-     * Получаем все имена колонок таблицы
-     */
-    private List<String> getTableColumnNames(String tablename) {
-        Query query = entityManager.createNativeQuery(
-                "select column_name from information_schema.columns where table_name = ?;");
-        tablename = tablename.substring(5);
-        query.setParameter(1, tablename);
-        List<String> list = query.getResultList();
-        return list;
-    }
-
-    /**
-     * Метод генерации SQL query Insert
-     */
-    private String generateInsertQuery(Node node, String tableName, String primaryKeyName, List<String> columnNames) {
-        String query = "";
-
-        if (node.hasAttributes()) {
-
-            String queryTemplate = "INSERT INTO %s(%s) VALUES(%s) ON CONFLICT(%s) DO UPDATE SET %s;"; // Через параметры нельзя: DO UPDATE SET ?5; - недопустимо
-            NamedNodeMap nodeMap = node.getAttributes();
-
-            String queryParams = "";
-            String queryValues = "";
-            String queryUpsert = "";
-
-            for (int k = 0; k < nodeMap.getLength(); k++) {
-                Node attribute = nodeMap.item(k);
-                String key = attribute.getNodeName().toLowerCase();
-                String value = attribute.getNodeValue();
-                if (columnNames.contains(key)) {
-                    queryParams += "\"" + key + "\",";
-                    queryValues += "'" + value + "',";
-                    queryUpsert += (key.equals("desc") ? "\"desc\"" : key) + " = EXCLUDED." + key + ",";
-                }
-                else {
-                    fiasLogger.error("Не найдена колонка " + key + " в таблице " + tableName);
-                }
-            }
-
-            // Удаляем последние (лишние) запятые
-            queryParams = queryParams.substring(0, queryParams.length() - 1);
-            queryValues = queryValues.substring(0, queryValues.length() - 1);
-            queryUpsert = queryUpsert.substring(0, queryUpsert.length() - 1);
-
-            query = String.format(queryTemplate, tableName, queryParams, queryValues, primaryKeyName, queryUpsert);
-        }
-
-        return query;
-    }
-
-    private void processZipFiasFile(File file) {
-        ZipFile zipFile = getZipFile(file);
-        if (zipFile != null) {
-            try {
-                Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                while (entries.hasMoreElements()) {
-                    ZipEntry zipEntry = entries.nextElement();
-                    String zipEntryName = zipEntry.getName().toLowerCase();
-
-                    fiasLogger.info("Обход файлов. Папка/файл: " + zipEntryName);
-
-                    if (zipEntryName.length() > 5 && zipEntryName.substring(zipEntryName.length()-4).equals(".xml")) { // Проверка на формат xml
-                        InputStream is = zipFile.getInputStream(zipEntry);
-                        String filename = zipEntryName;
-
-                        // Находим наименование файла
-                        if (zipEntryName.lastIndexOf('/') > 0) {
-                            filename = zipEntryName.substring(zipEntryName.lastIndexOf('/'));
-                        }
-
-                        // Обработка xml файла
-                        processFiasFileByDOM(is, filename);
-                    }
-                }
-            } catch (IOException e) {
-                fiasLogger.error("Не удалось прочитать xml-файл из zip-файла");
-                e.printStackTrace();
-            }
-            catch (ParserConfigurationException e) {
-                fiasLogger.error("Не удалось распарсить xml-файл");
-                e.printStackTrace();
-            }
-            catch (SAXException e) {
-                fiasLogger.error("Не удалось распарсить xml-файл");
-                e.printStackTrace();
-            }
-            finally {
-                try {
-                    zipFile.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    @Transactional
-    int createAndExecuteInserts(Node root, String tableName, String primaryKeyName, List<String> finalColumnNames, int k) {
-
-        Object obj = transactionTemplate.execute(new TransactionCallback() {
-            public Object doInTransaction(TransactionStatus status) {
-                int j = k;
-                while (j < (k+MAX_NUM_QUERIES) && j <root.getChildNodes().getLength()){
-//                for (int j = 0; j < root.getChildNodes().getLength(); j++) {
-                    Node node = root.getChildNodes().item(j);
-                    String insertQuery = generateInsertQuery(node, tableName, primaryKeyName, finalColumnNames);
-                    Query query = entityManager.createNativeQuery(insertQuery);
-                    query.executeUpdate();
-                    j++;
-                }
-                return j;
-            }
-        });
-
-
-        return (Integer) obj;
-    }
-
-    /**
-     * Метод обработки по узлам Xml-файла с помощью DOM
-     */
-    private void processFiasFileByDOM(InputStream is, String filename) throws ParserConfigurationException, IOException, SAXException {
-        fiasLogger.info("Обработка файла " + filename);
-
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(is);
-        doc.getDocumentElement().normalize();
-
-        for (int i = 0; i < doc.getChildNodes().getLength(); i++) {
-            Node root = doc.getChildNodes().item(i);
-            if (root.getChildNodes().getLength() > 0) {
-                Node firstNode = root.getChildNodes().item(0);
-
-                // Найдем по первому элементу наим-е таблицы, имя primary key, имена колонок таблицы
-                String nodeName = firstNode.getNodeName();
-                String tableName = findTableName(nodeName, filename);
-                String primaryKeyName = getPrimaryKeyName(tableName);
-
-                List<String> columnNames = getTableColumnNames(tableName);
-
-                fiasLogger.info("Создание и выполнение inserts. Начало");
-                int k = 0;
-                while (k < root.getChildNodes().getLength()) {
-                    k = createAndExecuteInserts(root, tableName, primaryKeyName, columnNames, k);
-                }
-                fiasLogger.info("Создание и выполнение inserts. Конец");
-
-            }
-        }
-        fiasLogger.info("Обработка файла " + filename + " закончена");
-    }
-
-
 }

@@ -28,18 +28,6 @@ public class ImportController {
     @Autowired
     private ScheduleTasks scheduleTasks;
 
-    @PostMapping("/process_fias_file")
-    public @ResponseBody
-    String processFile(@RequestParam(name = "file") MultipartFile multipartFile) throws IOException {
-//        String tmpPath = System.getProperty("java.io.tmpdir");
-//        if (!System.getProperty("os.name").toLowerCase().contains("win")) {
-//            tmpPath += "/";
-//        }
-//        File file = new File(tmpPath + multipartFile.getOriginalFilename());
-//        multipartFile.transferTo(file);
-        File file = new File("D:\\GAR FULL\\02\\02_AS_ADM_HIERARCHY.zip");
-        return importFiasService.importData(file);
-    }
 
     @GetMapping("/process_egrip_files")
     @ResponseBody String processFilesEgrip() {
@@ -63,15 +51,6 @@ public class ImportController {
         return "Ok";
     }
 
-    @GetMapping("/process_fias_full")
-    @ResponseBody String processFilesFias() {
-        try {
-            scheduleTasks.startImportFilesFias();
-        } catch (Exception e) {
-            return "Не удалось запустить загрузку";
-        }
-        return "Ok";
-    }
 
     @GetMapping("/process_fias_zip_full")
     @ResponseBody String processZipFias() {
