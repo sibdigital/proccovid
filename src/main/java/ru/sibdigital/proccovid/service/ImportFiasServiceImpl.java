@@ -13,32 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 import ru.sibdigital.proccovid.utils.StaxStreamProcessor;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -131,13 +118,11 @@ public class ImportFiasServiceImpl implements ImportFiasService {
     private void loadFiasFiles(Collection<File> Files) {
         for (File file : Files) {
             ZipFile zipFile = getZipFile(file);
-            Comparator<ZipEntry> byName =
-                    (ze1, ze2) -> ze1.getName().compareTo(ze2.getName());
             if (zipFile != null) {
 
                 List<? extends ZipEntry> zipEntriesList = zipFile.stream()
                        .filter(ze -> !ze.isDirectory())
-                       .sorted(byName)
+                        .filter(ze -> ze.getName().toLowerCase().endsWith(".xml"))
                        .collect(Collectors.toList());
                 final Map<String, Map<String, ZipEntry>> mapForLoad = createMapForLoad(zipEntriesList);
 
@@ -151,12 +136,10 @@ public class ImportFiasServiceImpl implements ImportFiasService {
         fiasLogger.info("Directory: " + k);
         try {
             ZipEntry aoe = map.get(ADDR_OBJ_SUBSTRING);
-            InputStream aoIS = zipFile.getInputStream(aoe);
-            Set<String> addrObjectSet = loadAddrObjectFile(aoIS);
+            Set<String> addrObjectSet = loadAddrObjectFile(zipFile.getInputStream(aoe));
 
             ZipEntry ahe = map.get(ADM_HIERARCHY_SUBSTRING);
-            InputStream ahIS = zipFile.getInputStream(ahe);
-            loadAdmHierarchyItem(ahIS, addrObjectSet);
+            loadAdmHierarchyItem(zipFile.getInputStream(ahe), addrObjectSet);
         } catch (IOException e) {
             fiasLogger.error("Не удалось прочитать xml файл");
         }
@@ -164,27 +147,26 @@ public class ImportFiasServiceImpl implements ImportFiasService {
     }
 
     private Set<String> loadAddrObjectFile(InputStream addrObjectInputStream) {
+        fiasLogger.info("Inserts AddrObject. Начало");
+
         Set<String> addrObjectSet = new HashSet<>();
         try {
             StaxStreamProcessor processor = new StaxStreamProcessor(addrObjectInputStream);
-
-            // Исх. данные
-            fiasLogger.info("Создание и выполнение inserts AddrObject. Начало");
             XMLStreamReader reader = processor.getReader();
+
             if (reader.hasNext()) {
-                int event = reader.next();
-                if (event == XMLEvent.START_ELEMENT) {
+                if (reader.next() == XMLEvent.START_ELEMENT) {
                     while (reader.hasNext()) {
                         addrObjectSet = (Set<String>) createAndExecuteAddrObjectInserts(reader, addrObjectSet);
                     }
                 }
             }
-            fiasLogger.info("Создание и выполнение inserts AddrObject. Конец");
         }
         catch (XMLStreamException e) {
             fiasLogger.error("Не удалось прочитать xml файл с ADDR_OBJECT");
         }
 
+        fiasLogger.info("Inserts AddrObject. Конец");
         return addrObjectSet;
     }
 
@@ -192,8 +174,7 @@ public class ImportFiasServiceImpl implements ImportFiasService {
         try {
             StaxStreamProcessor processor = new StaxStreamProcessor(admHierarchyInputStream);
 
-            // Исх. данные
-            fiasLogger.info("Создание и выполнение inserts AdmHierarchyItem. Начало");
+            fiasLogger.info("Inserts AdmHierarchyItem. Начало");
             XMLStreamReader reader = processor.getReader();
             if (reader.hasNext()) {
                 int event = reader.next();
@@ -203,7 +184,7 @@ public class ImportFiasServiceImpl implements ImportFiasService {
                     }
                 }
             }
-            fiasLogger.info("Создание и выполнение inserts AdmHierarchyItem. Конец");
+            fiasLogger.info("Inserts AdmHierarchyItem. Конец");
         }
         catch ( XMLStreamException e) {
             fiasLogger.error("Не удалось прочитать файл c ADM_HIERARCHY");
@@ -231,31 +212,32 @@ public class ImportFiasServiceImpl implements ImportFiasService {
                             boolean loadFlag = true;
                             int i = 0;
                             while (loadFlag && i < reader.getAttributeCount()) {
-                                String attributeName = reader.getAttributeLocalName(i);
+                                String attributeName = reader.getAttributeLocalName(i).toLowerCase();
                                 String value = reader.getAttributeValue(i);
+
                                 switch (attributeName) {
-                                    case "ISACTIVE":
+                                    case "isactive":
                                         if (!value.equals("1")) {
                                             loadFlag = false;
                                         }
                                         break;
-                                    case "ISACTUAL":
+                                    case "isactual":
                                         if (!value.equals("1")) {
                                             loadFlag = false;
                                         }
                                         break;
-                                    case "LEVEL":
+                                    case "level":
                                         if (excludedLevels.contains(value)) {
                                             loadFlag = false;
                                         }
                                         break;
-                                    case "OBJECTID":
+                                    case "objectid":
                                         attrbValueOBJECTID = value;
                                         break;
                                 }
 
                                 if (!excludedAttributes.contains(attributeName)) {
-                                    queryParams += "\"" + attributeName.toLowerCase() + "\",";
+                                    queryParams += "\"" + attributeName + "\",";
                                     if (value.contains("\'")) {
                                         value = value.replace("\'", "\"");
                                     }
@@ -354,16 +336,16 @@ public class ImportFiasServiceImpl implements ImportFiasService {
 
     private Set<String> getExcludedAttributes(){
         Set<String> set = new HashSet<>();
-        set.add("objectguid".toUpperCase());
-        set.add("changeid".toUpperCase());
-        set.add("previd".toUpperCase());
-        set.add("nextid".toUpperCase());
-        set.add("updatedate".toUpperCase());
-        set.add("startdate".toUpperCase());
-        set.add("enddate".toUpperCase());
-        set.add("isactual".toUpperCase());
-        set.add("isactive".toUpperCase());
-        set.add("createdate".toUpperCase());
+        set.add("objectguid");
+        set.add("changeid");
+        set.add("previd");
+        set.add("nextid");
+        set.add("updatedate");
+        set.add("startdate");
+        set.add("enddate");
+        set.add("isactual");
+        set.add("isactive");
+        set.add("createdate");
 
         return set;
     }
