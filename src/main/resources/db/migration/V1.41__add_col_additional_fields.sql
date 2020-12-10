@@ -1,0 +1,1 @@
+alter table cls_type_request add column if not exists additional_fields jsonb;

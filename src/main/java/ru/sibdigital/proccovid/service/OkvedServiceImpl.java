@@ -12,7 +12,6 @@ import ru.sibdigital.proccovid.model.Types;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.utils.ExcelParser;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

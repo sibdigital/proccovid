@@ -4,20 +4,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
-import ru.sibdigital.proccovid.service.OkvedServiceImpl;
+import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
+import ru.sibdigital.proccovid.service.OkvedService;
+import ru.sibdigital.proccovid.service.OrganizationService;
+import ru.sibdigital.proccovid.service.PrescriptionService;
 import ru.sibdigital.proccovid.service.RequestService;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,7 +39,7 @@ public class AdminController {
     private RequestService requestService;
 
     @Autowired
-    private OkvedServiceImpl okvedServiceImpl;
+    private OkvedService okvedService;
 
     @Autowired
     private ClsDepartmentOkvedRepo clsDepartmentOkvedRepo;
@@ -56,6 +64,12 @@ public class AdminController {
 
     @Autowired
     private RegNewsStatusRepo regNewsStatusRepo;
+
+    @Autowired
+    private PrescriptionService prescriptionService;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -127,14 +141,51 @@ public class AdminController {
     }
 
     @PostMapping("/save_cls_type_request")
-    public @ResponseBody String saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+    public @ResponseBody ClsTypeRequest saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto, @RequestParam(required = false) String publish) {
+        ClsTypeRequest clsTypeRequest;
         try {
-            requestService.saveClsTypeRequest(clsTypeRequestDto);
+            clsTypeRequest = prescriptionService.saveClsTypeRequest(clsTypeRequestDto);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return "Не удалось сохранить тип заявки";
+            clsTypeRequest = new ClsTypeRequest();
+            log.error(e.getMessage());
         }
-        return "Тип заявки сохранен";
+        return clsTypeRequest;
+    }
+
+    @PostMapping(value = "/upload_prescription_file", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> uploadPrescriptionFile(@RequestParam(value = "upload") MultipartFile file,
+                                                         @RequestParam Long idTypeRequestPrescription) {
+        RegTypeRequestPrescriptionFile regTypeRequestPrescriptionFile = prescriptionService.saveRegTypeRequestPrescriptionFile(file, idTypeRequestPrescription);
+        if (regTypeRequestPrescriptionFile != null) {
+            return ResponseEntity.ok()
+                    .body("{\"cause\": \"Файл успешно загружен\"," +
+                            "\"status\": \"server\"," +
+                            "\"sname\": \"" + regTypeRequestPrescriptionFile.getOriginalFileName() + "\"}");
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("{\"status\": \"server\"," +
+                        "\"cause\":\"Ошибка сохранения\"}" +
+                        "\"sname\": \"" + file.getOriginalFilename() + "\"}");
+    }
+
+    @GetMapping("/delete_prescription_file")
+    public @ResponseBody String deletePrescriptionFile(@RequestParam Long id) {
+        boolean deleted = prescriptionService.deleteRegTypeRequestPrescriptionFile(id);
+        if (deleted) {
+            return "Файл удален";
+        }
+        return "Не удалось удалить файл";
+    }
+
+    @GetMapping("/publish_prescription")
+    public @ResponseBody String publishPrescription(@RequestParam Long id) {
+        boolean published = prescriptionService.publishPrescription(id);
+        if (published) {
+            prescriptionService.createRequestsByPrescription(id);
+        } else {
+            return "Не удалось опубликовать предписание";
+        }
+        return "Предписание опубликовано";
     }
 
     @PostMapping("/save_cls_department")
@@ -178,7 +229,12 @@ public class AdminController {
         return "Пользователь сохранен";
     }
 
-
+    @GetMapping("/okveds")
+    public @ResponseBody List<OkvedDto> getOkveds() {
+        List<OkvedDto> list = okvedService.getOkveds()
+                .stream().map(okved -> new OkvedDto(okved.getId(), okved.getKindCode(), okved.getKindName())).collect(Collectors.toList());
+        return list;
+    }
 
     @GetMapping("/department_okveds/{id_department}")
     public @ResponseBody List<ClsDepartmentOkved> getListOkvedsDto(@PathVariable("id_department") Long id_department){
@@ -309,5 +365,51 @@ public class AdminController {
             return "Не удалось сохранить новость";
         }
         return "Новость сохранена";
+    }
+
+    @GetMapping("/cls_restriction_types")
+    public @ResponseBody List<ClsRestrictionType> getListRestrictionTypes() {
+        return prescriptionService.getClsRestrictionTypes();
+    }
+
+    @PostMapping("/save_cls_restriction_type")
+    public @ResponseBody String saveClsRestrictionType(@RequestBody ClsRestrictionTypeDto clsRestrictionTypeDto) {
+        try {
+            prescriptionService.saveClsRestrictionType(clsRestrictionTypeDto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить тип ограничения";
+        }
+        return "Тип ограничения сохранен";
+    }
+
+    @PostMapping("/selected_organizations/count")
+    public @ResponseBody Long getCountSelectedOrganizations(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+        return prescriptionService.getCountOrganizations(clsTypeRequestDto);
+    }
+
+    @PostMapping("/selected_organizations")
+    public @ResponseBody List<ClsOrganization> getSelectedOrganizations(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+        return prescriptionService.findOrganizations(clsTypeRequestDto);
+    }
+
+    @GetMapping("/cls_organizations")
+    public @ResponseBody Map<String, Object> getListOrganizations(@RequestParam(value = "inn", required = false) String inn,
+                                           @RequestParam(value = "start", required = false) Integer start,
+                                           @RequestParam(value = "count", required = false) Integer count) {
+
+        int page = start == null ? 0 : start / 25;
+        int size = count == null ? 25 : count;
+
+        ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
+        searchCriteria.setInn(inn);
+
+        Page<ClsOrganization> clsOrganizationPage = organizationService.getOrganizationsByCriteria(searchCriteria, page, size);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", clsOrganizationPage.getContent());
+        result.put("pos", (long) page * size);
+        result.put("total_count", clsOrganizationPage.getTotalElements());
+        return result;
     }
 }

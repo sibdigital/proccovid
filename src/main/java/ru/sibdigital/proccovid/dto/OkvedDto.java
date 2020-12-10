@@ -28,6 +28,12 @@ public class OkvedDto {
     private String subgroupName;
     private Short status;
 
+    public OkvedDto(UUID id, String kindCode, String kindName) {
+        this.id = id;
+        this.kindCode = kindCode;
+        this.kindName = kindName;
+    }
+
     public String getCode() {
         return code;
     }
@@ -138,6 +144,10 @@ public class OkvedDto {
         } else {
             this.description = this.description.concat("\n" + str);
         }
+    }
+
+    public String getValue() {
+        return this.kindCode + ' ' + this.kindName;
     }
 
     @Override

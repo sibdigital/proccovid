@@ -46,9 +46,6 @@ public class ImportFiasServiceImpl implements ImportFiasService {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
-    @Value("${fias.import.directory}")
-    private String fiasPath;
-
     @Value("${fiasZip.import.directory}")
     private String fiasZipPath;
 

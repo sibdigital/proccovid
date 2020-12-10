@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpecificationExecutor {
@@ -70,6 +71,26 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "                   order by dr.time_create desc;")
     Optional<List<DocRequest>> getLastRequestByInnOfRequest(@Param("id_request")Long id_request);
 
+    @Query(nativeQuery = true, value = "select * " +
+            "from " +
+            "   doc_request dr " +
+            "where " +
+            "   dr.id_organization = :orgId " +
+            "   and dr.status_review = :status " +
+            "   and exists (select * " +
+            "       from (select CAST(jsonb_array_elements_text(jsonb_extract_path((select additional_fields from cls_type_request as ctr where id = 1), 'okvedIds')) as uuid) as id) as t1 " +
+            "       where t1.id in (:okvedIds) " +
+            "   )")
+    Optional<List<DocRequest>> getRequestsByOrganizationIdAndStatusAndOkvedIds(Long orgId, Integer status, UUID[] okvedIds);
+
+    @Query(nativeQuery = true, value = "select dr.* " +
+            "from " +
+            "   doc_request dr " +
+            "where " +
+            "   dr.id_organization = :orgId " +
+            "   and dr.status_review = :status " +
+            "   and dr.id_type_request = :typeRequestId ")
+    Optional<List<DocRequest>> getRequestsByOrganizationIdAndStatusAndTypeRequestId(Long orgId, Integer status, Long typeRequestId);
 
 
 

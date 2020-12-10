@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface OkvedService {
+
+    List<Okved> getOkveds();
+
     String processFile(MultipartFile multipartFile, String version);
 
     List<Okved> findOkvedsBySearchText(String text);
