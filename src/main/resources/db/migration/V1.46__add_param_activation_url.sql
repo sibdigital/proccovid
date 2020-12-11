@@ -1,0 +1,1 @@
+insert into cls_settings(status, key, string_value) values (1, 'activationUrl', '');
