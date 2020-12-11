@@ -216,6 +216,82 @@ const getAddHelpForm = (data = null) => {
     };
 }
 
+const addHelpForm = {
+    view: 'scrollview',
+    autowidth: true,
+    autoheight: true,
+    body: {
+        type: 'space',
+        rows: [
+            {
+                view: 'form',
+                id: 'newHelpForm',
+                complexData: true,
+                elements: [
+                    {
+                        view: 'text',
+                        id: 'header',
+                        name: 'title',
+                        label: 'Название',
+                        labelPosition: 'top',
+                    },
+                    {
+                        view: 'label',
+                        label: 'Описание',
+                    },
+                    {
+                        view: 'nic-editor',
+                        id: 'message',
+                        name: 'description',
+                        css: "myClass",
+                        cdn: false,
+                        config: {
+                            iconsPath: '../libs/nicedit/nicEditorIcons.gif'
+                        }
+                    },
+                    {
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                maxWidth: 200,
+                                label: 'Отмена',
+                                click: function() {
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            helpForm
+                                        ]
+                                    }, $$('content'))
+                                }
+                            },
+                            {
+                                view: 'button',
+                                maxWidth: 200,
+                                label: 'Добавить',
+                                click: function() {
+                                    const params = $$('newHelpForm').getValues();
+                                    webix.ajax()
+                                        .headers({ 'Content-Type': 'application/json' })
+                                        .post('/help/add', JSON.stringify(params));
+
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            helpForm
+                                        ]
+                                    }, $$('content'))
+                                }
+                            }
+                        ]
+                    },
+                ]
+            }
+        ]
+    },
+
+}
+
 const helpForm = {
     view: 'scrollview',
     scroll: 'xy',
@@ -224,7 +300,7 @@ const helpForm = {
         rows: [
             {
                 type: 'wide',
-                cols: [
+                rows: [
                     {
                         view: 'list',
                         id: 'listHelps',
@@ -252,63 +328,59 @@ const helpForm = {
                                 let url = '/help/statistic';
                                 switch (id) {
                                     case 'Departments': {
-                                        view = departments;
+                                        url = '/help?name=departments';
                                         break;
                                     }
                                     case 'DepartmentUsers': {
-                                        view = departmentUsers;
+                                        url = '/help?name=departmentUsers';
                                         break;
                                     }
                                     case 'Principals': {
-                                        view = principals;
+                                        url = '/help?name=principals';
                                         break;
                                     }
                                     case 'Templates': {
-                                        view = templates;
+                                        url = '/help?name=templates';
                                         break;
                                     }
                                     case 'TypeRequests': {
-                                        view = typeRequests;
+                                        url = '/help?name=typeRequests';
                                         break;
                                     }
                                     case 'Requests': {
-                                        view = adminRequests;
+                                        url = '/help?name=requests';
                                         break;
                                     }
                                     case 'Statistic': {
-                                        view = statistic;
+                                        url = '/help?name=statistic';
                                         break;
                                     }
                                     case 'Okveds': {
-                                        view = okveds;
+                                        url = '/help?name=okveds';
                                         break;
                                     }
                                     case 'Mailing': {
-                                        view = mailingList;
+                                        url = '/help?name=mailing';
                                         break;
                                     }
                                     case 'MailingMessages': {
-                                        view = mailingMessages;
+                                        url = '/help?name=mailingMessages';
                                         break;
                                     }
                                     case 'Fias': {
-                                        view = fias;
+                                        url = '/help?name=fias';
                                         break;
                                     }
                                     case 'News': {
-                                        view = newsListForm;
+                                        url = '/help?name=news';
                                         break;
                                     }
                                     case 'RestrictionTypes': {
-                                        view = restrictionTypes;
+                                        url = '/help?name=restrictionTypes';
                                         break;
                                     }
                                     case 'Organizations': {
-                                        view = organizations;
-                                        break;
-                                    }
-                                    case 'Help': {
-                                        url = '/help/statistic';
+                                        url = '/help?name=organizations';
                                         break;
                                     }
                                 }
@@ -322,6 +394,19 @@ const helpForm = {
                             }
                         }
                     },
+                    {
+                        view: 'button',
+
+                        label: 'Добавить',
+                        click: function() {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    addHelpForm
+                                ]
+                            }, $$('content'))
+                        }
+                    }
                     // {
                     //     gravity: 0.2,
                     //     view: 'form',
