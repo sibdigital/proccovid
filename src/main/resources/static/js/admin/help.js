@@ -1,6 +1,6 @@
 const getDropDownView = (header, desc) => {
-    const buttonValue = header?.title ?? 'Раскрыть';
-    const textAreaValue = desc?.description ?? 'Описание';
+    const buttonValue = header.title  || 'Раскрыть';
+    const textAreaValue = desc.description || 'Описание';
 
     // const dropDownView = {
     //     view: 'scrollview',
