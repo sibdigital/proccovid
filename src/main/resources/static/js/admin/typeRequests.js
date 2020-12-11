@@ -1,16 +1,3 @@
-function back() {
-    $$("wizard").back();
-}
-
-function next() {
-    const parentCell = this.getParentView().getParentView();
-    const index = $$("wizard").index(parentCell);
-    const next = $$("wizard").getChildViews()[index + 1]
-    if (next) {
-        next.show();
-    }
-}
-
 const typeRequests = {
     view: 'scrollview',
     scroll: 'xy',
@@ -32,7 +19,7 @@ const typeRequests = {
                         // pager: 'Pager',
                         datafetch: 25,
                         columns: [
-                            {id: "activityKind", header: "Наименование", template: "#activityKind#", adjust: true, maxWidth: 500},
+                            {id: "activityKind", header: "Наименование", template: "#activityKind#", adjust: true, fillspace: true},
                             // {id: "shortName", header: "Краткое наименование", template: "#shortName#", width: 300},
                             // {id: "prescription", header: "Prescription", template: "#prescription#", adjust: true},
                             // {id: "prescriptionLink", header: "PrescriptionLink", template: "#prescriptionLink#", adjust: true},
@@ -41,7 +28,7 @@ const typeRequests = {
                             // {id: "statusVisible", header: "Статус видимости", template: "#statusVisible#", adjust: true},
                             // {id: "beginVisible", header: "Дата начала видимости", template: "#beginVisible#", adjust: true},
                             // {id: "endVisible", header: "Дата конца видимости", template: "#endVisible#", adjust: true},
-                            {id: "status", header: "Статус", template: "#statusPublicationName#"},
+                            {id: "status", header: "Статус", template: "#statusPublicationName#", adjust: true},
                         ],
                         on: {
                             onBeforeLoad: function () {
@@ -67,8 +54,9 @@ const typeRequests = {
                                     if (data.department) {
                                         data.departmentId = data.department.id;
                                     }
+
                                     if (data.regTypeRequestRestrictionTypes && data.regTypeRequestRestrictionTypes.length > 0) {
-                                        data.restrictionTypeIds = data.regTypeRequestRestrictionTypes[0].regTypeRequestRestrictionTypeId.clsRestricti
+                                        data.restrictionTypeIds = data.regTypeRequestRestrictionTypes[0].regTypeRequestRestrictionTypeId.clsRestrictionType.id;
                                     }
 
                                     loadTypeRequestFormInContent();
@@ -839,51 +827,58 @@ const typeRequestForm = {
                                                 click: function () {
                                                     this.disable();
 
-                                                    if ($$('typeRequestForm').validate()) {
-                                                        webix.ajax().headers({
-                                                            'Content-Type': 'application/json'
-                                                        }).post('/save_cls_type_request',
-                                                            JSON.stringify(getTypeRequestFormParams())
-                                                        ).then(function (data) {
-                                                            const savedTypeRequest = data.json();
-                                                            if (savedTypeRequest.id && savedTypeRequest.statusPublication === 0) {
-                                                                // сохраним файлы предписаний
-                                                                if (savedTypeRequest.regTypeRequestPrescriptions && savedTypeRequest.regTypeRequestPrescriptions.length > 0) {
-                                                                    savedTypeRequest.regTypeRequestPrescriptions.forEach(rtrp => {
-                                                                        let uploader = $$('uploader' + rtrp.num);
-                                                                        if (uploader) {
-                                                                            uploader.define('formData', {idTypeRequestPrescription: rtrp.id})
-                                                                            uploader.send(function (response) {
-                                                                                if (response) {
-                                                                                    console.log(response.cause)
-                                                                                }
-                                                                            });
-                                                                        }
-                                                                    })
+                                                    const message = 'Вы уверены, что хотитет опубликовать предписание? ' +
+                                                        'После публикации будет запущен процесс создания шаблонов заявок для выбранных организаций.';
+
+                                                    webix.confirm(message).then(function () {
+                                                        if ($$('typeRequestForm').validate()) {
+                                                            webix.ajax().headers({
+                                                                'Content-Type': 'application/json'
+                                                            }).post('/save_cls_type_request',
+                                                                JSON.stringify(getTypeRequestFormParams())
+                                                            ).then(function (data) {
+                                                                const savedTypeRequest = data.json();
+                                                                if (savedTypeRequest.id && savedTypeRequest.statusPublication === 0) {
+                                                                    // сохраним файлы предписаний
+                                                                    if (savedTypeRequest.regTypeRequestPrescriptions && savedTypeRequest.regTypeRequestPrescriptions.length > 0) {
+                                                                        savedTypeRequest.regTypeRequestPrescriptions.forEach(rtrp => {
+                                                                            let uploader = $$('uploader' + rtrp.num);
+                                                                            if (uploader) {
+                                                                                uploader.define('formData', {idTypeRequestPrescription: rtrp.id})
+                                                                                uploader.send(function (response) {
+                                                                                    if (response) {
+                                                                                        console.log(response.cause)
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                } else {
+                                                                    webix.message({text: 'Не удалось сохранить предписание', type: 'error'});
                                                                 }
-                                                            } else {
-                                                                webix.message({text: 'Не удалось сохранить предписание', type: 'error'});
-                                                            }
-                                                            $$('saveAndPublishPrescription').enable();
-                                                            return webix.ajax().get('publish_prescription', {id: savedTypeRequest.id});
-                                                        }).then(function (result) {
-                                                            result = result.text();
-                                                            if (result === 'Предписание опубликовано') {
-                                                                webix.message({text: result, type: 'success'});
-                                                                webix.ui({
-                                                                    id: 'content',
-                                                                    rows: [
-                                                                        typeRequests
-                                                                    ]
-                                                                }, $$('content'));
-                                                            } else {
-                                                                webix.message({text: result, type: 'error'});
-                                                            }
-                                                            $$('saveAndPublishPrescription').enable();
-                                                        })
-                                                    } else {
-                                                        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
-                                                    }
+                                                                $$('saveAndPublishPrescription').enable();
+                                                                return webix.ajax().get('publish_prescription', {id: savedTypeRequest.id});
+                                                            }).then(function (result) {
+                                                                result = result.text();
+                                                                if (result === 'Предписание опубликовано') {
+                                                                    webix.message({text: result, type: 'success'});
+                                                                    webix.ui({
+                                                                        id: 'content',
+                                                                        rows: [
+                                                                            typeRequests
+                                                                        ]
+                                                                    }, $$('content'));
+                                                                } else {
+                                                                    webix.message({text: result, type: 'error'});
+                                                                }
+                                                                $$('saveAndPublishPrescription').enable();
+                                                            })
+                                                        } else {
+                                                            webix.message({text: 'Не заполнены обязательные поля',type: 'error'});
+                                                        }
+                                                    }).fail(function () {
+                                                        $$('saveAndPublishPrescription').enable();
+                                                    })
                                                 }
                                             },
                                             {
@@ -945,4 +940,17 @@ function getTypeRequestFormParams() {
         }
     }
     return params;
+}
+
+function back() {
+    $$("wizard").back();
+}
+
+function next() {
+    const parentCell = this.getParentView().getParentView();
+    const index = $$("wizard").index(parentCell);
+    const next = $$("wizard").getChildViews()[index + 1]
+    if (next) {
+        next.show();
+    }
 }
