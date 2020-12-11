@@ -78,7 +78,7 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "   dr.id_organization = :orgId " +
             "   and dr.status_review = :status " +
             "   and exists (select * " +
-            "       from (select CAST(jsonb_array_elements_text(jsonb_extract_path((select additional_fields from cls_type_request as ctr where id = 1), 'okvedIds')) as uuid) as id) as t1 " +
+            "       from (select CAST(jsonb_array_elements_text(jsonb_extract_path((select additional_fields from cls_type_request as ctr where id = dr.id_type_request), 'okvedIds')) as uuid) as id) as t1 " +
             "       where t1.id in (:okvedIds) " +
             "   )")
     Optional<List<DocRequest>> getRequestsByOrganizationIdAndStatusAndOkvedIds(Long orgId, Integer status, UUID[] okvedIds);
