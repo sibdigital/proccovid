@@ -19,6 +19,7 @@ public class ClsNewsDto {
     private String message;
     private String startTime;
     private String endTime;
+    private String hashId;
 
     public List<CheckedReviewStatusDto> getStatuses() {
         return statuses;

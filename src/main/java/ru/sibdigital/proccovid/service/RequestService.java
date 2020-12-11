@@ -577,7 +577,18 @@ public class RequestService {
         Date startTime = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(clsNewsDto.getStartTime()).getTime());
         Date endTime = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(clsNewsDto.getEndTime()).getTime());
 
-        ClsNews clsNews = ClsNews.builder()
+
+        // Чтобы при build() не затерся hashId, сохраним его.
+        ClsNews clsNews;
+        String hashId = null;
+        if (clsNewsDto.getId() != null) {
+            clsNews = clsNewsRepo.findById(clsNewsDto.getId()).orElse(null);
+            if (clsNews != null) {
+                hashId = clsNews.getHashId();
+            }
+        }
+
+        clsNews = ClsNews.builder()
                 .id(clsNewsDto.getId())
                 .heading(clsNewsDto.getHeading())
                 .message(clsNewsDto.getMessage())
@@ -585,19 +596,40 @@ public class RequestService {
                 .endTime(endTime)
                 .build();
 
+        if (hashId != null) {
+            clsNews.setHashId(hashId);
+        }
+        else {
+            // Для hashId нужен clsNews.id. Если новость новая, то сохраняем и после получаем id.
+            clsNewsRepo.save(clsNews);
+            hashId = "" + clsNews.getId() + encode(System.currentTimeMillis() - Long.parseLong("1577808000000"));
+            clsNews.setHashId(hashId);
+        }
+
         clsNewsRepo.save(clsNews);
 
+        saveRegNewsOkved(clsNews, clsNewsDto);
+        saveRegNewsOrganization(clsNews, clsNewsDto);
+        saveRegNewsStatus(clsNews, clsNewsDto);
+
+        return clsNews;
+    }
+
+    public void saveRegNewsOkved(ClsNews clsNews, ClsNewsDto clsNewsDto){
         List<RegNewsOkved> list = regNewsOkvedRepo.findClsNewsOkvedByNews(clsNews);
         regNewsOkvedRepo.deleteAll(list);
 
-        //TODO Надо переписывать в подобном стиле
-        List<RegNewsOkved> listOkveds = clsNewsDto.getOkveds().stream()
-                .map(o -> RegNewsOkved.builder()
-                        .news(clsNews)
-                        .okved(o).build()
-                ).collect(Collectors.toList());
-        regNewsOkvedRepo.saveAll(listOkveds);
+        List<Okved> listOkveds = clsNewsDto.getOkveds();
+        for (Okved okved : listOkveds) {
+            RegNewsOkved rno = RegNewsOkved.builder()
+                    .news(clsNews)
+                    .okved(okved)
+                    .build();
+            regNewsOkvedRepo.save(rno);
+        }
+    }
 
+    public void saveRegNewsOrganization(ClsNews clsNews, ClsNewsDto clsNewsDto){
         List<RegNewsOrganization> list1 = regNewsOrganizationRepo.findRegNewsOrganizationByNews(clsNews);
         regNewsOrganizationRepo.deleteAll(list1);
 
@@ -606,28 +638,44 @@ public class RequestService {
         for (KeyValue inn : listInn) {
             List<ClsOrganization> organizationList = clsOrganizationRepo.findAllByInn(inn.getValue());
             for (ClsOrganization organization : organizationList) {
-                RegNewsOrganization regNewsOrganization = new RegNewsOrganization();
-                regNewsOrganization.setNews(clsNews);
-                regNewsOrganization.setOrganization(organization);
-                regNewsOrganizationList.add(regNewsOrganization);
+                RegNewsOrganization rnorg =  RegNewsOrganization.builder()
+                        .news(clsNews)
+                        .organization(organization)
+                        .build();
+                regNewsOrganizationList.add(rnorg);
             }
         }
-        regNewsOrganizationRepo.saveAll(regNewsOrganizationList);
+        if (regNewsOrganizationList != null) {
+            regNewsOrganizationRepo.saveAll(regNewsOrganizationList);
+        }
+    }
 
+    public void saveRegNewsStatus(ClsNews clsNews, ClsNewsDto clsNewsDto){
         List<RegNewsStatus> list3 = regNewsStatusRepo.findRegNewsStatusByNews(clsNews);
         regNewsStatusRepo.deleteAll(list3);
 
         List<CheckedReviewStatusDto> crsList = clsNewsDto.getStatuses();
         for (CheckedReviewStatusDto status : crsList){
             if (status.getChecked() == 1) {
-                RegNewsStatus regNewsStatus = new RegNewsStatus();
-                regNewsStatus.setNews(clsNews);
-                regNewsStatus.setStatusReview(status.getReviewStatus());
-                regNewsStatusRepo.save(regNewsStatus);
+                RegNewsStatus rns = RegNewsStatus.builder()
+                        .news(clsNews)
+                        .statusReview(status.getReviewStatus())
+                        .build();
+                regNewsStatusRepo.save(rns);
             }
         }
+    }
 
-        return clsNews;
+    public static String encode(Long num) {
+        String ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        int    BASE     = ALPHABET.length();
+
+        StringBuilder sb = new StringBuilder();
+        while ( num > 0 ) {
+            sb.append(ALPHABET.charAt((int) (num % BASE)) );
+            num /= BASE;
+        }
+        return sb.reverse().toString();
     }
 
 }
