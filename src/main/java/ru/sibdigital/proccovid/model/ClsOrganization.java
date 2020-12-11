@@ -37,6 +37,8 @@ public class ClsOrganization {
     private Integer idTypeOrganization;
     private Integer typeTaxReporting;
     private Boolean isDeleted;
+    private Timestamp timeCreate;
+    private Boolean isActivated;
 
     @OneToOne
     @JoinColumn(name = "id_principal", referencedColumnName = "id")
@@ -202,6 +204,26 @@ public class ClsOrganization {
 
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
+    }
+
+    @Basic
+    @Column(name = "time_create")
+    public Timestamp getTimeCreate() {
+        return timeCreate;
+    }
+
+    public void setTimeCreate(Timestamp timeCreate) {
+        this.timeCreate = timeCreate;
+    }
+
+    @Basic
+    @Column(name = "is_activated")
+    public Boolean getActivated() {
+        return isActivated;
+    }
+
+    public void setActivated(Boolean activated) {
+        isActivated = activated;
     }
 
     public ClsPrincipal getPrincipal() {
