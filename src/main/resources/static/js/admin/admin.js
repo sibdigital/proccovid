@@ -244,6 +244,7 @@ webix.ready(function() {
                             { id: "MailingMessages", icon: "fas fa-envelope", value: 'Сообщения рассылок'},
                             { id: "Fias", icon: "fas fa-download", value: 'Загрузка ФИАС, ЕГРЮЛ'},
                             { id: "News", icon: "fas fa-newspaper", value: 'Новости'},
+                            { id: "Help", icon: "fas fa-newspaper", value: 'Помощь'},
                         ],
                         on: {
                             onAfterSelect: function(id) {
@@ -303,6 +304,10 @@ webix.ready(function() {
                                     }
                                     case 'Organizations': {
                                         view = organizations;
+                                        break;
+                                    }
+                                    case 'Help': {
+                                        view = helpForm;
                                         break;
                                     }
                                 }
