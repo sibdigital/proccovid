@@ -288,7 +288,8 @@ const typeRequestForm = {
                                                 label: 'Наименование',
                                                 name: 'activityKind',
                                                 required: true,
-                                                validate: webix.rules.isNotEmpty
+                                                validate: webix.rules.isNotEmpty,
+                                                invalidMessage: 'Поле не может быть пустым',
                                             },
                                             {
                                                 view: 'text',
@@ -296,7 +297,8 @@ const typeRequestForm = {
                                                 label: 'Краткое наименование',
                                                 name: 'shortName',
                                                 required: true,
-                                                validate: webix.rules.isNotEmpty
+                                                validate: webix.rules.isNotEmpty,
+                                                invalidMessage: 'Поле не может быть пустым',
                                             },
                                             {
                                                 view: 'combo',
@@ -306,7 +308,8 @@ const typeRequestForm = {
                                                 labelWidth: 500,
                                                 required: true,
                                                 validate: webix.rules.isNotEmpty,
-                                                options: 'cls_departments'
+                                                options: 'cls_departments',
+                                                invalidMessage: 'Поле не может быть пустым',
                                             },
                                             {
                                                 view: 'combo',
@@ -314,8 +317,10 @@ const typeRequestForm = {
                                                 name: 'restrictionTypeIds',
                                                 label: 'Тип ограничения',
                                                 labelWidth: 190,
+                                                required: true,
+                                                validate: webix.rules.isNotEmpty,
+                                                options: 'cls_restriction_types',
                                                 invalidMessage: 'Поле не может быть пустым',
-                                                options: 'cls_restriction_types'
                                             },
                                             {}, //  для выравнивания на всю страницу
                                         ]
@@ -328,7 +333,11 @@ const typeRequestForm = {
                                                 css: 'webix_primary',
                                                 maxWidth: 301,
                                                 value: 'Продолжить',
-                                                click: next
+                                                click: function () {
+                                                    if ($$('typeRequestForm').validate()) {
+                                                        next(1);
+                                                    }
+                                                }
                                             }
                                         ]
                                     },
@@ -444,7 +453,11 @@ const typeRequestForm = {
                                                 css: 'webix_primary',
                                                 maxWidth: 301,
                                                 value: 'Продолжить',
-                                                click: next
+                                                click: function () {
+                                                    if ($$('typeRequestForm').validate()) {
+                                                        next(2);
+                                                    }
+                                                }
                                             }
                                         ]
                                     }
@@ -538,7 +551,11 @@ const typeRequestForm = {
                                                 css: 'webix_primary',
                                                 maxWidth: 301,
                                                 value: 'Продолжить',
-                                                click: next
+                                                click: function () {
+                                                    if ($$('typeRequestForm').validate()) {
+                                                        next(3);
+                                                    }
+                                                }
                                             }
                                         ]
                                     }
@@ -946,11 +963,6 @@ function back() {
     $$("wizard").back();
 }
 
-function next() {
-    const parentCell = this.getParentView().getParentView();
-    const index = $$("wizard").index(parentCell);
-    const next = $$("wizard").getChildViews()[index + 1]
-    if (next) {
-        next.show();
-    }
+function next(page) {
+    $$("wizard").getChildViews()[page].show();
 }
