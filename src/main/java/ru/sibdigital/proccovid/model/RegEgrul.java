@@ -6,6 +6,7 @@ import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -33,6 +34,9 @@ public class RegEgrul {
     @Basic
     @Column(name = "id_migration")
     private Long idMigration;
+    @Basic
+    @Column(name = "date_actual")
+    private Date dateActual;
 
 
 //    @OneToMany(mappedBy = "regEgrulOkvedId.regEgrul")
@@ -85,6 +89,14 @@ public class RegEgrul {
 
     public void setIdMigration(Long idMigration) {
         this.idMigration = idMigration;
+    }
+
+    public Date getDateActual() {
+        return dateActual;
+    }
+
+    public void setDateActual(Date dateActual) {
+        this.dateActual = dateActual;
     }
 
     @Override

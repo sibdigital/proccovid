@@ -51,6 +51,9 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     @Value("${substringForFullFiles}")
     private String substringForFullFiles;
 
+    @Value("${egrul.egrip.validate.delete}")
+    private Boolean deleteFiles;
+
     @Autowired
     private RegEgrulRepo regEgrulRepo;
 
@@ -213,6 +216,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 // Изменить запись о статусе обработки файла
                 if (migration.getStatus() == StatusLoadTypes.LOAD_START.getValue()) {
                     changeMigrationStatus(migration, StatusLoadTypes.SUCCESSFULLY_LOADED.getValue(), "");
+
+                    if (deleteFiles) {
+                        zipFile.delete();
+                    }
                 }
             }
         }
@@ -230,14 +237,8 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     while (entries.hasMoreElements()) {
                         ZipEntry zipEntry = entries.nextElement();
 
-                        InputStream is = zipFile.getInputStream(zipEntry);
-                        //EGRUL egrul = (EGRUL) unmarshaller.unmarshal(is);
                         saveEgrulData(file, zipFile, zipEntry, unmarshaller, migration);
                     }
-                } catch (IOException e) {
-                    egrulFilesLogger.error("Не удалось прочитать xml-файл из zip-файла");
-                    changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
-                    e.printStackTrace();
                 } finally {
                     try {
                         zipFile.close();
@@ -294,6 +295,8 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             RegEgrul newRegEgrul = new RegEgrul();
             newRegEgrul.setLoadDate(new Timestamp(System.currentTimeMillis()));
             newRegEgrul.setInn(свЮЛ.getИНН());
+            Date dateActual = new Date(свЮЛ.getДатаВып().toGregorianCalendar().getTimeInMillis());
+            newRegEgrul.setDateActual(dateActual);
             try {
                 свЮЛ.setСвОКВЭД(null);
                 newRegEgrul.setData(mapper.writeValueAsString(свЮЛ));
@@ -352,26 +355,37 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         Map<String, RegEgrul> earlier = findSavedEarlierEgrul(list);
         List<Long> deletedOkveds = new ArrayList<>();
+        List<EgrulContainer> updatedData = new ArrayList<>();
 
         if (!earlier.isEmpty()) {
             for (EgrulContainer ec : list) {
                 RegEgrul r = ec.getRegEgrul();
                 RegEgrul earl = earlier.get(r.getInn());
-                if (earl != null) {
-                    r.setId(earl.getId());
-                    deletedOkveds.add(earl.getId());
+                if (earl !=null) {
+                    // Производить замену, только если СвЮЛ.ДатаВып больше date_actual записи таблицы
+                    if (r.getDateActual().after(earl.getDateActual())) {
+                        updatedData.add(ec);
+                        r.setId(earl.getId());
+                        deletedOkveds.add(earl.getId());
+                    }
+                }
+                else {
+                    updatedData.add(ec);
                 }
             }
+        }
+        else {
+            updatedData = list;
         }
 
         if (!deletedOkveds.isEmpty()) {
             regEgrulOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
         }
 
-        final List<RegEgrul> rel = list.stream().map(c -> c.getRegEgrul()).collect(Collectors.toList());
+        final List<RegEgrul> rel = updatedData.stream().map(c -> c.getRegEgrul()).collect(Collectors.toList());
         regEgrulRepo.saveAll(rel);
 
-        final List<Set<RegEgrulOkved>> reos = list.stream().map(c -> c.getRegEgrulOkved()).collect(Collectors.toList());
+        final List<Set<RegEgrulOkved>> reos = updatedData.stream().map(c -> c.getRegEgrulOkved()).collect(Collectors.toList());
         Set<RegEgrulOkved> granula = new HashSet<>();
         int count = 1;
         for (Set<RegEgrulOkved> reo : reos) {
@@ -451,6 +465,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 // Изменить запись о статусе обработки файла
                 if (migration.getStatus() == StatusLoadTypes.LOAD_START.getValue()) {
                     changeMigrationStatus(migration, StatusLoadTypes.SUCCESSFULLY_LOADED.getValue(), "");
+
+                    if (deleteFiles) {
+                        zipFile.delete();
+                    }
                 }
             }
         }
@@ -519,26 +537,36 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         Map<String, RegEgrip> earlier = findSavedEarlierEgrips(list);
         List<Long> deletedOkveds = new ArrayList<>();
+        List<EgripContainer> updatedData = new ArrayList<>();
 
         if (!earlier.isEmpty()) {
             for (EgripContainer ec : list) {
                 RegEgrip r = ec.getRegEgrip();
                 RegEgrip earl = earlier.get(r.getInn());
                 if (earl != null) {
-                    r.setId(earl.getId());
-                    deletedOkveds.add(earl.getId());
+                    if (r.getDateActual().after(earl.getDateActual())) {
+                        updatedData.add(ec);
+                        r.setId(earl.getId());
+                        deletedOkveds.add(earl.getId());
+                    }
+                }
+                else {
+                    updatedData.add(ec);
                 }
             }
+        }
+        else {
+            updatedData = list;
         }
 
         if (!deletedOkveds.isEmpty()) {
             regEgripOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
         }
 
-        final List<RegEgrip> rel = list.stream().map(c -> c.getRegEgrip()).collect(Collectors.toList());
+        final List<RegEgrip> rel = updatedData.stream().map(c -> c.getRegEgrip()).collect(Collectors.toList());
         regEgripRepo.saveAll(rel);
 
-        final List<Set<RegEgripOkved>> reos = list.stream().map(c -> c.getRegEgripOkved()).collect(Collectors.toList());
+        final List<Set<RegEgripOkved>> reos = updatedData.stream().map(c -> c.getRegEgripOkved()).collect(Collectors.toList());
         Set<RegEgripOkved> granula = new HashSet<>();
         int count = 1;
         for (Set<RegEgripOkved> reo : reos) {
@@ -576,6 +604,8 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             RegEgrip newRegEgrip = new RegEgrip();
             newRegEgrip.setLoadDate(new Timestamp(System.currentTimeMillis()));
             newRegEgrip.setInn(свИП.getИННФЛ());
+            Date dateActual = new Date(свИП.getДатаВып().toGregorianCalendar().getTimeInMillis());
+            newRegEgrip.setDateActual(dateActual);
             try {
                 свИП.setСвОКВЭД(null);
                 newRegEgrip.setData(mapper.writeValueAsString(свИП));

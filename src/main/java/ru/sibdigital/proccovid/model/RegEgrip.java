@@ -5,6 +5,7 @@ import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +33,9 @@ public class RegEgrip {
     @Basic
     @Column(name = "id_migration")
     private Long idMigration;
+    @Basic
+    @Column(name = "date_actual")
+    private Date dateActual;
 
 //    @OneToMany(mappedBy = "regEgripOkvedId.regEgrip")
 //    private Set<RegEgripOkved> regEgripOkveds;
@@ -83,6 +87,14 @@ public class RegEgrip {
 
     public void setIdMigration(Long idMigration) {
         this.idMigration = idMigration;
+    }
+
+    public Date getDateActual() {
+        return dateActual;
+    }
+
+    public void setDateActual(Date dateActual) {
+        this.dateActual = dateActual;
     }
 
     @Override
