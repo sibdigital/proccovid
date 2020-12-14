@@ -415,4 +415,9 @@ public class AdminController {
         result.put("total_count", clsOrganizationPage.getTotalElements());
         return result;
     }
+
+    @GetMapping("/subdomainWork")
+    public @ResponseBody String getSubdomainWork(){
+        return applicationConstants.getSubdomainWork();
+    }
 }

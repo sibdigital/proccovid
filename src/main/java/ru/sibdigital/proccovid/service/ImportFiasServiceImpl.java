@@ -90,7 +90,7 @@ public class ImportFiasServiceImpl implements ImportFiasService {
     }
 
     private Map<String, Map<String, ZipEntry>> createMapForLoad(List<? extends ZipEntry> zipEntriesList){
-        Map<String, Map<String, ZipEntry>> map = new HashMap<>();
+        Map<String, Map<String, ZipEntry>> map = new TreeMap<>();
         for (ZipEntry zipEntry: zipEntriesList ) {
             final String zen = zipEntry.getName();
             final int lastIndex = zen.lastIndexOf('/');

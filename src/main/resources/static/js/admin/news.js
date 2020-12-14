@@ -73,6 +73,7 @@ const newsListForm = {
                                     message: jsonResponse.message,
                                     startTime: jsonResponse.startTime.replace("T", " "),
                                     endTime: jsonResponse.endTime.replace("T", " "),
+                                    hashId: jsonResponse.hashId,
                                 };
 
                                 webix.ui(newsFormTab, $$('newsListFormId'));
@@ -107,6 +108,13 @@ const newsListForm = {
                                             var row = jsonResponse[k];
                                             $$('status_table').add(row);
                                         }
+                                    });
+
+                                $$('newsForm').load(
+                                    function (){
+                                        var xhr = webix.ajax().sync().get('subdomainWork/' );
+                                        var link = xhr.responseText + "/news?hash_id=" + data.hashId
+                                        $$('link').setValue("<a href ='" + link + "'>" + link + "</a>")
                                     });
                             }
                         },
@@ -192,6 +200,10 @@ const newsFormTab = {
                                                 iconsPath: '../libs/nicedit/nicEditorIcons.gif'
                                             }
                                         },
+                                        {
+                                            view: 'label',
+                                            id: 'link'
+                                        }
                                     ]
                                 }
                             },
