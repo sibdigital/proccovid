@@ -147,59 +147,94 @@ function getHelp(url) {
     // console.log(view);
     // return view;
 
-    // return {
-    //     view: 'scrollview',
-    //     autowidth: true,
-    //     autoheight: true,
-    //     body: {
-    //         type: 'wide',
-    //         rows: getFormWithData(url)
-    //         // view: 'list',
-    //         // scroll: 'xy',
-    //         // url: url,
-    //         // datatype: 'json',
-    //         // template: '#title#',
-    //     }
-    // };
-
     return {
         view: 'scrollview',
         autowidth: true,
-        //autoheight: true,
-        body: {
-            //type: 'space',
-            rows: [
-                {
-                    //type: 'wide',
-                    rows: [
-                        {
-                            view: 'button',
-                            id: 'dropDownButton',
-                            css: 'webix_primary',
-                            value: 'Страница: Статистика по заявкам',
-                            click: (id, event) => {
-                                console.log(id, event);
-                                const textArea = $$('dropDownTextArea');
-                                if (textArea.isVisible()) {
-                                    textArea.hide();
-                                } else {
-                                    textArea.show();
-                                }
-                            }
+        autoheight: true,
+        body:
+            {
+                type: 'space',
+                rows: [
+                    {
+                        view: "dataview",
+                        scroll: true,
+                        select: 1,
+                        url: url,
+                        xCount: 1,
+                        yCount: 1,
+                        type: {
+                            height: "auto",
+                            width: "auto",
+                            template: "<div class='webix_strong'>#name#</div><br>#description#",
                         },
-                        {
-                            view: 'label',
-                            id: 'dropDownTextArea',
-                            label: 'Здесь собрана статистика по заявкам организаций и количестве работиков в оффисах и на удаленке',
-                            //autoheight: true,
-                            //height: 200,
-                            hidden: true,
-                            //readonly: true,
-                        }]
-                },
-            ]
-        }
+                        // body: {
+                        //     // type: 'wide',
+                        //     // rows: getFormWithData(url)
+                        //     view: 'dataview',
+                        //     //scroll: 'xy',
+                        //     xCount: 1,
+                        //     yCount: 1,
+                        //     url: url,
+                        //     type: {
+                        //         height: "auto",
+                        //         width: "auto",
+                        //         template: "<div class='webix_strong'>#name#</div><br>#description#",
+                        //     },
+                        // }
+                    },
+                    {
+                        view: 'button',
+                        value: 'Назад',
+                        click: () => {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    helpForm
+                                ]
+                            }, $$('content'))
+                        }
+                    }]
+            }
     };
+
+    // return {
+    //     view: 'scrollview',
+    //     autowidth: true,
+    //     //autoheight: true,
+    //     body: {
+    //         //type: 'space',
+    //         rows: [
+    //             {
+    //                 //type: 'wide',
+    //                 rows: [
+    //                     {
+    //                         view: 'button',
+    //                         id: 'dropDownButton',
+    //                         css: 'webix_primary',
+    //                         value: 'Страница: Статистика по заявкам',
+    //                         click: (id, event) => {
+    //                             console.log(id, event);
+    //                             const textArea = $$('dropDownTextArea');
+    //                             if (textArea.isVisible()) {
+    //                                 textArea.hide();
+    //                             } else {
+    //                                 textArea.show();
+    //                             }
+    //                         }
+    //                     },
+    //                     {
+    //                         view: 'label',
+    //                         id: 'dropDownTextArea',
+    //                         label: 'Здесь собрана статистика по заявкам организаций и количестве работиков в оффисах и на удаленке',
+    //                         //autoheight: true,
+    //                         //height: 200,
+    //                         hidden: true,
+    //                         //readonly: true,
+    //                     }]
+    //             },
+    //         ]
+    //     }
+    // };
 }
 
 const getAddHelpForm = (data = null) => {
@@ -216,6 +251,87 @@ const getAddHelpForm = (data = null) => {
     };
 }
 
+const addHelpForm = {
+    view: 'scrollview',
+    autowidth: true,
+    autoheight: true,
+    body: {
+        type: 'space',
+        rows: [
+            {
+                view: 'form',
+                id: 'newHelpForm',
+                complexData: true,
+                elements: [
+                    {
+                        view: 'text',
+                        id: 'header',
+                        name: 'name',
+                        label: 'Название',
+                        labelPosition: 'top',
+                    },
+                    {
+                        view: 'label',
+                        label: 'Описание',
+                    },
+                    {
+                        view: 'nic-editor',
+                        id: 'message',
+                        name: 'description',
+                        css: "myClass",
+                        cdn: false,
+                        config: {
+                            iconsPath: '../libs/nicedit/nicEditorIcons.gif'
+                        }
+                    },
+                    {
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                maxWidth: 200,
+                                label: 'Отмена',
+                                click: function() {
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            helpForm
+                                        ]
+                                    }, $$('content'))
+                                }
+                            },
+                            {
+                                view: 'button',
+                                maxWidth: 200,
+                                label: 'Добавить',
+                                click: function() {
+                                    const params = $$('newHelpForm').getValues();
+                                    webix.ajax()
+                                        .headers({ 'Content-Type': 'application/json' })
+                                        .post('/help/add', JSON.stringify(params))
+                                        .then((data) => {
+                                            if (data !== null) {
+                                                $$('listHelps').load('helps');
+                                            }
+                                        });
+
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            helpForm
+                                        ]
+                                    }, $$('content'))
+                                }
+                            }
+                        ]
+                    },
+                ]
+            }
+        ]
+    },
+
+}
+
 const helpForm = {
     view: 'scrollview',
     scroll: 'xy',
@@ -224,94 +340,95 @@ const helpForm = {
         rows: [
             {
                 type: 'wide',
-                cols: [
+                rows: [
                     {
                         view: 'list',
                         id: 'listHelps',
                         select: true,
-                        data: [
-                            { id: "Departments", icon: "fas fa-globe", value: 'Подразделения' },
-                            { id: "DepartmentUsers", icon: "fas fa-user-tie", value: 'Пользователи подразделений' },
-                            { id: "Organizations",icon: "fas fa-file-alt", value: 'Организации' },
-                            { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
-                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Предписания' },
-                            { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
-                            { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
-                            { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
-                            { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
-                            { id: "Okveds", icon: "fas fa-folder", value: 'ОКВЭДы' },
-                            { id: "Mailing", icon: "fas fa-paper-plane", value: 'Типы рассылок'},
-                            { id: "MailingMessages", icon: "fas fa-envelope", value: 'Сообщения рассылок'},
-                            { id: "Fias", icon: "fas fa-download", value: 'Загрузка ФИАС, ЕГРЮЛ'},
-                            { id: "News", icon: "fas fa-newspaper", value: 'Новости'},
-                        ],
+                        url: 'helps',
+                        template: '#name#',
+                        // data: [
+                        //     { id: "Departments", icon: "fas fa-globe", value: 'Подразделения' },
+                        //     { id: "DepartmentUsers", icon: "fas fa-user-tie", value: 'Пользователи подразделений' },
+                        //     { id: "Organizations",icon: "fas fa-file-alt", value: 'Организации' },
+                        //     { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
+                        //     { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Предписания' },
+                        //     { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
+                        //     { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
+                        //     { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
+                        //     { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
+                        //     { id: "Okveds", icon: "fas fa-folder", value: 'ОКВЭДы' },
+                        //     { id: "Mailing", icon: "fas fa-paper-plane", value: 'Типы рассылок'},
+                        //     { id: "MailingMessages", icon: "fas fa-envelope", value: 'Сообщения рассылок'},
+                        //     { id: "Fias", icon: "fas fa-download", value: 'Загрузка ФИАС, ЕГРЮЛ'},
+                        //     { id: "News", icon: "fas fa-newspaper", value: 'Новости'},
+                        // ],
                         on: {
                             onAfterSelect: function(id) {
                                 console.log(id);
+                                const item = $$('listHelps').getItem(id);
+                                console.log(item);
                                 let view;
-                                let url = '/help/statistic';
-                                switch (id) {
-                                    case 'Departments': {
-                                        view = departments;
-                                        break;
-                                    }
-                                    case 'DepartmentUsers': {
-                                        view = departmentUsers;
-                                        break;
-                                    }
-                                    case 'Principals': {
-                                        view = principals;
-                                        break;
-                                    }
-                                    case 'Templates': {
-                                        view = templates;
-                                        break;
-                                    }
-                                    case 'TypeRequests': {
-                                        view = typeRequests;
-                                        break;
-                                    }
-                                    case 'Requests': {
-                                        view = adminRequests;
-                                        break;
-                                    }
-                                    case 'Statistic': {
-                                        view = statistic;
-                                        break;
-                                    }
-                                    case 'Okveds': {
-                                        view = okveds;
-                                        break;
-                                    }
-                                    case 'Mailing': {
-                                        view = mailingList;
-                                        break;
-                                    }
-                                    case 'MailingMessages': {
-                                        view = mailingMessages;
-                                        break;
-                                    }
-                                    case 'Fias': {
-                                        view = fias;
-                                        break;
-                                    }
-                                    case 'News': {
-                                        view = newsListForm;
-                                        break;
-                                    }
-                                    case 'RestrictionTypes': {
-                                        view = restrictionTypes;
-                                        break;
-                                    }
-                                    case 'Organizations': {
-                                        view = organizations;
-                                        break;
-                                    }
-                                    case 'Help': {
-                                        url = '/help/statistic';
-                                        break;
-                                    }
-                                }
+                                let url = '/help?id=' + id;
+
+                                // switch (id) {
+                                //     case 'Departments': {
+                                //         url = '/help?name=departments';
+                                //         break;
+                                //     }
+                                //     case 'DepartmentUsers': {
+                                //         url = '/help?name=departmentUsers';
+                                //         break;
+                                //     }
+                                //     case 'Principals': {
+                                //         url = '/help?name=principals';
+                                //         break;
+                                //     }
+                                //     case 'Templates': {
+                                //         url = '/help?name=templates';
+                                //         break;
+                                //     }
+                                //     case 'TypeRequests': {
+                                //         url = '/help?name=typeRequests';
+                                //         break;
+                                //     }
+                                //     case 'Requests': {
+                                //         url = '/help?name=requests';
+                                //         break;
+                                //     }
+                                //     case 'Statistic': {
+                                //         url = '/help?name=statistic';
+                                //         break;
+                                //     }
+                                //     case 'Okveds': {
+                                //         url = '/help?name=okveds';
+                                //         break;
+                                //     }
+                                //     case 'Mailing': {
+                                //         url = '/help?name=mailing';
+                                //         break;
+                                //     }
+                                //     case 'MailingMessages': {
+                                //         url = '/help?name=mailingMessages';
+                                //         break;
+                                //     }
+                                //     case 'Fias': {
+                                //         url = '/help?name=fias';
+                                //         break;
+                                //     }
+                                //     case 'News': {
+                                //         url = '/help?name=news';
+                                //         break;
+                                //     }
+                                //     case 'RestrictionTypes': {
+                                //         url = '/help?name=restrictionTypes';
+                                //         break;
+                                //     }
+                                //     case 'Organizations': {
+                                //         url = '/help?name=organizations';
+                                //         break;
+                                //     }
+                                // }
                                 webix.ui({
                                     id: 'content',
                                     rows: [
@@ -322,6 +439,19 @@ const helpForm = {
                             }
                         }
                     },
+                    {
+                        view: 'button',
+
+                        label: 'Добавить',
+                        click: function() {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    addHelpForm
+                                ]
+                            }, $$('content'))
+                        }
+                    }
                     // {
                     //     gravity: 0.2,
                     //     view: 'form',
