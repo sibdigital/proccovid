@@ -84,12 +84,24 @@ public class HelpController {
         return result;
     }
 
+//    @GetMapping(value = "/help")
+//    public List<Map<String, Object>> getHelpPage(@RequestParam(value = "name") String name) {
+//        List<Map<String, Object>> result = null;
+//        if (name != null) {
+//            result = regHelpRepo.getHelpByName(name);
+//        }
+//        return result;
+//    }
+
     @GetMapping(value = "/help")
-    public List<Map<String, Object>> getHelpPage(@RequestParam(value = "name") String name) {
-        List<Map<String, Object>> result = null;
-        if (name != null) {
-            result = regHelpRepo.getHelpByName(name);
-        }
+    public RegHelp getHelpPage(@RequestParam(value = "id") Long id) {
+        RegHelp result = regHelpRepo.findById(id).orElse(null);
+        return result;
+    }
+
+    @GetMapping(value = "/helps")
+    public List<RegHelp> getHelps() {
+        List<RegHelp> result = regHelpRepo.findAll();
         return result;
     }
 
@@ -102,6 +114,7 @@ public class HelpController {
     @PostMapping(value = "/help/add")
     public void setNewHelp(@RequestBody RegHelp help) {
         System.out.println(help.getDescription());
+        help.setKey(help.getName());
 
         regHelpRepo.save(help);
     }
