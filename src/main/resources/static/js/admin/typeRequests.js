@@ -29,7 +29,15 @@ const typeRequests = {
                             // {id: "beginVisible", header: "Дата начала видимости", template: "#beginVisible#", adjust: true},
                             // {id: "endVisible", header: "Дата конца видимости", template: "#endVisible#", adjust: true},
                             {id: "status", header: "Статус", template: "#statusPublicationName#", adjust: true},
+                            {id: "time_Publication", header: "Дата публикации", adjust: true, format: dateFormat},
                         ],
+                        scheme: {
+                            $init: function (obj) {
+                                if (obj.statusPublication == 1) {
+                                    obj.time_Publication = obj.timePublication ? obj.timePublication.replace("T", " ") : "";
+                                }
+                            },
+                        },
                         on: {
                             onBeforeLoad: function () {
                                 this.showOverlay("Загружаю...");
