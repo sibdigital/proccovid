@@ -234,8 +234,9 @@ webix.ready(function() {
                             { id: "DepartmentUsers", icon: "fas fa-user-tie", value: 'Пользователи подразделений' },
                             { id: "Organizations",icon: "fas fa-file-alt", value: 'Организации' },
                             { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
-                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Предписания' },
-                            { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
+                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Типы заявок' },
+                            // { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
+                            { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
                             { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
                             { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
                             { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
@@ -272,6 +273,10 @@ webix.ready(function() {
                                     }
                                     case 'Requests': {
                                         view = adminRequests;
+                                        break;
+                                    }
+                                    case 'Prescriptions': {
+                                        view = prescriptions;
                                         break;
                                     }
                                     case 'Statistic': {

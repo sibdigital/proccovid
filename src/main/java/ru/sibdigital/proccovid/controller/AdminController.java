@@ -21,11 +21,8 @@ import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCri
 import ru.sibdigital.proccovid.service.OkvedService;
 import ru.sibdigital.proccovid.service.OrganizationService;
 import ru.sibdigital.proccovid.service.PrescriptionService;
-import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.service.RequestService;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import java.util.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,28 +139,32 @@ public class AdminController {
         result.put("total_count", templates.getTotalElements());
         return result;
     }
+    @GetMapping("/cls_prescriptions")
+    public @ResponseBody List<ClsPrescription> getClsPrescriptions() {
+        return prescriptionService.getClsPrescriptions();
+    }
 
-    @PostMapping("/save_cls_type_request")
-    public @ResponseBody ClsTypeRequest saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto, @RequestParam(required = false) String publish) {
-        ClsTypeRequest clsTypeRequest;
+    @PostMapping("/save_cls_prescription")
+    public @ResponseBody ClsPrescription saveClsTypeRequest(@RequestBody ClsPrescriptionDto clsPrescriptionDto) {
+        ClsPrescription clsPrescription;
         try {
-            clsTypeRequest = prescriptionService.saveClsTypeRequest(clsTypeRequestDto);
+            clsPrescription = prescriptionService.savePrescription(clsPrescriptionDto);
         } catch (Exception e) {
-            clsTypeRequest = new ClsTypeRequest();
+            clsPrescription = new ClsPrescription();
             log.error(e.getMessage());
         }
-        return clsTypeRequest;
+        return clsPrescription;
     }
 
     @PostMapping(value = "/upload_prescription_file", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> uploadPrescriptionFile(@RequestParam(value = "upload") MultipartFile file,
-                                                         @RequestParam Long idTypeRequestPrescription) {
-        RegTypeRequestPrescriptionFile regTypeRequestPrescriptionFile = prescriptionService.saveRegTypeRequestPrescriptionFile(file, idTypeRequestPrescription);
-        if (regTypeRequestPrescriptionFile != null) {
+                                                         @RequestParam Long idPrescriptionText) {
+        RegPrescriptionTextFile prescriptionTextFile = prescriptionService.savePrescriptionTextFile(file, idPrescriptionText);
+        if (prescriptionTextFile != null) {
             return ResponseEntity.ok()
                     .body("{\"cause\": \"Файл успешно загружен\"," +
                             "\"status\": \"server\"," +
-                            "\"sname\": \"" + regTypeRequestPrescriptionFile.getOriginalFileName() + "\"}");
+                            "\"sname\": \"" + prescriptionTextFile.getOriginalFileName() + "\"}");
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("{\"status\": \"server\"," +
@@ -173,18 +174,23 @@ public class AdminController {
 
     @GetMapping("/delete_prescription_file")
     public @ResponseBody String deletePrescriptionFile(@RequestParam Long id) {
-        boolean deleted = prescriptionService.deleteRegTypeRequestPrescriptionFile(id);
+        boolean deleted = prescriptionService.deletePrescriptionTextFile(id);
         if (deleted) {
             return "Файл удален";
         }
         return "Не удалось удалить файл";
     }
 
+    @GetMapping("/cls_prescription")
+    public @ResponseBody ClsPrescription getClsPrescription(@RequestParam Long id) {
+        return prescriptionService.getClsPrescription(id);
+    }
+
     @GetMapping("/publish_prescription")
     public @ResponseBody String publishPrescription(@RequestParam Long id) {
         boolean published = prescriptionService.publishPrescription(id);
         if (published) {
-            prescriptionService.createRequestsByPrescription(id);
+//            prescriptionService.createRequestsByPrescription(id);
         } else {
             return "Не удалось опубликовать предписание";
         }

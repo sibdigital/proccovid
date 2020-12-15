@@ -8,9 +8,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.sibdigital.proccovid.dto.ClsPrescriptionDto;
 import ru.sibdigital.proccovid.dto.ClsRestrictionTypeDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
-import ru.sibdigital.proccovid.dto.RegTypeRequestPrescriptionDto;
+import ru.sibdigital.proccovid.dto.RegPrescriptionTextDto;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
@@ -37,6 +40,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     @Autowired
     private ClsRestrictionTypeRepo clsRestrictionTypeRepo;
+
+    @Autowired
+    private ClsPrescriptionRepo clsPrescriptionRepo;
 
     @Autowired
     private ClsTypeRequestRepo clsTypeRequestRepo;
@@ -57,10 +63,16 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private ClsDepartmentOkvedRepo clsDepartmentOkvedRepo;
 
     @Autowired
-    private RegTypeRequestPrescriptionRepo regTypeRequestPrescriptionRepo;
+    private RegPrescriptionTextRepo regPrescriptionTextRepo;
 
     @Autowired
-    private RegTypeRequestPrescriptionFileRepo regTypeRequestPrescriptionFileRepo;
+    private RegPrescriptionTextFileRepo regPrescriptionTextFileRepo;
+
+    @Override
+    public List<ClsPrescription> getClsPrescriptions() {
+        return StreamSupport.stream(clsPrescriptionRepo.findAll(Sort.by(Sort.Direction.DESC, "id")).spliterator(), false)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public List<ClsRestrictionType> getClsRestrictionTypes() {
@@ -80,110 +92,89 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     }
 
     @Override
-    public ClsTypeRequest getClsTypeRequest(Long id) {
-        return clsTypeRequestRepo.findById(id).orElse(null);
+    public ClsPrescription getClsPrescription(Long id) {
+        return clsPrescriptionRepo.findById(id).orElse(null);
     }
 
     @Override
     @Transactional
-    public ClsTypeRequest saveClsTypeRequest(ClsTypeRequestDto dto) {
-        ClsTypeRequest clsTypeRequest = null;
+    public ClsPrescription savePrescription(ClsPrescriptionDto dto) {
+        ClsPrescription prescription = null;
 
         if (Objects.nonNull(dto.getId())) {
-            clsTypeRequest = clsTypeRequestRepo.findById(dto.getId()).orElse(null);
-            if (Objects.nonNull(clsTypeRequest) && clsTypeRequest.getStatusPublication() == PublicationStatuses.PUBLISHED.getValue()) {
-                return clsTypeRequest;
+            prescription = clsPrescriptionRepo.findById(dto.getId()).orElse(null);
+            if (Objects.nonNull(prescription) && prescription.getStatus() == PrescriptionStatuses.PUBLISHED.getValue()) {
+                return prescription;
             }
         }
 
-        ClsDepartment clsDepartment = clsDepartmentRepo.findById(dto.getDepartmentId()).orElse(null);
+        ClsTypeRequest typeRequest = clsTypeRequestRepo.findById(dto.getTypeRequestId()).orElse(null);
 
-        if (Objects.nonNull(clsTypeRequest)) {
-            clsTypeRequest.setDepartment(clsDepartment);
-            clsTypeRequest.setActivityKind(dto.getActivityKind());
-            clsTypeRequest.setShortName(dto.getShortName());
-            clsTypeRequest.setPrescription(dto.getPrescription());
-            clsTypeRequest.setPrescriptionLink(dto.getPrescriptionLink());
-            clsTypeRequest.setSettings(dto.getSettings());
-            clsTypeRequest.setStatusRegistration(dto.getStatusRegistration());
-            clsTypeRequest.setBeginRegistration(dto.getBeginRegistration());
-            clsTypeRequest.setEndRegistration(dto.getEndRegistration());
-            clsTypeRequest.setBeginVisible(dto.getBeginVisible());
-            clsTypeRequest.setBeginVisible(dto.getBeginVisible());
-            clsTypeRequest.setEndVisible(dto.getEndVisible());
-            clsTypeRequest.setSortWeight(dto.getSortWeight());
-            clsTypeRequest.setAdditionalFields(dto.getAdditionalFields());
-            clsTypeRequest.setStatusPublication(PublicationStatuses.NOT_PUBLISHED.getValue());
+        if (Objects.nonNull(prescription)) {
+            prescription.setTypeRequest(typeRequest);
+            prescription.setName(dto.getName());
+            prescription.setDescription(dto.getDescription());
+            prescription.setStatus(PrescriptionStatuses.NOT_PUBLISHED.getValue());
+            prescription.setAdditionalFields(dto.getAdditionalFields());
         } else {
-            clsTypeRequest = ClsTypeRequest.builder()
-                    .id(dto.getId())
-                    .department(clsDepartment)
-                    .activityKind(dto.getActivityKind())
-                    .shortName(dto.getShortName())
-                    .prescription(dto.getPrescription())
-                    .prescriptionLink(dto.getPrescriptionLink())
-                    .settings(dto.getSettings())
-                    .statusRegistration(dto.getStatusRegistration())
-                    .beginRegistration(dto.getBeginRegistration())
-                    .endRegistration(dto.getEndRegistration())
-                    .statusVisible(dto.getStatusVisible())
-                    .beginVisible(dto.getBeginVisible())
-                    .endVisible(dto.getEndVisible())
-                    .sortWeight(dto.getSortWeight())
+            prescription = ClsPrescription.builder()
+                    .typeRequest(typeRequest)
+                    .name(dto.getName())
+                    .description(dto.getDescription())
+                    .status(PrescriptionStatuses.NOT_PUBLISHED.getValue())
                     .additionalFields(dto.getAdditionalFields())
-                    .statusPublication(PublicationStatuses.NOT_PUBLISHED.getValue())
                     .build();
         }
 
-        clsTypeRequestRepo.save(clsTypeRequest);
+        clsPrescriptionRepo.save(prescription);
 
-        // TODO пока только один тип, возможно будет несколько
-        if (Objects.nonNull(dto.getRestrictionTypeIds())) {
-            if (Objects.nonNull(clsTypeRequest.getRegTypeRequestRestrictionTypes())) {
-                clsTypeRequest.getRegTypeRequestRestrictionTypes().forEach(rtrrt -> {
-                    regTypeRequestRestrictionTypeRepo.delete(rtrrt);
-                });
-            }
-            RegTypeRequestRestrictionType regTypeRequestRestrictionType = new RegTypeRequestRestrictionType();
-            regTypeRequestRestrictionType.setRegTypeRequestRestrictionTypeId(
-                    new RegTypeRequestRestrictionTypeId(clsTypeRequest, ClsRestrictionType.builder().id(dto.getRestrictionTypeIds()).build()));
-            regTypeRequestRestrictionTypeRepo.save(regTypeRequestRestrictionType);
-        }
+//        // TODO пока только один тип, возможно будет несколько
+//        if (Objects.nonNull(dto.getRestrictionTypeIds())) {
+//            if (Objects.nonNull(typeRequest.getRegTypeRequestRestrictionTypes())) {
+//                typeRequest.getRegTypeRequestRestrictionTypes().forEach(rtrrt -> {
+//                    regTypeRequestRestrictionTypeRepo.delete(rtrrt);
+//                });
+//            }
+//            RegTypeRequestRestrictionType regTypeRequestRestrictionType = new RegTypeRequestRestrictionType();
+//            regTypeRequestRestrictionType.setRegTypeRequestRestrictionTypeId(
+//                    new RegTypeRequestRestrictionTypeId(typeRequest, ClsRestrictionType.builder().id(dto.getRestrictionTypeIds()).build()));
+//            regTypeRequestRestrictionTypeRepo.save(regTypeRequestRestrictionType);
+//        }
 
-        if (Objects.nonNull(dto.getRegTypeRequestPrescriptions()) && dto.getRegTypeRequestPrescriptions().size() > 0) {
-                List<RegTypeRequestPrescription> regTypeRequestPrescriptions = new ArrayList<>();
-                for (RegTypeRequestPrescriptionDto rtrpDto : dto.getRegTypeRequestPrescriptions()) {
-                    RegTypeRequestPrescription regTypeRequestPrescription = RegTypeRequestPrescription.builder()
-                            .id(rtrpDto.getId())
-                            .typeRequest(clsTypeRequest)
-                            .num(rtrpDto.getNum())
-                            .content(rtrpDto.getContent())
+        if (Objects.nonNull(dto.getPrescriptionTexts()) && dto.getPrescriptionTexts().size() > 0) {
+                List<RegPrescriptionText> prescriptionTexts = new ArrayList<>();
+                for (RegPrescriptionTextDto prescriptionTextDto : dto.getPrescriptionTexts()) {
+                    RegPrescriptionText prescriptionText = RegPrescriptionText.builder()
+                            .id(prescriptionTextDto.getId())
+                            .prescription(prescription)
+                            .num(prescriptionTextDto.getNum())
+                            .content(prescriptionTextDto.getContent())
                             .build();
-                    regTypeRequestPrescriptionRepo.save(regTypeRequestPrescription);
-                    regTypeRequestPrescriptions.add(regTypeRequestPrescription);
+                    regPrescriptionTextRepo.save(prescriptionText);
+                    prescriptionTexts.add(prescriptionText);
                 }
-                clsTypeRequest.setRegTypeRequestPrescriptions(regTypeRequestPrescriptions);
+                prescription.setPrescriptionTexts(prescriptionTexts);
             }
 
-        return clsTypeRequest;
+        return prescription;
     }
 
     @Override
-    public RegTypeRequestPrescriptionFile saveRegTypeRequestPrescriptionFile(MultipartFile file, Long idTypeRequestPrescription) {
-        RegTypeRequestPrescription regTypeRequestPrescription = regTypeRequestPrescriptionRepo.findById(idTypeRequestPrescription).orElse(null);
+    public RegPrescriptionTextFile savePrescriptionTextFile(MultipartFile file, Long idPrescriptionText) {
+        RegPrescriptionText regPrescriptionText = regPrescriptionTextRepo.findById(idPrescriptionText).orElse(null);
 
-        RegTypeRequestPrescriptionFile regTypeRequestPrescriptionFile = construct(file, regTypeRequestPrescription);
-        if (regTypeRequestPrescriptionFile != null) {
-            regTypeRequestPrescriptionFileRepo.save(regTypeRequestPrescriptionFile);
+        RegPrescriptionTextFile regPrescriptionTextFile = construct(file, regPrescriptionText);
+        if (regPrescriptionTextFile != null) {
+            regPrescriptionTextFileRepo.save(regPrescriptionTextFile);
         }
-        return regTypeRequestPrescriptionFile;
+        return regPrescriptionTextFile;
     }
 
-    private RegTypeRequestPrescriptionFile construct(MultipartFile multipartFile, RegTypeRequestPrescription regTypeRequestPrescription) {
-        RegTypeRequestPrescriptionFile rtrpf = null;
+    private RegPrescriptionTextFile construct(MultipartFile multipartFile, RegPrescriptionText prescriptionText) {
+        RegPrescriptionTextFile rtrpf = null;
         try {
             final String absolutePath = Paths.get(uploadingDir).toFile().getAbsolutePath();
-            final String filename = regTypeRequestPrescription.getId().toString() + "_" + UUID.randomUUID();
+            final String filename = prescriptionText.getId().toString() + "_" + UUID.randomUUID();
             final String originalFilename = multipartFile.getOriginalFilename();
             String extension = getFileExtension(originalFilename);
             File file = new File(String.format("%s/%s%s", absolutePath, filename, extension));
@@ -192,14 +183,14 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             final String fileHash = getFileHash(file);
             final long size = Files.size(file.toPath());
 
-//            final List<RegTypeRequestPrescriptionFile> files = regTypeRequestPrescriptionFileRepo.findRegTypeRequestPrescriptionFileByPrescriptionAndHash(regTypeRequestPrescription, fileHash);
-            final List<RegTypeRequestPrescriptionFile> files = new ArrayList<>();
+//            final List<RegPrescriptionTextFile> files = regTypeRequestPrescriptionFileRepo.findRegTypeRequestPrescriptionFileByPrescriptionAndHash(prescriptionText, fileHash);
+            final List<RegPrescriptionTextFile> files = new ArrayList<>();
 
             if (!files.isEmpty()) {
                 rtrpf = files.get(0);
             } else {
-                rtrpf = RegTypeRequestPrescriptionFile.builder()
-                        .typeRequestPrescription(regTypeRequestPrescription)
+                rtrpf = RegPrescriptionTextFile.builder()
+                        .prescriptionText(prescriptionText)
                         .attachmentPath(String.format("%s/%s", uploadingDir, filename))
                         .fileName(filename)
                         .originalFileName(originalFilename)
@@ -241,11 +232,11 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     }
 
     @Override
-    public boolean deleteRegTypeRequestPrescriptionFile(Long id) {
+    public boolean deletePrescriptionTextFile(Long id) {
         try {
-            RegTypeRequestPrescriptionFile regTypeRequestPrescriptionFile = regTypeRequestPrescriptionFileRepo.getOne(id);
-            regTypeRequestPrescriptionFile.setDeleted(true);
-            regTypeRequestPrescriptionFileRepo.save(regTypeRequestPrescriptionFile);
+            RegPrescriptionTextFile prescriptionTextFile = regPrescriptionTextFileRepo.getOne(id);
+            prescriptionTextFile.setDeleted(true);
+            regPrescriptionTextFileRepo.save(prescriptionTextFile);
             return true;
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -274,11 +265,11 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     public boolean publishPrescription(Long id) {
         boolean published = false;
         try {
-            ClsTypeRequest prescription = clsTypeRequestRepo.findById(id).orElse(null);
-            if (Objects.nonNull(prescription) && prescription.getStatusPublication() != PublicationStatuses.PUBLISHED.getValue()) {
-                prescription.setStatusPublication(PublicationStatuses.PUBLISHED.getValue());
+            ClsPrescription prescription = clsPrescriptionRepo.findById(id).orElse(null);
+            if (Objects.nonNull(prescription) && prescription.getStatus() != PrescriptionStatuses.PUBLISHED.getValue()) {
+                prescription.setStatus(PrescriptionStatuses.PUBLISHED.getValue());
                 prescription.setTimePublication(Timestamp.valueOf(LocalDateTime.now()));
-                clsTypeRequestRepo.save(prescription);
+                clsPrescriptionRepo.save(prescription);
                 published = true;
             }
         } catch (Exception e) {
@@ -289,9 +280,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     @Async
     @Override
-    public void createRequestsByPrescription(Long idTypeRequest) {
+    public void createRequestsByPrescription(Long id) {
         try {
-            ClsTypeRequest prescription = clsTypeRequestRepo.findById(idTypeRequest).orElse(null);
+            ClsPrescription prescription = clsPrescriptionRepo.findById(id).orElse(null);
             if (Objects.nonNull(prescription)) {
                 UUID[] okvedIds = prescription.getAdditionalFields().getOkvedIds();
                 if (Objects.nonNull(okvedIds) && okvedIds.length > 0) {
@@ -328,9 +319,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         }
     }
 
-    private void createRequest(ClsTypeRequest prescription, Long organizationId) {
+    private void createRequest(ClsPrescription prescription, Long organizationId) {
 
-        ClsDepartment department = prescription.getDepartment();
+        ClsDepartment department = prescription.getTypeRequest().getDepartment();
 
 //        RegOrganizationOkved mainOrganizationOkved = organization.getRegOrganizationOkveds()
 //                .stream().filter(regOrgOkved -> regOrgOkved.getMain()).findFirst().orElse(null);
@@ -354,7 +345,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 .statusReview(ReviewStatuses.NEW.getValue())
                 .statusImport(0)
                 .timeCreate(Timestamp.valueOf(LocalDateTime.now()))
-                .typeRequest(prescription)
+                .typeRequest(prescription.getTypeRequest())
                 .build();
 
         docRequestRepo.save(request);

@@ -104,7 +104,7 @@ public class MainController {
 
     @GetMapping("/cls_type_request")
     public @ResponseBody ClsTypeRequest getClsTypeRequest(@RequestParam Long id) {
-        return prescriptionService.getClsTypeRequest(id);
+        return requestService.getClsTypeRequest(id);
     }
 
     @CrossOrigin

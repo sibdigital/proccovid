@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class RegTypeRequestPrescriptionDto {
+public class RegPrescriptionTextDto {
 
     private Long id;
     private Short num;
