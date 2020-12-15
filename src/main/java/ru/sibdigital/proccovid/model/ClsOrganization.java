@@ -48,6 +48,10 @@ public class ClsOrganization {
     @OneToMany(mappedBy = "regOrganizationOkvedId.clsOrganization")
     private Set<RegOrganizationOkved> regOrganizationOkveds;
 
+    public ClsOrganization(Long organizationId) {
+        this.id = organizationId;
+    }
+
     public Long getId() {
         return id;
     }

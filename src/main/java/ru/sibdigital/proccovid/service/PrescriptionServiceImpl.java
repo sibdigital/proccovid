@@ -295,10 +295,10 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             if (Objects.nonNull(prescription)) {
                 UUID[] okvedIds = prescription.getAdditionalFields().getOkvedIds();
                 if (Objects.nonNull(okvedIds) && okvedIds.length > 0) {
-                    List<ClsOrganization> organizations = clsOrganizationRepo.getOrganizationsByOkveds(okvedIds);
-                    for (ClsOrganization organization : organizations) {
+                    List<Long> organizationIds = clsOrganizationRepo.getOrganizationIdsByOkveds(okvedIds);
+                    for (Long organizationId : organizationIds) {
                         // если есть заявки в статусе NEW, то пометим их как EXPIRED
-                        List<DocRequest> requests = docRequestRepo.getRequestsByOrganizationIdAndStatusAndOkvedIds(organization.getId(),
+                        List<DocRequest> requests = docRequestRepo.getRequestsByOrganizationIdAndStatusAndOkvedIds(organizationId,
                                 ReviewStatuses.NEW.getValue(), okvedIds).orElse(null);
                         if (Objects.nonNull(requests) && requests.size() > 0) {
                             requests.forEach(request -> {
@@ -306,21 +306,20 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                                 docRequestRepo.save(request);
                             });
                         }
-                        createRequest(prescription, organization);
+                        createRequest(prescription, organizationId);
                     }
                 }
 
                 Long[] organizationIds = prescription.getAdditionalFields().getOrganizationIds();
                 if (Objects.nonNull(organizationIds) && organizationIds.length > 0) {
-                    List<ClsOrganization> organizations = clsOrganizationRepo.getOrganizationsByIds(organizationIds);
-                    for (ClsOrganization organization : organizations) {
+                    for (Long organizationId : organizationIds) {
                         // если есть заявки, созданные выше по ОКВЕДам, то пропускаем
-                        List<DocRequest> requests = docRequestRepo.getRequestsByOrganizationIdAndStatusAndTypeRequestId(organization.getId(),
+                        List<DocRequest> requests = docRequestRepo.getRequestsByOrganizationIdAndStatusAndTypeRequestId(organizationId,
                                 ReviewStatuses.NEW.getValue(), prescription.getId()).orElse(null);
                         if (Objects.nonNull(requests) && requests.size() > 0) {
                             continue;
                         }
-                        createRequest(prescription, organization);
+                        createRequest(prescription, organizationId);
                     }
                 }
             }
@@ -329,7 +328,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         }
     }
 
-    private void createRequest(ClsTypeRequest prescription, ClsOrganization organization) {
+    private void createRequest(ClsTypeRequest prescription, Long organizationId) {
 
         ClsDepartment department = prescription.getDepartment();
 
@@ -347,7 +346,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 //        }
 
         DocRequest request = DocRequest.builder()
-                .organization(organization)
+                .organization(new ClsOrganization(organizationId))
                 .department(department)
                 .personOfficeCnt(0L)
                 .personRemoteCnt(0L)
