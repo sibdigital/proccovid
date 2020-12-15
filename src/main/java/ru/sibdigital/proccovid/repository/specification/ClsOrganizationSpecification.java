@@ -26,6 +26,8 @@ public class ClsOrganizationSpecification implements Specification<ClsOrganizati
             predicates.add(criteriaBuilder.like(criteriaBuilder.trim(root.get("inn")), searchCriteria.getInn() + '%'));
         }
 
+        predicates.add(criteriaBuilder.isFalse(root.get("isDeleted")));
+
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 }
