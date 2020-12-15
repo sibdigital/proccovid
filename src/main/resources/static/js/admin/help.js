@@ -186,24 +186,24 @@ function getHelp(url) {
                         cols: [
                             {
                                 view: 'button',
-                                value: 'Редактировать',
-                                click: () => {
-                                    webix.ui({
-                                        id: 'content',
-                                        rows: [
-                                            getAddHelpForm($$('currentHelpDataView').getItem($$('currentHelpDataView').getIdByIndex(0)))
-                                        ]
-                                    }, $$('content'))
-                                }
-                            },
-                            {
-                                view: 'button',
                                 value: 'Назад',
                                 click: () => {
                                     webix.ui({
                                         id: 'content',
                                         rows: [
                                             helpForm
+                                        ]
+                                    }, $$('content'))
+                                }
+                            },
+                            {
+                                view: 'button',
+                                value: 'Редактировать',
+                                click: () => {
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            getAddHelpForm($$('currentHelpDataView').getItem($$('currentHelpDataView').getIdByIndex(0)))
                                         ]
                                     }, $$('content'))
                                 }
@@ -457,7 +457,6 @@ const helpForm = {
                     },
                     {
                         view: 'button',
-
                         label: 'Добавить',
                         click: function() {
                             webix.ui({
