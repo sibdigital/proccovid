@@ -1,24 +1,24 @@
 package ru.sibdigital.proccovid.service;
 
 import org.springframework.web.multipart.MultipartFile;
+import ru.sibdigital.proccovid.dto.ClsPrescriptionDto;
 import ru.sibdigital.proccovid.dto.ClsRestrictionTypeDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
-import ru.sibdigital.proccovid.model.ClsOrganization;
-import ru.sibdigital.proccovid.model.ClsRestrictionType;
-import ru.sibdigital.proccovid.model.ClsTypeRequest;
-import ru.sibdigital.proccovid.model.RegTypeRequestPrescriptionFile;
+import ru.sibdigital.proccovid.model.*;
 
 import java.util.List;
 
 public interface PrescriptionService {
 
+    List<ClsPrescription> getClsPrescriptions();
+
     List<ClsRestrictionType> getClsRestrictionTypes();
 
     ClsRestrictionType saveClsRestrictionType(ClsRestrictionTypeDto dto);
 
-    ClsTypeRequest getClsTypeRequest(Long id);
+    ClsPrescription getClsPrescription(Long id);
 
-    ClsTypeRequest saveClsTypeRequest(ClsTypeRequestDto dto);
+    ClsPrescription savePrescription(ClsPrescriptionDto dto);
 
     Long getCountOrganizations(ClsTypeRequestDto clsTypeRequestDto);
 
@@ -28,7 +28,7 @@ public interface PrescriptionService {
 
     void createRequestsByPrescription(Long idTypeRequest);
 
-    RegTypeRequestPrescriptionFile saveRegTypeRequestPrescriptionFile(MultipartFile file, Long idTypeRequestPrescription);
+    RegPrescriptionTextFile savePrescriptionTextFile(MultipartFile file, Long idPrescriptionText);
 
-    boolean deleteRegTypeRequestPrescriptionFile(Long id);
+    boolean deletePrescriptionTextFile(Long id);
 }

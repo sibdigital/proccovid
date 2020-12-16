@@ -35,6 +35,4 @@ public class ClsTypeRequestDto {
 
     private AdditionalFields additionalFields;
 
-    private List<RegTypeRequestPrescriptionDto> regTypeRequestPrescriptions;
-
 }

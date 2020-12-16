@@ -6,13 +6,11 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -48,8 +46,6 @@ public class ClsTypeRequest {
     private Timestamp endVisible;
     private int sortWeight;
     private String consent;
-    private int statusPublication;
-    private Timestamp timePublication;
 
     @OneToOne
     @JoinColumn(name = "id_department", referencedColumnName = "id")
@@ -57,14 +53,6 @@ public class ClsTypeRequest {
 
     @OneToMany(mappedBy = "regTypeRequestRestrictionTypeId.clsTypeRequest")
     private Set<RegTypeRequestRestrictionType> regTypeRequestRestrictionTypes;
-
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-    private AdditionalFields additionalFields;
-
-    @OrderBy("num asc")
-    @OneToMany(targetEntity = RegTypeRequestPrescription.class, mappedBy = "typeRequest", fetch = FetchType.LAZY)
-    private List<RegTypeRequestPrescription> regTypeRequestPrescriptions;
 
     public Long getId() {
         return id;
@@ -188,36 +176,6 @@ public class ClsTypeRequest {
         this.consent = consent;
     }
 
-    @Basic
-    @Column(name = "status_publication")
-    public int getStatusPublication() {
-        return statusPublication;
-    }
-
-    public void setStatusPublication(int statusPublication) {
-        this.statusPublication = statusPublication;
-    }
-
-    public String getStatusPublicationName(){
-        String result  = "";
-        if (this.statusPublication == PublicationStatuses.NOT_PUBLISHED.getValue()) {
-            result = "Не опубликовано";
-        } else if (this.statusPublication == PublicationStatuses.PUBLISHED.getValue()) {
-            result = "Опубликовано";
-        }
-        return result;
-    }
-
-    @Basic
-    @Column(name = "time_publication")
-    public Timestamp getTimePublication() {
-        return timePublication;
-    }
-
-    public void setTimePublication(Timestamp timePublication) {
-        this.timePublication = timePublication;
-    }
-
     public ClsDepartment getDepartment() {
         return department;
     }
@@ -232,22 +190,6 @@ public class ClsTypeRequest {
 
     public void setRegTypeRequestRestrictionTypes(Set<RegTypeRequestRestrictionType> regTypeRequestRestrictionTypes) {
         this.regTypeRequestRestrictionTypes = regTypeRequestRestrictionTypes;
-    }
-
-    public AdditionalFields getAdditionalFields() {
-        return additionalFields;
-    }
-
-    public void setAdditionalFields(AdditionalFields additionalFields) {
-        this.additionalFields = additionalFields;
-    }
-
-    public List<RegTypeRequestPrescription> getRegTypeRequestPrescriptions() {
-        return regTypeRequestPrescriptions;
-    }
-
-    public void setRegTypeRequestPrescriptions(List<RegTypeRequestPrescription> regTypeRequestPrescriptions) {
-        this.regTypeRequestPrescriptions = regTypeRequestPrescriptions;
     }
 
     public String getValue() {

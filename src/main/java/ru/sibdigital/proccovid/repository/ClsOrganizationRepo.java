@@ -68,12 +68,12 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
             "   id in (:organizationIds) and not org.is_deleted")
     Long getCountOrganizationsByIds(Long[] organizationIds);
 
-    @Query(nativeQuery = true, value = "select org.* " +
+    @Query(nativeQuery = true, value = "select org.id " +
             "from " +
             "   cls_organization org join reg_organization_okved orgOkved on org.id = orgOkved.id_organization " +
             "where" +
             "   id_okved in (:okvedIds) and not org.is_deleted")
-    List<ClsOrganization> getOrganizationsByOkveds(UUID[] okvedIds);
+    List<Long> getOrganizationIdsByOkveds(UUID[] okvedIds);
 
     @Query(nativeQuery = true, value = "select org.* " +
             "from " +

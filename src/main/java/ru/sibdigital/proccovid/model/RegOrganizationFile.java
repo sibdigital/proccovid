@@ -1,6 +1,5 @@
 package ru.sibdigital.proccovid.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -10,17 +9,12 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "reg_type_request_prescription_file", schema = "public")
-@NoArgsConstructor
+@Table(name = "reg_organization_file", schema = "public")
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder(toBuilder = true)
-public class RegTypeRequestPrescriptionFile {
-
-    @Id
-    @Column(name = "id", nullable = false)
-    @SequenceGenerator(name = "REG_TYPE_REQUEST_PRESCRIPTION_FILE_SEQ_GEN", sequenceName = "reg_type_request_prescription_file_id_seq", allocationSize = 1, schema = "public")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REG_TYPE_REQUEST_PRESCRIPTION_FILE_SEQ_GEN")
-    private Long id;
+public class RegOrganizationFile {
+    private int id;
     private Boolean isDeleted;
     private Timestamp timeCreate;
     private String attachmentPath;
@@ -29,22 +23,23 @@ public class RegTypeRequestPrescriptionFile {
     private String fileExtension;
     private String hash;
     private Long fileSize;
+    private ClsOrganization clsOrganizationByIdOrganization;
+    private DocRequest docRequestByIdRequest;
 
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "id_type_request_prescription", nullable = false)
-    private RegTypeRequestPrescription typeRequestPrescription;
-
-    public Long getId() {
+    @Id
+    @Column(name = "id")
+    @SequenceGenerator(name = "REG_ORGANIZATION_FILE_SEQ_GEN", sequenceName = "REG_ORGANIZATION_FILE_id_seq", allocationSize = 1, schema = "public")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REG_ORGANIZATION_FILE_SEQ_GEN")
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
     @Basic
-    @Column(name = "is_deleted", nullable = true)
+    @Column(name = "is_deleted")
     public Boolean getDeleted() {
         return isDeleted;
     }
@@ -54,7 +49,7 @@ public class RegTypeRequestPrescriptionFile {
     }
 
     @Basic
-    @Column(name = "time_create", nullable = false)
+    @Column(name = "time_create")
     public Timestamp getTimeCreate() {
         return timeCreate;
     }
@@ -64,7 +59,7 @@ public class RegTypeRequestPrescriptionFile {
     }
 
     @Basic
-    @Column(name = "attachment_path", nullable = true, length = -1)
+    @Column(name = "attachment_path")
     public String getAttachmentPath() {
         return attachmentPath;
     }
@@ -74,7 +69,7 @@ public class RegTypeRequestPrescriptionFile {
     }
 
     @Basic
-    @Column(name = "file_name", nullable = true, length = -1)
+    @Column(name = "file_name")
     public String getFileName() {
         return fileName;
     }
@@ -84,7 +79,7 @@ public class RegTypeRequestPrescriptionFile {
     }
 
     @Basic
-    @Column(name = "original_file_name", nullable = true, length = -1)
+    @Column(name = "original_file_name")
     public String getOriginalFileName() {
         return originalFileName;
     }
@@ -94,7 +89,7 @@ public class RegTypeRequestPrescriptionFile {
     }
 
     @Basic
-    @Column(name = "file_extension", nullable = true, length = 16)
+    @Column(name = "file_extension")
     public String getFileExtension() {
         return fileExtension;
     }
@@ -104,7 +99,7 @@ public class RegTypeRequestPrescriptionFile {
     }
 
     @Basic
-    @Column(name = "hash", nullable = true, length = -1)
+    @Column(name = "hash")
     public String getHash() {
         return hash;
     }
@@ -114,7 +109,7 @@ public class RegTypeRequestPrescriptionFile {
     }
 
     @Basic
-    @Column(name = "file_size", nullable = true)
+    @Column(name = "file_size")
     public Long getFileSize() {
         return fileSize;
     }
@@ -123,24 +118,44 @@ public class RegTypeRequestPrescriptionFile {
         this.fileSize = fileSize;
     }
 
-    public RegTypeRequestPrescription getTypeRequestPrescription() {
-        return typeRequestPrescription;
-    }
-
-    public void setTypeRequestPrescription(RegTypeRequestPrescription typeRequestPrescription) {
-        this.typeRequestPrescription = typeRequestPrescription;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RegTypeRequestPrescriptionFile that = (RegTypeRequestPrescriptionFile) o;
-        return Objects.equals(id, that.id) && Objects.equals(isDeleted, that.isDeleted) && Objects.equals(timeCreate, that.timeCreate) && Objects.equals(attachmentPath, that.attachmentPath) && Objects.equals(fileName, that.fileName) && Objects.equals(originalFileName, that.originalFileName) && Objects.equals(fileExtension, that.fileExtension) && Objects.equals(hash, that.hash) && Objects.equals(fileSize, that.fileSize);
+        RegOrganizationFile that = (RegOrganizationFile) o;
+        return id == that.id &&
+                Objects.equals(isDeleted, that.isDeleted) &&
+                Objects.equals(timeCreate, that.timeCreate) &&
+                Objects.equals(attachmentPath, that.attachmentPath) &&
+                Objects.equals(fileName, that.fileName) &&
+                Objects.equals(originalFileName, that.originalFileName) &&
+                Objects.equals(fileExtension, that.fileExtension) &&
+                Objects.equals(hash, that.hash) &&
+                Objects.equals(fileSize, that.fileSize);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, isDeleted, timeCreate, attachmentPath, fileName, originalFileName, fileExtension, hash, fileSize);
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "id_organization", referencedColumnName = "id", nullable = false)
+    public ClsOrganization getClsOrganizationByIdOrganization() {
+        return clsOrganizationByIdOrganization;
+    }
+
+    public void setClsOrganizationByIdOrganization(ClsOrganization clsOrganizationByIdOrganization) {
+        this.clsOrganizationByIdOrganization = clsOrganizationByIdOrganization;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "id_request", referencedColumnName = "id")
+    public DocRequest getDocRequestByIdRequest() {
+        return docRequestByIdRequest;
+    }
+
+    public void setDocRequestByIdRequest(DocRequest docRequestByIdRequest) {
+        this.docRequestByIdRequest = docRequestByIdRequest;
     }
 }
