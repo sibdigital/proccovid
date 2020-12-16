@@ -20,14 +20,6 @@ const prescriptions = {
                         datafetch: 25,
                         columns: [
                             {id: "name", header: "Наименование", template: "#name#", adjust: true, fillspace: true},
-                            // {id: "shortName", header: "Краткое наименование", template: "#shortName#", width: 300},
-                            // {id: "prescription", header: "Prescription", template: "#prescription#", adjust: true},
-                            // {id: "prescriptionLink", header: "PrescriptionLink", template: "#prescriptionLink#", adjust: true},
-                            // {id: "settings", header: "Настройки", template: "#settings#", adjust: true},
-                            // {id: "statusRegistration", header: "Статус регистрации", template: "#statusRegistration#", adjust: true},
-                            // {id: "statusVisible", header: "Статус видимости", template: "#statusVisible#", adjust: true},
-                            // {id: "beginVisible", header: "Дата начала видимости", template: "#beginVisible#", adjust: true},
-                            // {id: "endVisible", header: "Дата конца видимости", template: "#endVisible#", adjust: true},
                             {id: "status", header: "Статус", template: "#statusName#", adjust: true},
                             {id: "time_Publication", header: "Дата публикации", adjust: true, format: dateFormat},
                         ],
@@ -308,9 +300,9 @@ const prescriptionForm = {
                                                 maxWidth: 301,
                                                 value: 'Продолжить',
                                                 click: function () {
-                                                    // if ($$('prescriptionForm').validate()) {
+                                                    if ($$('prescriptionForm').validate()) {
                                                         next(1);
-                                                    // }
+                                                    }
                                                 }
                                             }
                                         ]
