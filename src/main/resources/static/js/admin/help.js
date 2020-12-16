@@ -141,7 +141,6 @@ function getFormWithData(url) {
 
 }
 
-
 function getHelp(url) {
     // const view = getFormWithData(url);
     // console.log(view);
@@ -157,6 +156,7 @@ function getHelp(url) {
                 rows: [
                     {
                         view: "dataview",
+                        id: 'currentHelpDataView',
                         scroll: true,
                         select: 1,
                         url: url,
@@ -183,16 +183,32 @@ function getHelp(url) {
                         // }
                     },
                     {
-                        view: 'button',
-                        value: 'Назад',
-                        click: () => {
-                            webix.ui({
-                                id: 'content',
-                                rows: [
-                                    helpForm
-                                ]
-                            }, $$('content'))
-                        }
+                        cols: [
+                            {
+                                view: 'button',
+                                value: 'Назад',
+                                click: () => {
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            helpForm
+                                        ]
+                                    }, $$('content'))
+                                }
+                            },
+                            {
+                                view: 'button',
+                                value: 'Редактировать',
+                                click: () => {
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            getAddHelpForm($$('currentHelpDataView').getItem($$('currentHelpDataView').getIdByIndex(0)))
+                                        ]
+                                    }, $$('content'))
+                                }
+                            }
+                        ]
                     }]
             }
     };
@@ -238,98 +254,99 @@ function getHelp(url) {
 }
 
 const getAddHelpForm = (data = null) => {
+    console.log(data);
+    const nameLabel = data !== null ? data.name : '';
+    const descLabel = data !== null ? data.description : '';
+    const updateButtonLabel = data !== null ? 'Сохранить' : 'Добавить';
 
     return {
-        view: 'nic-editor',
-        id: 'message',
-        name: 'message',
-        css: "myClass",
-        cdn: false,
-        config: {
-            iconsPath: '../libs/nicedit/nicEditorIcons.gif'
-        }
-    };
-}
-
-const addHelpForm = {
-    view: 'scrollview',
-    autowidth: true,
-    autoheight: true,
-    body: {
-        type: 'space',
-        rows: [
-            {
-                view: 'form',
-                id: 'newHelpForm',
-                complexData: true,
-                elements: [
-                    {
-                        view: 'text',
-                        id: 'header',
-                        name: 'name',
-                        label: 'Название',
-                        labelPosition: 'top',
-                    },
-                    {
-                        view: 'label',
-                        label: 'Описание',
-                    },
-                    {
-                        view: 'nic-editor',
-                        id: 'message',
-                        name: 'description',
-                        css: "myClass",
-                        cdn: false,
-                        config: {
-                            iconsPath: '../libs/nicedit/nicEditorIcons.gif'
-                        }
-                    },
-                    {
-                        cols: [
-                            {},
-                            {
-                                view: 'button',
-                                maxWidth: 200,
-                                label: 'Отмена',
-                                click: function() {
-                                    webix.ui({
-                                        id: 'content',
-                                        rows: [
-                                            helpForm
-                                        ]
-                                    }, $$('content'))
-                                }
-                            },
-                            {
-                                view: 'button',
-                                maxWidth: 200,
-                                label: 'Добавить',
-                                click: function() {
-                                    const params = $$('newHelpForm').getValues();
-                                    webix.ajax()
-                                        .headers({ 'Content-Type': 'application/json' })
-                                        .post('/help/add', JSON.stringify(params))
-                                        .then((data) => {
-                                            if (data !== null) {
-                                                $$('listHelps').load('helps');
-                                            }
-                                        });
-
-                                    webix.ui({
-                                        id: 'content',
-                                        rows: [
-                                            helpForm
-                                        ]
-                                    }, $$('content'))
-                                }
+        view: 'scrollview',
+        autowidth: true,
+        autoheight: true,
+        body: {
+            type: 'space',
+            rows: [
+                {
+                    view: 'form',
+                    id: 'newHelpForm',
+                    complexData: true,
+                    elements: [
+                        {
+                            view: 'text',
+                            id: 'header',
+                            name: 'name',
+                            label: 'Название',
+                            labelPosition: 'top',
+                            value: nameLabel
+                        },
+                        {
+                            view: 'label',
+                            label: 'Описание',
+                        },
+                        {
+                            view: 'nic-editor',
+                            id: 'message',
+                            name: 'description',
+                            css: "myClass",
+                            cdn: false,
+                            value: descLabel,
+                            config: {
+                                iconsPath: '../libs/nicedit/nicEditorIcons.gif'
                             }
-                        ]
-                    },
-                ]
-            }
-        ]
-    },
+                        },
+                        {
+                            cols: [
+                                {},
+                                {
+                                    view: 'button',
+                                    maxWidth: 200,
+                                    label: 'Отмена',
+                                    click: function() {
+                                        webix.ui({
+                                            id: 'content',
+                                            rows: [
+                                                helpForm
+                                            ]
+                                        }, $$('content'))
+                                    }
+                                },
+                                {
+                                    view: 'button',
+                                    maxWidth: 200,
+                                    label: updateButtonLabel,
+                                    click: function() {
+                                        const params = $$('newHelpForm').getValues();
 
+                                        if (data !== null) {
+                                            params.id = data.id;
+                                            params.key = data.key;
+                                        }
+
+                                        webix.ajax()
+                                            .headers({ 'Content-Type': 'application/json' })
+                                            .post('/help/add', JSON.stringify(params))
+                                            .then((data) => {
+                                                if (data !== null) {
+                                                    $$('listHelps').load('helps');
+                                                }
+                                            });
+
+                                        webix.ui({
+                                            id: 'content',
+                                            rows: [
+                                                helpForm
+                                            ]
+                                        }, $$('content'))
+                                    }
+                                }
+                            ]
+                        },
+                    ]
+                }
+            ]
+        },
+
+    };
 }
 
 const helpForm = {
@@ -368,7 +385,6 @@ const helpForm = {
                                 console.log(id);
                                 const item = $$('listHelps').getItem(id);
                                 console.log(item);
-                                let view;
                                 let url = '/help?id=' + id;
 
                                 // switch (id) {
@@ -441,13 +457,12 @@ const helpForm = {
                     },
                     {
                         view: 'button',
-
                         label: 'Добавить',
                         click: function() {
                             webix.ui({
                                 id: 'content',
                                 rows: [
-                                    addHelpForm
+                                    getAddHelpForm()
                                 ]
                             }, $$('content'))
                         }

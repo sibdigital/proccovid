@@ -1,6 +1,7 @@
 package ru.sibdigital.proccovid.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.model.RegHelp;
@@ -101,7 +102,7 @@ public class HelpController {
 
     @GetMapping(value = "/helps")
     public List<RegHelp> getHelps() {
-        List<RegHelp> result = regHelpRepo.findAll();
+        List<RegHelp> result = regHelpRepo.findAll(Sort.by(Sort.Direction.ASC, "name"));
         return result;
     }
 
@@ -114,7 +115,9 @@ public class HelpController {
     @PostMapping(value = "/help/add")
     public void setNewHelp(@RequestBody RegHelp help) {
         System.out.println(help.getDescription());
-        help.setKey(help.getName());
+        if (help.getKey() == null) {
+            help.setKey(help.getName());
+        }
 
         regHelpRepo.save(help);
     }
