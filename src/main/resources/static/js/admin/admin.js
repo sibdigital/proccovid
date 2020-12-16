@@ -234,7 +234,7 @@ webix.ready(function() {
                             { id: "DepartmentUsers", icon: "fas fa-user-tie", value: 'Пользователи подразделений' },
                             { id: "Organizations",icon: "fas fa-file-alt", value: 'Организации' },
                             { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
-                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Типы заявок' },
+                            { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Виды деятельности' },
                             // { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
                             { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
                             { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
@@ -325,7 +325,7 @@ webix.ready(function() {
 
                                 if (id === 'Requests') {
                                     $$('department_filter').getList().add({id:'', value:'Все подразделения', $empty: true}, 0);
-                                    $$('request_type').getList().add({id:'', value:'Все типы заявок', $empty: true}, 0);
+                                    $$('request_type').getList().add({id:'', value:'Все виды деятельности', $empty: true}, 0);
                                     $$('district_filter').getList().add({id:'', value:'Все районы', $empty: true}, 0);
                                     $$('actualization_type').getList().add({id:'', value:'Все заявки', $empty: true}, 0)
                                 }

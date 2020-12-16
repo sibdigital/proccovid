@@ -133,7 +133,7 @@ const adminRequests = {
                                         id: 'request_type',
                                         width: 450,
                                         css: 'smallText',
-                                        placeholder: 'Все типы заявок',
+                                        placeholder: 'Все виды деятельности',
                                         options: 'cls_type_requests_short',
                                         on: {
                                             onChange() {
