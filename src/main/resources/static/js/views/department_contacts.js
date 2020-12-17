@@ -15,7 +15,6 @@ const department_contacts = {
                         minWidth: 320,
                         css: 'contacts',
                         select: 1,
-                        // url: "dep_contacts/" + ID_DEPARTMENT,
                         xCount: 3,
                         type: {
                             template: "<div class='overall'>" +
@@ -117,6 +116,33 @@ const department_contacts = {
                     }
                 ]
             },
+            {
+                cols: [
+                    {},
+                    {
+                        view: 'button',
+                        css: 'webix_primary',
+                        align: 'right',
+                        maxWidth: 200,
+                        value: 'Сохранить изменения',
+                        click: function () {
+                            var data = $$('contact_grid').serialize();
+                            $$('contact_table').clearAll();
+                            $$('contact_table').parse(data);
+                            $$('windowCD').close();
+                        }
+                    },
+                    {
+                        view: 'button',
+                        align: 'right',
+                        maxWidth: 150,
+                        value: 'Отмена',
+                        click: function () {
+                            $$('windowCD').close();
+                        }
+                    }
+                ]
+            },
         ],
     }
 }
@@ -127,23 +153,24 @@ function addContact() {
     if (params.type == 2) {
         params.type = 0;
     }
-    params.departmentId = ID_DEPARTMENT;
+    // params.departmentId = ID_DEPARTMENT;
     if (form.validate()) {
-        webix.ajax()
-            .headers({'Content-type': 'application/json'})
-            .post('/save_department_contact', params)
-            .then(function (data) {
-                if (data !== null) {
-                    if (params.id) {
-                        webix.message('Контакт обновлен', 'success');
-                    } else {
-                        webix.message("Контакт добавлен", 'success');
-                    }
-                    $$('contact_grid').load('dep_contacts/'+ID_DEPARTMENT);
-                } else {
-                    webix.message("Не удалось добавить контакт", 'error');
-                }
-            });
+        // webix.ajax()
+        //     .headers({'Content-type': 'application/json'})
+        //     .post('/save_department_contact', params)
+        //     .then(function (data) {
+        //         if (data !== null) {
+        //             if (params.id) {
+        //                 webix.message('Контакт обновлен', 'success');
+        //             } else {
+        //                 webix.message("Контакт добавлен", 'success');
+        //             }
+        //             $$('contact_grid').load('dep_contacts/'+ID_DEPARTMENT);
+        //         } else {
+        //             webix.message("Не удалось добавить контакт", 'error');
+        //         }
+        //     });
+        $$('contact_grid').add(params);
         form.clear()
         form.clearValidation()
         if (params["type"] == 0) {
@@ -156,18 +183,19 @@ function addContact() {
 
 function deleteContact() {
     let params = $$('contact_grid').getSelectedItem()
-    webix.ajax()
-        .headers({'Content-type': 'application/json'})
-        .post('/delete_dep_contact', JSON.stringify(params))
-        .then(function (data) {
-            if (data !== null) {
-                $$("contact_grid").remove($$("contact_grid").getSelectedId());
-                webix.message("Контакт удалён", 'success');
-                $$('contact_grid').load('dep_contacts/' + ID_DEPARTMENT);
-            } else {
-                webix.message("Не удалось удалить контакт", 'error');
-            }
-        });
+    // webix.ajax()
+    //     .headers({'Content-type': 'application/json'})
+    //     .post('/delete_dep_contact', JSON.stringify(params))
+    //     .then(function (data) {
+    //         if (data !== null) {
+    //             $$("contact_grid").remove($$("contact_grid").getSelectedId());
+    //             webix.message("Контакт удалён", 'success');
+    //             $$('contact_grid').load('dep_contacts/' + ID_DEPARTMENT);
+    //         } else {
+    //             webix.message("Не удалось удалить контакт", 'error');
+    //         }
+    //     });
+    $$("contact_grid").remove($$("contact_grid").getSelectedId());
 }
 
 function changeComboConfig(val) {

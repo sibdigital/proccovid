@@ -447,25 +447,4 @@ public class AdminController {
         return departmentContacts;
     }
 
-    @PostMapping("/save_department_contact")
-    public @ResponseBody ClsDepartmentContact saveDepContact(@RequestBody ClsDepartmentContactDto departmentContactDto){
-        ClsDepartmentContact cdc = null;
-        try {
-            cdc = requestService.saveDepContact(departmentContactDto);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return cdc;
-    }
-
-    @PostMapping("/delete_dep_contact")
-    public @ResponseBody ClsDepartmentContactDto deleteDepContact(@RequestBody ClsDepartmentContactDto departmentContactDto) {
-        try{
-            requestService.deleteDepContact(departmentContactDto);
-        }catch (Exception e){
-            log.error(e.getMessage(), e);
-            return null;
-        }
-        return departmentContactDto;
-    }
 }

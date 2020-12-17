@@ -30,9 +30,9 @@ function changeDepartmentContacts(){
 
     let window = webix.ui({
         view: 'window',
-        id: 'windowCLO',
+        id: 'windowCD',
         head: 'Контакты подразделения \"' + departmentFormValues.name + '\" (id: '+ departmentFormValues.id +')',
-        close: true,
+        close: false,
         width: 1000,
         height: 800,
         position: 'center',
@@ -41,7 +41,6 @@ function changeDepartmentContacts(){
         on: {
             'onHide': function() {
                 window.destructor();
-                $$('contact_table').load('dep_contacts/'+ID_DEPARTMENT);
             }
         }
 
@@ -117,8 +116,6 @@ const departments = {
                                     });
 
                                 $$('contact_table').load('dep_contacts/' + data.id);
-
-                                window.show();
                             }
                         },
                         url: 'cls_departments'
@@ -216,15 +213,26 @@ const departmentForm = {
                                     },
                                     {
                                         id: 'type',
-                                        header: 'Тип',
+                                        header: '',
+                                        template: function (obj) {
+                                            if (obj.type == 0) {
+                                                return "<span class='webix_icon fas fa-envelope'></span>"
+                                            }
+                                            else {
+                                                return "<span class='webix_icon fas fa-phone'></span>"
+                                            }
+
+                                        }
                                     },
                                     {
                                         id: 'contactValue',
                                         header: 'Контакт',
+                                        adjust: true,
                                     },
                                     {
                                         id: 'description',
                                         header: 'Описание',
+                                        adjust: true,
                                         fillspace: true,
                                     },
                                 ],
@@ -297,6 +305,11 @@ const departmentForm = {
 
                                         let okveds = $$('okved_table').serialize();
                                         params.okveds = okveds;
+                                        params.okvedsChanged = true;
+
+                                        let contacts = $$('contact_table').serialize();
+                                        params.contacts = contacts;
+                                        params.contactsChanged = true; // позже изменить
 
                                         webix.ajax().headers({
                                             'Content-Type': 'application/json'

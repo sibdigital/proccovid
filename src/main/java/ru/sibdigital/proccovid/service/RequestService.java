@@ -447,15 +447,40 @@ public class RequestService {
 
         clsDepartmentRepo.save(clsDepartment);
 
-        List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
-        clsDepartmentOkvedRepo.deleteAll(list);
+        if (clsDepartmentDto.getOkvedsChanged()) {
+            List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
+            clsDepartmentOkvedRepo.deleteAll(list);
 
-        List<Okved> listOkveds = clsDepartmentDto.getOkveds();
-        for (Okved okved : listOkveds) {
-            ClsDepartmentOkved clsDepartmentOkved = new ClsDepartmentOkved();
-            clsDepartmentOkved.setDepartment(clsDepartment);
-            clsDepartmentOkved.setOkved(okved);
-            clsDepartmentOkvedRepo.save(clsDepartmentOkved);
+            List<Okved> listOkveds = clsDepartmentDto.getOkveds();
+            List<ClsDepartmentOkved> cdoList = new ArrayList<>();
+            for (Okved okved : listOkveds) {
+                ClsDepartmentOkved cdo = ClsDepartmentOkved.builder()
+                        .department(clsDepartment)
+                        .okved(okved)
+                        .build();
+                cdoList.add(cdo);
+            }
+            clsDepartmentOkvedRepo.saveAll(cdoList);
+        }
+
+        if (clsDepartmentDto.getContactsChanged()) {
+            List<ClsDepartmentContact> list2 = clsDepartmentContactRepo.findAllByDepartment(clsDepartment.getId()).orElse(null);
+            if (list2 != null) {
+                clsDepartmentContactRepo.deleteAll(list2);
+            }
+
+            List<ClsDepartmentContactDto> contactDtoList = clsDepartmentDto.getContacts();
+            List<ClsDepartmentContact> cdcList = new ArrayList<>();
+            for (ClsDepartmentContactDto contactDto : contactDtoList) {
+                ClsDepartmentContact cdc = ClsDepartmentContact.builder()
+                        .department(clsDepartment)
+                        .type(contactDto.getType())
+                        .description(contactDto.getDescription())
+                        .contactValue(contactDto.getContactValue())
+                        .build();
+                cdcList.add(cdc);
+            }
+            clsDepartmentContactRepo.saveAll(cdcList);
         }
 
         return clsDepartment;
@@ -568,26 +593,6 @@ public class RequestService {
 
     public List<ClsDepartmentContact> getAllClsDepartmentContactByDepartmentId(Long id){
         return clsDepartmentContactRepo.findAllByDepartment(id).orElse(null);
-    }
-
-    @Transactional
-    public ClsDepartmentContact saveDepContact(ClsDepartmentContactDto departmentContactDto) {
-        ClsDepartment clsDepartment = clsDepartmentRepo.findById(departmentContactDto.getDepartmentId()).orElse(null);
-        ClsDepartmentContact cdc = ClsDepartmentContact.builder()
-                .id(departmentContactDto.getId())
-                .department(clsDepartment)
-                .type(departmentContactDto.getType())
-                .contactValue(departmentContactDto.getContactValue().trim())
-                .description(departmentContactDto.getDescription().trim())
-                .build();
-
-        clsDepartmentContactRepo.save(cdc);
-        return cdc;
-    }
-
-    @Transactional
-    public void deleteDepContact(ClsDepartmentContactDto departmentContactDto){
-        clsDepartmentContactRepo.deleteById(departmentContactDto.getId());
     }
 
 }
