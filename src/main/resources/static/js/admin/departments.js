@@ -24,6 +24,34 @@ function changeLinkedDepartmentOkveds(){
     window.show();
 }
 
+function changeDepartmentContacts(){
+    let departmentFormValues = $$('departmentForm').getValues();
+    let data = $$('contact_table').serialize();
+
+    let window = webix.ui({
+        view: 'window',
+        id: 'windowCLO',
+        head: 'Контакты подразделения \"' + departmentFormValues.name + '\" (id: '+ departmentFormValues.id +')',
+        close: true,
+        width: 1000,
+        height: 800,
+        position: 'center',
+        modal: true,
+        body: department_contacts,
+        on: {
+            'onHide': function() {
+                window.destructor();
+                $$('contact_table').load('dep_contacts/'+ID_DEPARTMENT);
+            }
+        }
+
+    });
+    $$('contact_grid').parse(data);
+
+    window.show();
+}
+
+
 const departments = {
     view: 'scrollview',
     id: 'departmentsId',
@@ -76,36 +104,6 @@ const departments = {
                                 let data = $$('departments_table').getItem(id);
                                 webix.ui(departmentForm, $$('departmentsId'));
 
-                                // let window = webix.ui({
-                                //     view: 'window',
-                                //     id: 'window',
-                                //     head: 'Редактирование подразделения (id: ' + data.id + ').',
-                                //     close: true,
-                                //     width: 1000,
-                                //     height: 800,
-                                //     position: 'center',
-                                //     modal: true,
-                                //     body: departmentForm,
-                                //     on: {
-                                //         'onShow': function () {
-                                //             var xhr = webix.ajax().sync().get('department_okveds/' + data.id);
-                                //             var jsonResponse = JSON.parse(xhr.responseText);
-                                //             for (var k in jsonResponse) {
-                                //                 var row = {
-                                //                     name_okved: jsonResponse[k].value,
-                                //                     path: jsonResponse[k].id,
-                                //                     version: jsonResponse[k].id.substring(0, 4)
-                                //                 }
-                                //                 $$('okved_table').add(row);
-                                //             }
-                                //             $$('okved_version').setValue('2014');
-                                //         },
-                                //         'onHide': function(){
-                                //             window.destructor();
-                                //         }
-                                //     }
-                                // });
-
                                 $$('departmentForm').parse(data);
                                 $$('departmentForm').load(
                                     function (){
@@ -117,6 +115,8 @@ const departments = {
                                             $$('okved_table').add(row);
                                         }
                                     });
+
+                                $$('contact_table').load('dep_contacts/' + data.id);
 
                                 window.show();
                             }
@@ -184,7 +184,54 @@ const departmentForm = {
                 id: 'departmentForm',
                 elements: [
                     { view: 'text', label: 'Наименование', labelPosition: 'top', name: 'name', required: true, validate: webix.rules.isNotEmpty },
-                    { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', required: true, validate: webix.rules.isNotEmpty },
+                    { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', required: true, minHeight: 200, validate: webix.rules.isNotEmpty },
+                    { rows: [
+                            {cols: [
+                                     {
+                                        view: 'label',
+                                        label: 'Контакты горячей линии',
+                                        align: 'left',
+                                         maxWidth: 80,
+                                     },
+                                    {
+                                        view: 'icon',
+                                        align: 'right',
+                                        id: 'iEdit',
+                                        tooltip: 'Редактировать контакты',
+                                        icon:'wxi-pencil',
+                                        click: changeDepartmentContacts},
+                                    {},
+                                ]
+                            },
+                            {
+                                view: 'datatable', name: 'contact_table', label: '', labelPosition: 'top',
+                                minHeight: 200,
+                                select: 'row',
+                                editable: true,
+                                id: 'contact_table',
+                                columns: [
+                                    {
+                                        id: 'index',
+                                        hidden: true
+                                    },
+                                    {
+                                        id: 'type',
+                                        header: 'Тип',
+                                    },
+                                    {
+                                        id: 'contactValue',
+                                        header: 'Контакт',
+                                    },
+                                    {
+                                        id: 'description',
+                                        header: 'Описание',
+                                        fillspace: true,
+                                    },
+                                ],
+                                data: [],
+                            },
+
+                        ]},
                     {
                         rows: [
                             {

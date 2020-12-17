@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
@@ -98,6 +99,9 @@ public class RequestService {
 
     @Autowired
     private ScheduleTasks scheduleTasks;
+
+    @Autowired
+    private ClsDepartmentContactRepo clsDepartmentContactRepo;
 
 
     @Value("${upload.path:/uploads}")
@@ -560,6 +564,30 @@ public class RequestService {
         regMailingMessageRepo.save(regMailingMessage);
 
         return regMailingMessage;
+    }
+
+    public List<ClsDepartmentContact> getAllClsDepartmentContactByDepartmentId(Long id){
+        return clsDepartmentContactRepo.findAllByDepartment(id).orElse(null);
+    }
+
+    @Transactional
+    public ClsDepartmentContact saveDepContact(ClsDepartmentContactDto departmentContactDto) {
+        ClsDepartment clsDepartment = clsDepartmentRepo.findById(departmentContactDto.getDepartmentId()).orElse(null);
+        ClsDepartmentContact cdc = ClsDepartmentContact.builder()
+                .id(departmentContactDto.getId())
+                .department(clsDepartment)
+                .type(departmentContactDto.getType())
+                .contactValue(departmentContactDto.getContactValue().trim())
+                .description(departmentContactDto.getDescription().trim())
+                .build();
+
+        clsDepartmentContactRepo.save(cdc);
+        return cdc;
+    }
+
+    @Transactional
+    public void deleteDepContact(ClsDepartmentContactDto departmentContactDto){
+        clsDepartmentContactRepo.deleteById(departmentContactDto.getId());
     }
 
 }

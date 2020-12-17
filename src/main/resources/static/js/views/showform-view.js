@@ -453,7 +453,12 @@ webix.ready(function() {
                                                     ],
                                                     url: '../doc_persons/' + ID
                                                 },
-                                            ]
+                                                {
+                                                    view: 'button',
+                                                    value: 'Скачать список',
+
+                                                },
+                                            ],
                                         },
                                     ]
                                 }
