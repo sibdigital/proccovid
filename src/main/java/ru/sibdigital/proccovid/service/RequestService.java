@@ -441,6 +441,7 @@ public class RequestService {
         ClsDepartment clsDepartment = ClsDepartment.builder()
                 .id(clsDepartmentDto.getId())
                 .name(clsDepartmentDto.getName())
+                .fullName(clsDepartmentDto.getFullName())
                 .description(clsDepartmentDto.getDescription())
                 .isDeleted(clsDepartmentDto.getDeleted())
                 .build();

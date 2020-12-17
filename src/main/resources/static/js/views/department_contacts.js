@@ -153,23 +153,7 @@ function addContact() {
     if (params.type == 2) {
         params.type = 0;
     }
-    // params.departmentId = ID_DEPARTMENT;
     if (form.validate()) {
-        // webix.ajax()
-        //     .headers({'Content-type': 'application/json'})
-        //     .post('/save_department_contact', params)
-        //     .then(function (data) {
-        //         if (data !== null) {
-        //             if (params.id) {
-        //                 webix.message('Контакт обновлен', 'success');
-        //             } else {
-        //                 webix.message("Контакт добавлен", 'success');
-        //             }
-        //             $$('contact_grid').load('dep_contacts/'+ID_DEPARTMENT);
-        //         } else {
-        //             webix.message("Не удалось добавить контакт", 'error');
-        //         }
-        //     });
         $$('contact_grid').add(params);
         form.clear()
         form.clearValidation()
@@ -182,19 +166,6 @@ function addContact() {
 }
 
 function deleteContact() {
-    let params = $$('contact_grid').getSelectedItem()
-    // webix.ajax()
-    //     .headers({'Content-type': 'application/json'})
-    //     .post('/delete_dep_contact', JSON.stringify(params))
-    //     .then(function (data) {
-    //         if (data !== null) {
-    //             $$("contact_grid").remove($$("contact_grid").getSelectedId());
-    //             webix.message("Контакт удалён", 'success');
-    //             $$('contact_grid').load('dep_contacts/' + ID_DEPARTMENT);
-    //         } else {
-    //             webix.message("Не удалось удалить контакт", 'error');
-    //         }
-    //     });
     $$("contact_grid").remove($$("contact_grid").getSelectedId());
 }
 
@@ -202,7 +173,7 @@ function changeComboConfig(val) {
     if (val === 2) {
         $$('contactValueText').config.label = "Почта";
         $$('contactValueText').config.placeholder = "sibdigital@mail.ru";
-        $$('contactValueText').config.validate = webix.rules.isEmail;
+        // $$('contactValueText').config.validate = webix.rules.isEmail;
         $$('contactValueText').config.invalidMessage = "Неверный формат почты"
         $$('contactValueText').refresh();
     } else if (val === 1) {

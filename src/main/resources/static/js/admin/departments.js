@@ -181,6 +181,7 @@ const departmentForm = {
                 id: 'departmentForm',
                 elements: [
                     { view: 'text', label: 'Наименование', labelPosition: 'top', name: 'name', required: true, validate: webix.rules.isNotEmpty },
+                    { view: 'text', label: 'Полное наименование', labelPosition: 'top', name: 'fullName', required: true, validate: webix.rules.isNotEmpty },
                     { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', required: true, minHeight: 200, validate: webix.rules.isNotEmpty },
                     { rows: [
                             {cols: [

@@ -25,6 +25,7 @@ public class ClsDepartment {
     private Integer statusImport;
     private Timestamp timeImport;
     private Boolean isDeleted;
+    private String fullName;
 
     public Long getId() {
         return id;
@@ -88,6 +89,16 @@ public class ClsDepartment {
         return this.getName();
     }
 
+    @Basic
+    @Column(name = "full_name")
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -95,6 +106,7 @@ public class ClsDepartment {
         ClsDepartment that = (ClsDepartment) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(name, that.name) &&
+                Objects.equals(fullName, that.fullName) &&
                 Objects.equals(description, that.description) &&
                 Objects.equals(statusImport, that.statusImport) &&
                 Objects.equals(timeImport, that.timeImport);
@@ -102,7 +114,7 @@ public class ClsDepartment {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, statusImport, timeImport);
+        return Objects.hash(id, name, fullName, description, statusImport, timeImport);
     }
 
 
