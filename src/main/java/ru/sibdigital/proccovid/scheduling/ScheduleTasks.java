@@ -68,8 +68,13 @@ public class ScheduleTasks {
         taskScheduler.schedule(task, new Date());
     }
 
-    public void startImportZipFias(){
-        Runnable task = new ImportZipFias();
+    public void startImportZipFullFias(){
+        Runnable task = new ImportZipFullFias();
+        taskScheduler.schedule(task, new Date());
+    }
+
+    public void startImportZipUpdatesFias(){
+        Runnable task = new ImportZipUpdatesFias();
         taskScheduler.schedule(task, new Date());
     }
 
@@ -144,10 +149,17 @@ public class ScheduleTasks {
         }
     }
 
-    class ImportZipFias implements Runnable {
+    class ImportZipFullFias implements Runnable {
         @Override
         public void run() {
-            importFiasService.importZipFiasData();
+            importFiasService.importZipFullFiasData();
+        }
+    }
+
+    class ImportZipUpdatesFias implements Runnable {
+        @Override
+        public void run() {
+            importFiasService.importZipUpdatesFiasData();
         }
     }
 }
