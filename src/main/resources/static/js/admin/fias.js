@@ -42,8 +42,8 @@ function processFilesEgrip() {
             }
         )
 }
-function processZipFias() {
-    webix.confirm('Вы действительно хотите запустить загрузку ФИАС?')
+function processFullZipFias() {
+    webix.confirm('Вы действительно хотите запустить полную загрузку ФИАС?')
         .then(
             function () {
                 webix.ajax().get('/process_fias_zip_full', )
@@ -63,6 +63,29 @@ function processZipFias() {
             }
         )
 }
+
+function processUpdatesZipFias() {
+    webix.confirm('Вы действительно хотите запустить загрузку обновлений ФИАС?')
+        .then(
+            function () {
+                webix.ajax().get('/process_fias_zip_update', )
+                    .then(function (data) {
+                        if (data.text() === 'Ok') {
+                            webix.message({
+                                text: 'Запущена загрузка',
+                                type: 'success'
+                            });
+                        } else {
+                            webix.message({
+                                text: 'Не удалось запустить загрузку',
+                                type: 'error'
+                            });
+                        }
+                    })
+            }
+        )
+}
+
 const fias = {
     view: 'scrollview',
     scroll: 'xy',
@@ -79,11 +102,19 @@ const fias = {
                         cols: [
                             {
                                 view: 'button',
-                                value: 'Загрузка zip ФИАС через scheduler',
+                                value: 'Загрузка zip ФИАС через scheduler (первая полная)',
                                 align: 'left',
                                 maxWidth: 400,
                                 css: 'webix_primary',
-                                click: processZipFias
+                                click: processFullZipFias
+                            },
+                            {
+                                view: 'button',
+                                value: 'Загрузка обновлений zip ФИАС',
+                                align: 'left',
+                                maxWidth: 400,
+                                css: 'webix_primary',
+                                click: processUpdatesZipFias
                             },
                             {},
                         ]
