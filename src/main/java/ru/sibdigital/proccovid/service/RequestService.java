@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
@@ -100,16 +101,8 @@ public class RequestService {
     private ScheduleTasks scheduleTasks;
 
     @Autowired
-    private ClsNewsRepo clsNewsRepo;
+    private ClsDepartmentContactRepo clsDepartmentContactRepo;
 
-    @Autowired
-    private RegNewsOkvedRepo regNewsOkvedRepo;
-
-    @Autowired
-    private RegNewsOrganizationRepo regNewsOrganizationRepo;
-
-    @Autowired
-    private RegNewsStatusRepo regNewsStatusRepo;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -191,7 +184,7 @@ public class RequestService {
     }
 
     public List<ClsTypeRequest> getClsTypeRequests() {
-        return StreamSupport.stream(clsTypeRequestRepo.findAllByOrderByIdAsc().spliterator(), false)
+        return StreamSupport.stream(clsTypeRequestRepo.findAll(Sort.by(Sort.Direction.DESC, "id")).spliterator(), false)
                 .collect(Collectors.toList());
     }
 
@@ -448,21 +441,47 @@ public class RequestService {
         ClsDepartment clsDepartment = ClsDepartment.builder()
                 .id(clsDepartmentDto.getId())
                 .name(clsDepartmentDto.getName())
+                .fullName(clsDepartmentDto.getFullName())
                 .description(clsDepartmentDto.getDescription())
                 .isDeleted(clsDepartmentDto.getDeleted())
                 .build();
 
         clsDepartmentRepo.save(clsDepartment);
 
-        List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
-        clsDepartmentOkvedRepo.deleteAll(list);
+        if (clsDepartmentDto.getOkvedsChanged()) {
+            List<ClsDepartmentOkved> list = clsDepartmentOkvedRepo.findClsDepartmentOkvedByDepartment(clsDepartment);
+            clsDepartmentOkvedRepo.deleteAll(list);
 
-        List<Okved> listOkveds = clsDepartmentDto.getOkveds();
-        for (Okved okved : listOkveds) {
-            ClsDepartmentOkved clsDepartmentOkved = new ClsDepartmentOkved();
-            clsDepartmentOkved.setDepartment(clsDepartment);
-            clsDepartmentOkved.setOkved(okved);
-            clsDepartmentOkvedRepo.save(clsDepartmentOkved);
+            List<Okved> listOkveds = clsDepartmentDto.getOkveds();
+            List<ClsDepartmentOkved> cdoList = new ArrayList<>();
+            for (Okved okved : listOkveds) {
+                ClsDepartmentOkved cdo = ClsDepartmentOkved.builder()
+                        .department(clsDepartment)
+                        .okved(okved)
+                        .build();
+                cdoList.add(cdo);
+            }
+            clsDepartmentOkvedRepo.saveAll(cdoList);
+        }
+
+        if (clsDepartmentDto.getContactsChanged()) {
+            List<ClsDepartmentContact> list2 = clsDepartmentContactRepo.findAllByDepartment(clsDepartment.getId()).orElse(null);
+            if (list2 != null) {
+                clsDepartmentContactRepo.deleteAll(list2);
+            }
+
+            List<ClsDepartmentContactDto> contactDtoList = clsDepartmentDto.getContacts();
+            List<ClsDepartmentContact> cdcList = new ArrayList<>();
+            for (ClsDepartmentContactDto contactDto : contactDtoList) {
+                ClsDepartmentContact cdc = ClsDepartmentContact.builder()
+                        .department(clsDepartment)
+                        .type(contactDto.getType())
+                        .description(contactDto.getDescription())
+                        .contactValue(contactDto.getContactValue())
+                        .build();
+                cdcList.add(cdc);
+            }
+            clsDepartmentContactRepo.saveAll(cdcList);
         }
 
         return clsDepartment;
@@ -573,109 +592,8 @@ public class RequestService {
         return regMailingMessage;
     }
 
-    public ClsNews saveNews(ClsNewsDto clsNewsDto) throws ParseException {
-        Date startTime = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(clsNewsDto.getStartTime()).getTime());
-        Date endTime = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(clsNewsDto.getEndTime()).getTime());
-
-
-        // Чтобы при build() не затерся hashId, сохраним его.
-        ClsNews clsNews;
-        String hashId = null;
-        if (clsNewsDto.getId() != null) {
-            clsNews = clsNewsRepo.findById(clsNewsDto.getId()).orElse(null);
-            if (clsNews != null) {
-                hashId = clsNews.getHashId();
-            }
-        }
-
-        clsNews = ClsNews.builder()
-                .id(clsNewsDto.getId())
-                .heading(clsNewsDto.getHeading())
-                .message(clsNewsDto.getMessage())
-                .startTime(startTime)
-                .endTime(endTime)
-                .build();
-
-        if (hashId != null) {
-            clsNews.setHashId(hashId);
-        }
-        else {
-            // Для hashId нужен clsNews.id. Если новость новая, то сохраняем и после получаем id.
-            clsNewsRepo.save(clsNews);
-            hashId = "" + clsNews.getId() + encode(System.currentTimeMillis() - Long.parseLong("1577808000000"));
-            clsNews.setHashId(hashId);
-        }
-
-        clsNewsRepo.save(clsNews);
-
-        saveRegNewsOkved(clsNews, clsNewsDto);
-        saveRegNewsOrganization(clsNews, clsNewsDto);
-        saveRegNewsStatus(clsNews, clsNewsDto);
-
-        return clsNews;
-    }
-
-    public void saveRegNewsOkved(ClsNews clsNews, ClsNewsDto clsNewsDto){
-        List<RegNewsOkved> list = regNewsOkvedRepo.findClsNewsOkvedByNews(clsNews);
-        regNewsOkvedRepo.deleteAll(list);
-
-        List<Okved> listOkveds = clsNewsDto.getOkveds();
-        for (Okved okved : listOkveds) {
-            RegNewsOkved rno = RegNewsOkved.builder()
-                    .news(clsNews)
-                    .okved(okved)
-                    .build();
-            regNewsOkvedRepo.save(rno);
-        }
-    }
-
-    public void saveRegNewsOrganization(ClsNews clsNews, ClsNewsDto clsNewsDto){
-        List<RegNewsOrganization> list1 = regNewsOrganizationRepo.findRegNewsOrganizationByNews(clsNews);
-        regNewsOrganizationRepo.deleteAll(list1);
-
-        List<KeyValue> listInn = clsNewsDto.getInnList();
-        List<RegNewsOrganization> regNewsOrganizationList = new ArrayList<>();
-        for (KeyValue inn : listInn) {
-            List<ClsOrganization> organizationList = clsOrganizationRepo.findAllByInn(inn.getValue());
-            for (ClsOrganization organization : organizationList) {
-                RegNewsOrganization rnorg =  RegNewsOrganization.builder()
-                        .news(clsNews)
-                        .organization(organization)
-                        .build();
-                regNewsOrganizationList.add(rnorg);
-            }
-        }
-        if (regNewsOrganizationList != null) {
-            regNewsOrganizationRepo.saveAll(regNewsOrganizationList);
-        }
-    }
-
-    public void saveRegNewsStatus(ClsNews clsNews, ClsNewsDto clsNewsDto){
-        List<RegNewsStatus> list3 = regNewsStatusRepo.findRegNewsStatusByNews(clsNews);
-        regNewsStatusRepo.deleteAll(list3);
-
-        List<CheckedReviewStatusDto> crsList = clsNewsDto.getStatuses();
-        for (CheckedReviewStatusDto status : crsList){
-            if (status.getChecked() == 1) {
-                RegNewsStatus rns = RegNewsStatus.builder()
-                        .news(clsNews)
-                        .statusReview(status.getReviewStatus())
-                        .build();
-                regNewsStatusRepo.save(rns);
-            }
-        }
-    }
-
-    public static String encode(Long num) {
-        String ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        int    BASE     = ALPHABET.length();
-
-        StringBuilder sb = new StringBuilder();
-        while ( num > 0 ) {
-            sb.append(ALPHABET.charAt((int) (num % BASE)) );
-            num /= BASE;
-        }
-        return sb.reverse().toString();
+    public List<ClsDepartmentContact> getAllClsDepartmentContactByDepartmentId(Long id){
+        return clsDepartmentContactRepo.findAllByDepartment(id).orElse(null);
     }
 
 }

@@ -141,7 +141,7 @@
                                 id: 'request_type',
                                 width: 450,
                                 css: 'smallText',
-                                placeholder: 'Все типы заявок',
+                                placeholder: 'Все виды деятельности',
                                 options: 'cls_type_requests_short',
                                 on: {
                                     onChange(id) {
@@ -230,7 +230,7 @@
             });
             // по умолчанию
             $$('tabbar').setValue('requests');
-            $$('request_type').getList().add({id:'', value:'Все типы заявок', $empty: true}, 0)
+            $$('request_type').getList().add({id:'', value:'Все виды деятельности', $empty: true}, 0)
             $$('district_filter').getList().add({id:'', value:'Все районы', $empty: true}, 0)
             $$('actualization_type').getList().add({id:'', value:'Все заявки', $empty: true}, 0)
         })

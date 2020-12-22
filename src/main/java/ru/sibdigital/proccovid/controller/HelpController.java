@@ -1,8 +1,11 @@
 package ru.sibdigital.proccovid.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ru.sibdigital.proccovid.model.RegHelp;
+import ru.sibdigital.proccovid.repository.RegHelpRepo;
 import ru.sibdigital.proccovid.service.StatisticService;
 
 import java.util.ArrayList;
@@ -13,6 +16,10 @@ import java.util.Map;
 @Controller
 @RestController
 public class HelpController {
+
+    @Autowired
+    RegHelpRepo regHelpRepo;
+
     @GetMapping(value = "/help/statistic")
     public List<Map<String, Object>> getHelpPage() {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -78,10 +85,41 @@ public class HelpController {
         return result;
     }
 
+//    @GetMapping(value = "/help")
+//    public List<Map<String, Object>> getHelpPage(@RequestParam(value = "name") String name) {
+//        List<Map<String, Object>> result = null;
+//        if (name != null) {
+//            result = regHelpRepo.getHelpByName(name);
+//        }
+//        return result;
+//    }
+
+    @GetMapping(value = "/help")
+    public RegHelp getHelpPage(@RequestParam(value = "id") Long id) {
+        RegHelp result = regHelpRepo.findById(id).orElse(null);
+        return result;
+    }
+
+    @GetMapping(value = "/helps")
+    public List<RegHelp> getHelps() {
+        List<RegHelp> result = regHelpRepo.findAll(Sort.by(Sort.Direction.ASC, "name"));
+        return result;
+    }
+
     @GetMapping(value = "/help/statistic/globalIds")
     public List<Integer> getGlobalIds() {
         List<Integer> result = new ArrayList<>() {{ add(1);  }};
         return result;
+    }
+
+    @PostMapping(value = "/help/add")
+    public void setNewHelp(@RequestBody RegHelp help) {
+        System.out.println(help.getDescription());
+        if (help.getKey() == null) {
+            help.setKey(help.getName());
+        }
+
+        regHelpRepo.save(help);
     }
 
 }

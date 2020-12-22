@@ -1,10 +1,18 @@
 package ru.sibdigital.proccovid.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Table(name = "cls_department_okved", schema = "public")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder(toBuilder = true)
 public class ClsDepartmentOkved {
 
     @Id

@@ -18,13 +18,12 @@ import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
-import ru.sibdigital.proccovid.service.OkvedService;
-import ru.sibdigital.proccovid.service.OrganizationService;
-import ru.sibdigital.proccovid.service.PrescriptionService;
+import ru.sibdigital.proccovid.service.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.service.RequestService;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.servlet.http.HttpSession;
 import java.util.*;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +72,16 @@ public class AdminController {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private NewsService newsService;
+
+    @Autowired
+    private RegNewsFileRepo regNewsFileRepo;
+
+    @Autowired
+    private ClsDepartmentRepo clsDepartmentRepo;
+
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -142,28 +151,32 @@ public class AdminController {
         result.put("total_count", templates.getTotalElements());
         return result;
     }
+    @GetMapping("/cls_prescriptions")
+    public @ResponseBody List<ClsPrescription> getClsPrescriptions() {
+        return prescriptionService.getClsPrescriptions();
+    }
 
-    @PostMapping("/save_cls_type_request")
-    public @ResponseBody ClsTypeRequest saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto, @RequestParam(required = false) String publish) {
-        ClsTypeRequest clsTypeRequest;
+    @PostMapping("/save_cls_prescription")
+    public @ResponseBody ClsPrescription saveClsTypeRequest(@RequestBody ClsPrescriptionDto clsPrescriptionDto) {
+        ClsPrescription clsPrescription;
         try {
-            clsTypeRequest = prescriptionService.saveClsTypeRequest(clsTypeRequestDto);
+            clsPrescription = prescriptionService.savePrescription(clsPrescriptionDto);
         } catch (Exception e) {
-            clsTypeRequest = new ClsTypeRequest();
+            clsPrescription = new ClsPrescription();
             log.error(e.getMessage());
         }
-        return clsTypeRequest;
+        return clsPrescription;
     }
 
     @PostMapping(value = "/upload_prescription_file", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> uploadPrescriptionFile(@RequestParam(value = "upload") MultipartFile file,
-                                                         @RequestParam Long idTypeRequestPrescription) {
-        RegTypeRequestPrescriptionFile regTypeRequestPrescriptionFile = prescriptionService.saveRegTypeRequestPrescriptionFile(file, idTypeRequestPrescription);
-        if (regTypeRequestPrescriptionFile != null) {
+                                                         @RequestParam Long idPrescriptionText) {
+        RegPrescriptionTextFile prescriptionTextFile = prescriptionService.savePrescriptionTextFile(file, idPrescriptionText);
+        if (prescriptionTextFile != null) {
             return ResponseEntity.ok()
                     .body("{\"cause\": \"Файл успешно загружен\"," +
                             "\"status\": \"server\"," +
-                            "\"sname\": \"" + regTypeRequestPrescriptionFile.getOriginalFileName() + "\"}");
+                            "\"sname\": \"" + prescriptionTextFile.getOriginalFileName() + "\"}");
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("{\"status\": \"server\"," +
@@ -173,18 +186,23 @@ public class AdminController {
 
     @GetMapping("/delete_prescription_file")
     public @ResponseBody String deletePrescriptionFile(@RequestParam Long id) {
-        boolean deleted = prescriptionService.deleteRegTypeRequestPrescriptionFile(id);
+        boolean deleted = prescriptionService.deletePrescriptionTextFile(id);
         if (deleted) {
             return "Файл удален";
         }
         return "Не удалось удалить файл";
     }
 
+    @GetMapping("/cls_prescription")
+    public @ResponseBody ClsPrescription getClsPrescription(@RequestParam Long id) {
+        return prescriptionService.getClsPrescription(id);
+    }
+
     @GetMapping("/publish_prescription")
     public @ResponseBody String publishPrescription(@RequestParam Long id) {
         boolean published = prescriptionService.publishPrescription(id);
         if (published) {
-            prescriptionService.createRequestsByPrescription(id);
+//            prescriptionService.createRequestsByPrescription(id);
         } else {
             return "Не удалось опубликовать предписание";
         }
@@ -331,43 +349,45 @@ public class AdminController {
         return clsNewsRepo.findById(id_news).orElse(null);
     }
 
-    @GetMapping("/news_okveds/{id_news}")
-    public @ResponseBody List<RegNewsOkved> getListOkvedsDtoByNews(@PathVariable("id_news") Long id_news){
-        List<RegNewsOkved> list = regNewsOkvedRepo.findClsNewsOkvedByNews_Id(id_news);
-        return list;
+    @GetMapping("/init_news_statuses")
+    public @ResponseBody List<CheckedReviewStatusDto> getInitListStatuses() {
+        return CheckedReviewStatusDto.getInitList();
     }
 
-    @GetMapping("/news_inn/{id_news}")
-    public @ResponseBody List<String> getListInnByNews(@PathVariable("id_news") Long id_news){
-        List<String> list = regNewsOrganizationRepo.findInnByNews(id_news);
-        return list;
+    @GetMapping("/news_tables/{id_news}")
+    public @ResponseBody Map<String, List> getNewsTables(@PathVariable("id_news") Long id_news) {
+       return newsService.getNewsTables(id_news);
     }
 
-    @GetMapping("/news_statuses/{id_news}")
-    public @ResponseBody List<CheckedReviewStatusDto> getListStatusesByNews(@PathVariable("id_news") Long id_news){
-        List<CheckedReviewStatusDto> initList = CheckedReviewStatusDto.getInitList();
-
-        if (id_news != Long.parseLong("-1")) {
-            Long checkedValue = Long.parseLong("1");
-            List<RegNewsStatus> list = regNewsStatusRepo.findRegNewsStatusByNews_Id(id_news);
-            for (RegNewsStatus regNewsStatus : list) {
-                int rowsId = Integer.parseInt("" + regNewsStatus.getStatusReview());
-                initList.get(rowsId).setChecked(checkedValue);
-            }
+    @PostMapping(value = "/upload_news_file", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> uploadNewsFile(@RequestParam(value = "upload") MultipartFile file,
+                                                         @RequestParam Long idNews) {
+        RegNewsFile regNewsFile = newsService.saveRegNewsFile(file, idNews);
+        if (regNewsFile != null) {
+            return ResponseEntity.ok()
+                    .body("{\"cause\": \"Файл успешно загружен\"," +
+                            "\"status\": \"server\"," +
+                            "\"sname\": \"" + regNewsFile.getOriginalFileName() + "\"}");
         }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("{\"status\": \"server\"," +
+                        "\"cause\":\"Ошибка сохранения\"}" +
+                        "\"sname\": \"" + file.getOriginalFilename() + "\"}");
+    }
 
-        return initList;
+    @GetMapping("/delete_news_file")
+    public @ResponseBody String deleteNewsFile(@RequestParam(value = "id") Long id) {
+        boolean deleted = newsService.deleteRegNewsFile(id);
+        if (deleted) {
+            return "Файл удален";
+        }
+        return "Не удалось удалить файл";
     }
 
     @PostMapping("/save_news")
-    public @ResponseBody String saveNews(@RequestBody ClsNewsDto clsNewsDto) {
-        try {
-            requestService.saveNews(clsNewsDto);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return "Не удалось сохранить новость";
-        }
-        return "Новость сохранена";
+    public @ResponseBody ClsNews saveNews(@RequestBody ClsNewsDto clsNewsDto) {
+        ClsNews news = newsService.saveNews(clsNewsDto);
+        return news;
     }
 
     @GetMapping("/cls_restriction_types")
@@ -420,4 +440,11 @@ public class AdminController {
     public @ResponseBody String getSubdomainWork(){
         return applicationConstants.getSubdomainWork();
     }
+
+    @GetMapping("/dep_contacts/{id}")
+    public @ResponseBody List<ClsDepartmentContact> getDepContacts(@PathVariable("id") Long departmentId){
+        List<ClsDepartmentContact> departmentContacts = requestService.getAllClsDepartmentContactByDepartmentId(departmentId);
+        return departmentContacts;
+    }
+
 }

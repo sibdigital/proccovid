@@ -1,11 +1,11 @@
 package ru.sibdigital.proccovid.model;
 
-public enum PublicationStatuses {
+public enum PrescriptionStatuses {
     NOT_PUBLISHED(0),
     PUBLISHED(1);
 
     private final int value;
-    private PublicationStatuses(int value) {
+    private PrescriptionStatuses(int value) {
         this.value = value;
     }
 

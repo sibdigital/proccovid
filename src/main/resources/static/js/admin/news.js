@@ -75,40 +75,39 @@ const newsListForm = {
                                     endTime: jsonResponse.endTime.replace("T", " "),
                                     hashId: jsonResponse.hashId,
                                 };
-
                                 webix.ui(newsFormTab, $$('newsListFormId'));
 
                                 $$('newsForm').parse(data);
-                                $$('newsForm').load(
-                                    function (){
-                                        var xhr = webix.ajax().sync().get('news_okveds/' + data.id);
-                                        var responseText = xhr.responseText.replace("\"id\":", "\"index\":");
-                                        var jsonResponse = JSON.parse(responseText);
-                                        for (var k in jsonResponse) {
-                                            var row = jsonResponse[k].okved;
-                                            $$('okved_table').add(row);
-                                        }
-                                    });
 
-                                $$('newsForm').load(
-                                    function (){
-                                        var xhr = webix.ajax().sync().get('news_inn/' + data.id);
-                                        var jsonResponse = JSON.parse(xhr.responseText);
-                                        for (var k in jsonResponse) {
-                                            var row= {value: jsonResponse[k]};
-                                            $$('inn_table').add(row);
-                                        }
-                                    });
+                                $$('newsForm').load(function (){
+                                    var xhr = webix.ajax().sync().get('news_tables/' + data.id);
+                                    var jsonResponse = JSON.parse(xhr.responseText);
+                                    var okveds    = jsonResponse['okveds'];
+                                    var inn       = jsonResponse['inn'];
+                                    var files     = jsonResponse['files'];
+                                    var statuses  = jsonResponse['statuses'];
 
-                                $$('newsForm').load(
-                                    function (){
-                                        var xhr = webix.ajax().sync().get('news_statuses/' + data.id);
-                                        var jsonResponse = JSON.parse(xhr.responseText);
-                                        for (var k in jsonResponse) {
-                                            var row = jsonResponse[k];
-                                            $$('status_table').add(row);
-                                        }
-                                    });
+                                    for (var k in okveds) {
+                                        $$('okved_table').add(okveds[k].okved);
+                                    }
+
+                                    for (var k in inn) {
+                                        var row= {value: inn[k]};
+                                        $$('inn_table').add(row);
+                                    }
+
+                                    if (files.length > 0) {
+                                        $$('uploadedFiles').show();
+                                    }
+                                    for (var k in files) {
+                                        $$('uploadedFiles').add(files[k]);
+                                    }
+
+                                    for (var k in statuses) {
+                                        $$('status_table').add(statuses[k]);
+                                    }
+
+                                })
 
                                 $$('newsForm').load(
                                     function (){
@@ -136,7 +135,7 @@ const newsListForm = {
                                     webix.ui(newsFormTab, $$('newsListFormId'));
                                     $$('newsForm').load(
                                         function (){
-                                            var xhr = webix.ajax().sync().get('news_statuses/'+'-1');
+                                            var xhr = webix.ajax().sync().get('init_news_statuses');
                                             var jsonResponse = JSON.parse(xhr.responseText);
                                             for (var k in jsonResponse) {
                                                 var row = jsonResponse[k];
@@ -154,205 +153,287 @@ const newsListForm = {
 const newsFormTab = {
     view: 'scrollview',
     id: 'newsFormTabId',
-    autowidth: true,
-    autoheight: true,
+    scroll: 'xy',
     body: {
+        type: 'space',
         rows: [
             {
                 id: 'newsForm',
                 view: 'form',
-                complexData: true,
                 elements: [
                     {
-                        id: 'tabview',
-                        view: 'tabview',
-                        cells: [
+                        view: 'tabbar',
+                        id: 'newsTabs',
+                        multiview: true,
+                        borderless:true,
+                        value: 'mainNewsTab',
+                        options: [
                             {
-                                header: 'Основное',
-                                body: {
-                                    rows: [
-                                        view_section('Основные сведения'),
-                                        {view: 'text', label: 'Заголовок', labelPosition: 'top', name: 'heading', id: 'heading'},
-                                        {cols:[
-                                                {
-                                                    view: 'datepicker',
-                                                    label: 'Время начала публикации',
-                                                    labelPosition: 'top',
-                                                    name: 'startTime',
-                                                    timepicker: true,
-                                                    id: 'startTime'},
-                                                {},
-                                                {
-                                                    view: 'datepicker',
-                                                    label: 'Время окончания публикации',
-                                                    labelPosition: 'top',
-                                                    name: 'endTime',
-                                                    timepicker: true,
-                                                    id: 'endTime'},
-                                            ]},
-                                        {
-                                            view: 'nic-editor',
-                                            id: 'message',
-                                            name: 'message',
-                                            css: "myClass",
-                                            cdn: false,
-                                            config: {
-                                                iconsPath: '../libs/nicedit/nicEditorIcons.gif'
-                                            }
-                                        },
-                                        {
-                                            view: 'label',
-                                            id: 'link'
-                                        }
-                                    ]
-                                }
+                                id: 'mainNewsTab',
+                                value: 'Основное',
                             },
                             {
-                                header: 'Фильтры',
-                                body: {
-                                    rows:[
-                                        { view: 'tabview',
-                                            cells:[
-                                                {
-                                                    header: 'По ИНН',
-                                                    id:"innView",
-                                                    view:"form",
-                                                    rows: [
-                                                        {
-                                                            view: 'datatable',
-                                                            id: 'inn_table',
-                                                            label: '',
-                                                            labelPosition: 'top',
-                                                            minHeight: 200,
-                                                            select: 'row',
-                                                            editable: true,
-                                                            columns: [
-                                                                {
-                                                                    id: 'value',
-                                                                    editor:"text",
-                                                                    header: 'ИНН',
-                                                                    fillspace: true
-                                                                },
-                                                                {
-                                                                    id: 'btnDelete',
-                                                                    header: " ",
-                                                                    template: "{common.trashIcon()}"
-                                                                },
-                                                            ],
-                                                            onClick: {
-                                                                "wxi-trash": function (event, id, node) {
-                                                                    this.remove(id)
+                                id: 'filterNewsTab',
+                                value: 'Фильтры',
+                            },
+                        ]
+                    },
+                    {
+                        id: 'tabview',
+                        animate:false,
+                        cells: [
+                            {
+                                id: 'mainNewsTab',
+                                rows: [
+                                    {view: 'text', label: 'Заголовок', labelPosition: 'top', name: 'heading', id: 'heading'},
+                                    {cols:[
+                                            {
+                                                view: 'datepicker',
+                                                label: 'Время начала публикации',
+                                                labelPosition: 'top',
+                                                name: 'startTime',
+                                                timepicker: true,
+                                                id: 'startTime'},
+                                            {},
+                                            {
+                                                view: 'datepicker',
+                                                label: 'Время окончания публикации',
+                                                labelPosition: 'top',
+                                                name: 'endTime',
+                                                timepicker: true,
+                                                id: 'endTime'},
+                                        ]},
+                                    {
+                                        view: 'nic-editor',
+                                        id: 'message',
+                                        name: 'message',
+                                        css: "myClass",
+                                        cdn: false,
+                                        config: {
+                                            iconsPath: '../libs/nicedit/nicEditorIcons.gif'
+                                        }
+                                    },
+                                    {
+                                        view: 'datatable',
+                                        id: 'uploadedFiles',
+                                        autoheight: true,
+                                        header: 'Загруженные файлы',
+                                        hidden: true,
+                                        columns: [
+                                            {
+                                                id: 'originalFileName',
+                                                header: '',
+                                                fillspace: true
+                                            },
+                                            {
+                                                id: 'btnDelete',
+                                                header: " ",
+                                                template: "{common.trashIcon()}"
+                                            },
+                                        ],
+                                        onClick: {
+                                            "wxi-trash": function (event, id, node) {
+                                                webix.ajax().get('/delete_news_file',
+                                                    {id: id.row}
+                                                ).then(function (data) {
+                                                    if (data.text() === 'Файл удален') {
+                                                        $$('uploadedFiles').remove(id);
+                                                    } else {
+                                                        webix.message({text: data.text(), type: 'error'});
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    },
+                                    {
+                                        view: 'list',
+                                        id: 'newsFiles',
+                                        type: 'uploader',
+                                        autoheight: true,
+                                    },
+                                    {
+                                        cols: [
+                                            {
+                                                view: 'uploader',
+                                                id: 'uploader',
+                                                css: 'webix_primary',
+                                                value: 'Прикрепить файл(-ы)',
+                                                autosend: false,
+                                                upload: '/upload_news_file',
+                                                required: true,
+                                                accept: 'application/pdf, application/zip',
+                                                multiple: true,
+                                                link: 'newsFiles',
+                                                maxWidth: 200
+                                            },
+                                            {}
+                                        ]
+                                    },
+                                    {
+                                        view: 'label',
+                                        id: 'link'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'filterNewsTab',
+                                rows:[
+                                    {
+                                        view: 'tabbar',
+                                        id: 'filterTabs',
+                                        multiview: true,
+                                        borderless:true,
+                                        value: 'innView',
+                                        options: [
+                                            {
+                                                id: 'innView',
+                                                value: 'По ИНН',
+                                            },
+                                            {
+                                                id: 'statusView',
+                                                value: 'По статусам заявок',
+                                            },
+                                            {
+                                                id: 'okvedView',
+                                                value: 'По ОКВЭДам',
+                                            },
+                                        ]
+                                    },
+                                    {   id: 'filterTabView',
+                                        animate:false,
+                                        cells:[
+                                            {
+                                                header: 'По ИНН',
+                                                id:"innView",
+                                                view:"form",
+                                                rows: [
+                                                    {
+                                                        view: 'datatable',
+                                                        id: 'inn_table',
+                                                        label: '',
+                                                        labelPosition: 'top',
+                                                        minHeight: 200,
+                                                        select: 'row',
+                                                        editable: true,
+                                                        columns: [
+                                                            {
+                                                                id: 'value',
+                                                                editor:"text",
+                                                                header: 'ИНН',
+                                                                fillspace: true
+                                                            },
+                                                            {
+                                                                id: 'btnDelete',
+                                                                header: " ",
+                                                                template: "{common.trashIcon()}"
+                                                            },
+                                                        ],
+                                                        onClick: {
+                                                            "wxi-trash": function (event, id, node) {
+                                                                this.remove(id)
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        cols: [
+                                                            {},
+                                                            {
+                                                                view:"button",
+                                                                maxWidth:200,
+                                                                label:"Добавить",
+                                                                click:function(){
+                                                                    $$('inn_table').add({});
                                                                 }
                                                             }
-                                                        },
-                                                        {
-                                                            cols: [
-                                                                {},
-                                                                {
-                                                                    view:"button",
-                                                                    maxWidth:200,
-                                                                    label:"Добавить",
-                                                                    click:function(){
-                                                                        $$('inn_table').add({});
-                                                                    }
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    header: 'По статусам заявок',
-                                                    id:"statusView",
-                                                    view:"form",
-                                                    rows: [
-                                                        {
-                                                            view: 'datatable',
-                                                            id: 'status_table',
-                                                            label: '',
-                                                            labelPosition: 'top',
-                                                            minHeight: 200,
-                                                            select: 'row',
-                                                            editable: true,
-                                                            columns: [
-                                                                {
-                                                                    id: 'checked',
-                                                                    header:"",
-                                                                    css:"center",
-                                                                    template:"{common.checkbox()}"
-                                                                },
-                                                                {
-                                                                    id:"value",
-                                                                    header:"Статус заявки",
-                                                                    fillspace: true
-                                                                },
-                                                                {
-                                                                    id:"reviewStatus",
-                                                                    hidden: true,
-                                                                },
-                                                            ],
-                                                        // data: [
-                                                        //         { checked:0, value:"На рассмотрении", reviewStatus: 0},
-                                                        //         { checked:0, value:"Одобрена", reviewStatus: 1},
-                                                        //         { checked:0, value:"Отклонена", reviewStatus: 2},
-                                                        //         { checked:0, value:"Обновлена", reviewStatus: 3},
-                                                        //         { checked:0, value:"Принята", reviewStatus: 4},
-                                                        //     ]
-                                                        },
-                                                    ]
-                                                },
-                                                {
-                                                    header:'По ОКВЭДам',
-                                                    id:"okvedView",
-                                                    view:"form",
-                                                    rows: [
-                                                        {
-                                                            view: 'datatable', name: 'okved_table', label: '', labelPosition: 'top',
-                                                            minHeight: 200,
-                                                            select: 'row',
-                                                            editable: true,
-                                                            id: 'okved_table',
-                                                            columns: [
-                                                                {
-                                                                    id: 'index',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    id: 'kindCode',
-                                                                    header: 'Код',
-                                                                },
-                                                                {
-                                                                    id: 'version',
-                                                                    header: 'Версия',
-                                                                },
-                                                                {
-                                                                    id: 'kindName',
-                                                                    header: 'ОКВЭД',
-                                                                    fillspace: true,
-                                                                },
-                                                            ],
-                                                            data: [],
-                                                        },
-                                                        {
-                                                            cols: [
-                                                                {},
-                                                                {
-                                                                    view: 'button',
-                                                                    value: 'Изменить ОКВЭДы',
-                                                                    align: 'right',
-                                                                    css: 'webix_primary',
-                                                                    maxWidth: 200,
-                                                                    click: changeLinkedNewsOkveds
-                                                                },
-                                                            ]
-                                                        },
-                                                    ]
-                                                },
-                                            ]
-                                        }
-                                    ]
-                                }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                header: 'По статусам заявок',
+                                                id:"statusView",
+                                                view:"form",
+                                                rows: [
+                                                    {
+                                                        view: 'datatable',
+                                                        id: 'status_table',
+                                                        label: '',
+                                                        labelPosition: 'top',
+                                                        minHeight: 200,
+                                                        select: 'row',
+                                                        editable: true,
+                                                        columns: [
+                                                            {
+                                                                id: 'checked',
+                                                                header:"",
+                                                                css:"center",
+                                                                template:"{common.checkbox()}"
+                                                            },
+                                                            {
+                                                                id:"value",
+                                                                header:"Статус заявки",
+                                                                fillspace: true
+                                                            },
+                                                            {
+                                                                id:"reviewStatus",
+                                                                hidden: true,
+                                                            },
+                                                        ],
+                                                    },
+                                                ]
+                                            },
+                                            {
+                                                header:'По ОКВЭДам',
+                                                id:"okvedView",
+                                                view:"form",
+                                                rows: [
+                                                    {
+                                                        view: 'datatable', name: 'okved_table', label: '', labelPosition: 'top',
+                                                        minHeight: 200,
+                                                        select: 'row',
+                                                        editable: true,
+                                                        id: 'okved_table',
+                                                        columns: [
+                                                            {
+                                                                id: 'index',
+                                                                hidden: true
+                                                            },
+                                                            {
+                                                                id: 'kindCode',
+                                                                header: 'Код',
+                                                            },
+                                                            {
+                                                                id: 'version',
+                                                                header: 'Версия',
+                                                            },
+                                                            {
+                                                                id: 'kindName',
+                                                                header: 'ОКВЭД',
+                                                                fillspace: true,
+                                                            },
+                                                        ],
+                                                        data: [],
+                                                    },
+                                                    {
+                                                        cols: [
+                                                            {},
+                                                            {
+                                                                view: 'button',
+                                                                value: 'Изменить ОКВЭДы',
+                                                                align: 'right',
+                                                                css: 'webix_primary',
+                                                                maxWidth: 200,
+                                                                click: changeLinkedNewsOkveds
+                                                            },
+                                                        ]
+                                                    },
+                                                ]
+                                            },
+                                        ]
+                                    }
+                                ]
                             }
-                            ]
+                        ]
                     },
                     { cols: [
                             {},
@@ -376,17 +457,31 @@ const newsFormTab = {
                                             'Content-Type': 'application/json'
                                         }).post('/save_news',
                                             params).then(function (data) {
-                                            if (data.text() === 'Новость сохранена') {
-                                                webix.message({text: data.text(), type: 'success'});
+                                            const savedNews = data.json();
+                                            if (savedNews.id)  {
+                                                let uploader = $$('uploader');
+                                                if (uploader) {
+                                                    successfullyUploaded = true
+                                                    uploader.define('formData', {idNews: savedNews.id})
+                                                    uploader.send(function (response) {
+                                                        if (response) {
+                                                            console.log(response.cause);
+                                                            if (response.cause != 'Файл успешно загружен') {
+                                                                successfullyUploaded = false
+                                                            }
+                                                        }
+
+                                                        if (successfullyUploaded) {
+                                                            webix.message({text: 'Новость сохранена', type: 'success'});
+                                                            webix.ui(newsListForm, $$('newsFormTabId'));
+                                                        }
+                                                    })
 
 
-                                                window.location.reload(true);
-                                                // webix.ui(newsListForm, $$('newsFormTabId'));
-                                                // $$('news_table').clearAll();
-                                                // $$('news_table').load('news');
-
-                                            } else {
-                                                webix.message({text: data.text(), type: 'error'});
+                                                }
+                                            }
+                                            else {
+                                                webix.message({text: 'Не удалось сохранить новость', type: 'error'});
                                             }
                                         })
                                     } else {
@@ -401,8 +496,7 @@ const newsFormTab = {
                                 css: 'webix_secondary',
                                 value: 'Отмена',
                                 click: function () {
-                                    // webix.ui(newsListForm, $$('newsFormTabId'));
-                                    window.location.reload(true)
+                                    webix.ui(newsListForm, $$('newsFormTabId'));
                                 }
                             }]
                     }]

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.sibdigital.proccovid.model.Okved;
+import ru.sibdigital.proccovid.model.RegNewsFile;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class ClsNewsDto {
     private List<Okved> okveds;
     private List<KeyValue> innList;
     private List<CheckedReviewStatusDto> statuses;
+    private List<RegNewsFile> regNewsFiles;
 
 
 }
