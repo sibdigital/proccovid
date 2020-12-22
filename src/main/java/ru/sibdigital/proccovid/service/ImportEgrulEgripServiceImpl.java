@@ -51,7 +51,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     @Value("${substringForFullFiles}")
     private String substringForFullFiles;
 
-    @Value("${egrul.egrip.validate.delete}")
+    @Value("${egr.validate.delete}")
     private Boolean deleteFiles;
 
     @Autowired
@@ -70,7 +70,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     private RegEgripOkvedRepo regEgripOkvedRepo;
 
     @Autowired
-    private ClsMigrationRepo clsMigrationRepo;
+    private MigrationService migrationService;
 
     private Map<String, Okved> okvedsMap = new HashMap<>();
 
@@ -93,32 +93,6 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             e.printStackTrace();
         }
         return zipFile;
-    }
-
-    private ClsMigration getClsMigration(String filename, Short type) {
-        ClsMigration migration = clsMigrationRepo.findClsMigrationByFilenameAndType(filename, type);
-        return migration;
-    }
-
-    private ClsMigration addMigrationRecord(ClsMigration migration, String filename, Short type, Short status, String error){
-        if (migration == null) {
-            migration = new ClsMigration();
-        }
-
-        migration.setFilename(filename);
-        migration.setLoadDate(new Timestamp(System.currentTimeMillis()));
-        migration.setType(type);
-        migration.setStatus(status);
-        migration.setError(error);
-        clsMigrationRepo.save(migration);
-
-        return migration;
-    }
-
-    private void changeMigrationStatus(ClsMigration migration, Short status, String error){
-        migration.setStatus(status);
-        migration.setError(error);
-        clsMigrationRepo.save(migration);
     }
 
     public void importData(boolean isEgrul, boolean isEgrip) {
@@ -205,17 +179,17 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     private void loadEGRULFiles(List<File> zipFiles) {
         for (File zipFile : zipFiles) {
-            ClsMigration migration = getClsMigration(zipFile.getName(), ModelTypes.EGRUL_LOAD.getValue());
+            ClsMigration migration = migrationService.getClsMigration(zipFile, ModelTypes.EGRUL_LOAD.getValue());
             if (migration == null || migration.getStatus() != StatusLoadTypes.SUCCESSFULLY_LOADED.getValue()) {
                 // Добавить запись об обработке файла
-                migration = addMigrationRecord(migration, zipFile.getName(), ModelTypes.EGRUL_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                migration = migrationService.addMigrationRecord(migration, zipFile, ModelTypes.EGRUL_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
 
                 // Обработать данные zip
                 processEgrulFile(zipFile, migration);
 
                 // Изменить запись о статусе обработки файла
                 if (migration.getStatus() == StatusLoadTypes.LOAD_START.getValue()) {
-                    changeMigrationStatus(migration, StatusLoadTypes.SUCCESSFULLY_LOADED.getValue(), "");
+                    migrationService.changeMigrationStatus(migration, StatusLoadTypes.SUCCESSFULLY_LOADED.getValue(), "");
 
                     if (deleteFiles) {
                         zipFile.delete();
@@ -243,17 +217,17 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     try {
                         zipFile.close();
                     } catch (IOException e) {
-                        changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), e.getMessage());
+                        migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), e.getMessage());
                         e.printStackTrace();
                     }
                 }
             } else {
                 egrulFilesLogger.error("Не удалось создать демаршаллизатор");
-                changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось создать демаршаллизатор");
+                migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось создать демаршаллизатор");
             }
         } else {
             egrulFilesLogger.error("Не удалось прочитать zip-файл");
-            changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать zip-файл");
+            migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать zip-файл");
         }
         egrulFilesLogger.info("Окончание обработки файла " + file.getName() + " " + new Date());
     }
@@ -275,11 +249,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             result = true;
         } catch (IOException e) {
             egrulFilesLogger.error("Не удалось прочитать xml-файл из zip-файла");
-            changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
+            migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
             e.printStackTrace();
         } catch (JAXBException e) {
             egrulFilesLogger.error("Не удалось демаршализовать xml-файл из zip-файла");
-            changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось демаршализовать xml-файл из zip-файла");
+            migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось демаршализовать xml-файл из zip-файла");
             e.printStackTrace();
         }
         return result;
@@ -454,17 +428,17 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     private void loadEGRIPFiles(List<File> zipFiles) {
         for (File zipFile : zipFiles) {
-            ClsMigration migration = getClsMigration(zipFile.getName(), ModelTypes.EGRIP_LOAD.getValue());
+            ClsMigration migration = migrationService.getClsMigration(zipFile, ModelTypes.EGRIP_LOAD.getValue());
             if (migration == null || migration.getStatus() != StatusLoadTypes.SUCCESSFULLY_LOADED.getValue()) {
                 // Добавить запись об обработке файла
-                migration = addMigrationRecord(migration, zipFile.getName(), ModelTypes.EGRIP_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                migration = migrationService.addMigrationRecord(migration, zipFile, ModelTypes.EGRIP_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
 
                 // Обработать данные zip
                 processEgripFile(zipFile, migration);
 
                 // Изменить запись о статусе обработки файла
                 if (migration.getStatus() == StatusLoadTypes.LOAD_START.getValue()) {
-                    changeMigrationStatus(migration, StatusLoadTypes.SUCCESSFULLY_LOADED.getValue(), "");
+                    migrationService.changeMigrationStatus(migration, StatusLoadTypes.SUCCESSFULLY_LOADED.getValue(), "");
 
                     if (deleteFiles) {
                         zipFile.delete();
@@ -491,18 +465,18 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     try {
                         zipFile.close();
                     } catch (IOException e) {
-                        changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), e.getMessage());
+                        migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), e.getMessage());
                         e.printStackTrace();
                     }
                 }
             } else {
                 egripFilesLogger.error("Не удалось создать демаршаллизатор");
-                changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось создать демаршаллизатор");
+                migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось создать демаршаллизатор");
 
             }
         } else {
             egripFilesLogger.error("Не удалось прочитать zip-файл");
-            changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать zip-файл");
+            migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать zip-файл");
 
         }
         egripFilesLogger.info("Окончание обработки файла " + file.getName() + " " + new Date());
@@ -523,11 +497,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         }  catch (IOException e) {
             egripFilesLogger.error("Не удалось прочитать xml-файл из zip-файла");
-            changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
+            migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
             e.printStackTrace();
         } catch (JAXBException e) {
             egripFilesLogger.error("Не удалось демаршализовать xml-файл из zip-файла");
-            changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось демаршализовать xml-файл из zip-файла");
+            migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось демаршализовать xml-файл из zip-файла");
             e.printStackTrace();
         }
 
