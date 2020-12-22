@@ -207,10 +207,7 @@ public class ImportFiasServiceImpl implements ImportFiasService {
                 else { // загрузка файла прошла с ошибками. Переименовать файл.
                     try {
                         zipFile.close();
-                        String filename = file.getName();
-                        String fileTime = sdf.format(file.lastModified());
-                        File newFile = new File(file.getParent(), String.format("%s_%s_error%s", getFileNameWithoutExtension(filename), fileTime, getFileExtension(filename)));
-                        boolean success = file.renameTo(newFile);
+                        boolean success = migrationService.renameFile(file);
                         if (!success) {
                             fiasLogger.error("Не удалось переименовать (пометить, что загрузка прошла с ошибками) файл "+ file.getName());
                         }
@@ -534,21 +531,6 @@ public class ImportFiasServiceImpl implements ImportFiasService {
     }
 
 
-    private String getFileExtension(String name) {
-        int lastIndexOf = name.lastIndexOf(".");
-        if (lastIndexOf == -1) {
-            return ""; // empty extension
-        }
-        return name.substring(lastIndexOf);
-    }
-
-    private String getFileNameWithoutExtension(String name) {
-        int lastIndexOf = name.lastIndexOf(".");
-        if (lastIndexOf == -1) {
-            return ""; // empty extension
-        }
-        return name.substring(0, lastIndexOf);
-    }
 
 
 }

@@ -13,10 +13,12 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 @Service
 @Slf4j
 public class MigrationServiceImpl implements MigrationService {
+    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy_HH_mm");
 
     @Autowired
     private ClsMigrationRepo clsMigrationRepo;
@@ -61,5 +63,31 @@ public class MigrationServiceImpl implements MigrationService {
             log.error(ex.getMessage());
         }
         return result;
+    }
+
+    public Boolean renameFile(File file) {
+        Boolean success = true;
+        String filename = file.getName();
+        String fileTime = sdf.format(file.lastModified());
+        File newFile = new File(file.getParent(), String.format("%s_%s_error%s", getFileNameWithoutExtension(filename), fileTime, getFileExtension(filename)));
+        success = file.renameTo(newFile);
+        return success;
+    }
+
+
+    private String getFileExtension(String name) {
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return ""; // empty extension
+        }
+        return name.substring(lastIndexOf);
+    }
+
+    private String getFileNameWithoutExtension(String name) {
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return ""; // empty extension
+        }
+        return name.substring(0, lastIndexOf);
     }
 }

@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -194,6 +195,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     if (deleteFiles) {
                         zipFile.delete();
                     }
+                } else { // загрузка файла прошла с ошибками. Переименовать файл.
+                    boolean success = migrationService.renameFile(zipFile);
+                        if (!success) {
+                            egrulLogger.error("Не удалось переименовать (пометить, что загрузка прошла с ошибками) файл "+ zipFile.getName());
+                        }
                 }
             }
             else if (migration.getStatus() == StatusLoadTypes.SUCCESSFULLY_LOADED.getValue()) {
@@ -448,6 +454,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
                     if (deleteFiles) {
                         zipFile.delete();
+                    }
+                } else { // загрузка файла прошла с ошибками. Переименовать файл.
+                    boolean success = migrationService.renameFile(zipFile);
+                    if (!success) {
+                        egripLogger.error("Не удалось переименовать (пометить, что загрузка прошла с ошибками) файл "+ zipFile.getName());
                     }
                 }
             }
