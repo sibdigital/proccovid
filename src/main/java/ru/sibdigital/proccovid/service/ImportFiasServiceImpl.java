@@ -222,6 +222,14 @@ public class ImportFiasServiceImpl implements ImportFiasService {
             }
             else {
                 fiasLogger.info(file.getName() + " уже был обработан.");
+                if (deleteFiles) {
+                    try {
+                        file.delete();
+                    }
+                    catch (Exception e) {
+                        fiasLogger.error("Не удалось удалить файл "+ file.getName());
+                    }
+                }
             }
 
         }

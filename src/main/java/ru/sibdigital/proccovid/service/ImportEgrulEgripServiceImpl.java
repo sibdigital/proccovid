@@ -196,6 +196,12 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     }
                 }
             }
+            else if (migration.getStatus() == StatusLoadTypes.SUCCESSFULLY_LOADED.getValue()) {
+                egrulFilesLogger.error(zipFile.getName() + " уже был обработан.");
+                if (deleteFiles) {
+                    zipFile.delete();
+                }
+            }
         }
     }
 
@@ -443,6 +449,12 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     if (deleteFiles) {
                         zipFile.delete();
                     }
+                }
+            }
+            else if (migration.getStatus() != StatusLoadTypes.SUCCESSFULLY_LOADED.getValue()) {
+                egripFilesLogger.error(zipFile.getName() + " уже был обработан.");
+                if (deleteFiles) {
+                    zipFile.delete();
                 }
             }
         }
