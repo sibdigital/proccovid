@@ -139,6 +139,6 @@ public class MainController {
 
     @GetMapping("/migration_data")
     public @ResponseBody  List<ClsMigration> getMigrationData() {
-        return clsMigrationRepo.findAll(Sort.by("filename"));
+        return clsMigrationRepo.findAll(Sort.by("loadDate"));
     }
 }

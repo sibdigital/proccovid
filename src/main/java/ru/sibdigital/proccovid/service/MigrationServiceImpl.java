@@ -43,6 +43,7 @@ public class MigrationServiceImpl implements MigrationService {
     }
 
     public void changeMigrationStatus(ClsMigration migration, Short status, String error){
+        migration.setLoadDate(new Timestamp(System.currentTimeMillis()));
         migration.setStatus(status);
         migration.setError(error);
         clsMigrationRepo.save(migration);
