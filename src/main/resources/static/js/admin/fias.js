@@ -68,7 +68,7 @@ function processUpdatesZipFias() {
     webix.confirm('Вы действительно хотите запустить загрузку обновлений ФИАС?')
         .then(
             function () {
-                webix.ajax().get('/process_fias_zip_update', )
+                webix.ajax().get('/process_fias_files', )
                     .then(function (data) {
                         if (data.text() === 'Ok') {
                             webix.message({

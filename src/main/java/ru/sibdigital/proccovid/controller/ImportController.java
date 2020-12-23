@@ -62,7 +62,7 @@ public class ImportController {
         return "Ok";
     }
 
-    @GetMapping("/process_fias_zip_update")
+    @GetMapping("/process_fias_files")
     @ResponseBody String processZipUpdatesFias() {
         try {
             scheduleTasks.startImportZipUpdatesFias();
