@@ -13,6 +13,7 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -88,7 +89,12 @@ public class DocRequestPrs implements Serializable {
 //    @OneToMany(targetEntity = DocAddressFact.class, mappedBy="docRequestAddressFact", fetch = FetchType.EAGER)
 //    private Set<DocAddressFact> docAddressFact;
 
-/*    @SequenceGenerator(name = "REQUEST_SEQ", sequenceName = "doc_request_id_seq")*/
+    @OneToMany(targetEntity = RegDocRequestFile.class, mappedBy="request")
+    private List<RegDocRequestFile> docRequestFiles;
+
+    @OneToMany(targetEntity = RegDocRequestPrescription.class, mappedBy="request")
+    private List<RegDocRequestPrescription> docRequestPrescriptions;
+
     public Long getId() {
         return id;
     }
@@ -322,6 +328,22 @@ public class DocRequestPrs implements Serializable {
 //    public void setDocAddressFact(Set<DocAddressFact> docAddressFact) {
 //        this.docAddressFact = docAddressFact;
 //    }
+
+    public List<RegDocRequestFile> getDocRequestFiles() {
+        return docRequestFiles;
+    }
+
+    public void setDocRequestFiles(List<RegDocRequestFile> docRequestFiles) {
+        this.docRequestFiles = docRequestFiles;
+    }
+
+    public List<RegDocRequestPrescription> getDocRequestPrescriptions() {
+        return docRequestPrescriptions;
+    }
+
+    public void setDocRequestPrescriptions(List<RegDocRequestPrescription> docRequestPrescriptions) {
+        this.docRequestPrescriptions = docRequestPrescriptions;
+    }
 
     @Basic
     @Column(name = "reject_comment", nullable = false)

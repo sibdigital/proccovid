@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -39,6 +40,7 @@ public class ClsOrganization {
     private Boolean isDeleted;
     private Timestamp timeCreate;
     private Boolean isActivated;
+    private Boolean consentDataProcessing;
 
     @OneToOne
     @JoinColumn(name = "id_principal", referencedColumnName = "id")
@@ -47,6 +49,9 @@ public class ClsOrganization {
 
     @OneToMany(mappedBy = "regOrganizationOkvedId.clsOrganization")
     private Set<RegOrganizationOkved> regOrganizationOkveds;
+
+    @OneToMany(mappedBy = "clsOrganization")
+    private List<RegOrganizationAddressFact> regOrganizationAddressFacts;
 
     public ClsOrganization(Long organizationId) {
         this.id = organizationId;
@@ -230,6 +235,17 @@ public class ClsOrganization {
         isActivated = activated;
     }
 
+    @Basic
+    @Column(name = "consent_data_processing")
+    public Boolean getConsentDataProcessing() {
+        return consentDataProcessing;
+    }
+
+    public void setConsentDataProcessing(Boolean consentDataProcessing) {
+        this.consentDataProcessing = consentDataProcessing;
+    }
+
+    @JsonIgnore
     public ClsPrincipal getPrincipal() {
         return principal;
     }
@@ -244,6 +260,14 @@ public class ClsOrganization {
 
     public void setRegOrganizationOkveds(Set<RegOrganizationOkved> regOrganizationOkveds) {
         this.regOrganizationOkveds = regOrganizationOkveds;
+    }
+
+    public List<RegOrganizationAddressFact> getRegOrganizationAddressFacts() {
+        return regOrganizationAddressFacts;
+    }
+
+    public void setRegOrganizationAddressFacts(List<RegOrganizationAddressFact> regOrganizationAddressFacts) {
+        this.regOrganizationAddressFacts = regOrganizationAddressFacts;
     }
 
     @Override

@@ -42,7 +42,7 @@ public class DocPerson {
 */
 
     @ManyToOne
-    @JoinColumn(name="id_request", nullable=false)
+    @JoinColumn(name="id_request", nullable=true)
     @JsonIgnore
     private DocRequest docRequest;
 
