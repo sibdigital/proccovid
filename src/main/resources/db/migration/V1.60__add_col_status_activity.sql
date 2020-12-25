@@ -1,0 +1,1 @@
+alter table doc_request add column if not exists status_activity integer default 1;
