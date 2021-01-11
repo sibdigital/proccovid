@@ -349,7 +349,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 RegEgrul earl = earlier.get(r.getInn());
                 if (earl !=null) {
                     // Производить замену, только если СвЮЛ.ДатаВып больше date_actual записи таблицы
-                    if (r.getDateActual().after(earl.getDateActual())) {
+                    if (earl.getDateActual() == null || r.getDateActual().after(earl.getDateActual())) {
                         updatedData.add(ec);
                         r.setId(earl.getId());
                         deletedOkveds.add(earl.getId());
@@ -541,7 +541,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 RegEgrip r = ec.getRegEgrip();
                 RegEgrip earl = earlier.get(r.getInn());
                 if (earl != null) {
-                    if (r.getDateActual().after(earl.getDateActual())) {
+                    if (earl.getDateActual() == null || r.getDateActual().after(earl.getDateActual())) {
                         updatedData.add(ec);
                         r.setId(earl.getId());
                         deletedOkveds.add(earl.getId());
