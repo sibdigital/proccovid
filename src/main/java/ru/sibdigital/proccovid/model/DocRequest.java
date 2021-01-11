@@ -54,6 +54,8 @@ public class DocRequest {
     private String rejectComment;
     private Long old_department_id;
 
+    private Short statusActivity;
+
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private AdditionalAttributes additionalAttributes;
@@ -89,7 +91,12 @@ public class DocRequest {
     @OneToMany(targetEntity = DocAddressFact.class, mappedBy="docRequestAddressFact", fetch = FetchType.EAGER)
     private List<DocAddressFact> docAddressFact;
 
-/*    @SequenceGenerator(name = "REQUEST_SEQ", sequenceName = "doc_request_id_seq")*/
+    @OneToMany(targetEntity = RegDocRequestFile.class, mappedBy="request")
+    private List<RegDocRequestFile> docRequestFiles;
+
+    @OneToMany(targetEntity = RegDocRequestPrescription.class, mappedBy="request")
+    private List<RegDocRequestPrescription> docRequestPrescriptions;
+
     public Long getId() {
         return id;
     }
@@ -288,6 +295,22 @@ public class DocRequest {
         return docAddressFact;
     }
 
+    public List<RegDocRequestFile> getDocRequestFiles() {
+        return docRequestFiles;
+    }
+
+    public void setDocRequestFiles(List<RegDocRequestFile> docRequestFiles) {
+        this.docRequestFiles = docRequestFiles;
+    }
+
+    public List<RegDocRequestPrescription> getDocRequestPrescriptions() {
+        return docRequestPrescriptions;
+    }
+
+    public void setDocRequestPrescriptions(List<RegDocRequestPrescription> docRequestPrescriptions) {
+        this.docRequestPrescriptions = docRequestPrescriptions;
+    }
+
     public ClsUser getReassignedUser() {
         return reassignedUser;
     }
@@ -344,6 +367,16 @@ public class DocRequest {
         this.old_department_id = old_department_id;
     }
 
+    @Basic
+    @Column(name = "status_activity")
+    public Short getStatusActivity() {
+        return statusActivity;
+    }
+
+    public void setStatusActivity(Short statusActivity) {
+        this.statusActivity = statusActivity;
+    }
+
     public String getStatusReviewName(){
         String result  = "";
         if (getStatusReview() != null) {
@@ -353,6 +386,10 @@ public class DocRequest {
                 result = "Одобрена";
             } else if (getStatusReview() == ReviewStatuses.REJECTED.getValue()) {
                 result = "Отклонена";
+            } else if (getStatusReview() == ReviewStatuses.NEW.getValue()) {
+                result = "Новая";
+            } else if (getStatusReview() == ReviewStatuses.EXPIRED.getValue()) {
+                result = "Просрочена";
             }
         }
         return result;

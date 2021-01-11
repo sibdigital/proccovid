@@ -81,11 +81,15 @@ public class MainController {
     }
 
     @GetMapping("/request/view")
-    public String viewDocRequest(@RequestParam("id") Long id, Model model, HttpSession session) {
-        model.addAttribute("doc_request_id", id);
+    public String viewDocRequest(@RequestParam("id") DocRequest docRequest, Model model, HttpSession session) {
+        model.addAttribute("doc_request_id", docRequest.getId());
         model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
         model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
         model.addAttribute("application_name", applicationConstants.getApplicationName());
+
+        if (docRequest.getDocRequestPrescriptions() != null && docRequest.getDocRequestPrescriptions().size() > 0) {
+            return "request";
+        }
         return "view";
     }
 

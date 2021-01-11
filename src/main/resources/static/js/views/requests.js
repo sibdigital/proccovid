@@ -28,7 +28,7 @@
                         },
                         {id: "inn", header: "ИНН", template: "#organization.inn#", adjust: true},
                         {id: "ogrn", header: "ОГРН", template: "#organization.ogrn#", adjust: true},
-                        {id: "typeRequest", header: "Тип заявки", template: "#typeRequest.activityKind#", adjust: true},
+                        {id: "typeRequest", header: "Вид деятельности", template: "#typeRequest.activityKind#", adjust: true},
                         {id: "orgPhone", header: "Телефон", template: "#organization.phone#", adjust: true},
                         {id: "time_Create", header: "Дата подачи", adjust: true, format: DATE_FORMAT },
                         {id: "personSlrySaveCnt", header: "Числ. с сохр. зп", adjust: true},
@@ -58,6 +58,12 @@
                             let data = $$('requests_table').getItem(id);
 
                             if (!view_item_another_page) {
+
+                                // TODO временное условие, пока не перейдем на новую схему данных
+                                if (data.docRequestPrescriptions && data.docRequestPrescriptions.length > 0) {
+                                    showRequestForm(data.id);
+                                    return;
+                                }
 
                                 let form = status == 0 ? showform(status) : showform_processed();
 

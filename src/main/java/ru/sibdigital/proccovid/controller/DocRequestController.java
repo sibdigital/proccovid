@@ -63,6 +63,9 @@ public class DocRequestController {
     @Autowired
     private RegHistoryRequestRepo historyRequestRepo;
 
+    @Autowired
+    private DocEmployeeRepo docEmployeeRepo;
+
     private static final Logger log = LoggerFactory.getLogger(DocRequestController.class);
 
     private void addHistory(DocRequest docRequest, ClsUser clsUser){
@@ -216,6 +219,11 @@ public class DocRequestController {
     @GetMapping("/doc_persons/{id_request}")
     public Optional<List<DocPerson>> getListPerson(@PathVariable("id_request") Long id_request){
         return docPersonRepo.findByDocRequest(id_request);
+    }
+
+    @GetMapping("/org_employees/{id_org}")
+    public Optional<List<DocEmployee>> getListEmployees(@PathVariable("id_org") Long id_org){
+        return docEmployeeRepo.findAllByOrganization(id_org);
     }
 
     @GetMapping("/doc_address_fact/{id_request}")
