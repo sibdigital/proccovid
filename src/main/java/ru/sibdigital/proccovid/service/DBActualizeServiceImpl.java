@@ -93,31 +93,35 @@ public class DBActualizeServiceImpl implements DBActualizeService {
             String inn = organization.getInn();
             if (inn.length() == 10) {
                 RegEgrul regEgrul = egrulService.getEgrul(inn);
-                for (RegEgrulOkved regEgrulOkved : regEgrul.getRegEgrulOkveds()) {
-                    Okved okved = okvedRepo.findOkvedByIdSerial(regEgrulOkved.getIdOkved());
-                    RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
-                            .clsOrganization(organization)
-                            .okved(okved)
-                            .build();
-                    RegOrganizationOkved regOrganizationOkved = RegOrganizationOkved.builder()
-                            .regOrganizationOkvedId(regOrganizationOkvedId)
-                            .isMain(regEgrulOkved.getMain())
-                            .build();
-                    regOrganizationOkvedRepo.save(regOrganizationOkved);
+                if (regEgrul != null) {
+                    for (RegEgrulOkved regEgrulOkved : regEgrul.getRegEgrulOkveds()) {
+                        Okved okved = okvedRepo.findOkvedByIdSerial(regEgrulOkved.getIdOkved());
+                        RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
+                                .clsOrganization(organization)
+                                .okved(okved)
+                                .build();
+                        RegOrganizationOkved regOrganizationOkved = RegOrganizationOkved.builder()
+                                .regOrganizationOkvedId(regOrganizationOkvedId)
+                                .isMain(regEgrulOkved.getMain())
+                                .build();
+                        regOrganizationOkvedRepo.save(regOrganizationOkved);
+                    }
                 }
             } else {
                 RegEgrip regEgrip = egrulService.getEgrip(inn);
-                for (RegEgripOkved regEgripOkved : regEgrip.getRegEgripOkveds()) {
-                    Okved okved = okvedRepo.findOkvedByIdSerial(regEgripOkved.getIdOkved());
-                    RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
-                            .clsOrganization(organization)
-                            .okved(okved)
-                            .build();
-                    RegOrganizationOkved regOrganizationOkved = RegOrganizationOkved.builder()
-                            .regOrganizationOkvedId(regOrganizationOkvedId)
-                            .isMain(regEgripOkved.getMain())
-                            .build();
-                    regOrganizationOkvedRepo.save(regOrganizationOkved);
+                if (regEgrip != null) {
+                    for (RegEgripOkved regEgripOkved : regEgrip.getRegEgripOkveds()) {
+                        Okved okved = okvedRepo.findOkvedByIdSerial(regEgripOkved.getIdOkved());
+                        RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
+                                .clsOrganization(organization)
+                                .okved(okved)
+                                .build();
+                        RegOrganizationOkved regOrganizationOkved = RegOrganizationOkved.builder()
+                                .regOrganizationOkvedId(regOrganizationOkvedId)
+                                .isMain(regEgripOkved.getMain())
+                                .build();
+                        regOrganizationOkvedRepo.save(regOrganizationOkved);
+                    }
                 }
             }
             // добавим сотрудников, файлы, адреса
@@ -170,7 +174,8 @@ public class DBActualizeServiceImpl implements DBActualizeService {
             if (organization.getPrincipal() == null) {
                 ClsPrincipal principal = ClsPrincipal.builder()
                         .organization(organization)
-//                            .password(passwordEncoder.encode(PasswordGenerator.generatePassword(8)))
+//                        .password(passwordEncoder.encode(PasswordGenerator.generatePassword(8)))
+                        .password("")
                         .build();
                 clsPrincipalRepo.save(principal);
                 organization.setPrincipal(principal);
