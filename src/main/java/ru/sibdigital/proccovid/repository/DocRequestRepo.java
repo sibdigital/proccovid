@@ -36,6 +36,8 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             nativeQuery = true)
     Optional<List<DocRequest>> getAllByStatusId(@Param("status") Integer status);
 
+    @Query("SELECT dr FROM DocRequest dr WHERE dr.organization.id =:idOrganization and dr.statusReview = 1")
+    Optional<List<DocRequest>> getAllRequestsWithConfirmedStatus (Long idOrganization);
 
     @Query(value = "SELECT dr.* FROM doc_request dr, cls_organization org WHERE  dr.id_organization = org.id " +
             " and dr.id_department = :dep_id AND dr.status_review = :status " +

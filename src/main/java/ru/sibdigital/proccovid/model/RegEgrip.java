@@ -37,8 +37,8 @@ public class RegEgrip {
     @Column(name = "date_actual")
     private Date dateActual;
 
-//    @OneToMany(mappedBy = "regEgripOkvedId.regEgrip")
-//    private Set<RegEgripOkved> regEgripOkveds;
+    @OneToMany(mappedBy = "regEgrip", fetch = FetchType.LAZY)
+    private Set<RegEgripOkved> regEgripOkveds;
 
     public Long getId() {
         return id;
@@ -72,14 +72,13 @@ public class RegEgrip {
         this.data = data;
     }
 
+    public Set<RegEgripOkved> getRegEgripOkveds() {
+        return regEgripOkveds;
+    }
 
-//    public Set<RegEgripOkved> getRegEgripOkveds() {
-//        return regEgripOkveds;
-//    }
-//
-//    public void setRegEgripOkveds(Set<RegEgripOkved> regEgripOkveds) {
-//        this.regEgripOkveds = regEgripOkveds;
-//    }
+    public void setRegEgripOkveds(Set<RegEgripOkved> regEgripOkveds) {
+        this.regEgripOkveds = regEgripOkveds;
+    }
 
     public Long getIdMigration() {
         return idMigration;

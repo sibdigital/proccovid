@@ -19,12 +19,8 @@ import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.service.*;
-import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.service.RequestService;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.servlet.http.HttpSession;
-import java.util.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +78,8 @@ public class AdminController {
     @Autowired
     private ClsDepartmentRepo clsDepartmentRepo;
 
+    @Autowired
+    private DBActualizeService dbActualizeService;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -447,4 +445,9 @@ public class AdminController {
         return departmentContacts;
     }
 
+    @GetMapping("/actualize_db")
+    public @ResponseBody String actualizeDd() {
+        dbActualizeService.actualize();
+        return "1";
+    }
 }
