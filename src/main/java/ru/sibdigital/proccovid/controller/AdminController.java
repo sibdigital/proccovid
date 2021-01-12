@@ -445,9 +445,9 @@ public class AdminController {
         return departmentContacts;
     }
 
-    @GetMapping("/actualize_db")
-    public @ResponseBody String actualizeDd() {
-        dbActualizeService.actualize();
+    @GetMapping("/actualize_organizations")
+    public @ResponseBody String actualizeOrganizations() {
+        dbActualizeService.actualizeOrganizations();
         return "1";
     }
 }

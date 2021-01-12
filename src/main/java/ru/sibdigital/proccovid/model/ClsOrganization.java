@@ -41,6 +41,8 @@ public class ClsOrganization {
     private Timestamp timeCreate;
     private Boolean isActivated;
     private Boolean consentDataProcessing;
+    private Boolean isActualized;
+    private Timestamp timeActualization;
 
     @OneToOne
     @JoinColumn(name = "id_principal", referencedColumnName = "id")
@@ -243,6 +245,26 @@ public class ClsOrganization {
 
     public void setConsentDataProcessing(Boolean consentDataProcessing) {
         this.consentDataProcessing = consentDataProcessing;
+    }
+
+    @Basic
+    @Column(name = "is_actualized")
+    public Boolean getActualized() {
+        return isActualized;
+    }
+
+    public void setActualized(Boolean actualized) {
+        isActualized = actualized;
+    }
+
+    @Basic
+    @Column(name = "time_actualization")
+    public Timestamp getTimeActualization() {
+        return timeActualization;
+    }
+
+    public void setTimeActualization(Timestamp timeActualization) {
+        this.timeActualization = timeActualization;
     }
 
     @JsonIgnore
