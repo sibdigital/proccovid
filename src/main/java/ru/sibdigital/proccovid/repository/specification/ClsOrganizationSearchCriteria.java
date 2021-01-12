@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ClsOrganizationSearchCriteria {
 
     private String inn;
+    private Long idPrescription;
 }

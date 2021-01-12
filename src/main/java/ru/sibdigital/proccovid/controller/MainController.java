@@ -57,7 +57,19 @@ public class MainController {
             return "redirect:/admin";
         }
 
-        return "redirect:/requests";
+        return "redirect:/cabinet";
+    }
+
+    @GetMapping("/cabinet")
+    public String cabinet(Model model) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+        model.addAttribute("id_department", clsUser.getIdDepartment().getId());
+        model.addAttribute("department_name", clsUser.getIdDepartment().getName());
+        model.addAttribute("user_lastname", clsUser.getLastname());
+        model.addAttribute("user_firstname", clsUser.getFirstname());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "user";
     }
 
     @GetMapping("/requests")
@@ -144,5 +156,13 @@ public class MainController {
     @GetMapping("/migration_data")
     public @ResponseBody  List<ClsMigration> getMigrationData() {
         return clsMigrationRepo.findAll(Sort.by("loadDate"));
+    }
+
+    @GetMapping("/cls_prescriptions_short")
+    public @ResponseBody List<KeyValue> getClsPrescriptionsShort() {
+        List<KeyValue> list = prescriptionService.getClsPrescriptions().stream().filter(cp -> cp.getStatus() == PrescriptionStatuses.PUBLISHED.getValue())
+                .map(cp -> new KeyValue(cp.getClass().getSimpleName(), cp.getId(), cp.getName()))
+                .collect(Collectors.toList());
+        return list;
     }
 }

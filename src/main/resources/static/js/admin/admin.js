@@ -328,6 +328,8 @@ webix.ready(function() {
                                     $$('request_type').getList().add({id:'', value:'Все виды деятельности', $empty: true}, 0);
                                     $$('district_filter').getList().add({id:'', value:'Все районы', $empty: true}, 0);
                                     $$('actualization_type').getList().add({id:'', value:'Все заявки', $empty: true}, 0)
+                                } else if (id === 'Organizations') {
+                                    $$('prescription').getList().add({id:'', value:'Предписание не выбрано', $empty: true}, 0);
                                 }
                             }
                         }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title th:utext="${application_name}"></title>
+    <link type="text/css" rel="stylesheet" th:href="@{/libs/webix.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/libs/materialdesignicons.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/css/user/user.css}">
+    <script th:src="@{/libs/webix.min.js}"></script>
+    <script th:src="@{/libs/routie.min.js}"></script>
+    <script th:src="@{/libs/jquery-3.4.1.min.js}"></script>
+</head>
+<body>
+<script th:inline="javascript">
+    const APPLICATION_NAME = [[${application_name}]]
+    const ID_DEPARTMENT = [[${id_department}]]
+    const DEPARTMENT = [[${department_name}]]
+    const USER_NAME = [[${user_lastname + " " + user_firstname}]]
+    const LINK_PREFIX = [[${link_prefix}]]
+    const LINK_SUFFIX = [[${link_suffix}]]
+</script>
+
+<script th:src="@{/js/user/user.js}"></script>
+<script th:src="@{/js/views/requests.js}"></script>
+<script th:src="@{/js/views/other-requests.js}"></script>
+<script th:src="@{/js/views/showform.js}"></script>
+<script th:src="@{/js/views/showform-processed.js}"></script>
+<script th:src="@{/js/views/showform-other.js}"></script>
+<script th:src="@{/js/views/request_form.js}"></script>
+<script th:src="@{/js/utils/filter.js}"></script>
+<script th:src="@{/js/user/requests.js}"></script>
+<script th:src="@{/js/user/prescriptions.js}"></script>
+</body>
+</html>

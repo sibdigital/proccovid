@@ -1,6 +1,7 @@
 package ru.sibdigital.proccovid.repository.specification;
 
 import org.springframework.data.jpa.domain.Specification;
+import ru.sibdigital.proccovid.model.ActivityStatuses;
 import ru.sibdigital.proccovid.model.DocRequestPrs;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -22,6 +23,12 @@ public class DocRequestPrsSpecification implements Specification<DocRequestPrs> 
     public Predicate toPredicate(Root<DocRequestPrs> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
 
+        predicates.add(criteriaBuilder.equal(root.get("statusActivity"), ActivityStatuses.ACTIVE.getValue()));
+
+        if (searchCriteria.getStatusReview() != null) {
+            predicates.add(criteriaBuilder.equal(
+                    root.get("statusReview"), searchCriteria.getStatusReview()));
+        }
         if (searchCriteria.getIdDepartment() != null && searchCriteria.getIdDepartment() != 0) {
             predicates.add(criteriaBuilder.equal(
                     root.get("department").get("id"), searchCriteria.getIdDepartment()));
