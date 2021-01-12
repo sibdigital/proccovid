@@ -110,7 +110,7 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                 }
 
                 // добавим сотрудников, адреса, файлы
-                List<DocRequest> requests = docRequestRepo.getAllRequestWithConfirmedStatus(organization.getId()).orElse(null);
+                List<DocRequest> requests = docRequestRepo.getAllRequestsWithConfirmedStatus(organization.getId()).orElse(null);
                 if (requests != null) {
                     for (DocRequest request: requests) {
                         // сотрудники
