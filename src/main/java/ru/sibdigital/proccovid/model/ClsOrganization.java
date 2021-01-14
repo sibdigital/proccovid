@@ -55,6 +55,9 @@ public class ClsOrganization {
     @OneToMany(mappedBy = "clsOrganization")
     private List<RegOrganizationAddressFact> regOrganizationAddressFacts;
 
+    @OneToMany(mappedBy = "organization")
+    private List<RegOrganizationPrescription> regOrganizationPrescriptions;
+
     public ClsOrganization(Long organizationId) {
         this.id = organizationId;
     }

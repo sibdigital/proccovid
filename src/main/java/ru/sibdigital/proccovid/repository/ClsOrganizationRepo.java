@@ -81,4 +81,15 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
             "where" +
             "   org.id in (:organizationIds) and not org.is_deleted")
     List<ClsOrganization> getOrganizationsByIds(Long[] organizationIds);
+
+    @Query(nativeQuery = true, value = "with slc as(\n" +
+            "    select * from get_request_slice(:statusRewievRequest) as d\n" +
+            ")\n" +
+            "select * from (\n" +
+            "     select org.*, slc.id as sid\n" +
+            "     from cls_organization as org\n" +
+            "     left join slc as slc on org.id = slc.id_organization\n" +
+            ") as org\n" +
+            "where org.sid is null")
+    List<ClsOrganization> getNotActualOrganization(int statusRewievRequest);
 }

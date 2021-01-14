@@ -187,4 +187,14 @@ public class DBActualizeServiceImpl implements DBActualizeService {
             clsOrganizationRepo.save(organization);
         }
     }
+
+    @Transactional
+    public void markOrganizationAsDeleted(){
+        final List<ClsOrganization> organizations = clsOrganizationRepo.getNotActualOrganization(ReviewStatuses.CONFIRMED.getValue());
+
+        for (ClsOrganization org : organizations){
+            org.setDeleted(true);
+        }
+        clsOrganizationRepo.saveAll(organizations);
+    }
 }

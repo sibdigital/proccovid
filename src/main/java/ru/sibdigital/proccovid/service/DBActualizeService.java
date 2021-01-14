@@ -8,5 +8,7 @@ public interface DBActualizeService {
 
     void actualizeOrganizations();
 
+    void markOrganizationAsDeleted();
+
     void actualizeOrganizations(List<ClsOrganization> organizations);
 }

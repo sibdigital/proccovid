@@ -1,5 +1,7 @@
 package ru.sibdigital.proccovid.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -34,6 +36,7 @@ public class ClsPrincipal {
 
     @Basic
     @Column(name = "password")
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
