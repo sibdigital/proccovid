@@ -24,6 +24,7 @@ public class ClsMigration {
     private String filename;
     private Short status;
     private String error;
+    private String hash;
 
     public Long getId() {
         return id;
@@ -83,6 +84,16 @@ public class ClsMigration {
         this.error = error;
     }
 
+    @Basic
+    @Column(name = "hash")
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,12 +103,13 @@ public class ClsMigration {
                 Objects.equals(type, that.type) &&
                 Objects.equals(loadDate, that.loadDate) &&
                 Objects.equals(filename, that.filename) &&
-                Objects.equals(status, that.status);
+                Objects.equals(status, that.status) &&
+                Objects.equals(hash, that.hash);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, loadDate, filename, status);
+        return Objects.hash(id, type, loadDate, filename, status, hash);
     }
 
 

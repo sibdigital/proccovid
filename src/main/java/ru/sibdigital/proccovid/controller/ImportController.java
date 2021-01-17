@@ -53,9 +53,19 @@ public class ImportController {
 
 
     @GetMapping("/process_fias_zip_full")
-    @ResponseBody String processZipFias() {
+    @ResponseBody String processZipFullFias() {
         try {
-            scheduleTasks.startImportZipFias();
+            scheduleTasks.startImportZipFullFias();
+        } catch (Exception e) {
+            return "Не удалось запустить загрузку";
+        }
+        return "Ok";
+    }
+
+    @GetMapping("/process_fias_files")
+    @ResponseBody String processZipUpdatesFias() {
+        try {
+            scheduleTasks.startImportZipUpdatesFias();
         } catch (Exception e) {
             return "Не удалось запустить загрузку";
         }

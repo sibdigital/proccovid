@@ -72,7 +72,6 @@
                                     reassignedUserName = ' Переназначил: ' + data.reassignedUser.fullName + ' (' + data.reassignedUser.idDepartment.name + ')';
                                 }
 
-                                // require([form], function (showform) {
                                 let queryWin = webix.ui({
                                     view: 'window',
                                     id: 'showQueryWin',
@@ -127,30 +126,28 @@
                                     }
                                 });
 
-                                let paths = data.attachmentPath.split(',')
+                                if (data.attachmentPath) {
+                                    let paths = data.attachmentPath.split(',')
 
-                                let fileList = []
-                                paths.forEach((path, index) => {
-                                    let filename = path.split('\\').pop().split('/').pop()
-                                    if (filename != '' &&
-                                        ((filename.toUpperCase().indexOf('.PDF') != -1) ||
-                                            (filename.toUpperCase().indexOf('.ZIP') != -1)
-                                        )) {
-                                        filename = '<a href="' + LINK_PREFIX + filename + LINK_SUFFIX + '" target="_blank">'
-                                            + filename + '</a>'
-                                        fileList.push({id: index, value: filename})
+                                    let fileList = []
+                                    paths.forEach((path, index) => {
+                                        let filename = path.split('\\').pop().split('/').pop()
+                                        if (filename != '' &&
+                                            ((filename.toUpperCase().indexOf('.PDF') != -1) ||
+                                                (filename.toUpperCase().indexOf('.ZIP') != -1)
+                                            )) {
+                                            filename = '<a href="' + LINK_PREFIX + filename + LINK_SUFFIX + '" target="_blank">'
+                                                + filename + '</a>'
+                                            fileList.push({id: index, value: filename})
+                                        }
+                                    })
+
+                                    if (fileList.length > 0) {
+                                        $$('filename').parse(fileList)
+                                    } else {
+                                        $$('filename_label').hide()
+                                        $$('filename').hide()
                                     }
-                                })
-
-                                if (fileList.length > 0) {
-                                    //data.attachmentFilename = fileList
-                                    $$('filename').parse(fileList)
-                                    //if(fileList.length = 1) $$('filename').height = 50
-                                    //if(fileList.length > 3) $$('filename').height = 180
-                                } else {
-                                    //data.attachmentFilename = ''
-                                    $$('filename_label').hide()
-                                    $$('filename').hide()
                                 }
 
                                 let actualizedRequestLink = "";
@@ -162,19 +159,6 @@
                                 else {
                                     $$('actualizedRequestLink').setValue("");
                                 }
-
-                                /*
-                                                            data.attachmentFilename = data.attachmentPath.split('\\').pop().split('/').pop()
-
-                                                            if(data.attachmentFilename != null && data.attachmentFilename != '') {
-                                                                data.attachmentFilename = '<a href="' + LINK_PREFIX + data.attachmentFilename + LINK_SUFFIX + '" target="_blank">'
-                                                                    + data.attachmentFilename + '</a>'
-                                                            }
-                                                            else {
-                                                                data.attachmentFilename = ''
-                                                                $$('filename_label').hide()
-                                                            }
-                                */
 
                                 if (data.organization.idTypeOrganization) {
                                     let typeOrg = data.organization.idTypeOrganization;
@@ -188,8 +172,6 @@
                                 webix.extend($$('show_layout'), webix.ProgressBar);
 
                                 queryWin.show()
-                                // })
-
                             } else {
 
                                 window.open('request/view?id=' + data.id);

@@ -54,6 +54,8 @@ public class DocRequestPrs implements Serializable {
     private String rejectComment;
     private Long old_department_id;
 
+    private Short statusActivity;
+
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private AdditionalAttributes additionalAttributes;
@@ -363,6 +365,16 @@ public class DocRequestPrs implements Serializable {
 
     public void setOld_department_id(Long old_department_id) {
         this.old_department_id = old_department_id;
+    }
+
+    @Basic
+    @Column(name = "status_activity")
+    public Short getStatusActivity() {
+        return statusActivity;
+    }
+
+    public void setStatusActivity(Short statusActivity) {
+        this.statusActivity = statusActivity;
     }
 
     public AdditionalAttributes getAdditionalAttributes() {

@@ -10,4 +10,5 @@ import java.util.List;
 public interface ClsMigrationRepo extends JpaRepository<ClsMigration, Long> {
     ClsMigration findClsMigrationByFilenameAndType(String filename, Short type);
     List<ClsMigration> findAllByTypeAndStatus(Short type, Short status);
+    ClsMigration findClsMigrationByHashAndType(String hash, Short type);
 }

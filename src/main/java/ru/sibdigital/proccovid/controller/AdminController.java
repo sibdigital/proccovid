@@ -418,6 +418,7 @@ public class AdminController {
 
     @GetMapping("/cls_organizations")
     public @ResponseBody Map<String, Object> getListOrganizations(@RequestParam(value = "inn", required = false) String inn,
+                                           @RequestParam(value = "id_prescription", required = false) Long idPrescription,
                                            @RequestParam(value = "start", required = false) Integer start,
                                            @RequestParam(value = "count", required = false) Integer count) {
 
@@ -426,6 +427,7 @@ public class AdminController {
 
         ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
         searchCriteria.setInn(inn);
+        searchCriteria.setIdPrescription(idPrescription);
 
         Page<ClsOrganization> clsOrganizationPage = organizationService.getOrganizationsByCriteria(searchCriteria, page, size);
 
