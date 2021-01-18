@@ -14,4 +14,7 @@ public interface RegEgrulRepo extends JpaRepository<RegEgrul, Long> {
     RegEgrul findByInn(String inn);
     @Query("select r from RegEgrul r where inn in :inns")
     List<RegEgrul> findAllByInnList(@Param("inns")List<String> inn);
+
+    @Query("select r from RegEgrul r where iogrn in :iogrns")
+    List<RegEgrul> findAllByIogrnList(@Param("iogrns") List<Long> iogrns);
 }

@@ -15,6 +15,7 @@ import ru.sibdigital.proccovid.dto.EgripContainer;
 import ru.sibdigital.proccovid.dto.EgrulContainer;
 import ru.sibdigital.proccovid.dto.egrip.EGRIP;
 import ru.sibdigital.proccovid.dto.egrul.EGRUL;
+import ru.sibdigital.proccovid.dto.egrul.СвНаимПодраздТип;
 import ru.sibdigital.proccovid.dto.egrul.СвОКВЭДТип;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
@@ -69,6 +70,9 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     @Autowired
     private RegEgripOkvedRepo regEgripOkvedRepo;
+
+    @Autowired
+    private RegFilialRepo regFilialRepo;
 
     @Autowired
     private MigrationService migrationService;
@@ -274,25 +278,40 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     private List<EgrulContainer> parseEgrulData(EGRUL egrul, ClsMigration migration) {
 
         List<EgrulContainer> containerList = new ArrayList<>();
+        Set<RegFilial> filials = new HashSet<>();
         for (EGRUL.СвЮЛ свЮЛ : egrul.getСвЮЛ()) {
             //egrulLogger.info("ИНН: " + свЮЛ.getИНН());
 
             EGRUL.СвЮЛ.СвОКВЭД свОКВЭД = свЮЛ.getСвОКВЭД();
+            Date dateActual = new Date(свЮЛ.getДатаВып().toGregorianCalendar().getTimeInMillis());
+            String ogrn = свЮЛ.getОГРН();
+
             RegEgrul newRegEgrul = new RegEgrul();
             newRegEgrul.setLoadDate(new Timestamp(System.currentTimeMillis()));
             newRegEgrul.setInn(свЮЛ.getИНН());
-            Date dateActual = new Date(свЮЛ.getДатаВып().toGregorianCalendar().getTimeInMillis());
+            newRegEgrul.setKpp(свЮЛ.getКПП());
+            newRegEgrul.setOgrn(ogrn);
+            newRegEgrul.setIogrn((ogrn != null) ? Long.parseLong(ogrn) : null);
             newRegEgrul.setDateActual(dateActual);
+            newRegEgrul.setIdMigration(migration.getId());
+
+            try {
+                filials = saveFilials(свЮЛ, newRegEgrul);
+                свЮЛ.setСвПодразд(null);
+            } catch (JsonProcessingException e) {
+                egrulLogger.error("Не удалось преобразовать данные филиала к JSON для ОГРН " + свЮЛ.getОГРН());
+                e.printStackTrace();
+            }
             try {
                 свЮЛ.setСвОКВЭД(null);
                 newRegEgrul.setData(mapper.writeValueAsString(свЮЛ));
             } catch (JsonProcessingException e) {
-                egrulLogger.error("Не удалось преобразовать данные к JSON для ИНН " + свЮЛ.getИНН());
+                egrulLogger.error("Не удалось преобразовать данные к JSON для ОГРН " + свЮЛ.getОГРН());
                 e.printStackTrace();
             }
-            newRegEgrul.setIdMigration(migration.getId());
 
             EgrulContainer ec = new EgrulContainer(newRegEgrul);
+            ec.setRegFilials(filials);
 
             if (свОКВЭД != null) {
                 Set<RegEgrulOkved> regEgrulOkveds = new HashSet<>();
@@ -337,6 +356,45 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         return containerList;
     }
 
+    private Set<RegFilial> saveFilials(EGRUL.СвЮЛ свЮЛ, RegEgrul regEgrul) throws JsonProcessingException {
+        Set<RegFilial> filials = new HashSet<>();
+        if (свЮЛ.getСвПодразд() != null) {
+            for (EGRUL.СвЮЛ.СвПодразд.СвФилиал свФилиал : свЮЛ.getСвПодразд().getСвФилиал()) {
+                RegFilial regFilial = RegFilial.builder()
+                                        .egrul(regEgrul)
+                                        .inn(regEgrul.getInn())
+                                        .build();
+                if (свФилиал.getСвНаим() != null) {
+                    regFilial.setFullName(свФилиал.getСвНаим().getНаимПолн());
+                }
+
+                if (свФилиал.getСвУчетНОФилиал() != null) {
+                    regFilial.setKpp(свФилиал.getСвУчетНОФилиал().getКПП());
+                }
+                regFilial.setData(mapper.writeValueAsString(свФилиал));
+                filials.add(regFilial);
+            }
+
+            for (EGRUL.СвЮЛ.СвПодразд.СвПредстав свПредстав : свЮЛ.getСвПодразд().getСвПредстав()) {
+                RegFilial regFilial = RegFilial.builder()
+                        .egrul(regEgrul)
+                        .inn(regEgrul.getInn())
+                        .build();
+                if (свПредстав.getСвНаим() != null) {
+                    regFilial.setFullName(свПредстав.getСвНаим().getНаимПолн());
+                }
+
+                if (свПредстав.getСвУчетНОПредстав() != null) {
+                    regFilial.setKpp(свПредстав.getСвУчетНОПредстав().getКПП());
+                }
+                regFilial.setData(mapper.writeValueAsString(свПредстав));
+                filials.add(regFilial);
+            }
+        }
+
+        return filials;
+    }
+
     private void saveEgruls(List<EgrulContainer> list){
 
         Map<String, RegEgrul> earlier = findSavedEarlierEgrul(list);
@@ -366,6 +424,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         if (!deletedOkveds.isEmpty()) {
             regEgrulOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
+            regFilialRepo.deleteRegFilials(deletedOkveds);
         }
 
         final List<RegEgrul> rel = updatedData.stream().map(c -> c.getRegEgrul()).collect(Collectors.toList());
@@ -388,11 +447,28 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         if (!granula.isEmpty()){
             regEgrulOkvedRepo.saveAll(granula);
         }
+
+        final List<Set<RegFilial>> rfs = updatedData.stream().map(c -> c.getRegFilials()).collect(Collectors.toList());
+        Set<RegFilial> granula2 = new HashSet<>();
+        int cnt = 1;
+        for (Set<RegFilial> rf : rfs) {
+            if (rf != null) {
+                granula2.addAll(rf);
+                cnt ++;
+            }
+            if (cnt % 10 == 0 && !granula2.isEmpty()){
+                regFilialRepo.saveAll(granula2);
+                granula2.clear();
+            }
+        }
+        if (!granula2.isEmpty()){
+            regFilialRepo.saveAll(granula2);
+        }
     }
 
     private Map<String, RegEgrul> findSavedEarlierEgrul(List<EgrulContainer> list){
-        final List<String> inns = list.stream().map(m -> m.getRegEgrul().getInn()).collect(Collectors.toList());
-        final List<RegEgrul> rel = regEgrulRepo.findAllByInnList(inns);
+        final List<Long> iogrns = list.stream().map(m -> m.getRegEgrul().getIogrn()).collect(Collectors.toList());
+        final List<RegEgrul> rel = regEgrulRepo.findAllByIogrnList(iogrns);
         Map<String, RegEgrul> result = new HashMap<>();
         rel.stream().forEach(r -> {
             result.put(r.getInn(), r);

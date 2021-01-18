@@ -1,6 +1,8 @@
 package ru.sibdigital.proccovid.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -11,20 +13,20 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "reg_egrul", schema = "public")
+@Table(name = "reg_filial", schema = "public")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder(toBuilder = true)
 @TypeDefs({
         @TypeDef(name = "JsonbType", typeClass = Jsonb.class)
 })
-public class RegEgrul {
+public class RegFilial {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_reg_egrul_pk")
-    @SequenceGenerator(name="seq_reg_egrul_pk", sequenceName = "seq_reg_egrul_pk", allocationSize=1)
+    @SequenceGenerator(name="seq_reg_filial_pk", sequenceName = "seq_reg_egrul_pk", allocationSize=1)
     private Long id;
-    @Basic
-    @Column(name = "load_date", nullable = true)
-    private Timestamp loadDate;
     @Basic
     @Column(name = "inn", nullable = true, length = 10)
     private String inn;
@@ -32,21 +34,15 @@ public class RegEgrul {
     @Column(name = "kpp", nullable = true, length = 9)
     private String kpp;
     @Basic
-    @Column(name = "ogrn", nullable = false, length = 15)
-    private String ogrn;
-    @Basic
-    @Column(name = "iogrn")
-    private Long iogrn;
+    @Column(name = "full_name")
+    private String fullName;
     @Basic
     @Column(name = "data", nullable = true, columnDefinition = "jsonb")
     @Type(type = "JsonbType")
     private String data;
-    @Basic
-    @Column(name = "id_migration")
-    private Long idMigration;
-    @Basic
-    @Column(name = "date_actual")
-    private Date dateActual;
+    @ManyToOne
+    @JoinColumn(name = "id_egrul", referencedColumnName = "id")
+    private RegEgrul egrul;
 
     public Long getId() {
         return id;
@@ -54,14 +50,6 @@ public class RegEgrul {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Timestamp getLoadDate() {
-        return loadDate;
-    }
-
-    public void setLoadDate(Timestamp loadDate) {
-        this.loadDate = loadDate;
     }
 
     public String getInn() {
@@ -80,20 +68,19 @@ public class RegEgrul {
         this.kpp = kpp;
     }
 
-    public String getOgrn() {
-        return ogrn;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setOgrn(String ogrn) {
-        this.ogrn = ogrn;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public Long getIogrn() {
-        return iogrn;
+    public RegEgrul getEgrul() {
+        return egrul;
     }
-
-    public void setIogrn(Long iogrn) {
-        this.iogrn = iogrn;
+    public void setEgrul(RegEgrul egrul) {
+        this.egrul = egrul;
     }
 
     public String getData() {
@@ -104,32 +91,19 @@ public class RegEgrul {
         this.data = data;
     }
 
-    public Long getIdMigration() {
-        return idMigration;
-    }
-
-    public void setIdMigration(Long idMigration) {
-        this.idMigration = idMigration;
-    }
-
-    public Date getDateActual() {
-        return dateActual;
-    }
-
-    public void setDateActual(Date dateActual) {
-        this.dateActual = dateActual;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RegEgrul regEgrul = (RegEgrul) o;
-        return Objects.equals(ogrn, regEgrul.ogrn);
+        RegFilial regFilial = (RegFilial) o;
+        return Objects.equals(id, regFilial.id) &&
+                Objects.equals(inn, regFilial.inn) &&
+                Objects.equals(kpp, regFilial.kpp) &&
+                Objects.equals(egrul, regFilial.egrul);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ogrn);
+        return Objects.hash(id, inn, kpp, egrul);
     }
 }
