@@ -296,7 +296,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             newRegEgrul.setIdMigration(migration.getId());
 
             try {
-                filials = saveFilials(свЮЛ, newRegEgrul);
+                filials = parseFilials(свЮЛ, newRegEgrul);
                 свЮЛ.setСвПодразд(null);
             } catch (JsonProcessingException e) {
                 egrulLogger.error("Не удалось преобразовать данные филиала к JSON для ОГРН " + свЮЛ.getОГРН());
@@ -356,7 +356,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         return containerList;
     }
 
-    private Set<RegFilial> saveFilials(EGRUL.СвЮЛ свЮЛ, RegEgrul regEgrul) throws JsonProcessingException {
+    private Set<RegFilial> parseFilials(EGRUL.СвЮЛ свЮЛ, RegEgrul regEgrul) throws JsonProcessingException {
         Set<RegFilial> filials = new HashSet<>();
         if (свЮЛ.getСвПодразд() != null) {
             for (EGRUL.СвЮЛ.СвПодразд.СвФилиал свФилиал : свЮЛ.getСвПодразд().getСвФилиал()) {
