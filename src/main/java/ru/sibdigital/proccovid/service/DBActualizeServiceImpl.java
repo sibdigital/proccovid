@@ -130,6 +130,7 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                         DocEmployee docEmployee = DocEmployee.builder()
                                 .organization(organization)
                                 .person(docPerson)
+                                .isDeleted(false)
                                 .build();
                         docEmployeeRepo.save(docEmployee);
                     }
