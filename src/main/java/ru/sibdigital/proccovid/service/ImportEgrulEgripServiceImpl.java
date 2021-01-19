@@ -359,7 +359,8 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     private Set<RegFilial> parseFilials(EGRUL.СвЮЛ свЮЛ, RegEgrul regEgrul) throws JsonProcessingException {
         Set<RegFilial> filials = new HashSet<>();
         if (свЮЛ.getСвПодразд() != null) {
-            for (EGRUL.СвЮЛ.СвПодразд.СвФилиал свФилиал : свЮЛ.getСвПодразд().getСвФилиал()) {
+            List<EGRUL.СвЮЛ.СвПодразд.СвФилиал> свФилиалList = свЮЛ.getСвПодразд().getСвФилиал();
+            for (EGRUL.СвЮЛ.СвПодразд.СвФилиал свФилиал : свФилиалList) {
                 RegFilial regFilial = RegFilial.builder()
                                         .egrul(regEgrul)
                                         .inn(regEgrul.getInn())
@@ -375,7 +376,8 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 filials.add(regFilial);
             }
 
-            for (EGRUL.СвЮЛ.СвПодразд.СвПредстав свПредстав : свЮЛ.getСвПодразд().getСвПредстав()) {
+            List<EGRUL.СвЮЛ.СвПодразд.СвПредстав> свПредставList = свЮЛ.getСвПодразд().getСвПредстав();
+            for (EGRUL.СвЮЛ.СвПодразд.СвПредстав свПредстав : свПредставList) {
                 RegFilial regFilial = RegFilial.builder()
                         .egrul(regEgrul)
                         .inn(regEgrul.getInn())
@@ -437,7 +439,6 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             if (reo != null) {
                 granula.addAll(reo);
                 count ++;
-                //regEgrulOkvedRepo.saveAll(reo);
             }
             if (count % 10 == 0 && !granula.isEmpty()){
                 regEgrulOkvedRepo.saveAll(granula);

@@ -99,11 +99,14 @@ public class RegFilial {
         return Objects.equals(id, regFilial.id) &&
                 Objects.equals(inn, regFilial.inn) &&
                 Objects.equals(kpp, regFilial.kpp) &&
+                Objects.equals(fullName, regFilial.fullName) &&
+                Objects.equals(data, regFilial.data) &&
                 Objects.equals(egrul, regFilial.egrul);
     }
 
+
     @Override
     public int hashCode() {
-        return Objects.hash(id, inn, kpp, egrul);
+        return Objects.hash(id, inn, kpp, fullName, data, egrul);
     }
 }
