@@ -404,7 +404,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         if (!earlier.isEmpty()) {
             for (EgrulContainer ec : list) {
                 RegEgrul r = ec.getRegEgrul();
-                RegEgrul earl = earlier.get(r.getInn());
+                RegEgrul earl = earlier.get(r.getOgrn());
                 if (earl !=null) {
                     // Производить замену, только если СвЮЛ.ДатаВып больше date_actual записи таблицы
                     if (earl.getDateActual() == null || r.getDateActual().after(earl.getDateActual())) {
@@ -471,7 +471,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         final List<RegEgrul> rel = regEgrulRepo.findAllByIogrnList(iogrns);
         Map<String, RegEgrul> result = new HashMap<>();
         rel.stream().forEach(r -> {
-            result.put(r.getInn(), r);
+            result.put(r.getOgrn(), r);
         });
         return result;
     }
