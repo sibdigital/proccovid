@@ -32,7 +32,7 @@ public class RegEgrul {
     @Column(name = "kpp", nullable = true, length = 9)
     private String kpp;
     @Basic
-    @Column(name = "ogrn", nullable = false, length = 15)
+    @Column(name = "ogrn", nullable = false, length = 13)
     private String ogrn;
     @Basic
     @Column(name = "iogrn")

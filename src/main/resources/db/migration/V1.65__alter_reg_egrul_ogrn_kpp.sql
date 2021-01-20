@@ -22,3 +22,10 @@ create table if not exists reg_filial (
     full_name text,
     data  jsonb
 );
+
+
+alter table reg_egrip
+	 add if not exists ogrn varchar(15);
+
+alter table reg_egrip
+    add if not exists iogrn bigint;

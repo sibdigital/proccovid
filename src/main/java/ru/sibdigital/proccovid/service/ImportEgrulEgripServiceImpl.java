@@ -399,17 +399,17 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     private void saveEgruls(List<EgrulContainer> list){
 
-        Map<String, RegEgrul> earlier = findSavedEarlierEgrul(list);
+        Map<Long, RegEgrul> earlier = findSavedEarlierEgrul(list);
         List<Long> deletedOkveds = new ArrayList<>();
         List<EgrulContainer> updatedData = new ArrayList<>();
 
         if (!earlier.isEmpty()) {
             for (EgrulContainer ec : list) {
                 RegEgrul r = ec.getRegEgrul();
-                RegEgrul earl = earlier.get(r.getOgrn());
+                RegEgrul earl = earlier.get(r.getIogrn());
                 if (earl !=null) {
                     // Производить замену, только если СвЮЛ.ДатаВып больше date_actual записи таблицы
-                    if (earl.getDateActual() == null || r.getDateActual().after(earl.getDateActual())) {
+                    if (r.getDateActual().after(earl.getDateActual())) {
                         updatedData.add(ec);
                         r.setId(earl.getId());
                         deletedOkveds.add(earl.getId());
@@ -467,12 +467,12 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         }
     }
 
-    private Map<String, RegEgrul> findSavedEarlierEgrul(List<EgrulContainer> list){
+    private Map<Long, RegEgrul> findSavedEarlierEgrul(List<EgrulContainer> list){
         final List<Long> iogrns = list.stream().map(m -> m.getRegEgrul().getIogrn()).collect(Collectors.toList());
         final List<RegEgrul> rel = regEgrulRepo.findAllByIogrnList(iogrns);
-        Map<String, RegEgrul> result = new HashMap<>();
+        Map<Long, RegEgrul> result = new HashMap<>();
         rel.stream().forEach(r -> {
-            result.put(r.getOgrn(), r);
+            result.put(r.getIogrn(), r);
         });
         return result;
     }
@@ -609,16 +609,16 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     private void saveEgrips(List<EgripContainer> list){
 
-        Map<String, RegEgrip> earlier = findSavedEarlierEgrips(list);
+        Map<Long, RegEgrip> earlier = findSavedEarlierEgrips(list);
         List<Long> deletedOkveds = new ArrayList<>();
         List<EgripContainer> updatedData = new ArrayList<>();
 
         if (!earlier.isEmpty()) {
             for (EgripContainer ec : list) {
                 RegEgrip r = ec.getRegEgrip();
-                RegEgrip earl = earlier.get(r.getInn());
+                RegEgrip earl = earlier.get(r.getIogrn());
                 if (earl != null) {
-                    if (earl.getDateActual() == null || r.getDateActual().after(earl.getDateActual())) {
+                    if (r.getDateActual().after(earl.getDateActual())) {
                         updatedData.add(ec);
                         r.setId(earl.getId());
                         deletedOkveds.add(earl.getId());
@@ -659,12 +659,12 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         }
     }
 
-    private Map<String, RegEgrip> findSavedEarlierEgrips(List<EgripContainer> list){
-        final List<String> inns = list.stream().map(m -> m.getRegEgrip().getInn()).collect(Collectors.toList());
-        final List<RegEgrip> rel = regEgripRepo.findAllByInnList(inns);
-        Map<String, RegEgrip> result = new HashMap<>();
+    private Map<Long, RegEgrip> findSavedEarlierEgrips(List<EgripContainer> list){
+        final List<Long> iogrns = list.stream().map(m -> m.getRegEgrip().getIogrn()).collect(Collectors.toList());
+        final List<RegEgrip> rel = regEgripRepo.findAllByIogrnList(iogrns);
+        Map<Long, RegEgrip> result = new HashMap<>();
         rel.stream().forEach(r -> {
-            result.put(r.getInn(), r);
+            result.put(r.getIogrn(), r);
         });
         return result;
     }
@@ -678,6 +678,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             RegEgrip newRegEgrip = new RegEgrip();
             newRegEgrip.setLoadDate(new Timestamp(System.currentTimeMillis()));
             newRegEgrip.setInn(свИП.getИННФЛ());
+
+            String ogrn = свИП.getОГРНИП();
+            newRegEgrip.setOgrn(ogrn);
+            newRegEgrip.setIogrn((ogrn != null) ? Long.parseLong(ogrn) : null);
             Date dateActual = new Date(свИП.getДатаВып().toGregorianCalendar().getTimeInMillis());
             newRegEgrip.setDateActual(dateActual);
             try {

@@ -27,6 +27,12 @@ public class RegEgrip {
     @Column(name = "inn", nullable = true, length = 12)
     private String inn;
     @Basic
+    @Column(name = "ogrn", nullable = false, length = 15)
+    private String ogrn;
+    @Basic
+    @Column(name = "iogrn")
+    private Long iogrn;
+    @Basic
     @Column(name = "data", nullable = true, columnDefinition = "jsonb")
     @Type(type = "Jsonb")
     private String data;
@@ -64,6 +70,22 @@ public class RegEgrip {
         this.inn = inn;
     }
 
+    public String getOgrn() {
+        return ogrn;
+    }
+
+    public void setOgrn(String ogrn) {
+        this.ogrn = ogrn;
+    }
+
+    public Long getIogrn() {
+        return iogrn;
+    }
+
+    public void setIogrn(Long iogrn) {
+        this.iogrn = iogrn;
+    }
+
     public String getData() {
         return data;
     }
@@ -72,14 +94,6 @@ public class RegEgrip {
         this.data = data;
     }
 
-
-//    public Set<RegEgripOkved> getRegEgripOkveds() {
-//        return regEgripOkveds;
-//    }
-//
-//    public void setRegEgripOkveds(Set<RegEgripOkved> regEgripOkveds) {
-//        this.regEgripOkveds = regEgripOkveds;
-//    }
 
     public Long getIdMigration() {
         return idMigration;
@@ -102,13 +116,11 @@ public class RegEgrip {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RegEgrip regEgrip = (RegEgrip) o;
-        return Objects.equals(inn, regEgrip.inn);
+        return Objects.equals(ogrn, regEgrip.ogrn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(inn);
+        return Objects.hash(ogrn);
     }
-
-
 }
