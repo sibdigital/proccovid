@@ -83,10 +83,16 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
     List<ClsOrganization> getOrganizationsByIds(Long[] organizationIds);
 
     @Query(nativeQuery = true, value = "with slc as(\n" +
-            "    select * from get_request_slice(:statusRewievRequest) as d\n" +
+            "    select  id, id_organization, id_type_request, time_create, time_review, 1 as status\n" +
+            " from get_request_slice(1) as d\n" +
+            " union\n" +
+            " select  id, id_organization, id_type_request, time_create, time_review, 4 as status\n" +
+            " from get_request_slice(4) as d\n" +
+            " union\n" +
+            " select  id, id_organization, id_type_request, time_create, time_review, 0 as status" +
             ")\n" +
             "select * from (\n" +
-            "     select org.*, slc.id as sid\n" +
+            "     select org.*, slc.id as sid, slc.status\n" +
             "     from cls_organization as org\n" +
             "     left join slc as slc on org.id = slc.id_organization\n" +
             ") as org\n" +
