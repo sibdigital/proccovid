@@ -19,7 +19,6 @@ import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.service.*;
-import ru.sibdigital.proccovid.service.RequestService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -447,9 +446,21 @@ public class AdminController {
         return departmentContacts;
     }
 
+    @GetMapping("/mark_organizations")
+    public @ResponseBody String markOrganizationAsDeleted() {
+        organizationService.markOrganizationAsDeleted();
+        return "Логическое удаление организаций выполнено";
+    }
+
     @GetMapping("/actualize_organizations")
     public @ResponseBody String actualizeOrganizations() {
-        dbActualizeService.actualizeOrganizations();
-        return "1";
+        organizationService.actualizeOrganizations();
+        return "Актуализация организаций запущена. Смотрите лог-файл actualization-organizations.log";
+    }
+
+    @GetMapping("/actualize_files")
+    public @ResponseBody String actualizeFiles() {
+        organizationService.actualizeFiles();
+        return "Актуализация файлов заявок запущена. Смотрите лог-файл actualization-files.log";
     }
 }

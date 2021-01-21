@@ -12,7 +12,7 @@
     </appender>
     <appender name="RollingFileByDate"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/egrul.log</file>
+        <file>${LOG_DIR}/spring-boot-loggerbydate.log</file>
         <encoder
                 class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d-%p-%C{1.} [%t]--%m%n</Pattern>
@@ -21,7 +21,7 @@
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- rollover daily and when the file reaches 10 MegaBytes -->
-            <fileNamePattern>${LOG_DIR}/egrul-%d{yyyy-MM-dd}.%i.log
+            <fileNamePattern>${LOG_DIR}/spring-boot-loggerbydate-%d{yyyy-MM-dd}.%i.log
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -67,6 +67,26 @@
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
+    <appender name="ActualizationOrganizationAppender"
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/actualization-organizations.log</file>
+        <append>true</append>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+<!--            <Pattern>%d-%p-%C{1.} [%t]&#45;&#45;%m%n</Pattern>-->
+            <Pattern>%d-%p{1.} %m%n</Pattern>
+        </encoder>
+    </appender>
+    <appender name="ActualizationFilesAppender"
+              class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/actualization-files.log</file>
+        <append>true</append>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+<!--            <Pattern>%d-%p-%C{1.} [%t]&#45;&#45;%m%n</Pattern>-->
+            <Pattern>%d-%p{1.} %m%n</Pattern>
+        </encoder>
+    </appender>
 
     <logger name="egrulLogger" level="info" additivity="false">
         <appender-ref ref="ImportEgrulRollingFileByDate"/>
@@ -74,8 +94,11 @@
     <logger name="egripLogger" level="info" additivity="false">
         <appender-ref ref="ImportEgripRollingFileByDate"/>
     </logger>
-    <logger name="egripLogger" level="info" additivity="false">
-        <appender-ref ref="ImportEgripRollingFileByDate"/>
+    <logger name="actualizationOrganizationsLogger" level="info" additivity="false">
+        <appender-ref ref="ActualizationOrganizationAppender"/>
+    </logger>
+    <logger name="actualizationFilesLogger" level="info" additivity="false">
+        <appender-ref ref="ActualizationFilesAppender"/>
     </logger>
 
     <root level="info">

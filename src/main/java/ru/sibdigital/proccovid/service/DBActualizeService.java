@@ -6,9 +6,7 @@ import java.util.List;
 
 public interface DBActualizeService {
 
-    void actualizeOrganizations();
-
     void markOrganizationAsDeleted();
 
-    void actualizeOrganizations(List<ClsOrganization> organizations);
+    long actualizeOrganizations(List<ClsOrganization> organizations);
 }

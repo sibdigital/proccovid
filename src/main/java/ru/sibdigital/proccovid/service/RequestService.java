@@ -6,6 +6,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -14,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
@@ -24,10 +25,15 @@ import ru.sibdigital.proccovid.scheduling.ScheduleTasks;
 import ru.sibdigital.proccovid.utils.DateUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,6 +45,8 @@ import java.util.stream.StreamSupport;
 @Service
 @Slf4j
 public class RequestService {
+
+    private final static Logger actualizationFilesLogger = LoggerFactory.getLogger("actualizationFilesLogger");
 
     @Autowired
     ClsOrganizationRepo clsOrganizationRepo;
@@ -103,6 +111,11 @@ public class RequestService {
     @Autowired
     private ClsDepartmentContactRepo clsDepartmentContactRepo;
 
+    @Autowired
+    private RegOrganizationFileRepo regOrganizationFileRepo;
+
+    @Autowired
+    private RegDocRequestFileRepo regDocRequestFileRepo;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -596,4 +609,112 @@ public class RequestService {
         return clsDepartmentContactRepo.findAllByDepartment(id).orElse(null);
     }
 
+    /**
+     * Метод для актуализации файлов заявок
+     * @param requests
+     * @param fileMap
+     */
+    @Transactional
+    public long actualizeFiles(List<DocRequest> requests, Map<String, String> fileMap) {
+        long countActualized = 0;
+        if (requests == null) {
+            return countActualized;
+        }
+        // добавим файлы
+        final String absolutePath = Paths.get(uploadingDir).toFile().getAbsolutePath();
+        for (DocRequest request: requests) {
+            if (request.getAttachmentPath() == null || request.getAttachmentPath().isBlank()) {
+                actualizationFilesLogger.warn("Пустой attachmentPath. Ид заявки {}.", request.getId());
+                continue;
+            }
+            String path = request.getAttachmentPath();
+            String[] fullFileNames = getFileNamesFromPath(path);
+            if (fullFileNames.length == 0) {
+                actualizationFilesLogger.warn("Не удалось обработать attachmentPath. Ид заявки {}. {}", request.getId(), path);
+                continue;
+            }
+            ClsOrganization organization = request.getOrganization();
+            for (String fullFileName : fullFileNames) {
+                File currentFile = new File(String.format("%s/%s", absolutePath, fullFileName));
+                if (!currentFile.exists()) {
+                    actualizationFilesLogger.warn("Файл не найден. ИД заявки {}. {}", request.getId(), fullFileName);
+                    continue;
+                }
+                String fileExtension = getFileExtension(fullFileName);
+                // переименуем файл
+                final String newFileName = organization.getId().toString() + "_" + UUID.randomUUID() + fileExtension;
+                fileMap.put(fullFileName, newFileName);
+                //
+                final String fileHash = getFileHash(currentFile);
+                long size = 0;
+                try {
+                    size = Files.size(currentFile.toPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                // сохраним информацию о файле
+                RegOrganizationFile regOrganizationFile = RegOrganizationFile.builder()
+                        .clsOrganizationByIdOrganization(organization)
+                        .docRequestByIdRequest(request)
+                        .attachmentPath(String.format("%s/%s", uploadingDir, newFileName))
+                        .fileName(newFileName)
+                        .originalFileName(fullFileName)
+                        .isDeleted(false)
+                        .fileExtension(fileExtension)
+                        .fileSize(size)
+                        .hash(fileHash)
+                        .timeCreate(new Timestamp(System.currentTimeMillis()))
+                        .build();
+                regOrganizationFileRepo.save(regOrganizationFile);
+                // привяжем файл к заявке согласно новой схеме
+                RegDocRequestFile regDocRequestFile = RegDocRequestFile.builder()
+                        .request(request)
+                        .organizationFile(regOrganizationFile)
+                        .build();
+                regDocRequestFileRepo.save(regDocRequestFile);
+                countActualized++;
+            }
+        }
+        return countActualized;
+    }
+
+    private String getFileHash(File file){
+        String result = "NOT";
+        try {
+            final byte[] bytes = Files.readAllBytes(file.toPath());
+            byte[] hash = MessageDigest.getInstance("MD5").digest(bytes);
+            result = DatatypeConverter.printHexBinary(hash);
+        } catch (IOException ex) {
+            actualizationFilesLogger.error(ex.getMessage());
+        } catch (NoSuchAlgorithmException ex) {
+            actualizationFilesLogger.error(ex.getMessage());
+        }
+        return result;
+    }
+
+    private String getFileExtension(String name) {
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return ""; // empty extension
+        }
+        return name.substring(lastIndexOf);
+    }
+
+    private String[] getFileNamesFromPath(String value) {
+        if (value == null) {
+            return new String[0];
+        }
+        List<String> fileNames = new ArrayList<>();
+        String[] paths = value.split(",");
+        for (String path: paths) {
+            String[] split = path.split("\\\\");
+            split = split[split.length - 1].split("/");
+            String fileName = split[split.length - 1];
+            if (!fileName.contains(".")) {
+                return new String[0];
+            }
+            fileNames.add(fileName);
+        }
+        return fileNames.toArray(new String[0]);
+    }
 }

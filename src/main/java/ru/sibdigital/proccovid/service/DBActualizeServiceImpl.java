@@ -2,20 +2,16 @@ package ru.sibdigital.proccovid.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
-import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
-import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSpecification;
-import ru.sibdigital.proccovid.utils.AppUtils;
 
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -26,7 +22,8 @@ import java.util.List;
 @Service
 public class DBActualizeServiceImpl implements DBActualizeService {
 
-    private final static int pageSize = 100;
+    @Value("${upload.path}")
+    private String uploadingDir;
 
     @Autowired
     private ClsOrganizationRepo clsOrganizationRepo;
@@ -53,123 +50,24 @@ public class DBActualizeServiceImpl implements DBActualizeService {
     private DocEmployeeRepo docEmployeeRepo;
 
     @Autowired
-    private RegOrganizationFileRepo regOrganizationFileRepo;
-
-    @Autowired
     private RegOrganizationAddressFactRepo regOrganizationAddressFactRepo;
 
-    public void actualizeOrganizations() {
-        long total = 0;
-        long countActualized = 0;
-        try {
-            log.info("Процесс актуализации организаций начат");
-            ClsOrganizationSpecification specification = new ClsOrganizationSpecification();
-            ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
-            searchCriteria.setInn("0323091260"); // TODO тест
-            specification.setSearchCriteria(searchCriteria);
-            total = clsOrganizationRepo.count(specification);
-            int pages = (int) (((total - 1) / pageSize) + 1);
-            for (int i = 0; i < pages; i++) {
-                Page<ClsOrganization> page = clsOrganizationRepo.findAll(specification, PageRequest.of(i, pageSize, Sort.by("id")));
-                actualizeOrganizations(page.getContent());
-                countActualized += page.getNumberOfElements();
-            }
-            log.info("Процесс актуализации организаций окончен");
-        } catch (Exception e) {
-            log.error("Ошибка! Процесс актуализации организаций прерван");
-            log.error(e.getMessage());
-        }
-        log.info("Количество организаций: {}", total);
-        log.info("Актуализировано: {}", countActualized);
-    }
-
     @Transactional
-    public void actualizeOrganizations(List<ClsOrganization> organizations) {
+    public long actualizeOrganizations(List<ClsOrganization> organizations) {
+        long countActualized = 0;
+        if (organizations == null) {
+            return countActualized;
+        }
         for (ClsOrganization organization : organizations) {
             if (organization.getActualized() != null && organization.getActualized()) {
                 continue;
             }
             // добавим окведы
-            String inn = organization.getInn();
-            if (inn.length() == 10) {
-                RegEgrul regEgrul = egrulService.getEgrul(inn);
-                if (regEgrul != null) {
-                    for (RegEgrulOkved regEgrulOkved : regEgrul.getRegEgrulOkveds()) {
-                        Okved okved = okvedRepo.findOkvedByIdSerial(regEgrulOkved.getIdOkved());
-                        RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
-                                .clsOrganization(organization)
-                                .okved(okved)
-                                .build();
-                        RegOrganizationOkved regOrganizationOkved = RegOrganizationOkved.builder()
-                                .regOrganizationOkvedId(regOrganizationOkvedId)
-                                .isMain(regEgrulOkved.getMain())
-                                .build();
-                        regOrganizationOkvedRepo.save(regOrganizationOkved);
-                    }
-                }
-            } else {
-                RegEgrip regEgrip = egrulService.getEgrip(inn);
-                if (regEgrip != null) {
-                    for (RegEgripOkved regEgripOkved : regEgrip.getRegEgripOkveds()) {
-                        Okved okved = okvedRepo.findOkvedByIdSerial(regEgripOkved.getIdOkved());
-                        RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
-                                .clsOrganization(organization)
-                                .okved(okved)
-                                .build();
-                        RegOrganizationOkved regOrganizationOkved = RegOrganizationOkved.builder()
-                                .regOrganizationOkvedId(regOrganizationOkvedId)
-                                .isMain(regEgripOkved.getMain())
-                                .build();
-                        regOrganizationOkvedRepo.save(regOrganizationOkved);
-                    }
-                }
-            }
-            // добавим сотрудников, файлы, адреса
-            List<DocRequest> requests = docRequestRepo.getLastRequestByInnAndStatus(organization.getInn(), ReviewStatuses.CONFIRMED.getValue()).orElse(null);
-            if (requests != null) {
-                DocRequest request = requests.get(0);
-                // сотрудники
-                if (request.getDocPersonList() != null) {
-                    for (DocPerson docPerson : request.getDocPersonList()) {
-                        DocEmployee docEmployee = DocEmployee.builder()
-                                .organization(organization)
-                                .person(docPerson)
-                                .build();
-                        docEmployeeRepo.save(docEmployee);
-                    }
-                }
-                // файлы
-                if (request.getAttachmentPath() != null && !request.getAttachmentPath().isBlank()) {
-                    String[] paths = request.getAttachmentPath().split(",");
-                    for (String path : paths) {
-                        String fullName = AppUtils.getFileNameFromPath(path);
-                        String[] subStrings = fullName.split("\\.");
-                        String fileName = subStrings[0];
-                        String fileExtension = subStrings.length > 1 ? subStrings[subStrings.length - 1] : "";
-                        RegOrganizationFile regOrganizationFile = RegOrganizationFile.builder()
-                                .clsOrganizationByIdOrganization(organization)
-                                .attachmentPath(path)
-                                .isDeleted(false)
-                                .fileName(fileName)
-                                .fileExtension(fileExtension)
-                                .originalFileName(fullName)
-                                .timeCreate(new Timestamp(System.currentTimeMillis()))
-                                .build();
-                        regOrganizationFileRepo.save(regOrganizationFile);
-                    }
-                }
-                // адреса
-                if (request.getDocAddressFact() != null) {
-                    for (DocAddressFact docAddressFact : request.getDocAddressFact()) {
-                        RegOrganizationAddressFact regOrganizationAddressFact = RegOrganizationAddressFact.builder()
-                                .clsOrganization(organization)
-                                .fullAddress(docAddressFact.getAddressFact())
-                                .timeCreate(new Timestamp(System.currentTimeMillis()))
-                                .build();
-                        regOrganizationAddressFactRepo.save(regOrganizationAddressFact);
-                    }
-                }
-            }
+            addDataFromEgrul(organization);
+            // актуализируем заявки
+            List<DocRequest> actualRequests = actualizeRequests(organization);
+            // добавим сотрудников, адреса
+            addDataFromRequests(organization, actualRequests);
             // создадим принципала
             if (organization.getPrincipal() == null) {
                 ClsPrincipal principal = ClsPrincipal.builder()
@@ -181,10 +79,130 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                 organization.setPrincipal(principal);
             }
 
-//            organization.setActivated(true); // TODO
+            organization.setActivated(true);
             organization.setActualized(true);
             organization.setTimeActualization(new Timestamp(System.currentTimeMillis()));
             clsOrganizationRepo.save(organization);
+            countActualized++;
+        }
+        return countActualized;
+    }
+
+    /**
+     * Метод для переноса утверждённых заявок и её данных из дубликатов организации
+     * @param organization
+     */
+    private void addDataFromRequests(ClsOrganization organization, List<DocRequest> requests) {
+        if (requests == null) {
+            return;
+        }
+        // соберем данные из заявок
+        Set<DocPerson> persons = new HashSet<>();
+        Set<DocAddressFact> addresses = new HashSet<>();
+        for (DocRequest request: requests) {
+            if (request.getDocPersonList() != null) {
+                persons.addAll(request.getDocPersonList());
+            }
+            if (request.getDocAddressFact() != null) {
+                addresses.addAll(request.getDocAddressFact());
+            }
+        }
+        // добавим сотрудников
+        if (persons.size() > 0) {
+            for (DocPerson docPerson : persons) {
+                DocEmployee docEmployee = DocEmployee.builder()
+                        .organization(organization)
+                        .person(docPerson)
+                        .build();
+                docEmployeeRepo.save(docEmployee);
+            }
+        }
+        // добавим адреса
+        if (addresses.size() > 0) {
+            for (DocAddressFact docAddressFact : addresses) {
+                RegOrganizationAddressFact regOrganizationAddressFact = RegOrganizationAddressFact.builder()
+                        .clsOrganization(organization)
+                        .docRequest(docAddressFact.getDocRequest())
+                        .fullAddress(docAddressFact.getAddressFact())
+                        .isHand(true)
+                        .timeCreate(new Timestamp(System.currentTimeMillis()))
+                        .build();
+                regOrganizationAddressFactRepo.save(regOrganizationAddressFact);
+            }
+        }
+    }
+
+    private List<DocRequest> actualizeRequests(ClsOrganization organization) {
+        // найдем утвержденные заявки по ИНН
+        List<DocRequest> allRequestsByOrgInn = docRequestRepo.getRequestsByInn(organization.getInn()).orElse(null);
+        if (allRequestsByOrgInn == null) {
+            return null;
+        }
+        // сгруппируем заявки по виду деятельности
+        Map<ClsTypeRequest, List<DocRequest>> requestMap = allRequestsByOrgInn.stream().collect(Collectors.groupingBy(DocRequest::getTypeRequest));
+        // в каждой группе найдем одну актуальную заявку и сформируем список заявок организации
+        List<DocRequest> actualRequests = new ArrayList<>();
+        for (Map.Entry<ClsTypeRequest, List<DocRequest>> entry: requestMap.entrySet()) {
+            // заявки ИД текущей организации делаем историческими
+            List<DocRequest> requests = entry.getValue().stream().filter(request -> Objects.equals(request.getOrganization().getId(), organization.getId())).collect(Collectors.toList());
+            for (DocRequest request : requests) {
+                request.setStatusActivity(ActivityStatuses.HISTORICAL.getValue());
+                docRequestRepo.save(request);
+            }
+            // найдем последнюю утвержденную заявку среди заявок по ИНН
+            DocRequest lastRequest = entry.getValue().stream().filter(request -> request.getStatusReview() == ReviewStatuses.CONFIRMED.getValue())
+                    .max(Comparator.comparing(DocRequest::getTimeReview)).orElse(null);
+            if (lastRequest != null) {
+                // проверим на принадлежность к текущей организации и если не принадлежит - меняем ИД организации
+                if (!Objects.equals(lastRequest.getOrganization().getId(), organization.getId())) {
+                    lastRequest.setOrganization(organization);
+                }
+                lastRequest.setStatusActivity(ActivityStatuses.ACTIVE.getValue());
+                docRequestRepo.save(lastRequest);
+                actualRequests.add(lastRequest);
+            }
+        }
+        return actualRequests;
+    }
+
+    /**
+     * Метод для добавления данных к организации из ЕГРЮЛ/ЕГРИП
+     * @param organization
+     */
+    void addDataFromEgrul(ClsOrganization organization) {
+        String inn = organization.getInn();
+        if (inn.length() == 10) {
+            RegEgrul regEgrul = egrulService.getEgrul(inn);
+            if (regEgrul != null) {
+                for (RegEgrulOkved regEgrulOkved : regEgrul.getRegEgrulOkveds()) {
+                    Okved okved = okvedRepo.findOkvedByIdSerial(regEgrulOkved.getIdOkved());
+                    RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
+                            .clsOrganization(organization)
+                            .okved(okved)
+                            .build();
+                    RegOrganizationOkved regOrganizationOkved = RegOrganizationOkved.builder()
+                            .regOrganizationOkvedId(regOrganizationOkvedId)
+                            .isMain(regEgrulOkved.getMain())
+                            .build();
+                    regOrganizationOkvedRepo.save(regOrganizationOkved);
+                }
+            }
+        } else {
+            RegEgrip regEgrip = egrulService.getEgrip(inn);
+            if (regEgrip != null) {
+                for (RegEgripOkved regEgripOkved : regEgrip.getRegEgripOkveds()) {
+                    Okved okved = okvedRepo.findOkvedByIdSerial(regEgripOkved.getIdOkved());
+                    RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
+                            .clsOrganization(organization)
+                            .okved(okved)
+                            .build();
+                    RegOrganizationOkved regOrganizationOkved = RegOrganizationOkved.builder()
+                            .regOrganizationOkvedId(regOrganizationOkvedId)
+                            .isMain(regEgripOkved.getMain())
+                            .build();
+                    regOrganizationOkvedRepo.save(regOrganizationOkved);
+                }
+            }
         }
     }
 

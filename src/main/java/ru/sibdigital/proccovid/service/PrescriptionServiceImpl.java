@@ -174,10 +174,10 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         RegPrescriptionTextFile rtrpf = null;
         try {
             final String absolutePath = Paths.get(uploadingDir).toFile().getAbsolutePath();
-            final String filename = prescriptionText.getId().toString() + "_" + UUID.randomUUID();
             final String originalFilename = multipartFile.getOriginalFilename();
             String extension = getFileExtension(originalFilename);
-            File file = new File(String.format("%s/%s%s", absolutePath, filename, extension));
+            final String filename = prescriptionText.getId().toString() + "_" + UUID.randomUUID() + extension;
+            File file = new File(String.format("%s/%s", absolutePath, filename));
             multipartFile.transferTo(file);
 
             final String fileHash = getFileHash(file);
