@@ -23,6 +23,7 @@ public class DocRequestPrsSpecification implements Specification<DocRequestPrs> 
     public Predicate toPredicate(Root<DocRequestPrs> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
 
+        predicates.add(criteriaBuilder.isFalse(root.get("organization").get("isDeleted")));
         predicates.add(criteriaBuilder.equal(root.get("statusActivity"), ActivityStatuses.ACTIVE.getValue()));
 
         if (searchCriteria.getStatusReview() != null) {
