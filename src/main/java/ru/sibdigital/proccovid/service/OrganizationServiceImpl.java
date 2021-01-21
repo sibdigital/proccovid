@@ -67,7 +67,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             actualizationOrganizationsLogger.info("Процесс актуализации организаций начат");
             ClsOrganizationSpecification specification = new ClsOrganizationSpecification();
             ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
-//            searchCriteria.setInn("3801139112"); // TODO тест
+//            searchCriteria.setInn("032500136644"); // TODO тест
             specification.setSearchCriteria(searchCriteria);
             long total = clsOrganizationRepo.count(specification);
             actualizationOrganizationsLogger.info("Количество организаций: {}", total);
@@ -82,6 +82,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } catch (Exception e) {
             actualizationOrganizationsLogger.info("Ошибка! Процесс актуализации организаций прерван");
             actualizationOrganizationsLogger.info(e.getMessage());
+            e.printStackTrace();
         }
         actualizationOrganizationsLogger.info("Итого актуализировано: {}", countActualized);
     }
@@ -93,7 +94,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             actualizationFilesLogger.info("Процесс актуализации файлов заявок начат");
             DocRequestPrsSpecification specification = new DocRequestPrsSpecification();
             DocRequestPrsSearchCriteria searchCriteria = new DocRequestPrsSearchCriteria();
-//            searchCriteria.setInnOrName("3801139112"); // TODO тест
+//            searchCriteria.setInnOrName("032500136644"); // TODO тест
             specification.setSearchCriteria(searchCriteria);
             long total = docRequestRepo.count(specification);
             actualizationFilesLogger.info("Количество заявок: {}", total);
@@ -110,6 +111,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } catch (Exception e) {
             actualizationFilesLogger.info("Ошибка! Процесс актуализации файлов заявок прерван");
             actualizationFilesLogger.info(e.getMessage());
+            e.printStackTrace();
         }
         actualizationFilesLogger.info("Итого актуализировано файлов: {}", countActualized);
     }
