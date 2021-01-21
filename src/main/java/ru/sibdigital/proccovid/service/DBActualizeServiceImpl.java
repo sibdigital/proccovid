@@ -152,8 +152,17 @@ public class DBActualizeServiceImpl implements DBActualizeService {
             // найдем последнюю утвержденную заявку среди заявок по ИНН
             DocRequest lastRequest = entry.getValue().stream().filter(request -> request.getStatusReview() == ReviewStatuses.CONFIRMED.getValue())
                     .max(Comparator.comparing(DocRequest::getTimeReview)).orElse(null);
+            // если не нашли, ищем открытую
+            if (lastRequest == null) {
+                lastRequest = entry.getValue().stream().filter(request -> request.getStatusReview() == ReviewStatuses.OPENED.getValue())
+                        .max(Comparator.comparing(DocRequest::getTimeCreate)).orElse(null);
+            }
+            // если не нашли, ищем прочую
+            if (lastRequest == null) {
+                lastRequest = entry.getValue().stream().filter(request -> request.getStatusReview() == ReviewStatuses.ACCEPTED.getValue())
+                        .max(Comparator.comparing(DocRequest::getTimeCreate)).orElse(null);
+            }
             if (lastRequest != null) {
-                // проверим на принадлежность к текущей организации и если не принадлежит - меняем ИД организации
                 if (!Objects.equals(lastRequest.getOrganization().getId(), organization.getId())) {
                     lastRequest.setOrganization(organization);
                 }
