@@ -90,6 +90,7 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
             " from get_request_slice(4) as d\n" +
             " union\n" +
             " select  id, id_organization, id_type_request, time_create, time_review, 0 as status" +
+            " from get_request_slice(0) as d\n" +
             ")\n" +
             "select * from (\n" +
             "     select org.*, slc.id as sid, slc.status\n" +
