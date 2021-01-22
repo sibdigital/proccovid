@@ -110,6 +110,7 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                     employee = DocEmployee.builder()
                             .organization(organization)
                             .person(docPerson)
+                            .isDeleted(false)
                             .build();
                     docEmployeeRepo.save(employee);
                     employees.put(docPerson.hashCode(), employee);

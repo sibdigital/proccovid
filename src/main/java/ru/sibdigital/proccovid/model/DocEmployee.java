@@ -22,6 +22,7 @@ public class DocEmployee {
     private Long id;
     private Boolean isVaccinatedFlu;
     private Boolean isVaccinatedCovid;
+    private Boolean isDeleted;
 
     @OneToOne
     @JoinColumn(name = "id_organization", referencedColumnName = "id")
@@ -76,6 +77,15 @@ public class DocEmployee {
         this.person = person;
     }
 
+    @Basic
+    @Column(name = "is_deleted", nullable = false)
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
