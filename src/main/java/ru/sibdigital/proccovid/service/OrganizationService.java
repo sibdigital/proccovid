@@ -13,4 +13,6 @@ public interface OrganizationService {
     void actualizeOrganizations();
 
     void actualizeFiles();
+
+    void createPrescriptions();
 }

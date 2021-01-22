@@ -463,4 +463,10 @@ public class AdminController {
         organizationService.actualizeFiles();
         return "Актуализация файлов заявок запущена. Смотрите лог-файл actualization-files.log";
     }
+
+    @GetMapping("/create_prescriptions")
+    public @ResponseBody String createPrescriptions() {
+        organizationService.createPrescriptions();
+        return "Создание предписаний выполнено";
+    }
 }

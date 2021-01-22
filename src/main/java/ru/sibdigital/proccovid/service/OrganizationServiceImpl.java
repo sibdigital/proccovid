@@ -1,5 +1,8 @@
 package ru.sibdigital.proccovid.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import ru.sibdigital.proccovid.model.ClsOrganization;
-import ru.sibdigital.proccovid.model.DocRequest;
-import ru.sibdigital.proccovid.repository.ClsOrganizationRepo;
-import ru.sibdigital.proccovid.repository.DocRequestRepo;
+import ru.sibdigital.proccovid.model.ClsTypeRequestSettings;
+import ru.sibdigital.proccovid.model.*;
+import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSpecification;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
@@ -22,6 +24,7 @@ import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSpecificati
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -47,6 +50,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private RequestService requestService;
+
+    @Autowired
+    private ClsTypeRequestRepo clsTypeRequestRepo;
+
+    @Autowired
+    private ClsPrescriptionRepo clsPrescriptionRepo;
+
+    @Autowired
+    private RegPrescriptionTextRepo regPrescriptionTextRepo;
 
     @Override
     public Page<ClsOrganization> getOrganizationsByCriteria(ClsOrganizationSearchCriteria searchCriteria, int page, int size) {
@@ -123,6 +135,49 @@ public class OrganizationServiceImpl implements OrganizationService {
             File newFile = new File(String.format("%s/%s", absolutePath, file.getValue()));
             currentFile.renameTo(newFile);
             actualizationFilesLogger.info("Файл переименован. {} -> {}", file.getKey(), file.getValue());
+        }
+    }
+
+    public void createPrescriptions() {
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        List<ClsTypeRequest> typeRequests = clsTypeRequestRepo.findAll();
+        for (ClsTypeRequest typeRequest: typeRequests) {
+            ClsPrescription prescription = ClsPrescription.builder()
+                    .typeRequest(typeRequest)
+                    .name("Предписание для " + typeRequest.getActivityKind())
+                    .description("описание")
+                    .status(PrescriptionStatuses.PUBLISHED.getValue())
+//                    .timePublication(new Timestamp(System.currentTimeMillis()))
+                    .build();
+            clsPrescriptionRepo.save(prescription);
+            short num = 1;
+            if (typeRequest.getPrescription() != null && !typeRequest.getPrescription().isBlank()) {
+                RegPrescriptionText prescriptionText = RegPrescriptionText.builder()
+                        .prescription(prescription)
+                        .num((short) num)
+                        .content(typeRequest.getPrescription())
+                        .build();
+                regPrescriptionTextRepo.save(prescriptionText);
+            }
+            if (typeRequest.getSettings() != null && !typeRequest.getSettings().isBlank()) {
+                try {
+                    ClsTypeRequestSettings settings = mapper.readValue(typeRequest.getSettings(), ClsTypeRequestSettings.class);
+                    for (ClsTypeRequestSettings.Field field: settings.getFields()) {
+                        if (field.getUi().getView().equalsIgnoreCase("template")) {
+                            RegPrescriptionText prescriptionText = RegPrescriptionText.builder()
+                                    .prescription(prescription)
+                                    .num((short) ++num)
+                                    .content(field.getUi().getTemplate())
+                                    .build();
+                            regPrescriptionTextRepo.save(prescriptionText);
+                        }
+                    }
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

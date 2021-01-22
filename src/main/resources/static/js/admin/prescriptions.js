@@ -20,6 +20,7 @@ const prescriptions = {
                         datafetch: 25,
                         columns: [
                             {id: "name", header: "Наименование", template: "#name#", adjust: true, fillspace: true},
+                            {id: "typeRequest", header: "Вид деятельности", template: "#typeRequest.activityKind#", adjust: true, fillspace: true},
                             {id: "status", header: "Статус", template: "#statusName#", adjust: true},
                             {id: "time_Publication", header: "Дата публикации", adjust: true, format: dateFormat},
                         ],
@@ -88,7 +89,7 @@ const prescriptions = {
                                                         cols: [
                                                             {
                                                                 view: 'label',
-                                                                label: 'Предписание ' + pt.num,
+                                                                label: 'Текст №' + pt.num,
                                                                 align: 'center'
                                                             },
                                                         ]
@@ -281,7 +282,7 @@ const prescriptionForm = {
                                                 view: 'combo',
                                                 id: 'typeRequestId',
                                                 name: 'typeRequestId',
-                                                label: 'Тип заявки',
+                                                label: 'Вид деятельности',
                                                 labelWidth: 190,
                                                 required: true,
                                                 validate: webix.rules.isNotEmpty,
@@ -338,7 +339,7 @@ const prescriptionForm = {
                                                                         cols: [
                                                                             {
                                                                                 view: 'label',
-                                                                                label: 'Предписание ' + num,
+                                                                                label: 'Текст №' + num,
                                                                                 align: 'center'
                                                                             },
                                                                         ]

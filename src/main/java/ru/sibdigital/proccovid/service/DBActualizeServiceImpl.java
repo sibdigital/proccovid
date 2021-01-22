@@ -55,6 +55,15 @@ public class DBActualizeServiceImpl implements DBActualizeService {
     @Autowired
     private RegDocRequestEmployeeRepo regDocRequestEmployeeRepo;
 
+    @Autowired
+    private ClsPrescriptionRepo clsPrescriptionRepo;
+
+    @Autowired
+    private RegDocRequestPrescriptionRepo regDocRequestPrescriptionRepo;
+
+    @Autowired
+    private RegOrganizationPrescriptionRepo regOrganizationPrescriptionRepo;
+
     @Transactional
     public long actualizeOrganizations(List<ClsOrganization> organizations) {
         long countActualized = 0;
@@ -134,6 +143,31 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                     regOrganizationAddressFactRepo.save(regOrganizationAddressFact);
                     addresses.add(docAddressFact.hashCode());
                 }
+            }
+            // добавим предписания и согласия
+            ClsPrescription prescription = clsPrescriptionRepo.findByTypeRequestId(request.getTypeRequest().getId());
+            if (prescription != null) {
+                List<ConsentPrescription> consentPrescriptions = new ArrayList<>();
+                if (prescription.getPrescriptionTexts() != null) {
+                    for (RegPrescriptionText regPrescriptionText : prescription.getPrescriptionTexts()) {
+                        consentPrescriptions.add(new ConsentPrescription(regPrescriptionText.getId().toString(), "1"));
+                    }
+                }
+                RegDocRequestPrescriptionAttributes regDocRequestPrescriptionAttributes = new RegDocRequestPrescriptionAttributes(consentPrescriptions.toArray(new ConsentPrescription[0]));
+                RegDocRequestPrescription regDocRequestPrescription = RegDocRequestPrescription.builder()
+                        .request(request)
+                        .prescription(prescription)
+                        .additionalAttributes(regDocRequestPrescriptionAttributes)
+                        .build();
+                regDocRequestPrescriptionRepo.save(regDocRequestPrescription);
+                //
+                RegOrganizationPrescriptionAttributes regOrganizationPrescriptionAttributes = new RegOrganizationPrescriptionAttributes(consentPrescriptions.toArray(new ConsentPrescription[0]));
+                RegOrganizationPrescription regOrganizationPrescription = RegOrganizationPrescription.builder()
+                        .organization(organization)
+                        .prescription(prescription)
+                        .additionalAttributes(regOrganizationPrescriptionAttributes)
+                        .build();
+                regOrganizationPrescriptionRepo.save(regOrganizationPrescription);
             }
         }
     }
