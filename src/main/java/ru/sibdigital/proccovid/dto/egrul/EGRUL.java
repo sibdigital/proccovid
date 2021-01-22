@@ -3244,6 +3244,10 @@ public class EGRUL {
             return this.свСтатус;
         }
 
+        public void setСвСтатус(List<СвСтатус> свСтатус) {
+            this.свСтатус = свСтатус;
+        }
+
         /**
          * Gets the value of the свПрекрЮЛ property.
          *

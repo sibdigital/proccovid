@@ -47,6 +47,9 @@ public class RegEgrul {
     @Basic
     @Column(name = "date_actual")
     private Date dateActual;
+    @Basic
+    @Column(name = "active_status")
+    private Integer activeStatus;
 
     public Long getId() {
         return id;
@@ -118,6 +121,14 @@ public class RegEgrul {
 
     public void setDateActual(Date dateActual) {
         this.dateActual = dateActual;
+    }
+
+    public Integer getActiveStatus() {
+        return activeStatus;
+    }
+
+    public void setActiveStatus(Integer activeStatus) {
+        this.activeStatus = activeStatus;
     }
 
     @Override
