@@ -52,6 +52,9 @@ public class DBActualizeServiceImpl implements DBActualizeService {
     @Autowired
     private RegOrganizationAddressFactRepo regOrganizationAddressFactRepo;
 
+    @Autowired
+    private RegDocRequestEmployeeRepo regDocRequestEmployeeRepo;
+
     @Transactional
     public long actualizeOrganizations(List<ClsOrganization> organizations) {
         long countActualized = 0;
@@ -89,45 +92,47 @@ public class DBActualizeServiceImpl implements DBActualizeService {
     }
 
     /**
-     * Метод для переноса утверждённых заявок и её данных из дубликатов организации
+     * Метод для переноса данных из заявок, таких как сотрудники и адреса
      * @param organization
+     * @param requests
      */
     private void addDataFromRequests(ClsOrganization organization, List<DocRequest> requests) {
         if (requests == null) {
             return;
         }
-        // соберем данные из заявок
-        Set<DocPerson> persons = new HashSet<>();
-        Set<DocAddressFact> addresses = new HashSet<>();
+        Map<Integer, DocEmployee> employees = new HashMap<>();
+        Set<Integer> addresses = new HashSet<>();
         for (DocRequest request: requests) {
-            if (request.getDocPersonList() != null) {
-                persons.addAll(request.getDocPersonList());
-            }
-            if (request.getDocAddressFact() != null) {
-                addresses.addAll(request.getDocAddressFact());
-            }
-        }
-        // добавим сотрудников
-        if (persons.size() > 0) {
-            for (DocPerson docPerson : persons) {
-                DocEmployee docEmployee = DocEmployee.builder()
-                        .organization(organization)
-                        .person(docPerson)
+            // добавим сотрудников
+            for (DocPerson docPerson: request.getDocPersonList()) {
+                DocEmployee employee = employees.get(docPerson.hashCode());
+                if (employee == null) {
+                    employee = DocEmployee.builder()
+                            .organization(organization)
+                            .person(docPerson)
+                            .build();
+                    docEmployeeRepo.save(employee);
+                    employees.put(docPerson.hashCode(), employee);
+                }
+                RegDocRequestEmployee regDocRequestEmployee = RegDocRequestEmployee.builder()
+                        .request(request)
+                        .docEmployee(employee)
                         .build();
-                docEmployeeRepo.save(docEmployee);
+                regDocRequestEmployeeRepo.save(regDocRequestEmployee);
             }
-        }
-        // добавим адреса
-        if (addresses.size() > 0) {
-            for (DocAddressFact docAddressFact : addresses) {
-                RegOrganizationAddressFact regOrganizationAddressFact = RegOrganizationAddressFact.builder()
-                        .clsOrganization(organization)
-                        .docRequest(docAddressFact.getDocRequest())
-                        .fullAddress(docAddressFact.getAddressFact())
-                        .isHand(true)
-                        .timeCreate(new Timestamp(System.currentTimeMillis()))
-                        .build();
-                regOrganizationAddressFactRepo.save(regOrganizationAddressFact);
+            // добавим адреса
+            for (DocAddressFact docAddressFact: request.getDocAddressFact()) {
+                if (!addresses.contains(docAddressFact.hashCode())) {
+                    RegOrganizationAddressFact regOrganizationAddressFact = RegOrganizationAddressFact.builder()
+                            .clsOrganization(organization)
+                            .docRequest(docAddressFact.getDocRequest())
+                            .fullAddress(docAddressFact.getAddressFact())
+                            .isHand(true)
+                            .timeCreate(new Timestamp(System.currentTimeMillis()))
+                            .build();
+                    regOrganizationAddressFactRepo.save(regOrganizationAddressFact);
+                    addresses.add(docAddressFact.hashCode());
+                }
             }
         }
     }
