@@ -1,5 +1,6 @@
 package ru.sibdigital.proccovid.model;
 
+import lombok.Builder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -28,6 +29,15 @@ public class RegEgrul {
     @Column(name = "inn", nullable = true, length = 10)
     private String inn;
     @Basic
+    @Column(name = "kpp", nullable = true, length = 9)
+    private String kpp;
+    @Basic
+    @Column(name = "ogrn", nullable = false, length = 13)
+    private String ogrn;
+    @Basic
+    @Column(name = "iogrn")
+    private Long iogrn;
+    @Basic
     @Column(name = "data", nullable = true, columnDefinition = "jsonb")
     @Type(type = "JsonbType")
     private String data;
@@ -37,10 +47,9 @@ public class RegEgrul {
     @Basic
     @Column(name = "date_actual")
     private Date dateActual;
-
-
-//    @OneToMany(mappedBy = "regEgrulOkvedId.regEgrul")
-//    private Set<RegEgrulOkved> regEgrulOkveds;
+    @Basic
+    @Column(name = "active_status")
+    private Integer activeStatus;
 
     public Long getId() {
         return id;
@@ -66,6 +75,30 @@ public class RegEgrul {
         this.inn = inn;
     }
 
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
+    }
+
+    public String getOgrn() {
+        return ogrn;
+    }
+
+    public void setOgrn(String ogrn) {
+        this.ogrn = ogrn;
+    }
+
+    public Long getIogrn() {
+        return iogrn;
+    }
+
+    public void setIogrn(Long iogrn) {
+        this.iogrn = iogrn;
+    }
+
     public String getData() {
         return data;
     }
@@ -73,15 +106,6 @@ public class RegEgrul {
     public void setData(String data) {
         this.data = data;
     }
-
-
-//    public Set<RegEgrulOkved> getRegEgrulOkveds() {
-//        return regEgrulOkveds;
-//    }
-//
-//    public void setRegEgrulOkveds(Set<RegEgrulOkved> regEgrulOkveds) {
-//        this.regEgrulOkveds = regEgrulOkveds;
-//    }
 
     public Long getIdMigration() {
         return idMigration;
@@ -99,16 +123,24 @@ public class RegEgrul {
         this.dateActual = dateActual;
     }
 
+    public Integer getActiveStatus() {
+        return activeStatus;
+    }
+
+    public void setActiveStatus(Integer activeStatus) {
+        this.activeStatus = activeStatus;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RegEgrul regEgrul = (RegEgrul) o;
-        return Objects.equals(inn, regEgrul.inn);
+        return Objects.equals(ogrn, regEgrul.ogrn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(inn);
+        return Objects.hash(ogrn);
     }
 }

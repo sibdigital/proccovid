@@ -14,4 +14,7 @@ public interface RegEgripRepo extends JpaRepository<RegEgrip, Long> {
     RegEgrip findByInn(String inn);
     @Query("select r from RegEgrip r where inn in :inns")
     List<RegEgrip> findAllByInnList(@Param("inns")List<String> inn);
+
+    @Query("select r from RegEgrip r where iogrn in :iogrns")
+    List<RegEgrip> findAllByIogrnList(@Param("iogrns") List<Long> iogrns);
 }

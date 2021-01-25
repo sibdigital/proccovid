@@ -2,12 +2,16 @@ package ru.sibdigital.proccovid.dto;
 
 import ru.sibdigital.proccovid.model.RegEgrul;
 import ru.sibdigital.proccovid.model.RegEgrulOkved;
+import ru.sibdigital.proccovid.model.RegFilial;
+import ru.sibdigital.proccovid.model.egr.SvStatus;
 
 import java.util.Set;
 
 public class EgrulContainer {
     private RegEgrul regEgrul;
     private Set<RegEgrulOkved> regEgrulOkved;
+    private Set<RegFilial> regFilials;
+    private Set<SvStatus> svStatuses;
 
     public EgrulContainer(RegEgrul regEgrul){
         this.setRegEgrul(regEgrul);
@@ -27,5 +31,21 @@ public class EgrulContainer {
 
     public void setRegEgrulOkved(Set<RegEgrulOkved> regEgrulOkved) {
         this.regEgrulOkved = regEgrulOkved;
+    }
+
+    public Set<RegFilial> getRegFilials() {
+        return regFilials;
+    }
+
+    public void setRegFilials(Set<RegFilial> regFilials) {
+        this.regFilials = regFilials;
+    }
+
+    public Set<SvStatus> getSvStatuses() {
+        return svStatuses;
+    }
+
+    public void setSvStatuses(Set<SvStatus> svStatuses) {
+        this.svStatuses = svStatuses;
     }
 }
