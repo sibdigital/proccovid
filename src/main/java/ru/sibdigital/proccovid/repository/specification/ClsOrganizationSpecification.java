@@ -21,7 +21,9 @@ public class ClsOrganizationSpecification implements Specification<ClsOrganizati
         List<Predicate> predicates = new ArrayList<>();
 
         if (searchCriteria.getInn() != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.trim(root.get("inn")), searchCriteria.getInn() + '%'));
+            predicates.add(criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.trim(root.get("inn")), '%' + searchCriteria.getInn() + '%'),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), '%' + searchCriteria.getInn() + '%')));
         }
 
         if (searchCriteria.getIdPrescription() != null) {

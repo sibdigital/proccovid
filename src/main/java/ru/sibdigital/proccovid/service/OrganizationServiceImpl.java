@@ -64,7 +64,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Page<ClsOrganization> getOrganizationsByCriteria(ClsOrganizationSearchCriteria searchCriteria, int page, int size) {
         ClsOrganizationSpecification specification = new ClsOrganizationSpecification();
         specification.setSearchCriteria(searchCriteria);
-        Page<ClsOrganization> clsOrganizationsPage = clsOrganizationRepo.findAll(specification, PageRequest.of(page, size, Sort.by("id")));
+        Page<ClsOrganization> clsOrganizationsPage = clsOrganizationRepo.findAll(specification, PageRequest.of(page, size, Sort.by("name")));
         return clsOrganizationsPage;
     }
 
