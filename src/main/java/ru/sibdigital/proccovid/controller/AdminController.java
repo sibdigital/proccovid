@@ -19,12 +19,7 @@ import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.service.*;
-import ru.sibdigital.proccovid.repository.*;
-import ru.sibdigital.proccovid.service.RequestService;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.servlet.http.HttpSession;
-import java.util.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +77,8 @@ public class AdminController {
     @Autowired
     private ClsDepartmentRepo clsDepartmentRepo;
 
+    @Autowired
+    private DBActualizeService dbActualizeService;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -449,4 +446,27 @@ public class AdminController {
         return departmentContacts;
     }
 
+    @GetMapping("/mark_organizations")
+    public @ResponseBody String markOrganizationAsDeleted() {
+        organizationService.markOrganizationAsDeleted();
+        return "Логическое удаление организаций выполнено";
+    }
+
+    @GetMapping("/actualize_organizations")
+    public @ResponseBody String actualizeOrganizations() {
+        organizationService.actualizeOrganizations();
+        return "Актуализация организаций запущена. Смотрите лог-файл actualization-organizations.log";
+    }
+
+    @GetMapping("/actualize_files")
+    public @ResponseBody String actualizeFiles() {
+        organizationService.actualizeFiles();
+        return "Актуализация файлов заявок запущена. Смотрите лог-файл actualization-files.log";
+    }
+
+    @GetMapping("/create_prescriptions")
+    public @ResponseBody String createPrescriptions() {
+        organizationService.createPrescriptions();
+        return "Создание предписаний выполнено";
+    }
 }

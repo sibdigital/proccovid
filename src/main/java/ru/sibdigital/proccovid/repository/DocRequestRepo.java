@@ -36,6 +36,8 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             nativeQuery = true)
     Optional<List<DocRequest>> getAllByStatusId(@Param("status") Integer status);
 
+    @Query("SELECT dr FROM DocRequest dr WHERE dr.organization.id =:idOrganization and dr.statusReview = 1")
+    Optional<List<DocRequest>> getAllRequestsWithConfirmedStatus (Long idOrganization);
 
     @Query(value = "SELECT dr.* FROM doc_request dr, cls_organization org WHERE  dr.id_organization = org.id " +
             " and dr.id_department = :dep_id AND dr.status_review = :status " +
@@ -92,6 +94,14 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "   and dr.id_type_request = :typeRequestId ")
     Optional<List<DocRequest>> getRequestsByOrganizationIdAndStatusAndTypeRequestId(Long orgId, Integer status, Long typeRequestId);
 
+    @Query("SELECT dr FROM DocRequest dr WHERE dr.organization.inn = :inn")
+    Optional<List<DocRequest>> getRequestsByInn(String inn);
+
+    @Query("SELECT dr FROM DocRequest dr WHERE dr.organization.id = :id")
+    Optional<List<DocRequest>> getRequestsByOrganizationId(Long id);
+
+    @Query("SELECT dr FROM DocRequest dr WHERE  dr.organization.inn = :inn AND dr.statusReview = :status")
+    Optional<List<DocRequest>> getRequestsByInnAndStatusReview(String inn, Integer status);
 
 
 

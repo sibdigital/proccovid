@@ -1,6 +1,7 @@
 package ru.sibdigital.proccovid.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
@@ -9,6 +10,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
+@Builder(toBuilder = true)
 public class RegOrganizationOkvedId implements Serializable {
 
     @JsonIgnore

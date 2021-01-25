@@ -2,11 +2,18 @@ package ru.sibdigital.proccovid.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
 @Table(name = "cls_principal", schema = "public")
+@Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class ClsPrincipal {
 
     @Id

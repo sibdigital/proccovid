@@ -124,7 +124,7 @@ public class DocPerson {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, lastname, firstname, patronymic/*, isAgree*/);
+        return Objects.hash(lastname, firstname, patronymic/*, isAgree*/);
     }
 
 

@@ -9,6 +9,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "reg_egrul", schema = "public")
@@ -50,6 +51,9 @@ public class RegEgrul {
     @Basic
     @Column(name = "active_status")
     private Integer activeStatus;
+
+    @OneToMany(mappedBy = "regEgrul", fetch = FetchType.LAZY)
+    private Set<RegEgrulOkved> regEgrulOkveds;
 
     public Long getId() {
         return id;
@@ -105,6 +109,14 @@ public class RegEgrul {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public Set<RegEgrulOkved> getRegEgrulOkveds() {
+        return regEgrulOkveds;
+    }
+
+    public void setRegEgrulOkveds(Set<RegEgrulOkved> regEgrulOkveds) {
+        this.regEgrulOkveds = regEgrulOkveds;
     }
 
     public Long getIdMigration() {
