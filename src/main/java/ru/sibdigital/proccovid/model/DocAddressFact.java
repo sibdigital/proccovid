@@ -80,7 +80,7 @@ public class DocAddressFact {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, addressFact, personOfficeFactCnt);
+        return Objects.hash(addressFact);
     }
 
 

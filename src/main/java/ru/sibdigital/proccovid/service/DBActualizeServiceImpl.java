@@ -2,20 +2,16 @@ package ru.sibdigital.proccovid.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
-import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
-import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSpecification;
-import ru.sibdigital.proccovid.utils.AppUtils;
 
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -26,7 +22,8 @@ import java.util.List;
 @Service
 public class DBActualizeServiceImpl implements DBActualizeService {
 
-    private final static int pageSize = 100;
+    @Value("${upload.path}")
+    private String uploadingDir;
 
     @Autowired
     private ClsOrganizationRepo clsOrganizationRepo;
@@ -53,46 +50,179 @@ public class DBActualizeServiceImpl implements DBActualizeService {
     private DocEmployeeRepo docEmployeeRepo;
 
     @Autowired
-    private RegOrganizationFileRepo regOrganizationFileRepo;
-
-    @Autowired
     private RegOrganizationAddressFactRepo regOrganizationAddressFactRepo;
 
-    public void actualizeOrganizations() {
-        long total = 0;
-        long countActualized = 0;
-        try {
-            log.info("Процесс актуализации организаций начат");
-            ClsOrganizationSpecification specification = new ClsOrganizationSpecification();
-            ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
-            searchCriteria.setInn("0323091260"); // TODO тест
-            specification.setSearchCriteria(searchCriteria);
-            total = clsOrganizationRepo.count(specification);
-            int pages = (int) (((total - 1) / pageSize) + 1);
-            for (int i = 0; i < pages; i++) {
-                Page<ClsOrganization> page = clsOrganizationRepo.findAll(specification, PageRequest.of(i, pageSize, Sort.by("id")));
-                actualizeOrganizations(page.getContent());
-                countActualized += page.getNumberOfElements();
-            }
-            log.info("Процесс актуализации организаций окончен");
-        } catch (Exception e) {
-            log.error("Ошибка! Процесс актуализации организаций прерван");
-            log.error(e.getMessage());
-        }
-        log.info("Количество организаций: {}", total);
-        log.info("Актуализировано: {}", countActualized);
-    }
+    @Autowired
+    private RegDocRequestEmployeeRepo regDocRequestEmployeeRepo;
+
+    @Autowired
+    private ClsPrescriptionRepo clsPrescriptionRepo;
+
+    @Autowired
+    private RegDocRequestPrescriptionRepo regDocRequestPrescriptionRepo;
+
+    @Autowired
+    private RegOrganizationPrescriptionRepo regOrganizationPrescriptionRepo;
 
     @Transactional
-    public void actualizeOrganizations(List<ClsOrganization> organizations) {
+    public long actualizeOrganizations(List<ClsOrganization> organizations) {
+        long countActualized = 0;
+        if (organizations == null) {
+            return countActualized;
+        }
         for (ClsOrganization organization : organizations) {
             if (organization.getActualized() != null && organization.getActualized()) {
                 continue;
             }
             // добавим окведы
-            String inn = organization.getInn();
-            if (inn.length() == 10) {
-                RegEgrul regEgrul = egrulService.getEgrul(inn);
+            addDataFromEgrul(organization);
+            // актуализируем заявки
+            List<DocRequest> actualRequests = actualizeRequests(organization);
+            // добавим сотрудников, адреса
+            addDataFromRequests(organization, actualRequests);
+            // создадим принципала
+            if (organization.getPrincipal() == null) {
+                ClsPrincipal principal = ClsPrincipal.builder()
+                        .organization(organization)
+//                        .password(passwordEncoder.encode(PasswordGenerator.generatePassword(8)))
+                        .password("")
+                        .build();
+                clsPrincipalRepo.save(principal);
+                organization.setPrincipal(principal);
+            }
+
+            organization.setActivated(true);
+            organization.setActualized(true);
+            organization.setTimeActualization(new Timestamp(System.currentTimeMillis()));
+            clsOrganizationRepo.save(organization);
+            countActualized++;
+        }
+        return countActualized;
+    }
+
+    /**
+     * Метод для переноса данных из заявок, таких как сотрудники и адреса
+     * @param organization
+     * @param requests
+     */
+    private void addDataFromRequests(ClsOrganization organization, List<DocRequest> requests) {
+        if (requests == null) {
+            return;
+        }
+        Map<Integer, DocEmployee> employees = new HashMap<>();
+        Set<Integer> addresses = new HashSet<>();
+        for (DocRequest request: requests) {
+            // добавим сотрудников
+            for (DocPerson docPerson: request.getDocPersonList()) {
+                DocEmployee employee = employees.get(docPerson.hashCode());
+                if (employee == null) {
+                    employee = DocEmployee.builder()
+                            .organization(organization)
+                            .person(docPerson)
+                            .isDeleted(false)
+                            .build();
+                    docEmployeeRepo.save(employee);
+                    employees.put(docPerson.hashCode(), employee);
+                }
+                RegDocRequestEmployee regDocRequestEmployee = RegDocRequestEmployee.builder()
+                        .request(request)
+                        .docEmployee(employee)
+                        .build();
+                regDocRequestEmployeeRepo.save(regDocRequestEmployee);
+            }
+            // добавим адреса
+            for (DocAddressFact docAddressFact: request.getDocAddressFact()) {
+                if (!addresses.contains(docAddressFact.hashCode())) {
+                    RegOrganizationAddressFact regOrganizationAddressFact = RegOrganizationAddressFact.builder()
+                            .clsOrganization(organization)
+                            .docRequest(docAddressFact.getDocRequest())
+                            .fullAddress(docAddressFact.getAddressFact())
+                            .isHand(true)
+                            .timeCreate(new Timestamp(System.currentTimeMillis()))
+                            .build();
+                    regOrganizationAddressFactRepo.save(regOrganizationAddressFact);
+                    addresses.add(docAddressFact.hashCode());
+                }
+            }
+            // добавим предписания и согласия
+            ClsPrescription prescription = clsPrescriptionRepo.findByTypeRequestId(request.getTypeRequest().getId());
+            if (prescription != null) {
+                List<ConsentPrescription> consentPrescriptions = new ArrayList<>();
+                if (prescription.getPrescriptionTexts() != null) {
+                    for (RegPrescriptionText regPrescriptionText : prescription.getPrescriptionTexts()) {
+                        consentPrescriptions.add(new ConsentPrescription(regPrescriptionText.getId().toString(), "1"));
+                    }
+                }
+                RegDocRequestPrescriptionAttributes regDocRequestPrescriptionAttributes = new RegDocRequestPrescriptionAttributes(consentPrescriptions.toArray(new ConsentPrescription[0]));
+                RegDocRequestPrescription regDocRequestPrescription = RegDocRequestPrescription.builder()
+                        .request(request)
+                        .prescription(prescription)
+                        .additionalAttributes(regDocRequestPrescriptionAttributes)
+                        .build();
+                regDocRequestPrescriptionRepo.save(regDocRequestPrescription);
+                //
+                RegOrganizationPrescriptionAttributes regOrganizationPrescriptionAttributes = new RegOrganizationPrescriptionAttributes(consentPrescriptions.toArray(new ConsentPrescription[0]));
+                RegOrganizationPrescription regOrganizationPrescription = RegOrganizationPrescription.builder()
+                        .organization(organization)
+                        .prescription(prescription)
+                        .additionalAttributes(regOrganizationPrescriptionAttributes)
+                        .build();
+                regOrganizationPrescriptionRepo.save(regOrganizationPrescription);
+            }
+        }
+    }
+
+    private List<DocRequest> actualizeRequests(ClsOrganization organization) {
+        // найдем утвержденные заявки по ИНН
+        List<DocRequest> allRequestsByOrgInn = docRequestRepo.getRequestsByInn(organization.getInn()).orElse(null);
+        if (allRequestsByOrgInn == null) {
+            return null;
+        }
+        // сгруппируем заявки по виду деятельности
+        Map<ClsTypeRequest, List<DocRequest>> requestMap = allRequestsByOrgInn.stream().collect(Collectors.groupingBy(DocRequest::getTypeRequest));
+        // в каждой группе найдем одну актуальную заявку и сформируем список заявок организации
+        List<DocRequest> actualRequests = new ArrayList<>();
+        for (Map.Entry<ClsTypeRequest, List<DocRequest>> entry: requestMap.entrySet()) {
+            // заявки ИД текущей организации делаем историческими
+            List<DocRequest> requests = entry.getValue().stream().filter(request -> Objects.equals(request.getOrganization().getId(), organization.getId())).collect(Collectors.toList());
+            for (DocRequest request : requests) {
+                request.setStatusActivity(ActivityStatuses.HISTORICAL.getValue());
+                docRequestRepo.save(request);
+            }
+            // найдем последнюю утвержденную заявку среди заявок по ИНН
+            DocRequest lastRequest = entry.getValue().stream().filter(request -> request.getStatusReview() == ReviewStatuses.CONFIRMED.getValue())
+                    .max(Comparator.comparing(DocRequest::getTimeReview)).orElse(null);
+            // если не нашли, ищем открытую
+            if (lastRequest == null) {
+                lastRequest = entry.getValue().stream().filter(request -> request.getStatusReview() == ReviewStatuses.OPENED.getValue())
+                        .max(Comparator.comparing(DocRequest::getTimeCreate)).orElse(null);
+            }
+            // если не нашли, ищем прочую
+            if (lastRequest == null) {
+                lastRequest = entry.getValue().stream().filter(request -> request.getStatusReview() == ReviewStatuses.ACCEPTED.getValue())
+                        .max(Comparator.comparing(DocRequest::getTimeCreate)).orElse(null);
+            }
+            if (lastRequest != null) {
+                if (!Objects.equals(lastRequest.getOrganization().getId(), organization.getId())) {
+                    lastRequest.setOrganization(organization);
+                }
+                lastRequest.setStatusActivity(ActivityStatuses.ACTIVE.getValue());
+                docRequestRepo.save(lastRequest);
+                actualRequests.add(lastRequest);
+            }
+        }
+        return actualRequests;
+    }
+
+    /**
+     * Метод для добавления данных к организации из ЕГРЮЛ/ЕГРИП
+     * @param organization
+     */
+    void addDataFromEgrul(ClsOrganization organization) {
+        String inn = organization.getInn();
+        if (inn.length() == 10) {
+            RegEgrul regEgrul = egrulService.getEgrul(inn);
+            if (regEgrul != null) {
                 for (RegEgrulOkved regEgrulOkved : regEgrul.getRegEgrulOkveds()) {
                     Okved okved = okvedRepo.findOkvedByIdSerial(regEgrulOkved.getIdOkved());
                     RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
@@ -105,8 +235,10 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                             .build();
                     regOrganizationOkvedRepo.save(regOrganizationOkved);
                 }
-            } else {
-                RegEgrip regEgrip = egrulService.getEgrip(inn);
+            }
+        } else {
+            RegEgrip regEgrip = egrulService.getEgrip(inn);
+            if (regEgrip != null) {
                 for (RegEgripOkved regEgripOkved : regEgrip.getRegEgripOkveds()) {
                     Okved okved = okvedRepo.findOkvedByIdSerial(regEgripOkved.getIdOkved());
                     RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
@@ -120,66 +252,6 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                     regOrganizationOkvedRepo.save(regOrganizationOkved);
                 }
             }
-            // добавим сотрудников, файлы, адреса
-            List<DocRequest> requests = docRequestRepo.getLastRequestByInnAndStatus(organization.getInn(), ReviewStatuses.CONFIRMED.getValue()).orElse(null);
-            if (requests != null) {
-                DocRequest request = requests.get(0);
-                // сотрудники
-                if (request.getDocPersonList() != null) {
-                    for (DocPerson docPerson : request.getDocPersonList()) {
-                        DocEmployee docEmployee = DocEmployee.builder()
-                                .organization(organization)
-                                .person(docPerson)
-                                .build();
-                        docEmployeeRepo.save(docEmployee);
-                    }
-                }
-                // файлы
-                if (request.getAttachmentPath() != null && !request.getAttachmentPath().isBlank()) {
-                    String[] paths = request.getAttachmentPath().split(",");
-                    for (String path : paths) {
-                        String fullName = AppUtils.getFileNameFromPath(path);
-                        String[] subStrings = fullName.split("\\.");
-                        String fileName = subStrings[0];
-                        String fileExtension = subStrings.length > 1 ? subStrings[subStrings.length - 1] : "";
-                        RegOrganizationFile regOrganizationFile = RegOrganizationFile.builder()
-                                .clsOrganizationByIdOrganization(organization)
-                                .attachmentPath(path)
-                                .isDeleted(false)
-                                .fileName(fileName)
-                                .fileExtension(fileExtension)
-                                .originalFileName(fullName)
-                                .timeCreate(new Timestamp(System.currentTimeMillis()))
-                                .build();
-                        regOrganizationFileRepo.save(regOrganizationFile);
-                    }
-                }
-                // адреса
-                if (request.getDocAddressFact() != null) {
-                    for (DocAddressFact docAddressFact : request.getDocAddressFact()) {
-                        RegOrganizationAddressFact regOrganizationAddressFact = RegOrganizationAddressFact.builder()
-                                .clsOrganization(organization)
-                                .fullAddress(docAddressFact.getAddressFact())
-                                .timeCreate(new Timestamp(System.currentTimeMillis()))
-                                .build();
-                        regOrganizationAddressFactRepo.save(regOrganizationAddressFact);
-                    }
-                }
-            }
-            // создадим принципала
-            if (organization.getPrincipal() == null) {
-                ClsPrincipal principal = ClsPrincipal.builder()
-                        .organization(organization)
-//                            .password(passwordEncoder.encode(PasswordGenerator.generatePassword(8)))
-                        .build();
-                clsPrincipalRepo.save(principal);
-                organization.setPrincipal(principal);
-            }
-
-//            organization.setActivated(true); // TODO
-            organization.setActualized(true);
-            organization.setTimeActualization(new Timestamp(System.currentTimeMillis()));
-            clsOrganizationRepo.save(organization);
         }
     }
 

@@ -33,6 +33,9 @@ public class DocPerson {
     @Column(name = "patronymic", nullable = true, length = 100)
     private String patronymic;
 
+    @Basic
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted;
 
 
 /*
@@ -80,6 +83,15 @@ public class DocPerson {
         this.patronymic = patronymic;
     }
 
+    @Basic
+    @Column(name = "is_deleted", nullable = false)
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
 /*
     public Boolean getAgree() {
         return isAgree;
@@ -112,7 +124,7 @@ public class DocPerson {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, lastname, firstname, patronymic/*, isAgree*/);
+        return Objects.hash(lastname, firstname, patronymic/*, isAgree*/);
     }
 
 

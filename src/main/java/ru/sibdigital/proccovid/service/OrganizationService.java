@@ -7,4 +7,12 @@ import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCri
 public interface OrganizationService {
 
     Page<ClsOrganization> getOrganizationsByCriteria(ClsOrganizationSearchCriteria searchCriteria, int page, int size);
+
+    void markOrganizationAsDeleted();
+
+    void actualizeOrganizations();
+
+    void actualizeFiles();
+
+    void createPrescriptions();
 }

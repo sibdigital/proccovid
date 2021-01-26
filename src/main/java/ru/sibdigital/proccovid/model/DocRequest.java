@@ -54,7 +54,7 @@ public class DocRequest {
     private String rejectComment;
     private Long old_department_id;
 
-    private Short statusActivity;
+    private Integer statusActivity;
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -369,11 +369,11 @@ public class DocRequest {
 
     @Basic
     @Column(name = "status_activity")
-    public Short getStatusActivity() {
+    public Integer getStatusActivity() {
         return statusActivity;
     }
 
-    public void setStatusActivity(Short statusActivity) {
+    public void setStatusActivity(Integer statusActivity) {
         this.statusActivity = statusActivity;
     }
 
