@@ -19,6 +19,7 @@ import ru.sibdigital.proccovid.dto.egrul.ГРНДатаТип;
 import ru.sibdigital.proccovid.dto.egrul.СвОКВЭДТип;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.model.egr.EgrActiveStatus;
+import ru.sibdigital.proccovid.model.egr.EgrFilialTypes;
 import ru.sibdigital.proccovid.model.egr.Sulst;
 import ru.sibdigital.proccovid.model.egr.SvStatus;
 import ru.sibdigital.proccovid.repository.*;
@@ -490,6 +491,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     RegFilial regFilial = RegFilial.builder()
                             .egrul(regEgrul)
                             .inn(regEgrul.getInn())
+                            .type(EgrFilialTypes.FILIAL.getValue())
                             .build();
                     if (свФилиал.getСвНаим() != null) {
                         regFilial.setFullName(свФилиал.getСвНаим().getНаимПолн());
@@ -507,6 +509,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     RegFilial regFilial = RegFilial.builder()
                             .egrul(regEgrul)
                             .inn(regEgrul.getInn())
+                            .type(EgrFilialTypes.REPRESENTATION.getValue())
                             .build();
                     if (свПредстав.getСвНаим() != null) {
                         regFilial.setFullName(свПредстав.getСвНаим().getНаимПолн());

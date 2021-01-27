@@ -43,6 +43,9 @@ public class RegFilial {
     @ManyToOne
     @JoinColumn(name = "id_egrul", referencedColumnName = "id")
     private RegEgrul egrul;
+    @Basic
+    @Column(name = "type")
+    private Integer type;
 
     public Long getId() {
         return id;
@@ -91,6 +94,13 @@ public class RegFilial {
         this.data = data;
     }
 
+    public Integer getType() {
+        return type;
+    }
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -101,12 +111,13 @@ public class RegFilial {
                 Objects.equals(kpp, regFilial.kpp) &&
                 Objects.equals(fullName, regFilial.fullName) &&
                 Objects.equals(data, regFilial.data) &&
-                Objects.equals(egrul, regFilial.egrul);
+                Objects.equals(egrul, regFilial.egrul) &&
+                Objects.equals(type, regFilial.type);
     }
 
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, inn, kpp, fullName, data, egrul);
+        return Objects.hash(id, inn, kpp, fullName, data, egrul, type);
     }
 }
