@@ -8,6 +8,7 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -54,6 +55,9 @@ public class RegEgrul {
 
     @OneToMany(mappedBy = "regEgrul", fetch = FetchType.LAZY)
     private Set<RegEgrulOkved> regEgrulOkveds;
+
+    @OneToMany(mappedBy = "egrul", fetch = FetchType.LAZY)
+    private List<RegFilial> regFilials;
 
     public Long getId() {
         return id;
@@ -141,6 +145,14 @@ public class RegEgrul {
 
     public void setActiveStatus(Integer activeStatus) {
         this.activeStatus = activeStatus;
+    }
+
+    public List<RegFilial> getRegFilials() {
+        return regFilials;
+    }
+
+    public void setRegFilials(List<RegFilial> regFilials) {
+        this.regFilials = regFilials;
     }
 
     @Override

@@ -27,6 +27,7 @@ public class ClsOrganization {
     private String shortName;
     private String inn;
     private String ogrn;
+    private String kpp;
     private String addressJur;
     private String okvedAdd;
     private String okved;
@@ -48,6 +49,10 @@ public class ClsOrganization {
     @JoinColumn(name = "id_principal", referencedColumnName = "id")
     @JsonIgnore
     private ClsPrincipal principal;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_orgnization_classifier", referencedColumnName = "id")
+    private RegOrganizationClassifier regOrganizationClassifier;
 
     @OneToMany(mappedBy = "regOrganizationOkvedId.clsOrganization")
     private Set<RegOrganizationOkved> regOrganizationOkveds;
@@ -108,6 +113,16 @@ public class ClsOrganization {
 
     public void setOgrn(String ogrn) {
         this.ogrn = ogrn;
+    }
+
+    @Basic
+    @Column(name = "kpp", nullable = false)
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
     }
 
     @Basic
@@ -279,6 +294,14 @@ public class ClsOrganization {
         this.principal = principal;
     }
 
+    public RegOrganizationClassifier getRegOrganizationClassifier() {
+        return regOrganizationClassifier;
+    }
+
+    public void setRegOrganizationClassifier(RegOrganizationClassifier regOrganizationClassifier) {
+        this.regOrganizationClassifier = regOrganizationClassifier;
+    }
+
     public Set<RegOrganizationOkved> getRegOrganizationOkveds() {
         return regOrganizationOkveds;
     }
@@ -305,6 +328,7 @@ public class ClsOrganization {
                 Objects.equals(shortName, that.shortName) &&
                 Objects.equals(inn, that.inn) &&
                 Objects.equals(ogrn, that.ogrn) &&
+                Objects.equals(kpp, that.kpp) &&
                 Objects.equals(addressJur, that.addressJur) &&
                 Objects.equals(okvedAdd, that.okvedAdd) &&
                 Objects.equals(okved, that.okved) &&
@@ -317,6 +341,6 @@ public class ClsOrganization {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, shortName, inn, ogrn, addressJur, okvedAdd, okved, email, phone, statusImport, timeImport, idTypeRequest);
+        return Objects.hash(id, name, shortName, inn, ogrn, kpp, addressJur, okvedAdd, okved, email, phone, statusImport, timeImport, idTypeRequest);
     }
 }
