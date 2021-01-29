@@ -3768,6 +3768,10 @@ public class EGRUL {
             return this.свЗапЕГРЮЛ;
         }
 
+        public void setСвЗапЕГРЮЛ(List<СвЗапЕГРЮЛ> свЗапЕГРЮЛ) {
+            this.свЗапЕГРЮЛ = свЗапЕГРЮЛ;
+        }
+
         /**
          * Gets the value of the датаВып property.
          *

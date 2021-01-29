@@ -14,16 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.dto.EgripContainer;
 import ru.sibdigital.proccovid.dto.EgrulContainer;
 import ru.sibdigital.proccovid.dto.egrip.EGRIP;
-import ru.sibdigital.proccovid.dto.egrul.EGRUL;
-import ru.sibdigital.proccovid.dto.egrul.ГРНДатаТип;
-import ru.sibdigital.proccovid.dto.egrul.СвОКВЭДТип;
+import ru.sibdigital.proccovid.dto.egrip.ГРНИПДатаТип;
+import ru.sibdigital.proccovid.dto.egrul.*;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.model.egr.EgrActiveStatus;
-import ru.sibdigital.proccovid.model.egr.EgrFilialTypes;
-import ru.sibdigital.proccovid.model.egr.Sulst;
-import ru.sibdigital.proccovid.model.egr.SvStatus;
+import ru.sibdigital.proccovid.model.egr.*;
 import ru.sibdigital.proccovid.repository.*;
-import ru.sibdigital.proccovid.repository.egr.SulstRepo;
+import ru.sibdigital.proccovid.repository.egr.ReferenceBookRepo;
+import ru.sibdigital.proccovid.repository.egr.SvRecordEgrRepo;
 import ru.sibdigital.proccovid.repository.egr.SvStatusRepo;
 
 import javax.xml.bind.JAXBContext;
@@ -84,14 +81,19 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     private MigrationService migrationService;
 
     @Autowired
-    private SulstRepo sulstRepo;
+    private ReferenceBookRepo referenceBookRepo;
 
     @Autowired
     private SvStatusRepo svStatusRepo;
 
+    @Autowired
+    private SvRecordEgrRepo svRecordEgrRepo;
+
     private Map<String, Okved> okvedsMap = new HashMap<>();
 
-    private Map<String, Sulst> sulstMap  = new HashMap<>();
+    private Map<String, ReferenceBook> sulstMap  = new HashMap<>();
+    private Map<String, ReferenceBook> sipstMap  = new HashMap<>();
+    private Map<String, ReferenceBook> spvzMap  = new HashMap<>();
 
     private static Unmarshaller getUnmarshaller(Class clazz) {
         Unmarshaller unmarshaller = null;
@@ -124,12 +126,13 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     public void importData(boolean isEgrul, boolean isEgrip) {
         fillOkveds();
-        fillSulst();
+        fillReferenceBooks();
         if (isEgrul) {
             importEgrulData();
         }
         if (isEgrip) {
             importEgripData();
+            importEgrulData(); // убрать
         }
     }
 
@@ -141,12 +144,21 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         }
     }
 
-    private void fillSulst(){
-        final List<Sulst> sulsts = sulstRepo.findAll();
-        for (Sulst sulst: sulsts) {
-            String key = sulst.getCode();
-            sulstMap.put(key, sulst);
+    private void fillReferenceBooks(){
+        sulstMap = getMapReferenceBookByType(ReferenceBookTypes.SULST.getValue());
+        sipstMap = getMapReferenceBookByType(ReferenceBookTypes.SIPST.getValue());
+        spvzMap  = getMapReferenceBookByType(ReferenceBookTypes.SPVZ.getValue());
+    }
+
+    private Map<String, ReferenceBook> getMapReferenceBookByType(Short type) {
+        Map<String, ReferenceBook> map  = new HashMap<>();
+        List<ReferenceBook> list = referenceBookRepo.findAllByType(type);
+        for (ReferenceBook book: list) {
+            String key = book.getCode();
+            map.put(key, book);
         }
+
+        return map;
     }
 
     private static Comparator<File> compareByFileName = new Comparator<File>() {
@@ -311,6 +323,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         List<EgrulContainer> containerList = new ArrayList<>();
         Set<RegFilial> filials = new HashSet<>();
         Set<SvStatus> svStatuses = new HashSet<>();
+        Set<SvRecordEgr> svRecords = new HashSet<>();
         for (EGRUL.СвЮЛ свЮЛ : egrul.getСвЮЛ()) {
             //egrulLogger.info("ИНН: " + свЮЛ.getИНН());
             EGRUL.СвЮЛ.СвОКВЭД свОКВЭД = свЮЛ.getСвОКВЭД();
@@ -339,7 +352,17 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             }
 
             try {
+                svRecords = parseSvRecords(свЮЛ, newRegEgrul);
+                свЮЛ.setСвПодразд(null);
+            } catch (JsonProcessingException e) {
+                egrulLogger.error("Не удалось преобразовать данные филиала к JSON для ОГРН " + свЮЛ.getОГРН());
+                e.printStackTrace();
+            }
+
+            try {
                 свЮЛ.setСвОКВЭД(null);
+                свЮЛ.setСвСтатус(null);
+                свЮЛ.setСвЗапЕГРЮЛ(null);
                 newRegEgrul.setData(mapper.writeValueAsString(свЮЛ));
             } catch (JsonProcessingException e) {
                 egrulLogger.error("Не удалось преобразовать данные к JSON для ОГРН " + свЮЛ.getОГРН());
@@ -349,6 +372,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             EgrulContainer ec = new EgrulContainer(newRegEgrul);
             ec.setRegFilials(filials);
             ec.setSvStatuses(svStatuses);
+            ec.setSvRecords(svRecords);
 
             if (свОКВЭД != null) {
                 Set<RegEgrulOkved> regEgrulOkveds = new HashSet<>();
@@ -445,7 +469,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
                 EGRUL.СвЮЛ.СвСтатус.СвСтатус1 свСтатус1 = свСтатус.getСвСтатус();
                 if (свСтатус1 != null) {
-                    Sulst sulst = sulstMap.get(свСтатус1.getКодСтатусЮЛ());
+                    ReferenceBook sulst = sulstMap.get(свСтатус1.getКодСтатусЮЛ());
                     if (sulst == null) {
                         sulst = createSulst(свСтатус1);
                     }
@@ -471,12 +495,13 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         return statuses;
     }
 
-    private Sulst createSulst(EGRUL.СвЮЛ.СвСтатус.СвСтатус1 свСтатус1) {
-        Sulst sulst = Sulst.builder()
+    private ReferenceBook createSulst(EGRUL.СвЮЛ.СвСтатус.СвСтатус1 свСтатус1) {
+        ReferenceBook sulst = ReferenceBook.builder()
                         .code(свСтатус1.getКодСтатусЮЛ())
                         .name(свСтатус1.getНаимСтатусЮЛ())
+                        .type(ReferenceBookTypes.SULST.getValue())
                         .build();
-        sulstRepo.save(sulst);
+        referenceBookRepo.save(sulst);
         sulstMap.put(sulst.getCode(), sulst);
 
         return sulst;
@@ -500,6 +525,22 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     if (свФилиал.getСвУчетНОФилиал() != null) {
                         regFilial.setKpp(свФилиал.getСвУчетНОФилиал().getКПП());
                     }
+
+                    if (свФилиал.getАдрМНРФ() != null) {
+                        String kladrAddress = getКladrAddress(свФилиал.getАдрМНРФ());
+                        Integer kladrAddressHash = kladrAddress.hashCode();
+                        String kladrCode = свФилиал.getАдрМНРФ().getКодАдрКладр();
+
+                        regFilial.setKladrAddress(kladrAddress);
+                        regFilial.setKladrAddressHash(kladrAddressHash);
+                        regFilial.setKladrCode(kladrCode);
+
+                        RegFilial prevRegFilial = regFilialRepo.findByEgrul_IogrnAndAndKladrAddressHashAndType(regEgrul.getIogrn(), kladrAddressHash, EgrFilialTypes.FILIAL.getValue());
+                        if (prevRegFilial != null) {
+                            regFilial.setId(prevRegFilial.getId());
+                        }
+                    }
+
                     regFilial.setData(mapper.writeValueAsString(свФилиал));
                     filials.add(regFilial);
                 }
@@ -518,6 +559,22 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     if (свПредстав.getСвУчетНОПредстав() != null) {
                         regFilial.setKpp(свПредстав.getСвУчетНОПредстав().getКПП());
                     }
+
+                    if (свПредстав.getАдрМНРФ() != null) {
+                        String kladrAddress = getКladrAddress(свПредстав.getАдрМНРФ());
+                        String kladrCode = свПредстав.getАдрМНРФ().getКодАдрКладр();
+                        Integer kladrAddressHash = kladrAddress.hashCode();
+
+                        regFilial.setKladrAddress(kladrAddress);
+                        regFilial.setKladrAddressHash(kladrAddressHash);
+                        regFilial.setKladrCode(kladrCode);
+
+                        RegFilial prevRegFilial = regFilialRepo.findByEgrul_IogrnAndAndKladrAddressHashAndType(regEgrul.getIogrn(), kladrAddressHash, EgrFilialTypes.REPRESENTATION.getValue());
+                        if (prevRegFilial != null) {
+                            regFilial.setId(prevRegFilial.getId());
+                        }
+                    }
+
                     regFilial.setData(mapper.writeValueAsString(свПредстав));
                     filials.add(regFilial);
                 }
@@ -525,6 +582,41 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         }
 
         return filials;
+    }
+
+    private Set<SvRecordEgr> parseSvRecords(EGRUL.СвЮЛ свЮЛ, RegEgrul regEgrul) throws JsonProcessingException {
+        Set<SvRecordEgr> svRecords = new HashSet<>();
+        List<EGRUL.СвЮЛ.СвЗапЕГРЮЛ> свЗапЕГРЮЛList = свЮЛ.getСвЗапЕГРЮЛ();
+        if (свЗапЕГРЮЛList!= null ) {
+            for (EGRUL.СвЮЛ.СвЗапЕГРЮЛ свЗапЕГРЮЛ : свЗапЕГРЮЛList) {
+                SvRecordEgr svRecordEgr = SvRecordEgr.builder()
+                                        .egrul(regEgrul)
+                                        .recordId(свЗапЕГРЮЛ.getИдЗап())
+                                        .recordDate(XMLGregorianCalendarToTimestamp(свЗапЕГРЮЛ.getДатаЗап()))
+                                        .build();
+
+                svRecordEgr.setIsValid(isValidSvRecord(свЗапЕГРЮЛ));
+
+                ВидЗапТип видЗап =  свЗапЕГРЮЛ.getВидЗап();
+                if (видЗап != null) {
+                    ReferenceBook spvz = spvzMap.get(видЗап.getКодСПВЗ());
+                    if (spvz == null) {
+                        spvz = createSpvz(видЗап.getКодСПВЗ(), видЗап.getНаимВидЗап());
+                    }
+                    svRecordEgr.setSpvz(spvz);
+                }
+
+                свЗапЕГРЮЛ.setВидЗап(null);
+                свЗапЕГРЮЛ.setИдЗап(null);
+                свЗапЕГРЮЛ.setИдЗап(null);
+
+                svRecordEgr.setData(mapper.writeValueAsString(свЗапЕГРЮЛ));
+
+                svRecords.add(svRecordEgr);
+            }
+        }
+
+        return svRecords;
     }
 
     private void saveEgruls(List<EgrulContainer> list){
@@ -558,11 +650,19 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             regEgrulOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
             regFilialRepo.deleteRegFilials(deletedOkveds);
             svStatusRepo.deleteSvStatuses(deletedOkveds);
+            svRecordEgrRepo.deleteSvRecordEgrsByIdEgruls(deletedOkveds);
         }
 
         final List<RegEgrul> rel = updatedData.stream().map(c -> c.getRegEgrul()).collect(Collectors.toList());
         regEgrulRepo.saveAll(rel);
 
+        saveRegEgrulOkveds(updatedData);
+        saveSvFilials(updatedData);
+        saveSvStatuses(updatedData);
+        saveSvRecords(updatedData);
+    }
+
+    private void saveRegEgrulOkveds(List<EgrulContainer> updatedData) {
         final List<Set<RegEgrulOkved>> reos = updatedData.stream().map(c -> c.getRegEgrulOkved()).collect(Collectors.toList());
         Set<RegEgrulOkved> granula = new HashSet<>();
         int count = 1;
@@ -579,39 +679,62 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         if (!granula.isEmpty()){
             regEgrulOkvedRepo.saveAll(granula);
         }
+    }
 
+    private void saveSvFilials(List<EgrulContainer> updatedData) {
         final List<Set<RegFilial>> rfs = updatedData.stream().map(c -> c.getRegFilials()).collect(Collectors.toList());
-        Set<RegFilial> granula2 = new HashSet<>();
+        Set<RegFilial> granula = new HashSet<>();
         int cnt = 1;
         for (Set<RegFilial> rf : rfs) {
             if (rf != null) {
-                granula2.addAll(rf);
+                granula.addAll(rf);
                 cnt ++;
             }
-            if (cnt % 10 == 0 && !granula2.isEmpty()){
-                regFilialRepo.saveAll(granula2);
-                granula2.clear();
+            if (cnt % 10 == 0 && !granula.isEmpty()){
+                regFilialRepo.saveAll(granula);
+                granula.clear();
             }
         }
-        if (!granula2.isEmpty()){
-            regFilialRepo.saveAll(granula2);
+        if (!granula.isEmpty()){
+            regFilialRepo.saveAll(granula);
         }
+    }
 
+    private void saveSvStatuses(List<EgrulContainer> updatedData) {
         final List<Set<SvStatus>> svs = updatedData.stream().map(c -> c.getSvStatuses()).collect(Collectors.toList());
-        Set<SvStatus> granula3 = new HashSet<>();
-        int cnt2 = 1;
+        Set<SvStatus> granula = new HashSet<>();
+        int cnt = 1;
         for (Set<SvStatus> sv : svs) {
             if (sv != null) {
-                granula3.addAll(sv);
-                cnt2 ++;
+                granula.addAll(sv);
+                cnt ++;
             }
-            if (cnt2 % 10 == 0 && !granula3.isEmpty()){
-                svStatusRepo.saveAll(granula3);
-                granula3.clear();
+            if (cnt % 10 == 0 && !granula.isEmpty()){
+                svStatusRepo.saveAll(granula);
+                granula.clear();
             }
         }
-        if (!granula3.isEmpty()){
-            svStatusRepo.saveAll(granula3);
+        if (!granula.isEmpty()){
+            svStatusRepo.saveAll(granula);
+        }
+    }
+
+    private void saveSvRecords(List<EgrulContainer> updatedData) {
+        final List<Set<SvRecordEgr>> set = updatedData.stream().map(c -> c.getSvRecords()).collect(Collectors.toList());
+        Set<SvRecordEgr> granula = new HashSet<>();
+        int cnt = 1;
+        for (Set<SvRecordEgr> sre : set) {
+            if (sre != null) {
+                granula.addAll(sre);
+                cnt ++;
+            }
+            if (cnt % 10 == 0 && !granula.isEmpty()){
+                svRecordEgrRepo.saveAll(granula);
+                granula.clear();
+            }
+        }
+        if (!granula.isEmpty()){
+            svRecordEgrRepo.saveAll(granula);
         }
     }
 
@@ -623,6 +746,17 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             result.put(r.getIogrn(), r);
         });
         return result;
+    }
+
+    private Boolean isValidSvRecord(EGRUL.СвЮЛ.СвЗапЕГРЮЛ свЗапЕГРЮЛ) {
+        Boolean isValid = true;
+
+        EGRUL.СвЮЛ.СвЗапЕГРЮЛ.СвСтатусЗап свСтатусЗап = свЗапЕГРЮЛ.getСвСтатусЗап();
+        if (свСтатусЗап != null && свСтатусЗап.getГРНДатаНед() != null) {
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     ////////////////////////////// ЕГРИП /////////////////////////////
@@ -783,11 +917,19 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         if (!deletedOkveds.isEmpty()) {
             regEgripOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
+            svStatusRepo.deleteSvStatuses(deletedOkveds);
+            svRecordEgrRepo.deleteSvRecordEgrsByIdEgrips(deletedOkveds);
         }
 
         final List<RegEgrip> rel = updatedData.stream().map(c -> c.getRegEgrip()).collect(Collectors.toList());
         regEgripRepo.saveAll(rel);
 
+        saveRegEgripOkveds(updatedData);
+        saveEgripSvStatuses(updatedData);
+        saveEgripSvRecords(updatedData);
+    }
+
+    private void saveRegEgripOkveds(List<EgripContainer> updatedData) {
         final List<Set<RegEgripOkved>> reos = updatedData.stream().map(c -> c.getRegEgripOkved()).collect(Collectors.toList());
         Set<RegEgripOkved> granula = new HashSet<>();
         int count = 1;
@@ -807,6 +949,44 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         }
     }
 
+    private void saveEgripSvStatuses(List<EgripContainer> updatedData) {
+        final List<Set<SvStatus>> svs = updatedData.stream().map(c -> c.getSvStatuses()).collect(Collectors.toList());
+        Set<SvStatus> granula = new HashSet<>();
+        int cnt = 1;
+        for (Set<SvStatus> sv : svs) {
+            if (sv != null) {
+                granula.addAll(sv);
+                cnt ++;
+            }
+            if (cnt % 10 == 0 && !granula.isEmpty()){
+                svStatusRepo.saveAll(granula);
+                granula.clear();
+            }
+        }
+        if (!granula.isEmpty()){
+            svStatusRepo.saveAll(granula);
+        }
+    }
+
+    private void saveEgripSvRecords(List<EgripContainer> updatedData) {
+        final List<Set<SvRecordEgr>> set = updatedData.stream().map(c -> c.getSvRecords()).collect(Collectors.toList());
+        Set<SvRecordEgr> granula = new HashSet<>();
+        int cnt = 1;
+        for (Set<SvRecordEgr> sre : set) {
+            if (sre != null) {
+                granula.addAll(sre);
+                cnt ++;
+            }
+            if (cnt % 10 == 0 && !granula.isEmpty()){
+                svRecordEgrRepo.saveAll(granula);
+                granula.clear();
+            }
+        }
+        if (!granula.isEmpty()){
+            svRecordEgrRepo.saveAll(granula);
+        }
+    }
+
     private Map<Long, RegEgrip> findSavedEarlierEgrips(List<EgripContainer> list){
         final List<Long> iogrns = list.stream().map(m -> m.getRegEgrip().getIogrn()).collect(Collectors.toList());
         final List<RegEgrip> rel = regEgripRepo.findAllByIogrnList(iogrns);
@@ -819,6 +999,8 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     private  List<EgripContainer> parseEgripData(EGRIP egrip, ClsMigration migration) {
         List<EgripContainer> containerList = new ArrayList<>();
+        Set<SvStatus> svStatuses = new HashSet<>();
+        Set<SvRecordEgr> svRecords = new HashSet<>();
         for (EGRIP.СвИП свИП : egrip.getСвИП()) {
             //egripLogger.info("ИНН: " + свИП.getИННФЛ());
 
@@ -830,17 +1012,36 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             String ogrn = свИП.getОГРНИП();
             newRegEgrip.setOgrn(ogrn);
             newRegEgrip.setIogrn((ogrn != null) ? Long.parseLong(ogrn) : null);
+            newRegEgrip.setTypeEgrip(Short.valueOf(свИП.getКодВидИП()));
+
             Date dateActual = new Date(свИП.getДатаВып().toGregorianCalendar().getTimeInMillis());
             newRegEgrip.setDateActual(dateActual);
+
+            svStatuses = parseSvStatuses(свИП, newRegEgrip);
+
+//            newRegEgrip.setActiveStatus(getActiveStatus(свИП, svStatuses));
+
+            try {
+                svRecords = parseSvRecords(свИП, newRegEgrip);
+            } catch (JsonProcessingException e) {
+                egrulLogger.error("Не удалось преобразовать данные филиала к JSON для ОГРН " + свИП.getОГРНИП());
+                e.printStackTrace();
+            }
+
             try {
                 свИП.setСвОКВЭД(null);
+                свИП.setСвСтатус(null);
+                свИП.setСвЗапЕГРИП(null);
                 newRegEgrip.setData(mapper.writeValueAsString(свИП));
             } catch (JsonProcessingException e) {
                 egripLogger.error("Не удалось преобразовать данные к JSON для ИНН " + свИП.getИННФЛ());
                 e.printStackTrace();
             }
+
             newRegEgrip.setIdMigration(migration.getId());
             EgripContainer ec = new EgripContainer(newRegEgrip);
+            ec.setSvStatuses(svStatuses);
+            ec.setSvRecords(svRecords);
 
             if (свОКВЭД != null) {
                 Set<RegEgripOkved> regEgripOkveds = new HashSet<>();
@@ -883,4 +1084,175 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         return containerList;
     }
 
+    private Set<SvStatus> parseSvStatuses(EGRIP.СвИП свИП, RegEgrip regEgrip) {
+        Set<SvStatus> statuses = new HashSet<>();
+        EGRIP.СвИП.СвСтатус свСтатус = свИП.getСвСтатус();
+        if (свСтатус != null) {
+            SvStatus svStatus = SvStatus.builder()
+                    .egrip(regEgrip)
+                    .build();
+
+            EGRIP.СвИП.СвСтатус.СвСтатус1 свСтатус1 = свСтатус.getСвСтатус();
+            if (свСтатус1 != null) {
+                ReferenceBook sipst = sipstMap.get(свСтатус1.getКодСтатус());
+                if (sipst == null) {
+                    sipst = createSipst(свСтатус1);
+                }
+                svStatus.setSulst(sipst);
+            }
+
+            ГРНИПДатаТип grnDate = свСтатус.getГРНИПДата();
+            if (grnDate != null) {
+                svStatus.setGrn(grnDate.getГРНИП());
+                svStatus.setRecordDate(XMLGregorianCalendarToTimestamp(grnDate.getДатаЗаписи()));
+            }
+            statuses.add(svStatus);
+        }
+
+        return statuses;
+    }
+
+    private Set<SvRecordEgr> parseSvRecords(EGRIP.СвИП свИП, RegEgrip regEgrip) throws JsonProcessingException {
+        Set<SvRecordEgr> svRecords = new HashSet<>();
+        List<EGRIP.СвИП.СвЗапЕГРИП> свЗапЕГРИПList = свИП.getСвЗапЕГРИП();
+        if (свЗапЕГРИПList!= null ) {
+            for (EGRIP.СвИП.СвЗапЕГРИП свЗапЕГРИП : свЗапЕГРИПList) {
+                SvRecordEgr svRecordEgr = SvRecordEgr.builder()
+                        .egrip(regEgrip)
+                        .recordId(свЗапЕГРИП.getИдЗап())
+                        .recordDate(XMLGregorianCalendarToTimestamp(свЗапЕГРИП.getДатаЗап()))
+                        .build();
+
+                svRecordEgr.setIsValid(isValidSvRecord(свЗапЕГРИП));
+
+                ru.sibdigital.proccovid.dto.egrip.ВидЗапТип видЗап =  свЗапЕГРИП.getВидЗап();
+                if (видЗап != null) {
+                    ReferenceBook spvz = spvzMap.get(видЗап.getКодСПВЗ());
+                    if (spvz == null) {
+                        spvz = createSpvz(видЗап.getКодСПВЗ(), видЗап.getНаимВидЗап());
+                    }
+                    svRecordEgr.setSpvz(spvz);
+                }
+
+                свЗапЕГРИП.setВидЗап(null);
+                свЗапЕГРИП.setИдЗап(null);
+                свЗапЕГРИП.setИдЗап(null);
+
+                svRecordEgr.setData(mapper.writeValueAsString(свЗапЕГРИП));
+
+                svRecords.add(svRecordEgr);
+            }
+        }
+
+        return svRecords;
+    }
+
+    private ReferenceBook createSipst(EGRIP.СвИП.СвСтатус.СвСтатус1 свСтатус1) {
+        ReferenceBook sipst = ReferenceBook.builder()
+                .code(свСтатус1.getКодСтатус())
+                .name(свСтатус1.getНаимСтатус())
+                .type(ReferenceBookTypes.SIPST.getValue())
+                .build();
+        referenceBookRepo.save(sipst);
+        sipstMap.put(sipst.getCode(), sipst);
+
+        return sipst;
+    }
+
+    private Integer getActiveStatus(EGRIP.СвИП свИП, Set<SvStatus> svStatuses, Set<SvRecordEgr> svRecords) {
+        Integer activeStatus = EgrActiveStatus.ACTIVE.getValue();
+
+        if (!checkСвИПIsValid(svStatuses)) {
+            activeStatus = EgrActiveStatus.NOT_VALID.getValue();
+        }
+
+        if (checkСвИПIsCeased(свИП)) {
+            activeStatus = EgrActiveStatus.CEASED.getValue();
+        }
+
+        return activeStatus;
+    }
+
+    private boolean checkСвИПIsCeased(EGRIP.СвИП свИП) {
+        boolean isCeased = false;
+        EGRIP.СвИП.СвПрекращ свПрекрИП = свИП.getСвПрекращ();
+        if (свПрекрИП != null) {
+            isCeased = true;
+        }
+        return isCeased;
+    }
+
+    private boolean checkСвИПIsValid(Set<SvStatus> svStatuses) {
+
+        boolean isValid = true;
+        for (SvStatus svStatus : svStatuses) {
+            String code = svStatus.getSulst().getCode();
+            Integer icode = Integer.valueOf(code);
+            if (icode > 200) {
+                isValid = false;
+            }
+        }
+        return isValid;
+    }
+
+    private Boolean isValidSvRecord(EGRIP.СвИП.СвЗапЕГРИП свЗапЕГРИП) {
+        Boolean isValid = true;
+
+        EGRIP.СвИП.СвЗапЕГРИП.СвСтатусЗап свСтатусЗап = свЗапЕГРИП.getСвСтатусЗап();
+        if (свСтатусЗап != null && свСтатусЗап.getГРНИПДатаНед() != null) {
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    private String getКladrAddress(АдрРФЕГРЮЛТип адр) {
+        String address = "";
+        address += (адр.getКодРегион() != null) ? адр.getКодРегион() : "";
+
+        РегионТип регион = адр.getРегион();
+        if (регион != null) {
+            address += " " + регион.getТипРегион() + " " + регион.getНаимРегион();
+        }
+
+        РайонТип район = адр.getРайон();
+        if (район != null) {
+            address += " " + район.getТипРайон() + " " + район.getНаимРайон();
+        }
+
+        НаселПунктТип населПунктТип = адр.getНаселПункт();
+        if (населПунктТип != null) {
+            address += " " + населПунктТип.getТипНаселПункт() + " " + населПунктТип.getНаимНаселПункт();
+        }
+
+        ГородТип город = адр.getГород();
+        if (город != null) {
+            address += " " + город.getТипГород() + " " + город.getНаимГород();
+        }
+
+        УлицаТип улица = адр.getУлица();
+        if (улица != null) {
+            address += " " + улица.getТипУлица() + " " + улица.getНаимУлица();
+        }
+
+        address += (адр.getКорпус() != null) ? " КОРПУС " + адр.getКорпус() : "";
+        address += (адр.getДом() != null) ? " ДОМ " + адр.getДом() : "";
+        address += (адр.getКварт() != null) ? " КВАРТИРА " + адр.getКварт() : "";
+
+        return address;
+    }
+
+    private ReferenceBook createSpvz(String code, String name) {
+        ReferenceBook spvz = ReferenceBook.builder()
+                .code(code)
+                .name(name)
+                .type(ReferenceBookTypes.SPVZ.getValue())
+                .build();
+        referenceBookRepo.save(spvz);
+        spvzMap.put(spvz.getCode(), spvz);
+
+        return spvz;
+    }
 }

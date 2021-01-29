@@ -42,6 +42,12 @@ public class RegEgrip {
     @Basic
     @Column(name = "date_actual")
     private Date dateActual;
+    @Basic
+    @Column(name = "active_status")
+    private Integer activeStatus;
+    @Basic
+    @Column(name = "type_egrip")
+    private Short typeEgrip;
 
     @OneToMany(mappedBy = "regEgrip", fetch = FetchType.LAZY)
     private Set<RegEgripOkved> regEgripOkveds;
@@ -116,6 +122,22 @@ public class RegEgrip {
 
     public void setDateActual(Date dateActual) {
         this.dateActual = dateActual;
+    }
+
+    public Integer getActiveStatus() {
+        return activeStatus;
+    }
+
+    public void setActiveStatus(Integer activeStatus) {
+        this.activeStatus = activeStatus;
+    }
+
+    public Short getTypeEgrip() {
+        return typeEgrip;
+    }
+
+    public void setTypeEgrip(Short typeEgrip) {
+        this.typeEgrip = typeEgrip;
     }
 
     @Override

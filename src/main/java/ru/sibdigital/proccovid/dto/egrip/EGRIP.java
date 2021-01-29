@@ -1791,6 +1791,10 @@ public class EGRIP {
             return this.свЗапЕГРИП;
         }
 
+        public void setСвЗапЕГРИП(List<СвЗапЕГРИП> свЗапЕГРИП) {
+            this.свЗапЕГРИП = свЗапЕГРИП;
+        }
+
         /**
          * Gets the value of the датаВып property.
          *

@@ -8,19 +8,20 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sulst", schema = "egr")
+@Table(name = "reference_book", schema = "egr")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class Sulst {
+public class ReferenceBook {
     private Long id;
     private String code;
     private String name;
+    private Short  type; // СИЛСТ, СЮЛСТ, СПВЗ
 
     @Id
     @Column(name = "id", nullable = false)
-    @SequenceGenerator(name = "SULST_GEN", sequenceName = "sulst_id_seq", allocationSize = 1, schema = "egr")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SULST_GEN")
+    @SequenceGenerator(name = "REFERENCE_BOOK_GEN", sequenceName = "reference_book_id_seq", allocationSize = 1, schema = "egr")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REFERENCE_BOOK_GEN")
     public Long getId() {
         return id;
     }
@@ -46,11 +47,20 @@ public class Sulst {
         this.name = name;
     }
 
+    @Basic
+    @Column(name = "type")
+    public Short getType() {
+        return type;
+    }
+    public void setType(Short type) {
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Sulst sulst = (Sulst) o;
+        ReferenceBook sulst = (ReferenceBook) o;
         return Objects.equals(id, sulst.id) &&
                 Objects.equals(code, sulst.code) &&
                 Objects.equals(name, sulst.name);

@@ -19,7 +19,7 @@ public class SvStatus {
     private Long id;
     private RegEgrul egrul;
     private RegEgrip egrip;
-    private Sulst sulst;
+    private ReferenceBook sulst;
     private Date exclDecDate;
     private String exclDecNum;
     private Date publDate;
@@ -60,10 +60,10 @@ public class SvStatus {
 
     @ManyToOne
     @JoinColumn(name = "id_sulst", referencedColumnName = "id")
-    public Sulst getSulst() {
+    public ReferenceBook getSulst() {
         return sulst;
     }
-    public void setSulst(Sulst sulst) {
+    public void setSulst(ReferenceBook sulst) {
         this.sulst = sulst;
     }
 
