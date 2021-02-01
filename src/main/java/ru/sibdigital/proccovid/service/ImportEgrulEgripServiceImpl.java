@@ -1207,7 +1207,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     private boolean checkСвИПIsActiveBySvRecord(Set<SvRecordEgr> svRecords) {
         boolean isActive = true;
         for (SvRecordEgr record : svRecords) {
-            if (record.getSpvz().getStatus() == EgrReferenceBookStatuses.ORGANIZATION_NOT_ACTIVE.getValue()) {
+            if (record.getIsValid() && record.getSpvz().getStatus() == EgrReferenceBookStatuses.ORGANIZATION_NOT_ACTIVE.getValue()) {
                 isActive = false;
             }
         }
