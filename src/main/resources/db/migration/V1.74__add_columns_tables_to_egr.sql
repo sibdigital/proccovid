@@ -1,11 +1,15 @@
-alter table if exists egr.sulst rename to "reference_book";
+--alter table if exists egr.sulst rename to "reference_book";
+--
+--ALTER SEQUENCE if exists egr.sulst_id_seq RENAME TO "reference_book_id_seq";
+--
+--alter table egr.reference_book alter column code type varchar(5) using code::varchar(5);
+--
+--alter table egr.reference_book
+--    add if not exists type smallint;
+--
+--alter table egr.reference_book
+--    add if not exists status smallint;
 
-ALTER SEQUENCE if exists egr.sulst_id_seq RENAME TO "reference_book_id_seq";
-
-alter table egr.reference_book alter column code type varchar(5) using code::varchar(5);
-
-alter table egr.reference_book
-    add if not exists type smallint;
 
 -- reg_filial
 alter table reg_filial
@@ -44,3 +48,7 @@ CREATE TABLE if not exists egr.sv_record_egr
     data        jsonb,
     is_valid    boolean
 );
+
+create index if not exists reg_egrip_iogrn_idx
+    on reg_egrip (iogrn);
+

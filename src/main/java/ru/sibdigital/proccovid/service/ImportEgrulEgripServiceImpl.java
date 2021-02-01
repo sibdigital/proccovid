@@ -132,7 +132,6 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         }
         if (isEgrip) {
             importEgripData();
-            importEgrulData(); // убрать
         }
     }
 
@@ -436,7 +435,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         boolean isValid = true;
         for (SvStatus svStatus : svStatuses) {
-            if (unactiveStatuses.contains(svStatus.getSulst().getCode())) {
+            if (unactiveStatuses.contains(svStatus.getReferenceBook().getCode())) {
                 isValid = false;
             }
         }
@@ -473,7 +472,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     if (sulst == null) {
                         sulst = createSulst(свСтатус1);
                     }
-                    svStatus.setSulst(sulst);
+                    svStatus.setReferenceBook(sulst);
                 }
 
                 ГРНДатаТип grnDate = свСтатус.getГРНДата();
@@ -1039,6 +1038,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             }
 
             newRegEgrip.setIdMigration(migration.getId());
+
+            Integer activeStatus = getActiveStatus(свИП, svStatuses, svRecords);
+            newRegEgrip.setActiveStatus(activeStatus);
+
             EgripContainer ec = new EgripContainer(newRegEgrip);
             ec.setSvStatuses(svStatuses);
             ec.setSvRecords(svRecords);
@@ -1098,7 +1101,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 if (sipst == null) {
                     sipst = createSipst(свСтатус1);
                 }
-                svStatus.setSulst(sipst);
+                svStatus.setReferenceBook(sipst);
             }
 
             ГРНИПДатаТип grnDate = свСтатус.getГРНИПДата();
@@ -1136,7 +1139,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
                 свЗапЕГРИП.setВидЗап(null);
                 свЗапЕГРИП.setИдЗап(null);
-                свЗапЕГРИП.setИдЗап(null);
+                свЗапЕГРИП.setДатаЗап(null);
 
                 svRecordEgr.setData(mapper.writeValueAsString(свЗапЕГРИП));
 
@@ -1170,6 +1173,12 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             activeStatus = EgrActiveStatus.CEASED.getValue();
         }
 
+        if (activeStatus == EgrActiveStatus.ACTIVE.getValue()) {
+            if (!checkСвИПIsActiveBySvRecord(svRecords)) {
+                activeStatus = EgrActiveStatus.NOT_ACTIVE_BY_SV_RECORD.getValue();
+            }
+        }
+
         return activeStatus;
     }
 
@@ -1186,13 +1195,24 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         boolean isValid = true;
         for (SvStatus svStatus : svStatuses) {
-            String code = svStatus.getSulst().getCode();
+            String code = svStatus.getReferenceBook().getCode();
             Integer icode = Integer.valueOf(code);
             if (icode > 200) {
                 isValid = false;
             }
         }
         return isValid;
+    }
+
+    private boolean checkСвИПIsActiveBySvRecord(Set<SvRecordEgr> svRecords) {
+        boolean isActive = true;
+        for (SvRecordEgr record : svRecords) {
+            if (record.getSpvz().getStatus() == EgrReferenceBookStatuses.ORGANIZATION_NOT_ACTIVE.getValue()) {
+                isActive = false;
+            }
+        }
+
+        return isActive;
     }
 
     private Boolean isValidSvRecord(EGRIP.СвИП.СвЗапЕГРИП свЗапЕГРИП) {
@@ -1205,6 +1225,8 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         return isValid;
     }
+
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////
 

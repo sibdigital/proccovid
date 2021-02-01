@@ -19,7 +19,7 @@ public class SvStatus {
     private Long id;
     private RegEgrul egrul;
     private RegEgrip egrip;
-    private ReferenceBook sulst;
+    private ReferenceBook referenceBook;
     private Date exclDecDate;
     private String exclDecNum;
     private Date publDate;
@@ -59,12 +59,12 @@ public class SvStatus {
     }
 
     @ManyToOne
-    @JoinColumn(name = "id_sulst", referencedColumnName = "id")
-    public ReferenceBook getSulst() {
-        return sulst;
+    @JoinColumn(name = "id_reference_book", referencedColumnName = "id")
+    public ReferenceBook getReferenceBook() {
+        return referenceBook;
     }
-    public void setSulst(ReferenceBook sulst) {
-        this.sulst = sulst;
+    public void setReferenceBook(ReferenceBook referenceBook) {
+        this.referenceBook = referenceBook;
     }
 
     public Date getExclDecDate() {
@@ -139,7 +139,7 @@ public class SvStatus {
         return Objects.equals(id, svStatus.id) &&
                 Objects.equals(egrul, svStatus.egrul) &&
                 Objects.equals(egrip, svStatus.egrip) &&
-                Objects.equals(sulst, svStatus.sulst) &&
+                Objects.equals(referenceBook, svStatus.referenceBook) &&
                 Objects.equals(exclDecDate, svStatus.exclDecDate) &&
                 Objects.equals(exclDecNum, svStatus.exclDecNum) &&
                 Objects.equals(publDate, svStatus.publDate) &&
@@ -152,6 +152,6 @@ public class SvStatus {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, egrul, egrip, sulst, exclDecDate, exclDecNum, publDate, journalNum, grn, recordDate, grnCorr, recordDateCorr);
+        return Objects.hash(id, egrul, egrip, referenceBook, exclDecDate, exclDecNum, publDate, journalNum, grn, recordDate, grnCorr, recordDateCorr);
     }
 }

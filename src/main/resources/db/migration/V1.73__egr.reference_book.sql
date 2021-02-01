@@ -1,0 +1,262 @@
+--alter table if exists egr.sulst rename to "reference_book";
+--
+--ALTER SEQUENCE if exists egr.sulst_id_seq RENAME TO "reference_book_id_seq";
+--
+--alter table egr.reference_book alter column code type varchar(5) using code::varchar(5);
+--
+--alter table egr.reference_book
+--    add if not exists type smallint;
+--
+--alter table egr.reference_book
+--    add if not exists status smallint;
+
+alter table egr.sv_status
+    drop column if exists id_sulst;
+
+drop table if exists egr.sulst;
+
+create table if not exists egr.reference_book
+(
+    id     serial not null
+        constraint reference_book_pkey
+            primary key,
+    code   varchar(5),
+    name   text,
+    type   smallint,
+    status smallint
+);
+
+alter table egr.sv_status
+    add column if not exists id_reference_book integer
+        constraint reference_book_fk
+            references egr.reference_book;
+
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (1, '101', 'Находится в стадии ликвидации', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (2, '105', 'Регистрирующим органом принято решение о предстоящем исключении юридического лица из ЕГРЮЛ (недействующее юридическое лицо)', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (3, '106', 'Регистрирующим органом принято решение о предстоящем исключении юридического лица из ЕГРЮЛ (невозможность ликвидации юридического лица)', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (4, '107', 'Регистрирующим органом принято решение о предстоящем исключении юридического лица из ЕГРЮЛ (наличие в ЕГРЮЛ сведений о юридическом лице, в отношении которых внесена запись о недостоверности)', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (5, '111', 'Юридическое лицо находится в процессе уменьшения уставного капитала', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (6, '112', 'Юридическим лицом принято решение об изменении места нахождения', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (7, '113', 'В отношении юридического лица возбуждено производство по делу о несостоятельности (банкротстве)', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (8, '114', 'В отношении юридического лица в деле о несостоятельности (банкротстве) введено наблюдение', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (9, '115', 'В отношении юридического лица в деле о несостоятельности (банкротстве) введено финансовое оздоровление', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (10, '116', 'В отношении юридического лица в деле о несостоятельности (банкротстве) введено внешнее управление', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (11, '117', 'Юридическое лицо признано несостоятельным (банкротом) и в отношении него открыто конкурсное производство', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (12, '121', 'Юридическое лицо находится в процессе реорганизации в форме преобразования', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (13, '122', 'Юридическое лицо находится в процессе реорганизации в форме слияния', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (14, '123', 'Находится в процессе реорганизации в форме разделения', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (15, '124', 'Юридическое лицо находится в процессе реорганизации в форме присоединения к другому юридическому лицу', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (16, '125', 'Юридическое лицо находится в процессе реорганизации в форме разделения, осуществляемой одновременно с присоединением', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (17, '131', 'Юридическое лицо находится в процессе реорганизации в форме выделения', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (18, '132', 'Юридическое лицо находится в процессе реорганизации в форме присоединения к нему других юридических лиц', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (19, '133', 'Юридическое лицо находится в процессе реорганизации в форме присоединения, осуществляемой одновременно с разделением', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (20, '134', 'Юридическое лицо находится в процессе реорганизации в форме присоединения, осуществляемой одновременно с выделением', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (21, '136', 'Юридическое лицо находится в процессе реорганизации в форме выделения, осуществляемой одновременно с присоединением', 0, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (22, '701', 'Регистрация признана недействительной по решению суда', 0, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (23, '702', 'Внесение в ЕГРЮЛ сведений о юридическом лице, зарегистрированном до 01.07.2002, признано недействительным по решению суда', 0, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (24, '801', 'Регистрация признана ошибочной по решению регоргана', 0, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (25, '101', 'Глава крестьянского (фермерского) хозяйства отсутствует в связи со смертью', 1, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (26, '103', 'Глава крестьянского (фермерского) хозяйства отсутствует в связи с аннулированием документа, подтверждающего право временно или постоянно проживать в Российской Федерации', 1, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (27, '104', 'Глава крестьянского (фермерского) хозяйства отсутствует в связи с окончанием срока действия документа, подтверждающего право временно или постоянно проживать в Российской Федерации', 1, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (28, '601', 'ГОСУДАРСТВЕННАЯ РЕГИСТРАЦИЯ ФИЗИЧЕСКОГО ЛИЦА В КАЧЕСТВЕ ИНДИВИДУАЛЬНОГО ПРЕДПРИНИМАТЕЛЯ ПРИЗНАНА НЕДЕЙСТВИТЕЛЬНОЙ В СВЯЗИ С ПОЛУЧЕНИЕМ СВЕДЕНИЙ О СУДИМОСТИ', 1, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (29, '701', 'ГОСУДАРСТВЕННАЯ РЕГИСТРАЦИЯ ФИЗИЧЕСКОГО ЛИЦА В КАЧЕСТВЕ ИНДИВИДУАЛЬНОГО ПРЕДПРИНИМАТЕЛЯ ПРИЗНАНА НЕДЕЙСТВИТЕЛЬНОЙ ПО РЕШЕНИЮ СУДА', 1, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (30, '702', 'ГОСУДАРСТВЕННАЯ РЕГИСТРАЦИЯ КРЕСТЬЯНСКОГО (ФЕРМЕРСКОГО) ХОЗЯЙСТВА ПРИЗНАНА НЕДЕЙСТВИТЕЛЬНОЙ ПО РЕШЕНИЮ СУДА', 1, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (31, '801', 'ВНЕСЕНИЕ ЗАПИСИ О ГОСУДАРСТВЕННОЙ РЕГИСТРАЦИИ ФИЗИЧЕСКОГО ЛИЦА В КАЧЕСТВЕ ИНДИВИДУАЛЬНОГО ПРЕДПРИНИМАТЕЛЯ ПРИЗНАНО ОШИБОЧНЫМ ПО РЕШЕНИЮ РЕГИСТРИРУЮЩЕГО ОРГАНА', 1, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (32, '802', 'ВНЕСЕНИЕ ЗАПИСИ О ГОСУДАРСТВЕННОЙ РЕГИСТРАЦИИ КРЕСТЬЯНСКОГО (ФЕРМЕРСКОГО) ХОЗЯЙСТВА ПРИЗНАНО ОШИБОЧНЫМ ПО РЕШЕНИЮ РЕГИСТРИРУЮЩЕГО ОРГАНА', 1, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (131, '14401', 'Прекращение КФХ', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (215, '25201', 'Признание недействительной записи об ИП, зарегистрированном до 01.01.2004 (отсутствие такой регистрации)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (192, '23108', 'Внесение сведений об отзыве лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (193, '23200', 'Представление сведений об учете в налоговом органе', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (194, '23300', 'Представление сведений о регистрации в качестве страхователя в территориальном органе Пенсионного фонда Российской Федерации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (195, '23400', 'Внесение сведений о регистрации в ФСС РФ', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (196, '23801', 'Представление сведений о выдаче или замене документа, удостоверяющего личность гражданина Российской Федерации на территории Российской Федерации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (197, '23802', 'Представление сведений о регистрации физического лица по месту жительства', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (198, '23803', 'Изменение фамилии и (или) имени и (или) отчества физического лица на основании сведений, содержащихся в Едином государственном реестре записей актов гражданского состояния', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (199, '23804', 'Изменение фамилии и (или) имени и (или) отчества физического лица (исправление сведений в записи Единого государственного реестра записей актов гражданского состояния)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (184, '22325', 'Внесение изменений в связи с запретом главе КФХ на занятие предпринимательской деятельностью по приговору суда', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (185, '23100', 'Внесение в ЕГРИП сведений о лицензиях', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (186, '23101', 'Внесение сведений о выдаче лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (187, '23102', 'Внесение сведений о переоформлении лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (188, '23103', 'Внесение сведений о приостановлении действия лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (189, '23104', 'Представление лицензирующим органом сведений о возобновлении действия лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (190, '23105', 'Представление лицензирующим органом сведений об аннулировании лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (208, '24421', '(74-ФЗ ст.21 п.1.5) Прекращение КФХ на основании решения суда', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (176, '22111', 'Изменение сведений об индивидуальном предпринимателе, содержащихся в Едином государственном реестре индивидуальных предпринимателей', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (177, '22121', '(Р24002) Внесение изменений в сведения о КФХ', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (178, '22211', '(Р24001) Внесение изменений в сведения об ИП, в связи с исправлением ошибок', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (179, '22221', 'Внесение изменений в сведения о крестьянском (фермерском) хозяйстве, содержащиеся в Едином государственном реестре индивидуальных предпринимателей, в связи с ошибками, допущенными в ранее представленном заявлении', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (180, '22321', 'Внесение изменений в сведения о крестьянском (фермерском) хозяйстве, содержащиеся в Едином государственном реестре индивидуальных предпринимателей, в связи со сменой главы крестьянского (фермерского) хозяйства', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (181, '22322', 'Внесение изменений в сведения о крестьянском (фермерском) хозяйстве, содержащиеся в Едином государственном реестре индивидуальных предпринимателей, в связи со смертью главы крестьянского (фермерского) хозяйства', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (182, '22323', 'Внесение изменений в связи аннулированием документа на проживание в РФ главы КФХ', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (183, '22324', 'Внесение изменений в сведения о крестьянском (фермерском) хозяйстве, содержащиеся в Едином государственном реестре индивидуальных предпринимателей, в связи с окончанием срока действия документа, подтверждающего право главы крестьянского (фермерского) хозяйства временно или постоянно проживать в Российской Федерации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (168, '17023', 'Внесение в Единый государственный реестр юридических лиц сведений о недостоверности сведений о юридическом лице (результаты проверки достоверности содержащихся в Едином государственном реестре юридических лиц сведений о юридическом лице)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (169, '21111', '(Р27001) Внесение сведений об ИП, зарегистрированном до 01.01.2004', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (170, '21112', 'Внесение сведений об ИП, зарегистрированном до 01.01.2004, по данным налоговых органов', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (171, '21121', '(Р27002) Внесение сведений о КФХ, созданного до вступления в силу ч.I ГК', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (172, '21122', '(Р27003) Внесение сведений о КФХ, глава которого зарегистрирован в качестве ИП до 01.01.2004', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (173, '21123', 'Внесение сведений о КФХ, глава которого зарегистрирован до 01.01.2004, по данным налоговых органов', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (227, '27100', 'Передача регдела в электронном виде в другой РО', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (174, '21211', 'Государственная регистрация физического лица в качестве индивидуального предпринимателя', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (175, '21221', '(Р21002) Регистрация создания КФХ', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (160, '17011', 'Ликвидация регионального отделения политической партии по решению суда', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (162, '17013', 'Прекращение деятельности регионального отделения политической партии в связи с реорганизацией политической партии в форме преобразования', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (163, '17014', 'Ликвидация регионального отделения политической партии в связи с ликвидацией политической партии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (164, '17015', 'Ликвидации некоммерческой организации по решению суда', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (165, '17016', 'Принятие судом решения о ликвидации некоммерческой организации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (166, '17019', 'Внесение в ЕГРЮЛ сведений об упразднении', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (167, '17022', 'Внесение в Единый государственный реестр юридических лиц сведений о недостоверности сведений о юридическом лице (заявление физического лица о недостоверности сведений о нем)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (152, '17001', 'Передача регдела ЮЛ в электронном виде в другой РО', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (156, '17005', 'Прекращение деятельности религиозной организации по ст.8 ФЗ №125-ФЗ', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (157, '17006', 'Внесение сведений об изменении срока дисквалификации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (158, '17007', 'Внесение в Единый государственный реестр юридических лиц изменений в сведения о лице, в отношении которого имеется вступившее в силу постановление суда о назначении наказания в виде дисквалификации, в связи с отменой постановления судом или изменением вида наказания', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (159, '17010', 'Ликвидация политической партии по решению суда', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (144, '15302', 'Признание внесенной в Единый государственный реестр юридических лиц в отношении юридического лица записи недействительной на основании решения вышестоящего налогового органа', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (145, '15303', 'Признание внесенной в Единый государственный реестр юридических лиц в отношении юридического лица записи, содержащей поступившие из другого органа сведения, недействительной на основании сообщения, поступившего из указанного органа', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (146, '15401', 'Внесение изменений в сведения, содержащиеся в Едином государственном реестре юридических лиц, в связи с переименованием (переподчинением) адресных объектов', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (147, '16001', 'Признание судом недействительным решения о государственной регистрации юридического лица при его создании', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (148, '16002', 'Признание внесенной в Единый государственный реестр юридических лиц в отношении юридического лица записи недействительной на основании решения суда', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (149, '16004', 'Признание судом недействительным внесение в Единый государственный реестр юридических лиц сведений о юридическом лице, созданном до 01.07.2002', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (150, '16006', 'Получение регистрирующим органом судебного решения о недостоверности содержащихся в Едином государственном реестре юридических лиц сведений о юридическом лице', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (151, '16007', 'Получение регистрирующим органом судебного решения об отмене решения о недостоверности содержащихся в Едином государственном реестре юридических лиц сведений о юридическом лице', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (137, '14407', 'Прекращение юридического лица (исключение из ЕГРЮЛ юридического лица в связи с наличием в ЕГРЮЛ сведений о нем, в отношении которых внесена запись о недостоверности)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (138, '15101', 'Внесение изменений в сведения о юридическом лице, содержащиеся в Едином государственном реестре юридических лиц, в связи ошибками, допущенными регистрирующим органом', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (139, '15102', 'Внесение в Единый государственный реестр юридических лиц сведений о повторной выдаче свидетельства', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (142, '15202', 'Признание государственной регистрации юридического лица недействительной на основании решения вышестоящего налогового органа', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (143, '15301', 'Признание внесенной в Единый государственный реестр юридических лиц в отношении юридического лица записи недействительной', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (161, '17012', 'Ликвидация регионального отделения политической партии в связи с ликвидацией партии по решению суда (по документам из Росрегистрации)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (153, '17002', 'Поступление регдела ЮЛ в электронном виде из другого РО', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (154, '17003', 'Признание государственной регистрации политической партии утратившей силу на основании п.6 ст.15 Федерального закона от 11.07.2001 № 95-ФЗ "О политических партиях"', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (155, '17004', 'Прекращение деятельности общественного объединения в качестве юридического лица на основании ст.29 Федерального закона от 19.05.1995 № 82-ФЗ "Об общественных объединениях" по решению суда', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (127, '14307', 'Прекращение юридического лица путем реорганизации в форме присоединения, осуществляемой одновременно с его созданием путем реорганизации в форме выделения из другого юридического лица', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (125, '14305', 'Прекращение юридического лица путем реорганизации в форме разделения, осуществляемой одновременно с прекращением вновь созданного при данной реорганизации юридического лица путем его присоединения к другому юридическому лицу', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (124, '14304', 'Прекращение юридического лица путем реорганизации в форме присоединения', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (123, '14303', 'Прекращение юридического лица путем реорганизации в форме разделения', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (136, '14406', 'Прекращение юридического лица (исключение из ЕГРЮЛ юридического лица в связи с невозможностью его ликвидации)', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (121, '14301', 'Прекращение юридического лица путем реорганизации в форме преобразования', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (120, '14203', 'Прекращение юридического лица (ликвидация юридического лица в связи с завершением конкурсного производства в деле о несостоятельности (банкротстве))', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (140, '15103', 'Исправление ошибок, допущенных РО, при внесении сведений, представленных другими органами', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (141, '15201', 'Признание ошибкой регистрацию ЮЛ (не все документы)', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (128, '14308', 'Прекращение юридического лица путем реорганизации в форме слияния, осуществляемой одновременно с его созданием путем реорганизации другого юридического лица в форме разделения', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (129, '14309', '(Р12001) Прекращение деятельности АО при слиянии (при реорганизации в форме выделения с одновременным слиянием)', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (130, '14310', 'Прекращение юридического лица путем реорганизации в форме разделения, осуществляемой одновременно с прекращением вновь созданного при данной реорганизации юридического лица путем его слияния с другим юридическим лицом (другими юридическими лицами)', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (132, '14402', 'Прекращение унитарного предприятия в связи с продажей его имущественного комплекса', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (133, '14403', 'Прекращение унитарного предприятия, имущественный комплекс которого внесен в качестве вклада в уставный капитал открытого акционерного общества', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (134, '14404', 'Исключение из ЕГРЮЛ ЮЛ, фактически прекратившего свою деятельность', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (135, '14405', 'Прекращение унитарного предприятия, имущественный комплекс (имущество) которого передан в собственность государственной корпорации', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (207, '24412', '(129-ФЗ ст.22.3 п.5) Прекращение деятельности ИП в связи с приговором суда', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (206, '24411', '(129-ФЗ ст.22.3 п.4) Прекращение деятельности ИП в принудительном порядке', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (204, '24311', '(129-ФЗ ст.22.3 п.3) Прекращение деятельности ИП в связи с банкротством', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (203, '24211', '(129-ФЗ ст.22.3 п.2) Прекращение деятельности ИП в связи со смертью', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (202, '24122', 'Прекращение КФХ, в связи с созданием на базе КФХ ЮЛ', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (201, '24121', '(Р26002) Прекращение КФХ', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (200, '24111', '(Р26001) Прекращение деятельности ИП', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (122, '14302', '(Р12001) Прекращение деятельности чужого ЮЛ при слиянии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (112, '14134', 'Утверждение внешнего управляющего', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (113, '14135', 'Утверждение конкурсного управляющего', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (114, '14140', 'Принятие регистрирующим органом решения о предстоящем исключении юридического лица из ЕГРЮЛ (невозможность ликвидации юридического лица)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (115, '14141', 'Принятие регистрирующим органом решения о предстоящем исключении юридического лица из ЕГРЮЛ (наличие в ЕГРЮЛ сведений о юридическом лице, в отношении которых внесена запись о недостоверности)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (116, '14142', 'Прекращение процедуры исключения юридического лица из ЕГРЮЛ в связи с производством по делу о несостоятельности (банкротстве)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (117, '14143', 'Прекращение реорганизации юридического лица в связи с производством по делу о несостоятельности (банкротстве) в отношении участника реорганизации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (118, '14201', 'Ликвидация юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (119, '14202', 'Ликвидации юридического лица по решению суда', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (104, '14118', 'Отмена юридическим лицом ранее принятого решения о ликвидации, принятие нового решения о ликвидации и формировании ликвидационной комиссии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (105, '14119', 'Отмена юридическим лицом ранее принятого решения о ликвидации, принятие нового решения о ликвидации и назначении ликвидатора', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (106, '14120', 'Отмена юридическим лицом ранее принятого решения о ликвидации, принятие нового решения о ликвидации, формировании ликвидационной комиссии и составлении промежуточного ликвидационного баланса', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (107, '14121', 'Отмена юридическим лицом ранее принятого решения о ликвидации, принятие нового решения о ликвидации, назначении ликвидатора и составлении промежуточного ликвидационного баланса', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (108, '14130', 'В отношении юридического лица возбуждено производство по делу о несостоятельности (банкротстве)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (109, '14131', 'В отношении юридического лица в деле о несостоятельности (банкротстве) введено наблюдение', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (110, '14132', 'В отношении юридического лица в деле о несостоятельности (банкротстве) введено финансовое оздоровление', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (111, '14133', 'В отношении юридического лица в деле о несостоятельности (банкротстве) введено внешнее управление', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (96, '14110', 'Представление заявления лицом, чьи права и законные интересы затрагиваются в связи с исключением юридического лица из ЕГРЮЛ', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (97, '14111', 'Формирование ликвидационной комиссии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (98, '14112', 'Назначение ликвидатора', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (99, '14113', '(Р15001) Внесение сведений о решении о ликвидации и о ликвидационной комиссии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (100, '14114', 'Принятие юридическим лицом решения о ликвидации и назначении ликвидатора', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (101, '14115', 'Отмена юридическим лицом ранее принятого решения о ликвидации и принятие нового решения о ликвидации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (102, '14116', 'Принятие юридическим лицом решения о ликвидации, формировании ликвидационной комиссии и составлении промежуточного ликвидационного баланса', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (103, '14117', 'Принятие юридическим лицом решения о ликвидации, назначении ликвидатора и составлении промежуточного ликвидационного баланса', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (88, '14102', 'Принятие судом решения о ликвидации юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (89, '14103', 'Юридическое лицо признано несостоятельным (банкротом) и в отношении него открыто конкурсное производство', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (90, '14104', 'Формирование ликвидационной комиссии юридического лица, назначение ликвидатора (конкурсного управляющего)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (91, '14105', 'Составление промежуточного ликвидационного баланса юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (92, '14106', 'Отмена юридическим лицом ранее принятого решения о ликвидации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (93, '14107', 'Отмена судом решения о ликвидации юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (94, '14108', 'В отношении юридического лица прекращено производство по делу о несостоятельности (банкротстве)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (95, '14109', 'Принятие решения о предстоящем исключении фактически недействующего юридического лица из Единого государственного реестра юридических лиц', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (80, '13201', 'Представление сведений об учете юридического лица в налоговом органе по месту нахождения филиала/представительства', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (81, '13300', 'Представление сведений о регистрации юридического лица в качестве страхователя в территориальном органе Пенсионного фонда Российской Федерации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (82, '13400', 'Представление сведений о регистрации юридического лица в качестве страхователя в исполнительном органе Фонда социального страхования Российской Федерации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (83, '13500', 'Внесение сведений о регистрации в ФОМС', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (84, '13700', 'Принятие судом решения о дисквалификации лица, имеющего право без доверенности действовать от имени юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (85, '13801', 'Представление сведений о выдаче или замене документов, удостоверяющих личность гражданина Российской Федерации на территории Российской Федерации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (86, '13802', 'Представление сведений о регистрации физического лица по месту жительства', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (87, '14101', 'Принятие юридическим лицом решения о ликвидации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (72, '13102', 'Представление лицензирующим органом сведений о переоформлении документов, подтверждающих наличие лицензии (сведений о продлении срока действия лицензии)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (73, '13103', 'Представление лицензирующим органом сведений о приостановлении действия лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (74, '13104', 'Представление лицензирующим органом сведений о возобновлении действия лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (75, '13105', 'Представление лицензирующим органом сведений об аннулировании лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (76, '13106', 'Представление лицензирующим органом сведений о признании лицензии утратившей силу', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (77, '13107', 'Представление лицензирующим органом сведений об ограничении действия лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (78, '13108', 'Представление лицензирующим органом сведений об отзыве лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (79, '13200', 'Внесение сведений об учете в налоговом органе', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (64, '12322', 'Начало процедуры реорганизации юридического лица в форме присоединения к нему юридического лица, создаваемого при одновременной реорганизации другого юридического лица в форме выделения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (65, '12331', 'Начало процедуры реорганизации юридического лица в форме разделения с одновременным слиянием создаваемого в результате данной реорганизации юридического лица с другим юридическим лицом (другими юридическими лицами)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (66, '12332', 'Начало процедуры реорганизации юридического лица в форме слияния с юридическим лицом, создаваемым при одновременной реорганизации другого юридического лица в форме разделения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (67, '12341', 'Начало процедуры реорганизации юридического лица в форме выделения с одновременным слиянием создаваемого при данной реорганизации юридического лица с другим юридическим лицом (другими юридическими лицами)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (68, '12342', 'Начало процедуры реорганизации юридического лица в форме слияния с юридическим лицом, создаваемым при одновременной реорганизации другого юридического лица в форме выделения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (69, '12401', 'Отмена юридическим лицом решения о реорганизации', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (70, '12402', 'Изменение состава участвующих в реорганизации юридических лиц в связи с отменой решения о реорганизации участвующим в ней юридическим лицом', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (71, '13101', 'Представление лицензирующим органом сведений о предоставлении лицензии', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (56, '12301', 'Начало процедуры реорганизации юридического лица в форме преобразования', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (57, '12302', '(Р12003) Внесение сведений о начале реорганизации чужого ЮЛ в форме слияния', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (58, '12303', 'Начало процедуры реорганизации юридического лица в форме разделения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (59, '12304', 'Начало процедуры реорганизации юридического лица в форме выделения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (60, '12305', 'Начало процедуры реорганизации юридического лица в форме присоединения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (61, '12311', 'Начало процедуры реорганизации юридического лица в форме разделения, осуществляемой одновременно с реорганизацией в форме присоединения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (62, '12312', 'Начало процедуры реорганизации юридического лица в форме присоединения к нему юридического лица, создаваемого при одновременной реорганизации другого юридического лица в форме разделения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (63, '12321', 'Начало процедуры реорганизации юридического лица в форме выделения, осуществляемой одновременно с реорганизацией в форме присоединения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (48, '12202', 'Реорганизация юридического лица в форме выделения из него другого юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (49, '12203', 'Реорганизация юридического лица в форме присоединения к нему другого юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (50, '12204', 'Внесение изменений в сведения о юридическом лице, содержащиеся в Едином государственном реестре юридических лиц, в связи с ошибками, допущенными заявителем в ранее представленном заявлении', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (51, '12205', 'Реорганизация юридического лица в форме выделения, осуществленной одновременно с реорганизацией в форме присоединения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (52, '12206', 'Реорганизация юридического лица в форме присоединения к нему юридического лица, деятельность которого прекращается одновременно с его созданием путем выделения из другого юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (53, '12207', 'Реорганизация юридического лица в форме присоединения к нему юридического лица, деятельность которого прекращается одновременно с его созданием путем разделения другого юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (54, '12208', 'Внесение в Единый государственный реестр юридических лиц сведений о том, что хозяйственное общество находится в процессе уменьшения уставного капитала', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (55, '12209', 'Реорганизации юридического лица в форме выделения из него юридического лица с одновременным слиянием последнего с другим юридическим лицом (другими юридическими лицами)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (40, '11303', 'Создание юридического лица путем реорганизации в форме разделения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (41, '11304', 'Создание юридического лица путем реорганизации в форме выделения', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (42, '11305', 'Создание юридического лица путем реорганизации в форме разделения, с одновременным прекращением его деятельности в связи с присоединением к другому юридическому лицу', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (43, '11306', 'Создание юридического лица путем реорганизации в форме выделения, с одновременным прекращением его деятельности в связи с присоединением к другому юридическому лицу', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (44, '12101', 'Государственная регистрация изменений, внесенных в учредительные документы юридического лица, связанных с внесением изменений в сведения о юридическом лице, содержащиеся в Едином государственном реестре юридических лиц, на основании заявления', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (45, '12102', 'Уведомление регистрирующего органа о внесении изменений в учредительные документы юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (46, '12103', 'Государственная регистрация изменений, внесенных в устав общества с ограниченной ответственностью в целях приведения его в соответствие с положениями Федерального закона от 30.12.2008 № 312-ФЗ', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (47, '12201', 'Изменение сведений о юридическом лице, содержащихся в Едином государственном реестре юридических лиц', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (205, '24321', '(74-ФЗ ст.21 п.1.3) Прекращение КФХ в связи с банкротством', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (33, '11101', 'Внесение в Единый государственный реестр юридических лиц сведений о юридическом лице, зарегистрированном до 1 июля 2002 года', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (34, '11102', 'Внесение в ЕГРЮЛ сведений о ЮЛ, созданном до 01.07.2002, по сведениям налоговых органов', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (35, '11103', '(Р18001) Внесение в ЕГРЮЛ сведений о ЮЛ, зарегистрированном на территории Республики Крым или территории города федерального значения Севастополя до 18.03.2014', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (36, '11104', 'Государственная регистрация юридического лица в порядке редомициляции', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (37, '11201', 'Создание юридического лица', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (38, '11301', 'Создание юридического лица путем реорганизации в форме преобразования', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (39, '11302', 'Создание юридического лица путем реорганизации в форме слияния', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (212, '24621', '(ст.3 ФЗ от 23.06.2003 №76-ФЗ) Утрата главой КФХ государственной регистрации с 01.01.2005', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (211, '24611', '(ст.3 ФЗ от 23.06.2003 №76-ФЗ) Утрата ИП государственной регистрации с 01.01.2005', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (210, '24512', '(129-ФЗ ст.22.3 п.6) Прекращение деятельности ИП в связи окончанием срока проживания в РФ', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (209, '24511', '(129-ФЗ ст.22.3 п.6) Прекращение деятельности ИП в связи аннулированием документа на проживание в РФ', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (223, '25210', 'Признание государственной регистрации индивидуального предпринимателя или крестьянского (фермерского) хозяйства недействительной в соответствии с пунктом 4 статьи 21.1 Федерального закона от 8 августа 2001 года № 129-ФЗ', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (217, '25203', 'Признание регистрации ИП недействительной (запрет на занятие такой деятельностью)', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (216, '25202', 'Признание регистрации ИП недействительной (присвоение более одного ОГРНИП)', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (226, '26100', 'Признание регистрации ИП недействительной (на основании решения суда)', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (224, '25211', 'Признание внесенной в Единый государственный реестр индивидуальных предпринимателей в отношении индивидуального предпринимателя или крестьянского (фермерского) хозяйства записи недействительной в соответствии с пунктом 5 статьи 22.2 Федерального закона от 8 августа 2001 года № 129-ФЗ', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (191, '23106', 'Внесение сведений о признании лицензии утратившей силу', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (126, '14306', 'Прекращение юридического лица путем реорганизации в форме присоединения, осуществляемой одновременно с его созданием путем реорганизации другого юридического лица в форме разделения', 2, 1);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (225, '25301', 'Внесение изменений в сведения, содержащиеся в Едином государственном реестре индивидуальных предпринимателей, в связи с переименованием (переподчинением) адресных объектов', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (228, '27200', 'Поступление регистрационного дела из другого регистрирующего органа', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (218, '25204', 'Признание внесенной в Единый государственный реестр индивидуальных предпринимателей записи недействительной в связи с непредставлением необходимого пакета документов', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (219, '25205', 'Признание записи по ИП (ГРНИП) недействительной (документы представлены в ненадлежащий регорган)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (220, '25206', 'Признание записи (ГРНИП) недействительной (неверная идентификация)', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (221, '25207', 'Признание внесенной в Единый государственный реестр индивидуальных предпринимателей записи недействительной на основании решения вышестоящего налогового органа', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (222, '25208', 'Признание внесенной в Единый государственный реестр индивидуальных предпринимателей записи, содержащей сведения, поступившие из других органов, недействительной на основании сообщения о допущенных ошибках, поступившего из указанных органов', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (213, '25101', 'Исправление ошибок, допущенных РО', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (214, '25102', 'Внесение в Единый государственный реестр индивидуальных предпринимателей сведений о повторной выдаче свидетельства', 2, 0);
+
