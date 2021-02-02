@@ -499,6 +499,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                         .code(свСтатус1.getКодСтатусЮЛ())
                         .name(свСтатус1.getНаимСтатусЮЛ())
                         .type(ReferenceBookTypes.SULST.getValue())
+                        .status(EgrReferenceBookStatuses.ANOTHER.getValue())
                         .build();
         referenceBookRepo.save(sulst);
         sulstMap.put(sulst.getCode(), sulst);
@@ -1230,6 +1231,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 .code(свСтатус1.getКодСтатус())
                 .name(свСтатус1.getНаимСтатус())
                 .type(ReferenceBookTypes.SIPST.getValue())
+                .status(EgrReferenceBookStatuses.ANOTHER.getValue())
                 .build();
         referenceBookRepo.save(sipst);
         sipstMap.put(sipst.getCode(), sipst);
@@ -1355,6 +1357,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 .code(code)
                 .name(name)
                 .type(ReferenceBookTypes.SPVZ.getValue())
+                .status(EgrReferenceBookStatuses.ANOTHER.getValue())
                 .build();
         referenceBookRepo.save(spvz);
         spvzMap.put(spvz.getCode(), spvz);

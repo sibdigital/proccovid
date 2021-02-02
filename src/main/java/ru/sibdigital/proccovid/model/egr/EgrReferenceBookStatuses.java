@@ -1,15 +1,15 @@
 package ru.sibdigital.proccovid.model.egr;
 
 public enum EgrReferenceBookStatuses {
-    ANOTHER(0),
-    ORGANIZATION_NOT_ACTIVE(1);
+    ANOTHER(Short.valueOf("0")),
+    ORGANIZATION_NOT_ACTIVE(Short.valueOf("1"));
 
-    private final int value;
-    private EgrReferenceBookStatuses(int value) {
+    private final Short value;
+    private EgrReferenceBookStatuses(Short value) {
         this.value = value;
     }
 
-    public int getValue() {
+    public Short getValue() {
         return value;
     }
 }

@@ -260,3 +260,4 @@ INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (222, '2520
 INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (213, '25101', 'Исправление ошибок, допущенных РО', 2, 0);
 INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (214, '25102', 'Внесение в Единый государственный реестр индивидуальных предпринимателей сведений о повторной выдаче свидетельства', 2, 0);
 
+SELECT setval('egr.reference_book_id_seq', 228, true);
