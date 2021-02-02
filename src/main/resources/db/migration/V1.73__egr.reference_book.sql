@@ -259,5 +259,6 @@ INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (221, '2520
 INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (222, '25208', 'Признание внесенной в Единый государственный реестр индивидуальных предпринимателей записи, содержащей сведения, поступившие из других органов, недействительной на основании сообщения о допущенных ошибках, поступившего из указанных органов', 2, 0);
 INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (213, '25101', 'Исправление ошибок, допущенных РО', 2, 0);
 INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (214, '25102', 'Внесение в Единый государственный реестр индивидуальных предпринимателей сведений о повторной выдаче свидетельства', 2, 0);
+INSERT INTO egr.reference_book (id, code, name, type, status) VALUES (229, '14314', 'Прекращение юридического лица в форме присоединения при реорганизации с одновременным сочетанием различных ее форм', 2, 1);
 
-SELECT setval('egr.reference_book_id_seq', 228, true);
+SELECT setval('egr.reference_book_id_seq', 229, true);
