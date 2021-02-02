@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.model.*;
+import ru.sibdigital.proccovid.model.egr.EgripTypes;
 import ru.sibdigital.proccovid.repository.*;
 
 import java.sql.Timestamp;
@@ -235,10 +236,14 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                             .build();
                     regOrganizationOkvedRepo.save(regOrganizationOkved);
                 }
+                organization.setIdTypeOrganization(OrganizationTypes.JURIDICAL.getValue());
+                organization.setKpp(regEgrul.getKpp());
+                organization.setRegOrganizationClassifier(new RegOrganizationClassifier(null, regEgrul, null, null));
             }
         } else {
-            RegEgrip regEgrip = egrulService.getEgrip(inn);
-            if (regEgrip != null) {
+            List<RegEgrip> regEgrips = egrulService.getEgrip(inn);
+            if (regEgrips != null) {
+                RegEgrip regEgrip = regEgrips.stream().findFirst().get();
                 for (RegEgripOkved regEgripOkved : regEgrip.getRegEgripOkveds()) {
                     Okved okved = okvedRepo.findOkvedByIdSerial(regEgripOkved.getIdOkved());
                     RegOrganizationOkvedId regOrganizationOkvedId = RegOrganizationOkvedId.builder()
@@ -251,6 +256,12 @@ public class DBActualizeServiceImpl implements DBActualizeService {
                             .build();
                     regOrganizationOkvedRepo.save(regOrganizationOkved);
                 }
+                if (regEgrip.getTypeEgrip().equals(EgripTypes.INDIVIDUAL_ENTREPRENEUR)) {
+                    organization.setIdTypeOrganization(OrganizationTypes.IP.getValue());
+                } else {
+                    organization.setIdTypeOrganization(OrganizationTypes.KFH.getValue());
+                }
+                organization.setRegOrganizationClassifier(new RegOrganizationClassifier(null, null, regEgrip, null));
             }
         }
     }

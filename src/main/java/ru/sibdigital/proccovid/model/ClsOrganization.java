@@ -50,16 +50,19 @@ public class ClsOrganization {
     @JsonIgnore
     private ClsPrincipal principal;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_orgnization_classifier", referencedColumnName = "id")
+    @JoinColumn(name = "id_organization_classifier", referencedColumnName = "id")
     private RegOrganizationClassifier regOrganizationClassifier;
 
     @OneToMany(mappedBy = "regOrganizationOkvedId.clsOrganization")
     private Set<RegOrganizationOkved> regOrganizationOkveds;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "clsOrganization")
     private List<RegOrganizationAddressFact> regOrganizationAddressFacts;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "organization")
     private List<RegOrganizationPrescription> regOrganizationPrescriptions;
 
