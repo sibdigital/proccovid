@@ -573,7 +573,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                         address = getForeignAddress(свФилиал.getАдрМНИн());
                     }
 
-                    String filialAddressName = (((fullName == null) ? "" : (fullName + " ")) + ((address == null) ? "" : address));
+                    String filialAddressName = (((fullName == null || fullName.equals("")) ? "" : (fullName + " ")) + ((address == null) ? "" : address));
 
 
                     regFilial.setAddress(filialAddressName);
@@ -613,7 +613,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                         address = getForeignAddress(свПредстав.getАдрМНИн());
                     }
 
-                    String filialAddressName = (((fullName == null) ? "" : (fullName + " ")) + ((address == null) ? "" : address));
+                    String filialAddressName = (((fullName == null || fullName.equals("")) ? "" : (fullName + " ")) + ((address == null) ? "" : address));
 
                     regFilial.setAddress(filialAddressName);
                     regFilial.setKladrCode(kladrCode);
