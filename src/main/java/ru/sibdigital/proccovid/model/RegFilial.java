@@ -48,9 +48,6 @@ public class RegFilial {
     @Column(name = "address")
     private String address;
     @Basic
-    @Column(name = "filial_hash")
-    private Integer filialHash;
-    @Basic
     @Column(name = "kladr_code")
     private String kladrCode;
     @Basic
@@ -119,14 +116,6 @@ public class RegFilial {
         this.address = address;
     }
 
-    public Integer getFilialHash() {
-        return filialHash;
-    }
-
-    public void setFilialHash(Integer filialHash) {
-        this.filialHash = filialHash;
-    }
-
     public String getKladrCode() {
         return kladrCode;
     }
@@ -155,13 +144,12 @@ public class RegFilial {
                 Objects.equals(egrul, regFilial.egrul) &&
                 Objects.equals(type, regFilial.type) &&
                 Objects.equals(address, regFilial.address) &&
-                Objects.equals(filialHash, regFilial.filialHash) &&
                 Objects.equals(kladrCode, regFilial.kladrCode) &&
                 Objects.equals(activeStatus, regFilial.activeStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, inn, kpp, fullName, data, egrul, type, address, filialHash, kladrCode, activeStatus);
+        return Objects.hash(id, inn, kpp, fullName, data, egrul, type, address, kladrCode, activeStatus);
     }
 }

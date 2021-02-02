@@ -22,7 +22,5 @@ public interface RegFilialRepo extends JpaRepository<RegFilial, Long> {
             nativeQuery = true)
     void deleteRegFilials(@Param("id_egruls") List<Long> id_egruls);
 
-    Optional<RegFilial> findFirstByEgrul_IogrnAndAndFilialHashAndType(Long iogrn, Integer address_hash, Integer type);
-
     Optional<List<RegFilial>> findAllByEgrul_Id(Long id_egrul);
 }

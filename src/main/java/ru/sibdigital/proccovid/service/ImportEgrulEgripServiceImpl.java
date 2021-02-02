@@ -326,16 +326,18 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         for (EGRUL.СвЮЛ свЮЛ : egrul.getСвЮЛ()) {
             //egrulLogger.info("ИНН: " + свЮЛ.getИНН());
             EGRUL.СвЮЛ.СвОКВЭД свОКВЭД = свЮЛ.getСвОКВЭД();
-            Date dateActual = new Date(свЮЛ.getДатаВып().toGregorianCalendar().getTimeInMillis());
-            String ogrn = свЮЛ.getОГРН();
+//            Date dateActual = new Date(свЮЛ.getДатаВып().toGregorianCalendar().getTimeInMillis());
+//            String ogrn = свЮЛ.getОГРН();
+//
+//            RegEgrul newRegEgrul = new RegEgrul();
+//            newRegEgrul.setLoadDate(new Timestamp(System.currentTimeMillis()));
+//            newRegEgrul.setInn(свЮЛ.getИНН());
+//            newRegEgrul.setKpp(свЮЛ.getКПП());
+//            newRegEgrul.setOgrn(ogrn);
+//            newRegEgrul.setIogrn((ogrn != null && ogrn.isBlank() == false) ? Long.parseLong(ogrn) : null);
+//            newRegEgrul.setDateActual(dateActual);
 
-            RegEgrul newRegEgrul = new RegEgrul();
-            newRegEgrul.setLoadDate(new Timestamp(System.currentTimeMillis()));
-            newRegEgrul.setInn(свЮЛ.getИНН());
-            newRegEgrul.setKpp(свЮЛ.getКПП());
-            newRegEgrul.setOgrn(ogrn);
-            newRegEgrul.setIogrn((ogrn != null) ? Long.parseLong(ogrn) : null);
-            newRegEgrul.setDateActual(dateActual);
+            RegEgrul newRegEgrul = construct(свЮЛ);
             newRegEgrul.setIdMigration(migration.getId());
 
             svStatuses = parseSvStatuses(свЮЛ, newRegEgrul);
@@ -374,46 +376,66 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             ec.setSvRecords(svRecords);
 
             if (свОКВЭД != null) {
-                Set<RegEgrulOkved> regEgrulOkveds = new HashSet<>();
-
-                if (свОКВЭД.getСвОКВЭДОсн() != null) {
-                    String ver = свОКВЭД.getСвОКВЭДОсн().getПрВерсОКВЭД() != null ? свОКВЭД.getСвОКВЭДОсн().getПрВерсОКВЭД() : "2001";
-                    String okey = свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД() + ver;
-                    final Okved okved = okvedsMap.get(okey);
-                    if (okved != null) {
-                        RegEgrulOkved reo = new RegEgrulOkved();
-                        reo.setMain(true);
-                        reo.setRegEgrul(newRegEgrul);
-                        reo.setIdOkved(okved.getIdSerial());
-                        regEgrulOkveds.add(reo);
-                    } else {
-                        egrulLogger.error("ОКВЭД" + свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД() + "версии " + ver + " не найден для ИНН " + свЮЛ.getИНН());
-                    }
-                }
-                if (свОКВЭД.getСвОКВЭДДоп() != null) {
-                    for (СвОКВЭДТип свОКВЭДТип : свОКВЭД.getСвОКВЭДДоп()) {
-                        String version = свОКВЭДТип.getПрВерсОКВЭД() != null ? свОКВЭДТип.getПрВерсОКВЭД() : "2001";
-                        String dokey = свОКВЭДТип.getКодОКВЭД() + version;
-                        final Okved dokved = okvedsMap.get(dokey);
-
-                        if (dokved != null) {
-                            RegEgrulOkved dreo = new RegEgrulOkved();
-                            dreo.setMain(false);
-                            dreo.setRegEgrul(newRegEgrul);
-                            dreo.setIdOkved(dokved.getIdSerial());
-                            regEgrulOkveds.add(dreo);
-                        } else {
-                            egrulLogger.error("ОКВЭД" + свОКВЭДТип.getКодОКВЭД() + "версии " + version + " не найден для ИНН " + свЮЛ.getИНН());
-                        }
-                    }
-
-                }
-
+                Set<RegEgrulOkved> regEgrulOkveds = getRegEgrulOkveds(свОКВЭД, newRegEgrul);
                 ec.setRegEgrulOkved(regEgrulOkveds);
             }
             containerList.add(ec);
         }
         return containerList;
+    }
+
+    private RegEgrul construct(EGRUL.СвЮЛ свЮЛ) {
+        String ogrn = свЮЛ.getОГРН();
+        Date dateActual = new Date(свЮЛ.getДатаВып().toGregorianCalendar().getTimeInMillis());
+
+        RegEgrul newRegEgrul = new RegEgrul();
+        newRegEgrul.setLoadDate(new Timestamp(System.currentTimeMillis()));
+        newRegEgrul.setInn(свЮЛ.getИНН());
+        newRegEgrul.setKpp(свЮЛ.getКПП());
+        newRegEgrul.setOgrn(ogrn);
+        newRegEgrul.setIogrn((ogrn != null && ogrn.isBlank() == false) ? Long.parseLong(ogrn) : null);
+        newRegEgrul.setDateActual(dateActual);
+
+        return newRegEgrul;
+    }
+
+    private Set<RegEgrulOkved> getRegEgrulOkveds(EGRUL.СвЮЛ.СвОКВЭД свОКВЭД, RegEgrul newRegEgrul) {
+        Set<RegEgrulOkved> regEgrulOkveds = new HashSet<>();
+
+        if (свОКВЭД.getСвОКВЭДОсн() != null) {
+            String ver = свОКВЭД.getСвОКВЭДОсн().getПрВерсОКВЭД() != null ? свОКВЭД.getСвОКВЭДОсн().getПрВерсОКВЭД() : "2001";
+            String okey = свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД() + ver;
+            final Okved okved = okvedsMap.get(okey);
+            if (okved != null) {
+                RegEgrulOkved reo = new RegEgrulOkved();
+                reo.setMain(true);
+                reo.setRegEgrul(newRegEgrul);
+                reo.setIdOkved(okved.getIdSerial());
+                regEgrulOkveds.add(reo);
+            } else {
+                egrulLogger.error("ОКВЭД" + свОКВЭД.getСвОКВЭДОсн().getКодОКВЭД() + "версии " + ver + " не найден для ИНН " + newRegEgrul.getInn());
+            }
+        }
+        if (свОКВЭД.getСвОКВЭДДоп() != null) {
+            for (СвОКВЭДТип свОКВЭДТип : свОКВЭД.getСвОКВЭДДоп()) {
+                String version = свОКВЭДТип.getПрВерсОКВЭД() != null ? свОКВЭДТип.getПрВерсОКВЭД() : "2001";
+                String dokey = свОКВЭДТип.getКодОКВЭД() + version;
+                final Okved dokved = okvedsMap.get(dokey);
+
+                if (dokved != null) {
+                    RegEgrulOkved dreo = new RegEgrulOkved();
+                    dreo.setMain(false);
+                    dreo.setRegEgrul(newRegEgrul);
+                    dreo.setIdOkved(dokved.getIdSerial());
+                    regEgrulOkveds.add(dreo);
+                } else {
+                    egrulLogger.error("ОКВЭД" + свОКВЭДТип.getКодОКВЭД() + "версии " + version + " не найден для ИНН " + newRegEgrul.getInn());
+                }
+            }
+
+        }
+
+        return regEgrulOkveds;
     }
 
     private Integer getActiveStatus(EGRUL.СвЮЛ свЮЛ,  Set<SvStatus> svStatuses) {
@@ -432,6 +454,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     private boolean checkСвЮЛIsValid(Set<SvStatus> svStatuses) {
         final List<String> unactiveStatuses = Arrays.asList("701", "702", "801");
+
+//        long count = svStatuses.stream().map(svStatus -> svStatus.getReferenceBook().getCode())
+//                .filter(c -> unactiveStatuses.contains(c))
+//                .count();
 
         boolean isValid = true;
         for (SvStatus svStatus : svStatuses) {
@@ -459,11 +485,16 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 SvStatus svStatus = SvStatus.builder()
                                     .egrul(regEgrul)
                                     .build();
+
                 if (свСтатус.getСвРешИсклЮЛ() != null) {
-                    svStatus.setExclDecDate(XMLGregorianCalendarToTimestamp(свСтатус.getСвРешИсклЮЛ().getДатаРеш()));
-                    svStatus.setExclDecNum(свСтатус.getСвРешИсклЮЛ().getНомерРеш());
-                    svStatus.setPublDate(XMLGregorianCalendarToTimestamp(свСтатус.getСвРешИсклЮЛ().getДатаПубликации()));
-                    svStatus.setJournalNum(свСтатус.getСвРешИсклЮЛ().getНомерЖурнала());
+                    try {
+                        svStatus.setExclDecDate(XMLGregorianCalendarToTimestamp(свСтатус.getСвРешИсклЮЛ().getДатаРеш()));
+                        svStatus.setExclDecNum(свСтатус.getСвРешИсклЮЛ().getНомерРеш());
+                        svStatus.setPublDate(XMLGregorianCalendarToTimestamp(свСтатус.getСвРешИсклЮЛ().getДатаПубликации()));
+                        svStatus.setJournalNum(свСтатус.getСвРешИсклЮЛ().getНомерЖурнала());
+                    } catch (Exception e) {
+                        egrulLogger.error("Не удалось распарсить свРешИсклЮЛ" + свЮЛ.getОГРН());
+                    }
                 }
 
                 EGRUL.СвЮЛ.СвСтатус.СвСтатус1 свСтатус1 = свСтатус.getСвСтатус();
@@ -542,17 +573,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                         address = getForeignAddress(свФилиал.getАдрМНИн());
                     }
 
-                    Integer filialHash = (((fullName == null) ? "" : fullName) + ((address == null) ? "" : address)).hashCode();
+                    String filialAddressName = (((fullName == null) ? "" : (fullName + " ")) + ((address == null) ? "" : address));
 
 
-                    regFilial.setAddress(address);
-                    regFilial.setFilialHash(filialHash);
+                    regFilial.setAddress(filialAddressName);
                     regFilial.setKladrCode(kladrCode);
-
-//                    RegFilial prevRegFilial = regFilialRepo.findRegFilialByEgrul_IogrnAndAndFilialHashAndType(regEgrul.getIogrn(), filialHash, EgrFilialTypes.FILIAL.getValue()).orElse(null);
-//                    if (prevRegFilial != null) {
-//                        regFilial.setId(prevRegFilial.getId());
-//                    }
 
                     regFilial.setData(mapper.writeValueAsString(свФилиал));
                     filials.add(regFilial);
@@ -588,17 +613,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                         address = getForeignAddress(свПредстав.getАдрМНИн());
                     }
 
-                    Integer filialHash = (((fullName == null) ? "" : fullName) + ((address == null) ? "" : address)).hashCode();
+                    String filialAddressName = (((fullName == null) ? "" : (fullName + " ")) + ((address == null) ? "" : address));
 
-
-                    regFilial.setAddress(address);
-                    regFilial.setFilialHash(filialHash);
+                    regFilial.setAddress(filialAddressName);
                     regFilial.setKladrCode(kladrCode);
-
-//                    RegFilial prevRegFilial = regFilialRepo.findRegFilialByEgrul_IogrnAndAndFilialHashAndType(regEgrul.getIogrn(), filialHash, EgrFilialTypes.REPRESENTATION.getValue()).orElse(null);
-//                    if (prevRegFilial != null) {
-//                        regFilial.setId(prevRegFilial.getId());
-//                    }
 
                     regFilial.setData(mapper.writeValueAsString(свПредстав));
                     filials.add(regFilial);
@@ -738,20 +756,25 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             Long egrulId = container.getRegEgrul().getId();
             if (egrulId != null) {
                 List<RegFilial> prevFilials = regFilialRepo.findAllByEgrul_Id(egrulId).orElse(null);
-                Set<Integer> prevActiveFilialsHashes = new HashSet<>();
+                Set<String> prevActiveFilialsAddresses = new HashSet<>();
                 if (prevFilials != null) {
-                    prevActiveFilialsHashes = prevFilials.stream().filter(f -> (f.getActiveStatus() == EgrActiveStatus.ACTIVE.getValue())).map(f -> f.getFilialHash()).collect(Collectors.toSet());
+                    prevActiveFilialsAddresses = prevFilials.stream()
+                            .filter(f -> (f.getActiveStatus() == EgrActiveStatus.ACTIVE.getValue()))
+                            .map(f -> f.getAddress())
+                            .collect(Collectors.toSet());
                 }
-                Set<Integer> filialHashes = container.getRegFilials().stream().map(f -> f.getFilialHash()).collect(Collectors.toSet()); // из распарсиных xml
+                Set<String> filialsNameAddresses = container.getRegFilials().stream()
+                        .map(f -> f.getAddress())
+                        .collect(Collectors.toSet()); // из распарсиных xml
 
                 // Новые филиалы, чьих хэшкодов нет в базе
 //                Set<Integer> finalPrevActiveFilialsHashes = prevActiveFilialsHashes;
-                if (prevActiveFilialsHashes != null) {
-                    if (filialHashes != null) {
-                        Set<Integer> hashesOfNewFilials = new HashSet<>(filialHashes);
-                        hashesOfNewFilials.removeAll(prevActiveFilialsHashes);
+                if (prevActiveFilialsAddresses != null) {
+                    if (filialsNameAddresses != null) {
+                        Set<String> addressesOfNewFilials = new HashSet<>(filialsNameAddresses);
+                        addressesOfNewFilials.removeAll(prevActiveFilialsAddresses);
 
-                        Set<RegFilial> newFilials = container.getRegFilials().stream().filter(f -> hashesOfNewFilials.contains(f.getFilialHash())).collect(Collectors.toSet());
+                        Set<RegFilial> newFilials = container.getRegFilials().stream().filter(f -> addressesOfNewFilials.contains(f.getAddress())).collect(Collectors.toSet());
                         updatedFilials.addAll(newFilials);
                     }
                 } else {
@@ -759,11 +782,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 }
 
                 // Филиалы, чьи хэшкоды есть в базе, но нет в новом списке
-                if (filialHashes != null && prevFilials != null) {
-                    Set<Integer> hashesOfNotActiveAnymoreFilials = new HashSet<>(prevActiveFilialsHashes);
-                    hashesOfNotActiveAnymoreFilials.removeAll(filialHashes);
+                if (filialsNameAddresses != null && prevFilials != null) {
+                    Set<String> addressesOfNotActiveAnymoreFilials = new HashSet<>(prevActiveFilialsAddresses);
+                    addressesOfNotActiveAnymoreFilials.removeAll(filialsNameAddresses);
 
-                    Set<RegFilial> notActiveAnymoreFilials = prevFilials.stream().filter(f -> hashesOfNotActiveAnymoreFilials.contains(f.getFilialHash())).collect(Collectors.toSet());
+                    Set<RegFilial> notActiveAnymoreFilials = prevFilials.stream().filter(f -> addressesOfNotActiveAnymoreFilials.contains(f.getAddress())).collect(Collectors.toSet());
                     notActiveAnymoreFilials.forEach(f -> f.setActiveStatus(EgrActiveStatus.CEASED.getValue()));
                     updatedFilials.addAll(notActiveAnymoreFilials);
                 }

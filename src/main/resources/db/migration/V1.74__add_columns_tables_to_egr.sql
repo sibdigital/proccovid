@@ -16,9 +16,6 @@ alter table reg_filial
     add if not exists address text;
 
 alter table reg_filial
-    add if not exists filial_hash integer;
-
-alter table reg_filial
     add if not exists kladr_code varchar(23);
 
 alter table reg_filial
