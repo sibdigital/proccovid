@@ -508,6 +508,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     private Set<RegFilial> parseFilials(EGRUL.СвЮЛ свЮЛ, RegEgrul regEgrul) throws JsonProcessingException {
         Set<RegFilial> filials = new HashSet<>();
+
         if (свЮЛ.getСвПодразд() != null ) {
             List<EGRUL.СвЮЛ.СвПодразд.СвФилиал> свФилиалList = свЮЛ.getСвПодразд().getСвФилиал();
             if (свФилиалList != null) {
@@ -516,29 +517,41 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                             .egrul(regEgrul)
                             .inn(regEgrul.getInn())
                             .type(EgrFilialTypes.FILIAL.getValue())
+                            .activeStatus(EgrActiveStatus.ACTIVE.getValue())
                             .build();
+
+                    String fullName = "";
                     if (свФилиал.getСвНаим() != null) {
-                        regFilial.setFullName(свФилиал.getСвНаим().getНаимПолн());
+                        fullName = свФилиал.getСвНаим().getНаимПолн();
+                        regFilial.setFullName(fullName);
                     }
 
                     if (свФилиал.getСвУчетНОФилиал() != null) {
                         regFilial.setKpp(свФилиал.getСвУчетНОФилиал().getКПП());
                     }
 
+                    String address = "";
+                    String kladrCode = null;
                     if (свФилиал.getАдрМНРФ() != null) {
-                        String kladrAddress = getКladrAddress(свФилиал.getАдрМНРФ());
-                        Integer kladrAddressHash = kladrAddress.hashCode();
-                        String kladrCode = свФилиал.getАдрМНРФ().getКодАдрКладр();
-
-                        regFilial.setKladrAddress(kladrAddress);
-                        regFilial.setKladrAddressHash(kladrAddressHash);
-                        regFilial.setKladrCode(kladrCode);
-
-                        RegFilial prevRegFilial = regFilialRepo.findByEgrul_IogrnAndAndKladrAddressHashAndType(regEgrul.getIogrn(), kladrAddressHash, EgrFilialTypes.FILIAL.getValue());
-                        if (prevRegFilial != null) {
-                            regFilial.setId(prevRegFilial.getId());
-                        }
+                        address = getКladrAddress(свФилиал.getАдрМНРФ());
+                        kladrCode = свФилиал.getАдрМНРФ().getКодАдрКладр();
                     }
+
+                    if (свФилиал.getАдрМНИн() != null) {
+                        address = getForeignAddress(свФилиал.getАдрМНИн());
+                    }
+
+                    Integer filialHash = (((fullName == null) ? "" : fullName) + ((address == null) ? "" : address)).hashCode();
+
+
+                    regFilial.setAddress(address);
+                    regFilial.setFilialHash(filialHash);
+                    regFilial.setKladrCode(kladrCode);
+
+//                    RegFilial prevRegFilial = regFilialRepo.findRegFilialByEgrul_IogrnAndAndFilialHashAndType(regEgrul.getIogrn(), filialHash, EgrFilialTypes.FILIAL.getValue()).orElse(null);
+//                    if (prevRegFilial != null) {
+//                        regFilial.setId(prevRegFilial.getId());
+//                    }
 
                     regFilial.setData(mapper.writeValueAsString(свФилиал));
                     filials.add(regFilial);
@@ -550,29 +563,41 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                             .egrul(regEgrul)
                             .inn(regEgrul.getInn())
                             .type(EgrFilialTypes.REPRESENTATION.getValue())
+                            .activeStatus(EgrActiveStatus.ACTIVE.getValue())
                             .build();
+
+                    String fullName = "";
                     if (свПредстав.getСвНаим() != null) {
-                        regFilial.setFullName(свПредстав.getСвНаим().getНаимПолн());
+                        fullName = свПредстав.getСвНаим().getНаимПолн();
+                        regFilial.setFullName(fullName);
                     }
 
                     if (свПредстав.getСвУчетНОПредстав() != null) {
                         regFilial.setKpp(свПредстав.getСвУчетНОПредстав().getКПП());
                     }
 
+                    String address = "";
+                    String kladrCode = null;
                     if (свПредстав.getАдрМНРФ() != null) {
-                        String kladrAddress = getКladrAddress(свПредстав.getАдрМНРФ());
-                        String kladrCode = свПредстав.getАдрМНРФ().getКодАдрКладр();
-                        Integer kladrAddressHash = kladrAddress.hashCode();
-
-                        regFilial.setKladrAddress(kladrAddress);
-                        regFilial.setKladrAddressHash(kladrAddressHash);
-                        regFilial.setKladrCode(kladrCode);
-
-                        RegFilial prevRegFilial = regFilialRepo.findByEgrul_IogrnAndAndKladrAddressHashAndType(regEgrul.getIogrn(), kladrAddressHash, EgrFilialTypes.REPRESENTATION.getValue());
-                        if (prevRegFilial != null) {
-                            regFilial.setId(prevRegFilial.getId());
-                        }
+                        address = getКladrAddress(свПредстав.getАдрМНРФ());
+                        kladrCode = свПредстав.getАдрМНРФ().getКодАдрКладр();
                     }
+
+                    if (свПредстав.getАдрМНИн() != null) {
+                        address = getForeignAddress(свПредстав.getАдрМНИн());
+                    }
+
+                    Integer filialHash = (((fullName == null) ? "" : fullName) + ((address == null) ? "" : address)).hashCode();
+
+
+                    regFilial.setAddress(address);
+                    regFilial.setFilialHash(filialHash);
+                    regFilial.setKladrCode(kladrCode);
+
+//                    RegFilial prevRegFilial = regFilialRepo.findRegFilialByEgrul_IogrnAndAndFilialHashAndType(regEgrul.getIogrn(), filialHash, EgrFilialTypes.REPRESENTATION.getValue()).orElse(null);
+//                    if (prevRegFilial != null) {
+//                        regFilial.setId(prevRegFilial.getId());
+//                    }
 
                     regFilial.setData(mapper.writeValueAsString(свПредстав));
                     filials.add(regFilial);
@@ -647,7 +672,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         if (!deletedOkveds.isEmpty()) {
             regEgrulOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
-            regFilialRepo.deleteRegFilials(deletedOkveds);
+//            regFilialRepo.deleteRegFilials(deletedOkveds);
             svStatusRepo.deleteSvStatuses(deletedOkveds);
             svRecordEgrRepo.deleteSvRecordEgrsByIdEgruls(deletedOkveds);
         }
@@ -656,9 +681,12 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         regEgrulRepo.saveAll(rel);
 
         saveRegEgrulOkveds(updatedData);
-        saveSvFilials(updatedData);
+//        saveSvFilials(updatedData);
         saveSvStatuses(updatedData);
         saveSvRecords(updatedData);
+
+        Set<RegFilial> updatedFilials = getUpdatedFilials(updatedData);
+        saveSvFilials(updatedFilials);
     }
 
     private void saveRegEgrulOkveds(List<EgrulContainer> updatedData) {
@@ -697,6 +725,53 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         if (!granula.isEmpty()){
             regFilialRepo.saveAll(granula);
         }
+    }
+
+    private void saveSvFilials(Set<RegFilial> updatedFilials) {
+        regFilialRepo.saveAll(updatedFilials);
+    }
+
+    private Set<RegFilial> getUpdatedFilials(List<EgrulContainer> updatedData) {
+        Set<RegFilial> updatedFilials = new HashSet<>();
+        for (EgrulContainer container : updatedData) {
+            Long egrulId = container.getRegEgrul().getId();
+            if (egrulId != null) {
+                List<RegFilial> prevFilials = regFilialRepo.findAllByEgrul_Id(egrulId).orElse(null);
+                Set<Integer> prevActiveFilialsHashes = new HashSet<>();
+                if (prevFilials != null) {
+                    prevActiveFilialsHashes = prevFilials.stream().filter(f -> (f.getActiveStatus() == EgrActiveStatus.ACTIVE.getValue())).map(f -> f.getFilialHash()).collect(Collectors.toSet());
+                }
+                Set<Integer> filialHashes = container.getRegFilials().stream().map(f -> f.getFilialHash()).collect(Collectors.toSet()); // из распарсиных xml
+
+                // Новые филиалы, чьих хэшкодов нет в базе
+//                Set<Integer> finalPrevActiveFilialsHashes = prevActiveFilialsHashes;
+                if (prevActiveFilialsHashes != null) {
+                    if (filialHashes != null) {
+                        Set<Integer> hashesOfNewFilials = new HashSet<>(filialHashes);
+                        hashesOfNewFilials.removeAll(prevActiveFilialsHashes);
+
+                        Set<RegFilial> newFilials = container.getRegFilials().stream().filter(f -> hashesOfNewFilials.contains(f.getFilialHash())).collect(Collectors.toSet());
+                        updatedFilials.addAll(newFilials);
+                    }
+                } else {
+                    updatedFilials.addAll(container.getRegFilials());
+                }
+
+                // Филиалы, чьи хэшкоды есть в базе, но нет в новом списке
+                if (filialHashes != null && prevFilials != null) {
+                    Set<Integer> hashesOfNotActiveAnymoreFilials = new HashSet<>(prevActiveFilialsHashes);
+                    hashesOfNotActiveAnymoreFilials.removeAll(filialHashes);
+
+                    Set<RegFilial> notActiveAnymoreFilials = prevFilials.stream().filter(f -> hashesOfNotActiveAnymoreFilials.contains(f.getFilialHash())).collect(Collectors.toSet());
+                    notActiveAnymoreFilials.forEach(f -> f.setActiveStatus(EgrActiveStatus.CEASED.getValue()));
+                    updatedFilials.addAll(notActiveAnymoreFilials);
+                }
+            } else {
+                updatedFilials.addAll(container.getRegFilials());
+            }
+        }
+
+        return updatedFilials;
     }
 
     private void saveSvStatuses(List<EgrulContainer> updatedData) {
@@ -1165,12 +1240,14 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     private Integer getActiveStatus(EGRIP.СвИП свИП, Set<SvStatus> svStatuses, Set<SvRecordEgr> svRecords) {
         Integer activeStatus = EgrActiveStatus.ACTIVE.getValue();
 
-        if (!checkСвИПIsValid(svStatuses)) {
-            activeStatus = EgrActiveStatus.NOT_VALID.getValue();
-        }
-
         if (checkСвИПIsCeased(свИП)) {
             activeStatus = EgrActiveStatus.CEASED.getValue();
+        }
+
+        if (activeStatus == EgrActiveStatus.ACTIVE.getValue()) {
+            if (!checkСвИПIsValid(svStatuses)) {
+                activeStatus = EgrActiveStatus.NOT_VALID.getValue();
+            }
         }
 
         if (activeStatus == EgrActiveStatus.ACTIVE.getValue()) {
@@ -1262,6 +1339,13 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         address += (адр.getКорпус() != null) ? " КОРПУС " + адр.getКорпус() : "";
         address += (адр.getДом() != null) ? " ДОМ " + адр.getДом() : "";
         address += (адр.getКварт() != null) ? " КВАРТИРА " + адр.getКварт() : "";
+
+        return address;
+    }
+
+    private String getForeignAddress(АдрИнЕГРЮЛТип адр) {
+        String address = "";
+        address += (адр.getАдрИн() != null) ? адр.getАдрИн() : "";
 
         return address;
     }

@@ -13,13 +13,20 @@
 
 -- reg_filial
 alter table reg_filial
-    add if not exists kladr_address text;
+    add if not exists address text;
 
 alter table reg_filial
-    add if not exists kladr_address_hash integer;
+    add if not exists filial_hash integer;
 
 alter table reg_filial
     add if not exists kladr_code varchar(23);
+
+alter table reg_filial
+    add if not exists active_status smallint;
+
+create index if not exists reg_filial_id_egrul_idx
+    on reg_filial (id_egrul);
+
 
 alter table reg_egrip
     add if not exists active_status smallint;
@@ -51,4 +58,3 @@ CREATE TABLE if not exists egr.sv_record_egr
 
 create index if not exists reg_egrip_iogrn_idx
     on reg_egrip (iogrn);
-

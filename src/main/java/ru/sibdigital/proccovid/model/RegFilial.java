@@ -8,8 +8,6 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -24,8 +22,8 @@ public class RegFilial {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_reg_egrul_pk")
-    @SequenceGenerator(name="seq_reg_filial_pk", sequenceName = "seq_reg_egrul_pk", allocationSize=1)
+    @SequenceGenerator(name = "REG_FILIAL_GEN", sequenceName = "reg_filial_id_seq", allocationSize = 1, schema = "public")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REG_FILIAL_GEN")
     private Long id;
     @Basic
     @Column(name = "inn", nullable = true, length = 10)
@@ -47,14 +45,17 @@ public class RegFilial {
     @Column(name = "type")
     private Integer type;
     @Basic
-    @Column(name = "kladr_address")
-    private String kladrAddress;
+    @Column(name = "address")
+    private String address;
     @Basic
-    @Column(name = "kladr_address_hash")
-    private Integer kladrAddressHash;
+    @Column(name = "filial_hash")
+    private Integer filialHash;
     @Basic
     @Column(name = "kladr_code")
     private String kladrCode;
+    @Basic
+    @Column(name = "active_status")
+    private Integer activeStatus;
 
     public Long getId() {
         return id;
@@ -110,20 +111,20 @@ public class RegFilial {
         this.type = type;
     }
 
-    public String getKladrAddress() {
-        return kladrAddress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setKladrAddress(String kladrAddress) {
-        this.kladrAddress = kladrAddress;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public Integer getKladrAddressHash() {
-        return kladrAddressHash;
+    public Integer getFilialHash() {
+        return filialHash;
     }
 
-    public void setKladrAddressHash(Integer kladrAddressHash) {
-        this.kladrAddressHash = kladrAddressHash;
+    public void setFilialHash(Integer filialHash) {
+        this.filialHash = filialHash;
     }
 
     public String getKladrCode() {
@@ -132,6 +133,13 @@ public class RegFilial {
 
     public void setKladrCode(String kladrCode) {
         this.kladrCode = kladrCode;
+    }
+
+    public Integer getActiveStatus() {
+        return activeStatus;
+    }
+    public void setActiveStatus(Integer activeStatus) {
+        this.activeStatus = activeStatus;
     }
 
     @Override
@@ -146,12 +154,14 @@ public class RegFilial {
                 Objects.equals(data, regFilial.data) &&
                 Objects.equals(egrul, regFilial.egrul) &&
                 Objects.equals(type, regFilial.type) &&
-                Objects.equals(kladrAddressHash, regFilial.kladrAddressHash);
+                Objects.equals(address, regFilial.address) &&
+                Objects.equals(filialHash, regFilial.filialHash) &&
+                Objects.equals(kladrCode, regFilial.kladrCode) &&
+                Objects.equals(activeStatus, regFilial.activeStatus);
     }
-
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, inn, kpp, fullName, data, egrul, type, kladrAddressHash);
+        return Objects.hash(id, inn, kpp, fullName, data, egrul, type, address, filialHash, kladrCode, activeStatus);
     }
 }

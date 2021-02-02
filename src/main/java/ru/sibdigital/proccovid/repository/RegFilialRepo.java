@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.sibdigital.proccovid.model.RegEgrul;
 import ru.sibdigital.proccovid.model.RegFilial;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RegFilialRepo extends JpaRepository<RegFilial, Long> {
@@ -20,5 +22,7 @@ public interface RegFilialRepo extends JpaRepository<RegFilial, Long> {
             nativeQuery = true)
     void deleteRegFilials(@Param("id_egruls") List<Long> id_egruls);
 
-    RegFilial findByEgrul_IogrnAndAndKladrAddressHashAndType(Long iogrn, Integer address_hash, Integer type);
+    Optional<RegFilial> findFirstByEgrul_IogrnAndAndFilialHashAndType(Long iogrn, Integer address_hash, Integer type);
+
+    Optional<List<RegFilial>> findAllByEgrul_Id(Long id_egrul);
 }
