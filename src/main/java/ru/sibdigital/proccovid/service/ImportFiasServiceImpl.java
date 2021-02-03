@@ -171,7 +171,13 @@ public class ImportFiasServiceImpl implements ImportFiasService {
             if (migration == null || migration.getStatus() != StatusLoadTypes.SUCCESSFULLY_LOADED.getValue()) {
 
                 // Добавить запись об обработке файла
-                migration = migrationService.addMigrationRecord(migration, file, ModelTypes.FIAS_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+//                migration = migrationService.addMigrationRecord(migration, file, ModelTypes.FIAS_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                if (migration == null) {
+                    migration = migrationService.addRecord(file, ModelTypes.FIAS_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                } else {
+                    migration = migrationService.changeRecord(migration, file, ModelTypes.FIAS_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                }
+
 
                 // Обработать файл
                 ZipFile zipFile = getZipFile(file);

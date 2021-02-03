@@ -2,8 +2,9 @@ package ru.sibdigital.proccovid.dto;
 
 import ru.sibdigital.proccovid.model.RegEgrip;
 import ru.sibdigital.proccovid.model.RegEgripOkved;
-import ru.sibdigital.proccovid.model.RegEgrul;
+import ru.sibdigital.proccovid.model.egr.SvOrg;
 import ru.sibdigital.proccovid.model.egr.SvRecordEgr;
+import ru.sibdigital.proccovid.model.egr.SvReg;
 import ru.sibdigital.proccovid.model.egr.SvStatus;
 
 import java.util.Set;
@@ -13,6 +14,8 @@ public class EgripContainer {
     private Set<RegEgripOkved> regEgripOkved;
     private Set<SvStatus> svStatuses;
     private Set<SvRecordEgr> svRecords;
+    private Set<SvOrg> svOrgs;
+    private Set<SvReg> svRegs;
 
     public EgripContainer(RegEgrip regEgrip){
         this.setRegEgrip(regEgrip);
@@ -48,5 +51,21 @@ public class EgripContainer {
 
     public void setSvRecords(Set<SvRecordEgr> svRecords) {
         this.svRecords = svRecords;
+    }
+
+    public Set<SvOrg> getSvOrgs() {
+        return svOrgs;
+    }
+
+    public void setSvOrgs(Set<SvOrg> svOrgs) {
+        this.svOrgs = svOrgs;
+    }
+
+    public Set<SvReg> getSvRegs() {
+        return svRegs;
+    }
+
+    public void setSvRegs(Set<SvReg> svRegs) {
+        this.svRegs = svRegs;
     }
 }

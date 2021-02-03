@@ -28,18 +28,48 @@ public class MigrationServiceImpl implements MigrationService {
         return migration;
     }
 
-    public ClsMigration addMigrationRecord(ClsMigration migration, File file, Short type, Short status, String error){
-        if (migration == null) {
-            migration = new ClsMigration();
-        }
+//    public ClsMigration addMigrationRecord(ClsMigration migration, File file, Short type, Short status, String error){
+//        if (migration == null) {
+//            migration = new ClsMigration();
+//        }
+//
+//        migration.setFilename(file.getName());
+//        migration.setHash(getFileHash(file));
+//        migration.setLoadDate(new Timestamp(System.currentTimeMillis()));
+//        migration.setType(type);
+//        migration.setStatus(status);
+//        migration.setError(error);
+//        clsMigrationRepo.save(migration);
+//
+//        return migration;
+//    }
 
-        migration.setFilename(file.getName());
-        migration.setHash(getFileHash(file));
-        migration.setLoadDate(new Timestamp(System.currentTimeMillis()));
-        migration.setType(type);
-        migration.setStatus(status);
-        migration.setError(error);
+    @Override
+    public ClsMigration addRecord(File file, Short type, Short status, String error) {
+        ClsMigration migration = ClsMigration.builder()
+                            .filename(file.getName())
+                            .hash(getFileHash(file))
+                            .loadDate(new Timestamp(System.currentTimeMillis()))
+                            .type(type)
+                            .status(status)
+                            .error(error)
+                            .build();
         clsMigrationRepo.save(migration);
+
+        return migration;
+    }
+
+    @Override
+    public ClsMigration changeRecord(ClsMigration migration, File file, Short type, Short status, String error) {
+        if (migration != null) {
+            migration.setFilename(file.getName());
+            migration.setHash(getFileHash(file));
+            migration.setLoadDate(new Timestamp(System.currentTimeMillis()));
+            migration.setType(type);
+            migration.setStatus(status);
+            migration.setError(error);
+            clsMigrationRepo.save(migration);
+        }
 
         return migration;
     }

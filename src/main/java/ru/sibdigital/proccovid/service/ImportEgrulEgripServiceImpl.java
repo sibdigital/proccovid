@@ -229,7 +229,13 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             ClsMigration migration = migrationService.getClsMigration(zipFile, ModelTypes.EGRUL_LOAD.getValue());
             if (migration == null || migration.getStatus() != StatusLoadTypes.SUCCESSFULLY_LOADED.getValue()) {
                 // Добавить запись об обработке файла
-                migration = migrationService.addMigrationRecord(migration, zipFile, ModelTypes.EGRUL_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                if (migration == null) {
+                    migration = migrationService.addRecord(zipFile, ModelTypes.EGRUL_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                }
+                else {
+                    migration = migrationService.changeRecord(migration, zipFile, ModelTypes.EGRUL_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                }
+//                migration = migrationService.addMigrationRecord(migration, zipFile, ModelTypes.EGRUL_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
 
                 // Обработать данные zip
                 processEgrulFile(zipFile, migration);
@@ -651,7 +657,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
                 свЗапЕГРЮЛ.setВидЗап(null);
                 свЗапЕГРЮЛ.setИдЗап(null);
-                свЗапЕГРЮЛ.setИдЗап(null);
+                свЗапЕГРЮЛ.setДатаЗап(null);
 
                 svRecordEgr.setData(mapper.writeValueAsString(свЗапЕГРЮЛ));
 
@@ -692,7 +698,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         if (!deletedOkveds.isEmpty()) {
             regEgrulOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
 //            regFilialRepo.deleteRegFilials(deletedOkveds);
-            svStatusRepo.deleteSvStatuses(deletedOkveds);
+            svStatusRepo.deleteSvStatusesByIdEgruls(deletedOkveds);
             svRecordEgrRepo.deleteSvRecordEgrsByIdEgruls(deletedOkveds);
         }
 
@@ -900,7 +906,14 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             ClsMigration migration = migrationService.getClsMigration(zipFile, ModelTypes.EGRIP_LOAD.getValue());
             if (migration == null || migration.getStatus() != StatusLoadTypes.SUCCESSFULLY_LOADED.getValue()) {
                 // Добавить запись об обработке файла
-                migration = migrationService.addMigrationRecord(migration, zipFile, ModelTypes.EGRIP_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+//                migration = migrationService.addMigrationRecord(migration, zipFile, ModelTypes.EGRIP_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                if (migration == null) {
+                    migration = migrationService.addRecord(zipFile, ModelTypes.EGRIP_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                }
+                else {
+                    migration = migrationService.changeRecord(migration, zipFile, ModelTypes.EGRIP_LOAD.getValue(), StatusLoadTypes.LOAD_START.getValue(), "");
+                }
+
 
                 // Обработать данные zip
                 processEgripFile(zipFile, migration);
@@ -1015,7 +1028,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
         if (!deletedOkveds.isEmpty()) {
             regEgripOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
-            svStatusRepo.deleteSvStatuses(deletedOkveds);
+            svStatusRepo.deleteSvStatusesByIdEgrips(deletedOkveds);
             svRecordEgrRepo.deleteSvRecordEgrsByIdEgrips(deletedOkveds);
         }
 

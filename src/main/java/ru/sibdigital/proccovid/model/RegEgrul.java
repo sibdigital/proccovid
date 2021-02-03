@@ -1,9 +1,9 @@
 package ru.sibdigital.proccovid.model;
 
-import lombok.Builder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
+import ru.sibdigital.proccovid.model.egr.Opf;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -52,6 +52,15 @@ public class RegEgrul {
     @Basic
     @Column(name = "active_status")
     private Integer activeStatus;
+    @Basic
+    @Column(name = "full_name")
+    private String fullName;
+    @Basic
+    @Column(name = "short_name")
+    private String shortName;
+    @OneToOne
+    @JoinColumn(name = "id_opf", referencedColumnName = "id")
+    private Opf opf;
 
     @OneToMany(mappedBy = "regEgrul", fetch = FetchType.LAZY)
     private Set<RegEgrulOkved> regEgrulOkveds;
@@ -153,6 +162,29 @@ public class RegEgrul {
 
     public void setRegFilials(List<RegFilial> regFilials) {
         this.regFilials = regFilials;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
+
+    public Opf getOpf() {
+        return opf;
+    }
+    public void setOpf(Opf opf) {
+        this.opf = opf;
     }
 
     @Override

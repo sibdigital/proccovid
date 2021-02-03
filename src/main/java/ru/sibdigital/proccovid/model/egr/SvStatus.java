@@ -28,6 +28,11 @@ public class SvStatus {
     private Date recordDate;
     private String grnCorr;
     private Date recordDateCorr;
+    private Short orgDosSv;
+    private Date orgDosSvRecordDate;
+    private String orgDosSvGrn;
+    private Date orgDosSvRecordDateCorr;
+    private String orgDosSvGrnCorr;
 
     @Id
     @Column(name = "id", nullable = false)
@@ -131,6 +136,46 @@ public class SvStatus {
         this.recordDateCorr = recordDateCorr;
     }
 
+    public Short getOrgDosSv() {
+        return orgDosSv;
+    }
+
+    public void setOrgDosSv(Short orgDosSv) {
+        this.orgDosSv = orgDosSv;
+    }
+
+    public Date getOrgDosSvRecordDate() {
+        return orgDosSvRecordDate;
+    }
+
+    public void setOrgDosSvRecordDate(Date orgDosSvRecordDate) {
+        this.orgDosSvRecordDate = orgDosSvRecordDate;
+    }
+
+    public String getOrgDosSvGrn() {
+        return orgDosSvGrn;
+    }
+
+    public void setOrgDosSvGrn(String orgDosSvGrn) {
+        this.orgDosSvGrn = orgDosSvGrn;
+    }
+
+    public Date getOrgDosSvRecordDateCorr() {
+        return orgDosSvRecordDateCorr;
+    }
+
+    public void setOrgDosSvRecordDateCorr(Date orgDosSvRecordDateCorr) {
+        this.orgDosSvRecordDateCorr = orgDosSvRecordDateCorr;
+    }
+
+    public String getOrgDosSvGrnCorr() {
+        return orgDosSvGrnCorr;
+    }
+
+    public void setOrgDosSvGrnCorr(String orgDosSvGrnCorr) {
+        this.orgDosSvGrnCorr = orgDosSvGrnCorr;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -147,11 +192,16 @@ public class SvStatus {
                 Objects.equals(grn, svStatus.grn) &&
                 Objects.equals(recordDate, svStatus.recordDate) &&
                 Objects.equals(grnCorr, svStatus.grnCorr) &&
-                Objects.equals(recordDateCorr, svStatus.recordDateCorr);
+                Objects.equals(recordDateCorr, svStatus.recordDateCorr) &&
+                Objects.equals(orgDosSv, svStatus.orgDosSv) &&
+                Objects.equals(orgDosSvRecordDate, svStatus.orgDosSvRecordDate) &&
+                Objects.equals(orgDosSvGrn, svStatus.orgDosSvGrn) &&
+                Objects.equals(orgDosSvRecordDateCorr, svStatus.orgDosSvRecordDateCorr) &&
+                Objects.equals(orgDosSvGrnCorr, svStatus.orgDosSvGrnCorr);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, egrul, egrip, referenceBook, exclDecDate, exclDecNum, publDate, journalNum, grn, recordDate, grnCorr, recordDateCorr);
+        return Objects.hash(id, egrul, egrip, referenceBook, exclDecDate, exclDecNum, publDate, journalNum, grn, recordDate, grnCorr, recordDateCorr, orgDosSv, orgDosSvRecordDate, orgDosSvGrn, orgDosSvRecordDateCorr, orgDosSvGrnCorr);
     }
 }
