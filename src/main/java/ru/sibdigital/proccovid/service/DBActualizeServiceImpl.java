@@ -242,7 +242,7 @@ public class DBActualizeServiceImpl implements DBActualizeService {
             }
         } else {
             List<RegEgrip> regEgrips = egrulService.getEgrip(inn);
-            if (regEgrips != null) {
+            if (regEgrips != null && regEgrips.size() > 0) {
                 RegEgrip regEgrip = regEgrips.stream().findFirst().get();
                 for (RegEgripOkved regEgripOkved : regEgrip.getRegEgripOkveds()) {
                     Okved okved = okvedRepo.findOkvedByIdSerial(regEgripOkved.getIdOkved());
