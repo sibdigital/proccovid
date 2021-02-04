@@ -378,7 +378,7 @@ public class SuperEgrServiceImpl implements SuperEgrService{
     }
 
     protected void saveOpf(List<EgrulContainer> list) {
-        final List<Opf> os = list.stream().map(c -> c.getOpf()).filter(opf -> (opf.getId() != null)).collect(Collectors.toList());
+        final List<Opf> os = list.stream().map(c -> c.getOpf()).filter(opf -> (opf.getId() == null)).collect(Collectors.toList());
         if (! os.isEmpty()) {
             opfRepo.saveAll(os);
         }
