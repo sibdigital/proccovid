@@ -19,6 +19,13 @@ public interface SvStatusRepo extends JpaRepository<SvStatus, Long>, JpaSpecific
     @Query(value = "DELETE FROM egr.sv_status\n" +
             "WHERE id_egrul in (:id_egruls)",
             nativeQuery = true)
+    void deleteSvStatuses(@Param("id_egruls") List<Long> id_egruls);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM egr.sv_status\n" +
+            "WHERE id_egrul in (:id_egruls)",
+            nativeQuery = true)
     void deleteSvStatusesByIdEgruls(@Param("id_egruls") List<Long> id_egruls);
 
     @Modifying

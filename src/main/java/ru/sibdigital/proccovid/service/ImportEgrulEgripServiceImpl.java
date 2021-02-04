@@ -671,7 +671,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     private void saveEgruls(List<EgrulContainer> list){
 
         Map<Long, RegEgrul> earlier = findSavedEarlierEgrul(list);
-        List<Long> deletedOkveds = new ArrayList<>();
+        List<Long> deletedNodes = new ArrayList<>();
         List<EgrulContainer> updatedData = new ArrayList<>();
 
         if (!earlier.isEmpty()) {
@@ -683,7 +683,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     if (r.getDateActual().after(earl.getDateActual())) {
                         updatedData.add(ec);
                         r.setId(earl.getId());
-                        deletedOkveds.add(earl.getId());
+                        deletedNodes.add(earl.getId());
                     }
                 }
                 else {
@@ -695,11 +695,11 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             updatedData = list;
         }
 
-        if (!deletedOkveds.isEmpty()) {
-            regEgrulOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
+        if (!deletedNodes.isEmpty()) {
+            regEgrulOkvedRepo.deleteRegEgrulOkveds(deletedNodes);
 //            regFilialRepo.deleteRegFilials(deletedOkveds);
-            svStatusRepo.deleteSvStatusesByIdEgruls(deletedOkveds);
-            svRecordEgrRepo.deleteSvRecordEgrsByIdEgruls(deletedOkveds);
+            svStatusRepo.deleteSvStatusesByIdEgruls(deletedNodes);
+            svRecordEgrRepo.deleteSvRecordEgrsByIdEgruls(deletedNodes);
         }
 
         final List<RegEgrul> rel = updatedData.stream().map(c -> c.getRegEgrul()).collect(Collectors.toList());
@@ -1003,7 +1003,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
     private void saveEgrips(List<EgripContainer> list){
 
         Map<Long, RegEgrip> earlier = findSavedEarlierEgrips(list);
-        List<Long> deletedOkveds = new ArrayList<>();
+        List<Long> deletedNodes = new ArrayList<>();
         List<EgripContainer> updatedData = new ArrayList<>();
 
         if (!earlier.isEmpty()) {
@@ -1014,7 +1014,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     if (r.getDateActual().after(earl.getDateActual())) {
                         updatedData.add(ec);
                         r.setId(earl.getId());
-                        deletedOkveds.add(earl.getId());
+                        deletedNodes.add(earl.getId());
                     }
                 }
                 else {
@@ -1026,10 +1026,10 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             updatedData = list;
         }
 
-        if (!deletedOkveds.isEmpty()) {
-            regEgripOkvedRepo.deleteRegEgrulOkveds(deletedOkveds);
-            svStatusRepo.deleteSvStatusesByIdEgrips(deletedOkveds);
-            svRecordEgrRepo.deleteSvRecordEgrsByIdEgrips(deletedOkveds);
+        if (!deletedNodes.isEmpty()) {
+            regEgripOkvedRepo.deleteRegEgrulOkveds(deletedNodes);
+            svStatusRepo.deleteSvStatusesByIdEgrips(deletedNodes);
+            svRecordEgrRepo.deleteSvRecordEgrsByIdEgrips(deletedNodes);
         }
 
         final List<RegEgrip> rel = updatedData.stream().map(c -> c.getRegEgrip()).collect(Collectors.toList());
