@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
@@ -47,6 +48,9 @@ import java.util.stream.StreamSupport;
 public class RequestService {
 
     private final static Logger actualizationFilesLogger = LoggerFactory.getLogger("actualizationFilesLogger");
+
+    @Autowired
+    private ApplicationConstants applicationConstants;
 
     @Autowired
     ClsOrganizationRepo clsOrganizationRepo;
@@ -404,7 +408,7 @@ public class RequestService {
                 String link = formAddr + "?inn="+ org.getInn();
                 String subject = org.getName() + ", " +
                         (actualizeSubject != null ? actualizeSubject.getStringValue()
-                        : "актуализируйте утвержденную заявку на портале Работающая Бурятия");
+                        : "актуализируйте утвержденную заявку на портале " + applicationConstants.getApplicationName());
                 Map<String, String> params = Map.of(":link", link, "subject", subject);
                 if (org.getEmail() != null) {
                     emailService.sendMessage(org.getEmail().trim(), clsTemplate, params);
