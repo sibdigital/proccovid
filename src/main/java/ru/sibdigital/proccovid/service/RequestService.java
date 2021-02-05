@@ -524,6 +524,7 @@ public class RequestService {
                 .patronymic(clsUserDto.getPatronymic())
                 .login(clsUserDto.getLogin())
                 .isAdmin(clsUserDto.getAdmin())
+                .email(clsUserDto.getEmail())
                 .build();
 
         if (clsUserDto.getNewPassword() != null && !clsUserDto.getNewPassword().isBlank()) {

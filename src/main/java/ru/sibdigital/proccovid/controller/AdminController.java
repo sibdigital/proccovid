@@ -2,11 +2,13 @@ package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -79,6 +81,12 @@ public class AdminController {
 
     @Autowired
     private DBActualizeService dbActualizeService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${spring.mail.from}")
+    private String fromAddress;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -239,7 +247,15 @@ public class AdminController {
             if (clsUser != null && clsUserDto.getId() != clsUser.getId()) {
                 return "Пользователь с таким логином уже существует";
             }
-            requestService.saveClsUser(clsUserDto);
+            clsUser = requestService.saveClsUser(clsUserDto);
+            // отправим логин и пароль на почту
+            String text = "Логин и пароль от личного кабинета на портале " + applicationConstants.getApplicationName() + ":\n"
+                    + clsUser.getLogin() + "\n"
+                    + clsUser.getPassword();
+            emailService.sendSimpleMessage(clsUserDto.getEmail(), applicationConstants.getApplicationName(), text, fromAddress);
+        } catch (MailException e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось отправить письмо";
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return "Не удалось сохранить пользователя";

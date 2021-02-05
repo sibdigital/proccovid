@@ -19,5 +19,6 @@ public class ClsUserDto {
     private String login;
     private String newPassword;
     private Boolean admin;
+    private String email;
 
 }

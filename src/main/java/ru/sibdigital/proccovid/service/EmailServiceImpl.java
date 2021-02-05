@@ -72,7 +72,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private void sendSimpleMessage(String to, String subject, String text, String from) {
+    public void sendSimpleMessage(String to, String subject, String text, String from) throws MailException {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);

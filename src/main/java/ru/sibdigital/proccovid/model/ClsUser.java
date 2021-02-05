@@ -33,6 +33,7 @@ public class ClsUser implements Serializable {
     private String login;
     private String password;
     private Boolean isAdmin;
+    private String email;
 
     public Long getId() {
         return id;
@@ -110,6 +111,16 @@ public class ClsUser implements Serializable {
 
     public void setAdmin(Boolean admin) {
         isAdmin = admin;
+    }
+
+    @Basic
+    @Column(name = "email")
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getFullName() {

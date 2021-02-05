@@ -156,6 +156,7 @@ const departmentUserForm = {
                     { view: 'text', label: 'Фамилия', labelPosition: 'top', name: 'lastname', required: true, validate: webix.rules.isNotEmpty },
                     { view: 'text', label: 'Имя', labelPosition: 'top', name: 'firstname', required: true, validate: webix.rules.isNotEmpty },
                     { view: 'text', label: 'Отчество', labelPosition: 'top', name: 'patronymic' },
+                    { view: 'text', label: 'Адрес электронной почты', labelPosition: 'top', name: 'email', required: true, validate: webix.rules.isEmail },
                     { view: 'text', label: 'Логин', labelPosition: 'top', name: 'login', required: true, validate: webix.rules.isNotEmpty },
                     { view: 'text', id: 'newPassword', type: 'password', label: 'Новый пароль', labelPosition: 'top', name: 'newPassword', attributes: { autocomplete: 'new-password' } },
                     { view: 'checkbox', label: 'Администратор', labelPosition: 'top', name: 'admin' },
