@@ -237,6 +237,7 @@ webix.ready(function() {
                             { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Виды деятельности' },
                             // { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
                             { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
+                            { id: "TypeViolations", icon: "fas fa-file-alt", value: 'Виды нарушений' },
                             { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
                             { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
                             { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
@@ -277,6 +278,10 @@ webix.ready(function() {
                                     }
                                     case 'Prescriptions': {
                                         view = prescriptions;
+                                        break;
+                                    }
+                                    case 'TypeViolations': {
+                                        view = typeViolations;
                                         break;
                                     }
                                     case 'Statistic': {

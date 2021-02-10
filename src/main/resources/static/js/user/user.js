@@ -34,6 +34,7 @@ webix.ready(function() {
                         data: [
                             { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
                             // { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
+                            { id: "Violations", icon: "fas fa-file-alt", value: 'Нарушения' },
                         ],
                         type: {
                             css: 'my_menubar_item',
@@ -58,6 +59,8 @@ webix.ready(function() {
                                     if ($$('prescriptions_table') != null) {
                                         $$('prescriptions_table').destructor();
                                     }
+                                } else if (id == 'Violations') {
+                                    view = violations;
                                 }
                                 this.select(id)
                                 if (view != null) {

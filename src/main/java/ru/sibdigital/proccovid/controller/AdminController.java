@@ -83,6 +83,9 @@ public class AdminController {
     private DBActualizeService dbActualizeService;
 
     @Autowired
+    private ViolationService violationService;
+
+    @Autowired
     private EmailService emailService;
 
     @Value("${spring.mail.from}")
@@ -484,5 +487,22 @@ public class AdminController {
     public @ResponseBody String createPrescriptions() {
         organizationService.createPrescriptions();
         return "Создание предписаний выполнено";
+    }
+
+    @GetMapping("/type_violations")
+    public @ResponseBody List<ClsTypeViolationDto> getClsTypeViolations() {
+        return violationService.getClsTypeViolations().stream()
+                .map(o -> new ClsTypeViolationDto(o.getId(), o.getName(), o.getDescription())).collect(Collectors.toList());
+    }
+
+    @PostMapping("/save_type_violation")
+    public @ResponseBody String saveClsTypeViolation(@RequestBody ClsTypeViolationDto dto) {
+        try {
+            violationService.saveClsTypeViolation(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить вид нарушения";
+        }
+        return "Вид нарушения сохранен";
     }
 }

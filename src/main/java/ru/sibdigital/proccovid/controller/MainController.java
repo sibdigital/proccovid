@@ -123,36 +123,6 @@ public class MainController {
         return requestService.getClsTypeRequest(id);
     }
 
-//    @CrossOrigin
-//    @GetMapping("/egrul")
-//    public @ResponseBody EgrulResponse getEgrul(@RequestParam(name = "inn") String inn) {
-//        EgrulResponse response = new EgrulResponse();
-//        RegEgrul egrul = egrulService.getEgrul(inn);
-//        if (egrul != null) {
-//            try {
-//                response.setData(mapper.readValue(egrul.getData(), EGRUL.СвЮЛ.class));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return response;
-//    }
-//
-//    @CrossOrigin
-//    @GetMapping("/egrip")
-//    public @ResponseBody  EgripResponse getEgrip(@RequestParam(name = "inn") String inn) {
-//        EgripResponse response = new EgripResponse();
-//        RegEgrip egrip = egrulService.getEgrip(inn);
-//        if (egrip != null) {
-//            try {
-//                response.setData(mapper.readValue(egrip.getData(), EGRIP.СвИП.class));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return response;
-//    }
-
     @GetMapping("/migration_data")
     public @ResponseBody  List<ClsMigration> getMigrationData() {
         return clsMigrationRepo.findAll(Sort.by("loadDate"));
