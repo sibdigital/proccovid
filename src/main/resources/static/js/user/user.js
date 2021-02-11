@@ -14,7 +14,7 @@ webix.ready(function() {
     let layout = webix.ui({
         cols: [
             {
-                width: 220,
+                width: 225,
                 id: 'menuRow',
                 rows: [
                     {
@@ -34,7 +34,8 @@ webix.ready(function() {
                         data: [
                             { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
                             // { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
-                            { id: "Violations", icon: "fas fa-file-alt", value: 'Нарушения' },
+                            { id: "Violations", icon: "fas fa-file-alt", value: 'Нарушения организаций' },
+                            { id: "PersonViolations", icon: "fas fa-file-alt", value: 'Нарушения физ. лиц' },
                         ],
                         type: {
                             css: 'my_menubar_item',
@@ -61,6 +62,8 @@ webix.ready(function() {
                                     }
                                 } else if (id == 'Violations') {
                                     view = violations;
+                                } else if (id == 'PersonViolations') {
+                                    view = personViolations;
                                 }
                                 this.select(id)
                                 if (view != null) {
