@@ -55,33 +55,37 @@ const violations = {
                 },
                 onItemClick: function (id) {
                     let item = $$('violations_table').getItem(id);
-                    console.log(item)
+
                     setTimeout(function () {
                         showViolationForm();
 
-                        $$('violationForm').parse(item);
-                        $$('nameOrg').define('readonly', true);
-                        $$('nameOrg').refresh();
-                        $$('opfOrg').define('readonly', true);
-                        $$('opfOrg').refresh();
-                        $$('innOrg').define('readonly', true);
-                        $$('innOrg').refresh();
-                        if (item.ogrnOrg) {
-                            $$('ogrnOrg').define('readonly', true);
-                            $$('ogrnOrg').refresh();
-                        } else {
-                            $$('ogrnOrg').hide();
-                        }
-                        if (item.kppOrg) {
-                            $$('kppOrg').define('readonly', true);
-                            $$('kppOrg').refresh();
-                        } else {
-                            $$('kppOrg').hide();
-                        }
-                        $$('dateRegOrg').define('readonly', true);
-                        $$('dateRegOrg').refresh();
-                        $$('idTypeViolation').define('readonly', true);
-                        $$('idTypeViolation').refresh();
+                        webix.ajax().get('violation', {id: item.id})
+                            .then(function (data) {
+                                data = data.json();
+                                $$('violationForm').parse(data);
+                                $$('nameOrg').define('readonly', true);
+                                $$('nameOrg').refresh();
+                                $$('opfOrg').define('readonly', true);
+                                $$('opfOrg').refresh();
+                                $$('innOrg').define('readonly', true);
+                                $$('innOrg').refresh();
+                                if (data.ogrnOrg) {
+                                    $$('ogrnOrg').define('readonly', true);
+                                    $$('ogrnOrg').refresh();
+                                } else {
+                                    $$('ogrnOrg').hide();
+                                }
+                                if (data.kppOrg) {
+                                    $$('kppOrg').define('readonly', true);
+                                    $$('kppOrg').refresh();
+                                } else {
+                                    $$('kppOrg').hide();
+                                }
+                                $$('dateRegOrg').define('readonly', true);
+                                $$('dateRegOrg').refresh();
+                                $$('idTypeViolation').define('readonly', true);
+                                $$('idTypeViolation').refresh();
+                            });
                     }, 100);
                 }
             },
@@ -145,7 +149,7 @@ function showOrganizationSearchForm() {
                         on: {
                             onItemClick: function (id) {
                                 let item = $$('organizations').getItem(id);
-                                console.log(item)
+
                                 setTimeout(function () {
                                     showViolationForm();
 

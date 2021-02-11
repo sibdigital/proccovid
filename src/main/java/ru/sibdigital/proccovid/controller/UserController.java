@@ -44,24 +44,7 @@ public class UserController {
         Page<RegViolation> regViolationPage = violationService.getViolationsByCriteria(searchCriteria, page, size);
 
         List<ViolationDto> violationDtos = regViolationPage.getContent().stream()
-                .map(o -> ViolationDto.builder()
-                        .id(o.getId())
-                        .idTypeViolation(o.getTypeViolation().getId())
-                        .nameTypeViolation(o.getTypeViolation().getName())
-                        .nameAddedUser(o.getAddedUser().getFullName())
-                        .nameUpdatedUser(o.getUpdatedUser().getFullName())
-                        .timeCreate(o.getTimeCreate())
-                        .timeUpdate(o.getTimeCreate())
-                        .nameOrg(o.getNameOrg())
-                        .opfOrg(o.getOpfOrg())
-                        .innOrg(o.getInnOrg())
-                        .ogrnOrg(o.getOgrnOrg())
-                        .kppOrg(o.getKppOrg())
-                        .dateRegOrg(o.getDateRegOrg())
-                        .numberFile(o.getNumberFile())
-                        .dateFile(o.getDateFile())
-                        .isDeleted(o.getDeleted())
-                        .build())
+                .map(o -> new ViolationDto(o))
                 .collect(Collectors.toList());
 
         Map<String, Object> result = new HashMap<>();

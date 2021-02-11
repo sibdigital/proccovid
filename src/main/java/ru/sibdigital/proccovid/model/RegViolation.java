@@ -79,6 +79,8 @@ public class RegViolation {
         this.timeCreate = timeCreate;
     }
 
+    @Basic
+    @Column(name = "time_update", nullable = false)
     public Timestamp getTimeUpdate() {
         return timeUpdate;
     }

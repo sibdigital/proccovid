@@ -77,8 +77,8 @@ public class ViolationServiceImpl implements ViolationService {
     public Page<RegViolation> getViolationsByCriteria(RegViolationSearchCriteria searchCriteria, int page, int size) {
         RegViolationSpecification specification = new RegViolationSpecification();
         specification.setSearchCriteria(searchCriteria);
-        Page<RegViolation> clsOrganizationsPage = regViolationRepo.findAll(specification, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timeCreate")));
-        return clsOrganizationsPage;
+        Page<RegViolation> regViolationsPage = regViolationRepo.findAll(specification, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timeCreate")));
+        return regViolationsPage;
     }
 
     @Override
