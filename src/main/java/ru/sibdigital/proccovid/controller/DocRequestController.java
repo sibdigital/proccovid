@@ -130,8 +130,7 @@ public class DocRequestController {
 
     @PutMapping("/doc_requests/{id}/update")
     public ResponseEntity<String> updateItem(@PathVariable("id") DocRequest docRequest,
-                                                @RequestBody DocRequest obj,
-                                                @RequestHeader("Authorization") String token, HttpSession session){
+                                                @RequestBody DocRequest obj, HttpSession session){
 
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
@@ -153,8 +152,7 @@ public class DocRequestController {
 
     @PutMapping("/doc_requests/{id}/process")
     public ResponseEntity<String> processItem(@PathVariable("id") DocRequest docRequest,
-                                              @RequestBody DocRequest obj,
-                                              @RequestHeader("Authorization") String token, HttpSession session) {
+                                              @RequestBody DocRequest obj, HttpSession session) {
 
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();

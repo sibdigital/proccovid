@@ -156,8 +156,7 @@
 
                                                                                             webix.ajax()
                                                                                                 .headers(
-                                                                                                    {'Content-type': 'application/json',
-                                                                                                        'Authorization': 'Bearer ' + TOKEN
+                                                                                                    {'Content-type': 'application/json'
                                                                                                     }
                                                                                                 )
                                                                                                 .put('/doc_requests/' + params.id + '/update',
@@ -327,8 +326,8 @@
 
                                                                 webix.ajax()
                                                                     .headers(
-                                                                        {'Content-type': 'application/json',
-                                                                            'Authorization': 'Bearer ' + TOKEN }
+                                                                        {'Content-type': 'application/json'
+                                                                        }
                                                                     )
                                                                     .put('/doc_requests/' + params.id + '/process',
                                                                         JSON.stringify(params))
@@ -391,8 +390,7 @@
 
                                                                 webix.ajax()
                                                                     .headers(
-                                                                        {'Content-type': 'application/json',
-                                                                            'Authorization': 'Bearer ' + TOKEN
+                                                                        {'Content-type': 'application/json'
                                                                         }
                                                                     )
                                                                     .put('/doc_requests/' + params.id + '/process',
