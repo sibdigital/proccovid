@@ -188,14 +188,6 @@ public class RequestService {
         outStream.close();
     }
 
-    public boolean isTokenValid(Integer hash_code){
-        Iterator<ClsUser> iter = clsUserRepo.findAll().iterator();
-        while(iter.hasNext()) {
-            if(hash_code == iter.next().hashCode()) return true;
-        }
-        return false;
-    }
-
     public List<ClsTypeRequest> getClsTypeRequests() {
         return StreamSupport.stream(clsTypeRequestRepo.findAll(Sort.by(Sort.Direction.DESC, "id")).spliterator(), false)
                 .collect(Collectors.toList());
