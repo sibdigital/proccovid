@@ -109,6 +109,7 @@ public class EmailServiceImpl implements EmailService {
                 history.setTimeSend(new Timestamp(System.currentTimeMillis()));
                 history.setStatus(exception);
                 history.setClsTemplate(clsTemplate);
+                history.setEmail(organization.getEmail());
                 histories.put(code, history);
             }
         }
@@ -206,20 +207,21 @@ public class EmailServiceImpl implements EmailService {
             if (organization != null) {
                 int code = principal.hashCode();
 
-                Short exception = MailingStatuses.EMAIL_SENT.value();
+                Short status = MailingStatuses.EMAIL_SENT.value();
                 try {
                     InternetAddress address = new InternetAddress(organization.getEmail()); // validate
 
                     params.put("organizationName", organization.getName() == null ? "" : organization.getName());
                     params.put("inn", organization.getInn() == null ? "" : organization.getInn());
+                    params.put("subject", regMailingMessage.getSubject());
 
                     MimeMessage message = prepareMimeMessage(address, regMailingMessage, params);
                     message.setDescription(String.valueOf(code));
                     messages.add(message);
                 } catch (AddressException e) {
-                    exception = MailingStatuses.INVALID_ADDRESS.value();
+                    status = MailingStatuses.INVALID_ADDRESS.value();
                 } catch (MessagingException messagingException) {
-                    exception = MailingStatuses.EMAIL_NOT_CREATED.value();
+                    status = MailingStatuses.EMAIL_NOT_CREATED.value();
                 }
 
                 RegMailingHistory history = new RegMailingHistory();
@@ -227,7 +229,8 @@ public class EmailServiceImpl implements EmailService {
                 history.setRegMailingMessage(regMailingMessage);
                 history.setClsPrincipal(principal);
                 history.setTimeSend(new Timestamp(System.currentTimeMillis()));
-                history.setStatus(exception);
+                history.setStatus(status);
+                history.setEmail(organization.getEmail());
                 histories.put(code, history);
             }
         }
@@ -246,6 +249,10 @@ public class EmailServiceImpl implements EmailService {
                         log.error(messagingException.getMessage());
                     }
                 }
+            } catch (Exception e) {
+                histories.entrySet().stream().forEach(h -> h.getValue().setStatus(MailingStatuses.EMAIL_NOT_SENT.value()));
+                log.info("Рассылка закончилась ошибками:");
+                log.error(e.getMessage(), e);
             }
 
             regMailingHistoryRepo.saveAll(histories.values());

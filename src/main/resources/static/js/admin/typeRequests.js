@@ -20,14 +20,6 @@ const typeRequests = {
                         datafetch: 25,
                         columns: [
                             {id: "activityKind", header: "Наименование", template: "#activityKind#", width: 1000},
-                            // {id: "shortName", header: "Краткое наименование", template: "#shortName#", width: 300},
-                            // {id: "prescription", header: "Prescription", template: "#prescription#", adjust: true},
-                            // {id: "prescriptionLink", header: "PrescriptionLink", template: "#prescriptionLink#", adjust: true},
-                            // {id: "settings", header: "Настройки", template: "#settings#", adjust: true},
-                            // {id: "statusRegistration", header: "Статус регистрации", template: "#statusRegistration#", adjust: true},
-                            // {id: "statusVisible", header: "Статус видимости", template: "#statusVisible#", adjust: true},
-                            // {id: "beginVisible", header: "Дата начала видимости", template: "#beginVisible#", adjust: true},
-                            // {id: "endVisible", header: "Дата конца видимости", template: "#endVisible#", adjust: true},
                             {id: "sortWeight", header: "Вес сортировки", template: "#sortWeight#", adjust: true},
                         ],
                         on: {
@@ -77,14 +69,6 @@ const typeRequests = {
                     },
                     {
                         cols: [
-                            // {
-                            //     view: 'pager',
-                            //     id: 'Pager',
-                            //     height: 38,
-                            //     size: 25,
-                            //     group: 5,
-                            //     template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
-                            // },
                             {},
                             {},
                             {},
@@ -99,26 +83,6 @@ const typeRequests = {
 
                                     $$('departments').getList().add({ id: '', value: '' });
                                 }
-                                /*let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Добавление типа заявки',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: typeRequestForm,
-                                    on: {
-                                        'onShow': function () {
-                                        }
-                                    }
-                                });
-
-                                $$('departments').getList().add({ id: '', value: '' });
-
-                                window.show();*/
-
                             }
                         ]
                     }
@@ -284,12 +248,6 @@ const typeRequestForm = {
                                         ).then(function (data) {
                                             if (data.text() === 'Тип заявки сохранен') {
                                                 webix.message({text: data.text(), type: 'success'});
-                                                //$$('window').close();
-                                                //const typeRequestTable = $$('type_requests_table');
-                                                //const url = typeRequestTable.data.url;
-                                                //typeRequestTable.clearAll();
-                                                //typeRequestTable.load(url);
-                                                //webix.ui(typeRequests, $$('show_layout'));
                                                 webix.ui({
                                                     id: 'content',
                                                     rows: [

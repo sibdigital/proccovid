@@ -20,6 +20,7 @@ import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.service.*;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,19 +49,7 @@ public class AdminController {
     private ClsMailingListOkvedRepo clsMailingListOkvedRepo;
 
     @Autowired
-    private RegMailingMessageRepo regMailingMessageRepo;
-
-    @Autowired
     private ClsNewsRepo clsNewsRepo;
-
-    @Autowired
-    private RegNewsOkvedRepo regNewsOkvedRepo;
-
-    @Autowired
-    private RegNewsOrganizationRepo regNewsOrganizationRepo;
-
-    @Autowired
-    private RegNewsStatusRepo regNewsStatusRepo;
 
     @Autowired
     private PrescriptionService prescriptionService;
@@ -71,14 +60,7 @@ public class AdminController {
     @Autowired
     private NewsService newsService;
 
-    @Autowired
-    private RegNewsFileRepo regNewsFileRepo;
 
-    @Autowired
-    private ClsDepartmentRepo clsDepartmentRepo;
-
-    @Autowired
-    private DBActualizeService dbActualizeService;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -163,6 +145,18 @@ public class AdminController {
             log.error(e.getMessage());
         }
         return clsPrescription;
+    }
+
+    @PostMapping("/save_cls_type_request")
+    public @ResponseBody ClsTypeRequest saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto, @RequestParam(required = false) String publish) {
+        ClsTypeRequest clsTypeRequest;
+        try {
+            clsTypeRequest = requestService.saveClsTypeRequest(clsTypeRequestDto);
+        } catch (Exception e) {
+            clsTypeRequest = new ClsTypeRequest();
+            log.error(e.getMessage());
+        }
+        return clsTypeRequest;
     }
 
     @PostMapping(value = "/upload_prescription_file", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -293,16 +287,6 @@ public class AdminController {
         return "Рассылка сохранена";
     }
 
-    @GetMapping("/reg_mailing_message")
-    public @ResponseBody List<RegMailingMessage> getListMailingMessages() {
-        return regMailingMessageRepo.findAll(Sort.by("id"));
-    }
-
-    @GetMapping("/reg_mailing_message/{id_message}")
-    public @ResponseBody RegMailingMessage getMailingMessages(@PathVariable("id_message") Long id_message) {
-        return regMailingMessageRepo.findById(id_message).orElse(null);
-    }
-
     @GetMapping("/mailing_list_short")
     public @ResponseBody List<KeyValue> getMailingMessagesForRichselect() {
         List<KeyValue> list = requestService.getClsMailingList().stream()
@@ -310,31 +294,6 @@ public class AdminController {
                 .collect(Collectors.toList());
         return list;
     }
-
-    @PostMapping("/save_reg_mailing_message")
-    public @ResponseBody String saveRegMailingMessage(@RequestBody RegMailingMessageDto regMailingMessageDto) {
-        try {
-            requestService.saveRegMailingMessage(regMailingMessageDto);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return "Не удалось сохранить сообщение";
-        }
-        return "Сообщение сохранено";
-    }
-
-
-    @GetMapping("/change_status")
-    public @ResponseBody String changeStatusRegMailingMessage(@RequestParam("id") Long id_mailing_message, @RequestParam("status") Long status,
-                                                              @RequestParam("sendingTime") String sendingTime) {
-        try {
-            requestService.setStatusToMailingMessage(id_mailing_message, status, sendingTime);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return "Не удалось изменить статус у сообщения (id: " + id_mailing_message + ")";
-        }
-        return "Статус изменен";
-    }
-
 
     @GetMapping("/news")
     public @ResponseBody List<ClsNews> getListNews() {

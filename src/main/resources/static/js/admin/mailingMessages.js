@@ -125,7 +125,7 @@ const mailingMessages = {
                                     id: item.id,
                                     mailingId: jsonResponse.clsMailingList.id,
                                     message: jsonResponse.message,
-                                    sendingTime: jsonResponse.sendingTime.replace("T", " "),
+                                    sendingTime: (jsonResponse.sendingTime != null ? jsonResponse.sendingTime.replace("T", " ") : ""),
                                     status: ''+jsonResponse.status
                                 };
 
@@ -170,35 +170,74 @@ const mailingMessageForm = {
                 view: 'form',
                 id: 'mailingMessageForm',
                 rows: [
-                    {
-                        view: 'richselect',
-                        name: 'mailingId',
-                        id: 'mailingId',
-                        label: 'Тип рассылки',
-                        labelPosition: 'top',
+                    { view: 'text',
+                        label: 'Тема',
+                        id: 'subject',
+                        name: 'subject',
                         required: true,
-                        options: 'mailing_list_short',
+                        validate: webix.rules.isNotEmpty
                     },
-                    { view: 'textarea', label: 'Текст сообщения', labelPosition: 'top', name: 'message', required: true,},
-                    { view: 'datepicker',
-                        label: 'Время начала отправки',
-                        labelPosition: 'top',
-                        name: 'sendingTime',
-                        stringResult:true,
-                        timepicker:true,
-                        format:webix.i18n.fullDateFormat},
-                    { view: 'richselect',
-                        name: 'status',
-                        id: 'status',
-                        label: 'Статус',
-                        labelPosition: 'top',
-                        required: true,
-                        options: [
-                            {id: "0", value:'Создано'},
-                            {id: "1", value:'В очереди на отправку'},
-                            {id: "2", value: 'Отправка проведена'}
-                        ]},
-                    { cols: [
+                    {
+                        cols: [
+                            {
+                                view: 'richselect',
+                                name: 'mailingId',
+                                id: 'mailingId',
+                                label: 'Тип рассылки',
+                                labelPosition: 'left',
+                                required: true,
+                                options: 'mailing_list_short',
+                            },
+                            { view: 'richselect',
+                                name: 'status',
+                                id: 'status',
+                                label: 'Статус',
+                                labelPosition: 'left',
+                                required: true,
+                                options: [
+                                    {id: "0", value:'Создано'},
+                                    {id: "1", value:'В очереди на отправку'},
+                                    {id: "2", value: 'Отправка проведена'}
+                                ]
+                            },
+                            { view: 'datepicker',
+                                label: 'Время начала отправки',
+                                labelPosition: 'left',
+                                name: 'sendingTime',
+                                stringResult:true,
+                                timepicker:true,
+                                format:webix.i18n.fullDateFormat
+                            },
+                        ]
+                    },
+                    {
+                        id:"views",
+                        animate:false,
+                        minHeight: 300,
+                        cells: [
+                            {
+                                view: 'nic-editor',
+                                id: 'message',
+                                name: 'message',
+                                //required: true,
+                                css: "myClass",
+                                cdn: false,
+                                config: {
+                                    iconsPath: '../libs/nicedit/nicEditorIcons.gif'
+                                }
+                            },
+                            {
+                                view: 'ace-editor',
+                                id: 'settings',
+                                theme: 'github',
+                                mode: 'json',
+                                cdn: false
+                            }
+                        ]
+                    },
+                    //{ view: 'textarea', label: 'Текст сообщения', labelPosition: 'top', name: 'message', required: true,},
+                    {
+                        cols: [
                         {},
                         {
                             view: 'button',
@@ -241,7 +280,6 @@ const mailingMessageForm = {
                                 webix.ui(mailingMessages, $$('mailingMessageFormId'));
                             }
                         }]
-
                     }
                 ]
             }
