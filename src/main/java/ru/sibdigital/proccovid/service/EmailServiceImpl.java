@@ -254,8 +254,12 @@ public class EmailServiceImpl implements EmailService {
                 log.info("Рассылка закончилась ошибками:");
                 log.error(e.getMessage(), e);
             }
-
-            regMailingHistoryRepo.saveAll(histories.values());
+            try {
+                regMailingHistoryRepo.saveAll(histories.values());
+            } catch (Exception e) {
+                log.info("Ошибка сохранения истории"); // если это была тестовая отправка. то нормальная ситуация
+                log.error(e.getMessage(), e);
+            }
         }
     }
 

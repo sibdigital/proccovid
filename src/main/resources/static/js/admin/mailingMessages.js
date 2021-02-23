@@ -235,54 +235,94 @@ const mailingMessageForm = {
                             }
                         ]
                     },
-                    //{ view: 'textarea', label: 'Текст сообщения', labelPosition: 'top', name: 'message', required: true,},
                     {
                         cols: [
-                        {},
-                        {
-                            view: 'button',
-                            align: 'right',
-                            maxWidth: 200,
-                            css: 'webix_primary',
-                            value: 'Сохранить',
-                            click: function () {
-                                if ($$('mailingMessageForm').validate()) {
-                                    let params = $$('mailingMessageForm').getValues();
-                                    params.status = parseInt(params.status);
-
-                                    webix.ajax().headers({
-                                        'Content-Type': 'application/json'
-                                    }).post('/save_reg_mailing_message',
-                                        params).then(function (data) {
-                                        if (data.text() === 'Сообщение сохранено') {
-                                            webix.message({text: data.text(), type: 'success'});
-
-                                            webix.ui(mailingMessages, $$('mailingMessageFormId'));
-                                            $$('mailing_messages_table').clearAll();
-                                            $$('mailing_messages_table').load('reg_mailing_message');
-
-                                        } else {
-                                            webix.message({text: data.text(), type: 'error'});
-                                        }
-                                    })
-                                } else {
-                                    webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                            {},
+                            { view: 'text',
+                                label: 'Адрес тестового сообщения',
+                                id: 'test_adress',
+                                name: 'test_adress',
+                                maxWidth: 200,
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                maxWidth: 200,
+                                css: 'webix_secondary',
+                                value: 'Отправить тест',
+                                click: sendTest
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                maxWidth: 200,
+                                css: 'webix_secondary',
+                                value: 'Отмена',
+                                click: function () {
+                                    webix.ui(mailingMessages, $$('mailingMessageFormId'));
                                 }
-                            }
-                        },
-                        {
-                            view: 'button',
-                            align: 'right',
-                            maxWidth: 200,
-                            css: 'webix_secondary',
-                            value: 'Отмена',
-                            click: function () {
-                                webix.ui(mailingMessages, $$('mailingMessageFormId'));
-                            }
-                        }]
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                maxWidth: 200,
+                                css: 'webix_primary',
+                                value: 'Сохранить',
+                                click: saveMessage
+                            },
+                        ]
                     }
                 ]
             }
         ]
     }
+}
+
+function saveMessage(){
+    if ($$('mailingMessageForm').validate()) {
+        let params = $$('mailingMessageForm').getValues();
+        params.status = parseInt(params.status);
+
+        webix.ajax()
+            .headers({
+                'Content-Type': 'application/json'
+            })
+            .post('/save_reg_mailing_message',params)
+            .then(function (data) {
+                if (data.text() === 'Сообщение сохранено') {
+                    webix.message({text: data.text(), type: 'success'});
+
+                    webix.ui(mailingMessages, $$('mailingMessageFormId'));
+                    $$('mailing_messages_table').clearAll();
+                    $$('mailing_messages_table').load('reg_mailing_message');
+
+                } else {
+                    webix.message({text: data.text(), type: 'error'});
+                }
+            })
+    } else {
+        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+    }
+}
+
+function sendTest(){
+    let params = $$('mailingMessageForm').getValues();
+    const postParams = {
+        address: params.test_adress,
+        message: params.message,
+        subject: params.subject
+    }
+    webix.ajax()
+        .headers({
+            'Content-Type': 'application/json'
+        })
+        .post('/send_test_message',postParams)
+        .then(function (data) {
+            const responce = data.json();
+            if (responce.success == true) {
+                webix.message({text: responce.message(), type: 'success'});
+            } else {
+                webix.message({text: responce.message(), type: 'error'});
+            }
+        })
 }

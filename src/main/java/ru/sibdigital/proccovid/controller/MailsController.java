@@ -5,8 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.dto.RegMailingMessageDto;
+import ru.sibdigital.proccovid.model.ClsOrganization;
+import ru.sibdigital.proccovid.model.ClsPrescription;
+import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.RegMailingMessage;
 import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
+import ru.sibdigital.proccovid.service.EmailServiceImpl;
 import ru.sibdigital.proccovid.service.MailingMessageService;
 import ru.sibdigital.proccovid.service.StatisticService;
 
@@ -25,6 +29,9 @@ public class MailsController {
 
     @Autowired
     private RegMailingMessageRepo regMailingMessageRepo;
+
+    @Autowired
+    private EmailServiceImpl emailService;
 
     @GetMapping(value = "/numberOfMailsSent/all")
     public List<Map<String, Object>> getNumberOfMailsSentStatistic(@RequestParam(value = "dateStart", required = false) String dateStart,
@@ -53,6 +60,28 @@ public class MailsController {
             return "Не удалось сохранить сообщения!";
         }
         return "Сообщение сохранено";
+    }
+
+    @PostMapping("/send_test_message")
+    public @ResponseBody Map sendTestMessage(@RequestBody Map<String,String> map) {
+        try {
+            RegMailingMessage rmm = RegMailingMessage.builder()
+                    .message(map.get("message"))
+                    .subject("TECT - " + map.get("subject"))
+                    .status((short) 1)
+                    .build();
+            ClsOrganization co = ClsOrganization.builder()
+                    .email(map.get("address"))
+                    .build();
+            ClsPrincipal cp = ClsPrincipal.builder()
+                    .organization(co)
+                    .build();
+            emailService.sendMessage(List.of(cp), rmm, map);
+        }catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Map.of("message", e.getMessage(), "success", false);
+        }
+        return Map.of("message", "Сообщение отправлено", "success", true);
     }
 
 
