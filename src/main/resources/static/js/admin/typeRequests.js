@@ -37,32 +37,34 @@ const typeRequests = {
                             },
                             onItemDblClick: function (id) {
                                 let data = $$('type_requests_table').getItem(id);
-                                if (data.department) {
-                                    data.departmentId = data.department.id;
-                                }
 
-                                loadTypeRequestFormInContent()
+                                setTimeout(function () {
+                                    if (data.department) {
+                                        data.departmentId = data.department.id;
+                                    }
 
-                                $$('typeRequestForm').parse(data);
+                                    loadTypeRequestFormInContent()
 
-                                $$('departments').getList().add({ id: '', value: '' });
+                                    $$('typeRequestForm').parse(data);
 
-                                $$('prescription').setValue(data.prescription);
-                                $$('settings').setValue(data.settings);
+                                    $$('departments').getList().add({ id: '', value: '' });
 
-                                if (data.beginRegistration) {
-                                    $$('beginRegistration').setValue(new Date(data.beginRegistration));
-                                }
-                                if (data.endRegistration) {
-                                    $$('endRegistration').setValue(new Date(data.endRegistration));
-                                }
-                                if (data.beginVisible) {
-                                    $$('beginVisible').setValue(new Date(data.beginVisible));
-                                }
-                                if (data.endVisible) {
-                                    $$('endVisible').setValue(new Date(data.endVisible));
-                                }
+                                    $$('prescription').setValue(data.prescription);
+                                    $$('settings').setValue(data.settings);
 
+                                    if (data.beginRegistration) {
+                                        $$('beginRegistration').setValue(new Date(data.beginRegistration));
+                                    }
+                                    if (data.endRegistration) {
+                                        $$('endRegistration').setValue(new Date(data.endRegistration));
+                                    }
+                                    if (data.beginVisible) {
+                                        $$('beginVisible').setValue(new Date(data.beginVisible));
+                                    }
+                                    if (data.endVisible) {
+                                        $$('endVisible').setValue(new Date(data.endVisible));
+                                    }
+                                }, 100);
                             }
                         },
                         url: 'cls_type_requests'

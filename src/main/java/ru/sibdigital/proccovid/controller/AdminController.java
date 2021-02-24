@@ -130,6 +130,18 @@ public class AdminController {
         result.put("total_count", templates.getTotalElements());
         return result;
     }
+
+    @PostMapping("/save_cls_type_request")
+    public @ResponseBody String saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto) {
+        try {
+            requestService.saveClsTypeRequest(clsTypeRequestDto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить тип заявки";
+        }
+        return "Тип заявки сохранен";
+    }
+
     @GetMapping("/cls_prescriptions")
     public @ResponseBody List<ClsPrescription> getClsPrescriptions() {
         return prescriptionService.getClsPrescriptions();
@@ -145,18 +157,6 @@ public class AdminController {
             log.error(e.getMessage());
         }
         return clsPrescription;
-    }
-
-    @PostMapping("/save_cls_type_request")
-    public @ResponseBody ClsTypeRequest saveClsTypeRequest(@RequestBody ClsTypeRequestDto clsTypeRequestDto, @RequestParam(required = false) String publish) {
-        ClsTypeRequest clsTypeRequest;
-        try {
-            clsTypeRequest = requestService.saveClsTypeRequest(clsTypeRequestDto);
-        } catch (Exception e) {
-            clsTypeRequest = new ClsTypeRequest();
-            log.error(e.getMessage());
-        }
-        return clsTypeRequest;
     }
 
     @PostMapping(value = "/upload_prescription_file", produces = MediaType.APPLICATION_JSON_VALUE)
