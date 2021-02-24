@@ -179,8 +179,7 @@ function showRequestForm(id) {
                                                                                                 webix.ajax()
                                                                                                     .headers(
                                                                                                         {
-                                                                                                            'Content-type': 'application/json',
-                                                                                                            'Authorization': 'Bearer ' + TOKEN
+                                                                                                            'Content-type': 'application/json'
                                                                                                         }
                                                                                                     )
                                                                                                     .put('/doc_requests/' + params.id + '/update',
@@ -365,8 +364,7 @@ function showRequestForm(id) {
                                                                     webix.ajax()
                                                                         .headers(
                                                                             {
-                                                                                'Content-type': 'application/json',
-                                                                                'Authorization': 'Bearer ' + TOKEN
+                                                                                'Content-type': 'application/json'
                                                                             }
                                                                         )
                                                                         .put('/doc_requests/' + params.id + '/process',
@@ -431,8 +429,7 @@ function showRequestForm(id) {
                                                                     webix.ajax()
                                                                         .headers(
                                                                             {
-                                                                                'Content-type': 'application/json',
-                                                                                'Authorization': 'Bearer ' + TOKEN
+                                                                                'Content-type': 'application/json'
                                                                             }
                                                                         )
                                                                         .put('/doc_requests/' + params.id + '/process',

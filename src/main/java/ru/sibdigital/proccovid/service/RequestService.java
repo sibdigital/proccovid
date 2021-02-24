@@ -107,12 +107,6 @@ public class RequestService {
     private ClsMailingListOkvedRepo clsMailingListOkvedRepo;
 
     @Autowired
-    private RegMailingMessageRepo regMailingMessageRepo;
-
-    @Autowired
-    private ScheduleTasks scheduleTasks;
-
-    @Autowired
     private ClsDepartmentContactRepo clsDepartmentContactRepo;
 
     @Autowired
@@ -190,14 +184,6 @@ public class RequestService {
 
         inputStream.close();
         outStream.close();
-    }
-
-    public boolean isTokenValid(Integer hash_code){
-        Iterator<ClsUser> iter = clsUserRepo.findAll().iterator();
-        while(iter.hasNext()) {
-            if(hash_code == iter.next().hashCode()) return true;
-        }
-        return false;
     }
 
     public List<ClsTypeRequest> getClsTypeRequests() {
@@ -393,8 +379,6 @@ public class RequestService {
         sendMessage(organizationsEmails, clsTemplate);
     }
 
-
-
     private void sendMessage(List<ClsOrganization> organizationsEmails, ClsTemplate clsTemplate){
 
         ClsSettings actualizeSubject = settingService.findActualByKey("actualizeSubject");
@@ -571,43 +555,6 @@ public class RequestService {
     public List<ClsMailingList> getClsMailingList() {
         return StreamSupport.stream(clsMailingListRepo.findAllByOrderByIdAsc().spliterator(), false)
                 .collect(Collectors.toList());
-    }
-
-    public RegMailingMessage saveRegMailingMessage(RegMailingMessageDto regMailingMessageDto) throws ParseException {
-        ClsMailingList clsMailing = clsMailingListRepo.findById(regMailingMessageDto.getMailingId()).orElse(null);
-        Date time = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(regMailingMessageDto.getSendingTime()).getTime());
-
-        RegMailingMessage regMailingMessage = RegMailingMessage.builder()
-                .id(regMailingMessageDto.getId())
-                .clsMailingList(clsMailing)
-                .message(regMailingMessageDto.getMessage())
-                .sendingTime(time)
-                .status(regMailingMessageDto.getStatus())
-                .build();
-
-        scheduleTasks.removeTaskFromScheduler(regMailingMessageDto.getId());
-        if (regMailingMessageDto.getStatus() == 1) {
-            scheduleTasks.addTaskToScheduler(regMailingMessageDto.getId(), regMailingMessage, time);
-        }
-
-        regMailingMessageRepo.save(regMailingMessage);
-
-        return regMailingMessage;
-    }
-
-    public RegMailingMessage setStatusToMailingMessage(Long id, Long status, String sendingTime) throws ParseException {
-        RegMailingMessage regMailingMessage = regMailingMessageRepo.findById(id).orElse(null);
-        regMailingMessage.setStatus(Short.parseShort("" + status));
-
-        scheduleTasks.removeTaskFromScheduler(id);
-        if (status == 1) {
-            Date time = new Date(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(sendingTime).getTime());
-            scheduleTasks.addTaskToScheduler(id, regMailingMessage, time);
-        }
-
-        regMailingMessageRepo.save(regMailingMessage);
-
-        return regMailingMessage;
     }
 
     public List<ClsDepartmentContact> getAllClsDepartmentContactByDepartmentId(Long id){

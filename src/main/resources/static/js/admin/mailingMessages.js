@@ -125,7 +125,7 @@ const mailingMessages = {
                                     id: item.id,
                                     mailingId: jsonResponse.clsMailingList.id,
                                     message: jsonResponse.message,
-                                    sendingTime: jsonResponse.sendingTime.replace("T", " "),
+                                    sendingTime: (jsonResponse.sendingTime != null ? jsonResponse.sendingTime.replace("T", " ") : ""),
                                     status: ''+jsonResponse.status
                                 };
 
@@ -170,81 +170,159 @@ const mailingMessageForm = {
                 view: 'form',
                 id: 'mailingMessageForm',
                 rows: [
-                    {
-                        view: 'richselect',
-                        name: 'mailingId',
-                        id: 'mailingId',
-                        label: 'Тип рассылки',
-                        labelPosition: 'top',
+                    { view: 'text',
+                        label: 'Тема',
+                        id: 'subject',
+                        name: 'subject',
                         required: true,
-                        options: 'mailing_list_short',
+                        validate: webix.rules.isNotEmpty
                     },
-                    { view: 'textarea', label: 'Текст сообщения', labelPosition: 'top', name: 'message', required: true,},
-                    { view: 'datepicker',
-                        label: 'Время начала отправки',
-                        labelPosition: 'top',
-                        name: 'sendingTime',
-                        stringResult:true,
-                        timepicker:true,
-                        format:webix.i18n.fullDateFormat},
-                    { view: 'richselect',
-                        name: 'status',
-                        id: 'status',
-                        label: 'Статус',
-                        labelPosition: 'top',
-                        required: true,
-                        options: [
-                            {id: "0", value:'Создано'},
-                            {id: "1", value:'В очереди на отправку'},
-                            {id: "2", value: 'Отправка проведена'}
-                        ]},
-                    { cols: [
-                        {},
-                        {
-                            view: 'button',
-                            align: 'right',
-                            maxWidth: 200,
-                            css: 'webix_primary',
-                            value: 'Сохранить',
-                            click: function () {
-                                if ($$('mailingMessageForm').validate()) {
-                                    let params = $$('mailingMessageForm').getValues();
-                                    params.status = parseInt(params.status);
-
-                                    webix.ajax().headers({
-                                        'Content-Type': 'application/json'
-                                    }).post('/save_reg_mailing_message',
-                                        params).then(function (data) {
-                                        if (data.text() === 'Сообщение сохранено') {
-                                            webix.message({text: data.text(), type: 'success'});
-
-                                            webix.ui(mailingMessages, $$('mailingMessageFormId'));
-                                            $$('mailing_messages_table').clearAll();
-                                            $$('mailing_messages_table').load('reg_mailing_message');
-
-                                        } else {
-                                            webix.message({text: data.text(), type: 'error'});
-                                        }
-                                    })
-                                } else {
-                                    webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                    {
+                        cols: [
+                            {
+                                view: 'richselect',
+                                name: 'mailingId',
+                                id: 'mailingId',
+                                label: 'Тип рассылки',
+                                labelPosition: 'left',
+                                required: true,
+                                options: 'mailing_list_short',
+                            },
+                            { view: 'richselect',
+                                name: 'status',
+                                id: 'status',
+                                label: 'Статус',
+                                labelPosition: 'left',
+                                required: true,
+                                options: [
+                                    {id: "0", value:'Создано'},
+                                    {id: "1", value:'В очереди на отправку'},
+                                    {id: "2", value: 'Отправка проведена'}
+                                ]
+                            },
+                            { view: 'datepicker',
+                                label: 'Время начала отправки',
+                                labelPosition: 'left',
+                                name: 'sendingTime',
+                                stringResult:true,
+                                timepicker:true,
+                                format:webix.i18n.fullDateFormat
+                            },
+                        ]
+                    },
+                    {
+                        id:"views",
+                        animate:false,
+                        minHeight: 300,
+                        cells: [
+                            {
+                                view: 'nic-editor',
+                                id: 'message',
+                                name: 'message',
+                                //required: true,
+                                css: "myClass",
+                                cdn: false,
+                                config: {
+                                    iconsPath: '../libs/nicedit/nicEditorIcons.gif'
                                 }
+                            },
+                            {
+                                view: 'ace-editor',
+                                id: 'settings',
+                                theme: 'github',
+                                mode: 'json',
+                                cdn: false
                             }
-                        },
-                        {
-                            view: 'button',
-                            align: 'right',
-                            maxWidth: 200,
-                            css: 'webix_secondary',
-                            value: 'Отмена',
-                            click: function () {
-                                webix.ui(mailingMessages, $$('mailingMessageFormId'));
-                            }
-                        }]
-
+                        ]
+                    },
+                    {
+                        cols: [
+                            {},
+                            { view: 'text',
+                                label: 'Адрес тестового сообщения',
+                                id: 'test_adress',
+                                name: 'test_adress',
+                                maxWidth: 200,
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                maxWidth: 200,
+                                css: 'webix_secondary',
+                                value: 'Отправить тест',
+                                click: sendTest
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                maxWidth: 200,
+                                css: 'webix_secondary',
+                                value: 'Отмена',
+                                click: function () {
+                                    webix.ui(mailingMessages, $$('mailingMessageFormId'));
+                                }
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                maxWidth: 200,
+                                css: 'webix_primary',
+                                value: 'Сохранить',
+                                click: saveMessage
+                            },
+                        ]
                     }
                 ]
             }
         ]
     }
+}
+
+function saveMessage(){
+    if ($$('mailingMessageForm').validate()) {
+        let params = $$('mailingMessageForm').getValues();
+        params.status = parseInt(params.status);
+
+        webix.ajax()
+            .headers({
+                'Content-Type': 'application/json'
+            })
+            .post('/save_reg_mailing_message',params)
+            .then(function (data) {
+                if (data.text() === 'Сообщение сохранено') {
+                    webix.message({text: data.text(), type: 'success'});
+
+                    webix.ui(mailingMessages, $$('mailingMessageFormId'));
+                    $$('mailing_messages_table').clearAll();
+                    $$('mailing_messages_table').load('reg_mailing_message');
+
+                } else {
+                    webix.message({text: data.text(), type: 'error'});
+                }
+            })
+    } else {
+        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+    }
+}
+
+function sendTest(){
+    let params = $$('mailingMessageForm').getValues();
+    const postParams = {
+        address: params.test_adress,
+        message: params.message,
+        subject: params.subject
+    }
+    webix.ajax()
+        .headers({
+            'Content-Type': 'application/json'
+        })
+        .post('/send_test_message',postParams)
+        .then(function (data) {
+            const responce = data.json();
+            if (responce.success == true) {
+                webix.message({text: responce.message(), type: 'success'});
+            } else {
+                webix.message({text: responce.message(), type: 'error'});
+            }
+        })
 }

@@ -52,6 +52,16 @@ public class RegMailingMessage {
     }
 
     @Basic
+    @Column(name = "subject")
+    private String subject;
+    public String getSubject() {
+        return subject;
+    }
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    @Basic
     @Column(name = "sending_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date sendingTime;

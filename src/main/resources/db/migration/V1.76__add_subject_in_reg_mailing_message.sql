@@ -1,0 +1,1 @@
+alter table reg_mailing_message add column subject text;

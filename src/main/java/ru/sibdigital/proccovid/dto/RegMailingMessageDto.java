@@ -16,4 +16,5 @@ public class RegMailingMessageDto {
     private String sendingTime;
     private String message;
     private Short status;
+    private String subject;
 }
