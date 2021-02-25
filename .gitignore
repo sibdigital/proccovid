@@ -32,3 +32,4 @@ build/
 /proccovid-logs/
 
 src/main/resources/application-myconfig.properties
+*.rest
