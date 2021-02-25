@@ -104,33 +104,17 @@ public class EmailServiceImpl implements EmailService {
                     exception = MailingStatuses.EMAIL_NOT_CREATED.value();
                 }
 
-                RegMailingHistory history = new RegMailingHistory();
-                history.setClsPrincipal(principal);
-                history.setTimeSend(new Timestamp(System.currentTimeMillis()));
-                history.setStatus(exception);
-                history.setClsTemplate(clsTemplate);
-                history.setEmail(organization.getEmail());
+                RegMailingHistory history = constructHistory(principal, null, exception);
                 histories.put(code, history);
             }
         }
-
-        if (!messages.isEmpty()) {
-            try {
-                javaMailSender.send(messages.toArray(new MimeMessage[0]));
-            } catch (MailSendException mailSendException) {
-                Map<Object, Exception> failedMessages = mailSendException.getFailedMessages();
-                for (Map.Entry<Object, Exception> failedMessage : failedMessages.entrySet()) {
-                    MimeMessage message = (MimeMessage) failedMessage.getKey();
-                    try {
-                        RegMailingHistory history = histories.get(Integer.valueOf(message.getDescription()));
-                        history.setStatus(MailingStatuses.EMAIL_NOT_SENT.value());
-                    } catch (MessagingException messagingException) {
-                        log.error(messagingException.getMessage());
-                    }
-                }
-            }
-
+        try {
+            log.info("Обработка");
+            process(messages, histories);
             regMailingHistoryRepo.saveAll(histories.values());
+        }catch (Exception e) {
+            log.info("Ошибка сохранения истории"); // если это была тестовая отправка. то нормальная ситуация
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -198,16 +182,56 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    private RegMailingHistory constructHistory(ClsPrincipal principal, RegMailingMessage regMailingMessage, Short status){
+        RegMailingHistory history = new RegMailingHistory();
+        if (regMailingMessage != null) {
+            history.setClsMailingList(regMailingMessage.getClsMailingList());
+            history.setRegMailingMessage(regMailingMessage);
+        }
+        history.setClsPrincipal(principal);
+        history.setTimeSend(new Timestamp(System.currentTimeMillis()));
+        history.setStatus(status);
+        ClsOrganization organization = principal.getOrganization();
+        if (organization != null) {
+            history.setEmail(organization.getEmail());
+        }
+        return history;
+    }
+
+    private void process(List<MimeMessage> messages, Map<Integer, RegMailingHistory> histories){
+        if (!messages.isEmpty()) {
+            try {
+                javaMailSender.send(messages.toArray(new MimeMessage[0]));
+            } catch (MailSendException mailSendException) {
+                Map<Object, Exception> failedMessages = mailSendException.getFailedMessages();
+                log.info("Ошибок при отправке: " + failedMessages.size());
+                for (Map.Entry<Object, Exception> failedMessage : failedMessages.entrySet()) {
+                    MimeMessage message = (MimeMessage) failedMessage.getKey();
+                    try {
+                        RegMailingHistory history = histories.get(Integer.valueOf(message.getDescription()));
+                        history.setStatus(MailingStatuses.EMAIL_NOT_SENT.value());
+                    } catch (MessagingException messagingException) {
+                        log.error(messagingException.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                histories.entrySet().stream().forEach(h -> h.getValue().setStatus(MailingStatuses.EMAIL_NOT_SENT.value()));
+                log.info("Гранула рассылки завершилась ошибками:");
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
+
     public void sendMessage(List<ClsPrincipal> principals, RegMailingMessage regMailingMessage, Map<String, String> params) {
         Map<Integer, RegMailingHistory> histories = new HashMap<>();
-
         List<MimeMessage> messages = new ArrayList<>();
+
         for (ClsPrincipal principal : principals) {
             ClsOrganization organization = principal.getOrganization();
             if (organization != null) {
                 int code = principal.hashCode();
-
                 Short status = MailingStatuses.EMAIL_SENT.value();
+
                 try {
                     InternetAddress address = new InternetAddress(organization.getEmail()); // validate
 
@@ -224,39 +248,16 @@ public class EmailServiceImpl implements EmailService {
                     status = MailingStatuses.EMAIL_NOT_CREATED.value();
                 }
 
-                RegMailingHistory history = new RegMailingHistory();
-                history.setClsMailingList(regMailingMessage.getClsMailingList());
-                history.setRegMailingMessage(regMailingMessage);
-                history.setClsPrincipal(principal);
-                history.setTimeSend(new Timestamp(System.currentTimeMillis()));
-                history.setStatus(status);
-                history.setEmail(organization.getEmail());
+                RegMailingHistory history = constructHistory(principal, regMailingMessage, status);
                 histories.put(code, history);
             }
         }
-
-        if (!messages.isEmpty()) {
+        if (messages.isEmpty() == false){
             try {
-                javaMailSender.send(messages.toArray(new MimeMessage[0]));
-            } catch (MailSendException mailSendException) {
-                Map<Object, Exception> failedMessages = mailSendException.getFailedMessages();
-                for (Map.Entry<Object, Exception> failedMessage : failedMessages.entrySet()) {
-                    MimeMessage message = (MimeMessage) failedMessage.getKey();
-                    try {
-                        RegMailingHistory history = histories.get(Integer.valueOf(message.getDescription()));
-                        history.setStatus(MailingStatuses.EMAIL_NOT_SENT.value());
-                    } catch (MessagingException messagingException) {
-                        log.error(messagingException.getMessage());
-                    }
-                }
-            } catch (Exception e) {
-                histories.entrySet().stream().forEach(h -> h.getValue().setStatus(MailingStatuses.EMAIL_NOT_SENT.value()));
-                log.info("Рассылка закончилась ошибками:");
-                log.error(e.getMessage(), e);
-            }
-            try {
+                log.info("Обработка " + messages.size());
+                process(messages, histories);
                 regMailingHistoryRepo.saveAll(histories.values());
-            } catch (Exception e) {
+            }catch (Exception e) {
                 log.info("Ошибка сохранения истории"); // если это была тестовая отправка. то нормальная ситуация
                 log.error(e.getMessage(), e);
             }

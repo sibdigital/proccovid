@@ -2,20 +2,20 @@ package ru.sibdigital.proccovid.scheduling;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.ClsPrincipalRepo;
-import ru.sibdigital.proccovid.repository.RegMailingHistoryRepo;
 import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
-import ru.sibdigital.proccovid.service.EmailServiceImpl;
-import ru.sibdigital.proccovid.service.ImportEgrulEgripService;
-import ru.sibdigital.proccovid.service.ImportFiasService;
+import ru.sibdigital.proccovid.scheduling.tasks.ImportEgrulEgrip;
+import ru.sibdigital.proccovid.scheduling.tasks.ImportZipFullFias;
+import ru.sibdigital.proccovid.scheduling.tasks.ImportZipUpdatesFias;
+import ru.sibdigital.proccovid.scheduling.tasks.SendingMailingMessageTask;
 
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -24,32 +24,21 @@ import java.util.concurrent.*;
 public class ScheduleTasks {
 
     @Autowired
+    private AutowireCapableBeanFactory beanFactory;
+
+    @Autowired
     private ThreadPoolTaskScheduler taskScheduler;
 
     @Autowired
     private RegMailingMessageRepo regMailingMessageRepo;
 
-    @Autowired
-    private ClsPrincipalRepo clsPrincipalRepo;
-
-    @Autowired
-    private EmailServiceImpl emailService;
-
-    @Autowired
-    private RegMailingHistoryRepo regMailingHistoryRepo;
-
-    @Autowired
-    private ImportEgrulEgripService importEgrulEgripService;
-
-    @Autowired
-    private ImportFiasService importFiasService;
-
-
     Map<Long, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
     public void addTaskToScheduler(Long id, RegMailingMessage regMailingMessage, Date date) {
         if (date.compareTo(new Date()) >= 0) {
-            Runnable task = new SendingMailingMessageTask(regMailingMessage);
+            SendingMailingMessageTask task = new SendingMailingMessageTask();
+            beanFactory.autowireBean(task);
+            task.setMessage(regMailingMessage);
             ScheduledFuture<?> scheduledTask = taskScheduler.schedule(task, date);
             jobsMap.put(id, scheduledTask);
         }
@@ -64,17 +53,22 @@ public class ScheduleTasks {
     }
 
     public void startImportEgrulEgrip(boolean isEgrul, boolean isEgrip) {
-        Runnable task = new ImportEgrulEgrip(isEgrul, isEgrip);
+        ImportEgrulEgrip task = new ImportEgrulEgrip();
+        beanFactory.autowireBean(task);
+        task.setEgrul(isEgrul);
+        task.setEgrip(isEgrip);
         taskScheduler.schedule(task, new Date());
     }
 
     public void startImportZipFullFias(){
-        Runnable task = new ImportZipFullFias();
+        ImportZipFullFias task = new ImportZipFullFias();
+        beanFactory.autowireBean(task);
         taskScheduler.schedule(task, new Date());
     }
 
     public void startImportZipUpdatesFias(){
-        Runnable task = new ImportZipUpdatesFias();
+        ImportZipUpdatesFias task = new ImportZipUpdatesFias();
+        beanFactory.autowireBean(task);
         taskScheduler.schedule(task, new Date());
     }
 
@@ -90,76 +84,4 @@ public class ScheduleTasks {
     }
 
 
-    class SendingMailingMessageTask implements Runnable {
-
-        private RegMailingMessage message;
-
-        public SendingMailingMessageTask(RegMailingMessage message) {
-            this.message = message;
-        }
-
-        @Override
-        public void run() {
-            List<ClsPrincipal> principals = null;
-            log.info("Старт рассылки: " + message.getClsMailingList().getName());
-
-            try {
-                if (message.getClsMailingList().getStatus() == MailingListStatuses.VALID.value()) {
-                    if (message.getClsMailingList().getId() == 1) { // Системная рассылка
-                        principals = clsPrincipalRepo.findAll();
-                    } else {
-                        principals = clsPrincipalRepo.getClsPrincipalsByMessage_Id(message.getId());
-                    }
-
-                    emailService.sendMessage(principals, message, new HashMap<>());
-
-                    message.setStatus(MailingMessageStatuses.IS_SENT.value());
-                    regMailingMessageRepo.save(message);
-                }
-                else {
-                    RegMailingHistory history = new RegMailingHistory();
-                    history.setClsMailingList(message.getClsMailingList());
-                    history.setRegMailingMessage(message);
-                    history.setTimeSend(new Timestamp(System.currentTimeMillis()));
-                    history.setStatus(MailingStatuses.MAILING_LIST_NOT_VALID.value());
-                    regMailingHistoryRepo.save(history);
-                }
-
-                log.info("Конец рассылки: " + message.getClsMailingList().getName());
-            } catch (Exception e) {
-                log.info("Рассылка закончилась ошибками:");
-                log.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    class ImportEgrulEgrip implements Runnable {
-
-        private boolean isEgrul;
-        private boolean isEgrip;
-
-        public ImportEgrulEgrip(boolean isEgrul, boolean isEgrip) {
-            this.isEgrip = isEgrip;
-            this.isEgrul = isEgrul;
-        }
-
-        @Override
-        public void run() {
-            importEgrulEgripService.importData(isEgrul, isEgrip);
-        }
-    }
-
-    class ImportZipFullFias implements Runnable {
-        @Override
-        public void run() {
-            importFiasService.importZipFullFiasData();
-        }
-    }
-
-    class ImportZipUpdatesFias implements Runnable {
-        @Override
-        public void run() {
-            importFiasService.importZipUpdatesFiasData();
-        }
-    }
 }
