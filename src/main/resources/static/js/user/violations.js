@@ -6,20 +6,63 @@ const violations = {
                 {
                     cols:[
                         {
-                            view: 'search',
-                            id: 'search',
+                            view: 'text',
+                            id: 'search_inn',
                             maxWidth: 300,
-                            minWidth: 100,
-                            tooltip: 'После ввода значения нажмите Enter',
-                            placeholder: "Введите ИНН",
-                            on: {
-                                onEnter: function () {
-                                    reload();
-                                }
-                            }
+                            // minWidth: 100,
+                            label: 'ИНН',
+                            labelWidth: 100,
+                            placeholder: "ИНН",
+                        },
+                        {
+                            view: 'text',
+                            id: 'search_name',
+                            label: 'Наименование организации',
+                            labelWidth: 230,
+                            placeholder: "Наименование организации",
                         },
                     ]
-                }
+                },
+                {
+                    cols: [
+                        {
+                            view: 'text',
+                            id: 'search_numberFile',
+                            label: 'Номер дела',
+                            labelWidth: 100,
+                            width: 300,
+                        },
+                        {
+                            cols: [
+                                {
+                                    view: 'datepicker',
+                                    id: 'search_beginDateRegOrg',
+                                    label: 'Дата регистрации с',
+                                    labelWidth: 180,
+                                    width: 300,
+                                },
+                                {
+                                    view: 'datepicker',
+                                    id: 'search_endDateRegOrg',
+                                    label: 'по',
+                                    labelWidth: 100,
+                                    width: 220,
+                                },
+                            ]
+                        },
+                        {},
+                        {
+                            view: 'button',
+                            id: 'search_button',
+                            css: 'webix_primary',
+                            value: 'Найти',
+                            maxWidth: 300,
+                            click: function () {
+                                reload()
+                            }
+                        }
+                    ]
+                },
             ]
         },
         {
@@ -473,13 +516,30 @@ function showViolations() {
 function reload() {
     $$('violations_table').clearAll();
 
-    const url = 'violations';
-    let params = '';
-
-    const inn = $$('search').getValue();
+    const params = {};
+    const inn = $$('search_inn').getValue();
     if (inn != '') {
-        params = '?inn=' + inn;
+        params.inn = inn;
+    }
+    const nameOrg = $$('search_name').getValue();
+    if (nameOrg != '') {
+        params.name = nameOrg;
+    }
+    const numberFile = $$('search_numberFile').getValue();
+    if (numberFile != '') {
+        params.nf = numberFile;
+    }
+    const format = webix.Date.dateToStr('%Y-%m-%d');
+    const beginDateRegOrg = $$('search_beginDateRegOrg').getValue();
+    if (beginDateRegOrg != null) {
+        params.bdr = format(beginDateRegOrg);
+    }
+    const endDateRegOrg = $$('search_endDateRegOrg').getValue();
+    if (endDateRegOrg != null) {
+        params.edr = format(endDateRegOrg);
     }
 
-    $$('violations_table').load(url + params);
+    $$('violations_table').load(function() {
+        return webix.ajax().get('violations', params);
+    });
 }

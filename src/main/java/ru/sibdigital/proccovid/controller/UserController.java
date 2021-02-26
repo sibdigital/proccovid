@@ -16,6 +16,7 @@ import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearch
 import ru.sibdigital.proccovid.repository.specification.RegViolationSearchCriteria;
 import ru.sibdigital.proccovid.service.ViolationService;
 
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,13 +34,21 @@ public class UserController {
 
     @GetMapping("/violations")
     public @ResponseBody Map<String, Object> getRegViolations(@RequestParam(value = "inn", required = false) String inn,
-                                                             @RequestParam(value = "start", required = false) Integer start,
-                                                             @RequestParam(value = "count", required = false) Integer count) {
+                                                              @RequestParam(value = "name", required = false) String nameOrg,
+                                                              @RequestParam(value = "nf", required = false) String numberFile,
+                                                              @RequestParam(value = "bdr", required = false) Date beginDateRegOrg,
+                                                              @RequestParam(value = "edr", required = false) Date endDateRegOrg,
+                                                              @RequestParam(value = "start", required = false) Integer start,
+                                                              @RequestParam(value = "count", required = false) Integer count) {
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
         RegViolationSearchCriteria searchCriteria = new RegViolationSearchCriteria();
         searchCriteria.setInn(inn);
+        searchCriteria.setNameOrg(nameOrg);
+        searchCriteria.setNumberFile(numberFile);
+        searchCriteria.setBeginDateRegOrg(beginDateRegOrg);
+        searchCriteria.setEndDateRegOrg(endDateRegOrg);
 
         Page<RegViolation> regViolationPage = violationService.getViolationsByCriteria(searchCriteria, page, size);
 
@@ -68,10 +77,19 @@ public class UserController {
         return "Нарушение сохранено";
     }
 
+    @GetMapping("/violation")
+    public @ResponseBody ViolationDto getViolation(@RequestParam Long id) {
+        RegViolation regViolation = violationService.getRegViolation(id);
+        ViolationDto dto = new ViolationDto(regViolation);
+        return dto;
+    }
+
     @GetMapping("/person_violations")
     public @ResponseBody Map<String, Object> getRegPersonViolations(@RequestParam(value = "l", required = false) String lastname,
                                                                     @RequestParam(value = "f", required = false) String firstname,
                                                                     @RequestParam(value = "p", required = false) String patronymic,
+                                                                    @RequestParam(value = "pd", required = false) String passportData,
+                                                                    @RequestParam(value = "nf", required = false) String numberFile,
                                                                     @RequestParam(value = "start", required = false) Integer start,
                                                                     @RequestParam(value = "count", required = false) Integer count) {
         int page = start == null ? 0 : start / 25;
@@ -81,6 +99,8 @@ public class UserController {
         searchCriteria.setLastname(lastname);
         searchCriteria.setFirstname(firstname);
         searchCriteria.setPatronymic(patronymic);
+        searchCriteria.setPassportData(passportData);
+        searchCriteria.setNumberFile(numberFile);
 
         Page<RegPersonViolation> regViolationPage = violationService.getPersonViolationsByCriteria(searchCriteria, page, size);
 

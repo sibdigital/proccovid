@@ -8,21 +8,43 @@ const personViolations = {
                         {
                             view: 'text',
                             id: 'search_lastname',
+                            label: 'Фамилия',
+                            labelWidth: 100,
                             maxWidth: 300,
-                            placeholder: "Фамилия",
                         },
                         {
                             view: 'text',
                             id: 'search_firstname',
+                            label: 'Имя',
+                            labelWidth: 100,
                             maxWidth: 300,
-                            placeholder: "Имя",
                         },
                         {
                             view: 'text',
                             id: 'search_patronymic',
+                            label: 'Отчество',
+                            labelWidth: 100,
                             maxWidth: 300,
-                            placeholder: "Отчество",
                         },
+                        {
+                            view: 'text',
+                            id: 'search_passportData',
+                            label: 'Паспортные данные',
+                            labelWidth: 200,
+                            // width: 300,
+                        },
+                    ]
+                },
+                {
+                    cols: [
+                        {
+                            view: 'text',
+                            id: 'search_numberFile',
+                            label: 'Номер дела',
+                            labelWidth: 100,
+                            width: 300,
+                        },
+                        {},
                         {
                             view: 'button',
                             id: 'search_button',
@@ -331,7 +353,7 @@ function showPersonViolations() {
 function reloadPersonViolations() {
     $$('person_violations_table').clearAll();
 
-    let params = {};
+    const params = {};
     const lastname = $$('search_lastname').getValue();
     if (lastname != '') {
         params.l = lastname;
@@ -343,6 +365,14 @@ function reloadPersonViolations() {
     const patronymic = $$('search_patronymic').getValue();
     if (patronymic != '') {
         params.p = patronymic;
+    }
+    const numberFile = $$('search_numberFile').getValue();
+    if (numberFile != '') {
+        params.nf = numberFile;
+    }
+    const passportData = $$('search_passportData').getValue();
+    if (passportData != '') {
+        params.pd = passportData;
     }
 
     $$('person_violations_table').load(function() {

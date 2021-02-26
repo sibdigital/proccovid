@@ -22,14 +22,20 @@ public class RegPersonViolationSpecification implements Specification<RegPersonV
     public Predicate toPredicate(Root<RegPersonViolation> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
 
-        if (searchCriteria.getLastname() != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.trim(root.get("lastname")), searchCriteria.getLastname().toUpperCase() + '%'));
+        if (searchCriteria.getLastname() != null && !searchCriteria.getLastname().isBlank()) {
+            predicates.add(criteriaBuilder.like(root.get("lastname"), searchCriteria.getLastname().trim().toUpperCase() + '%'));
         }
-        if (searchCriteria.getFirstname() != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.trim(root.get("firstname")), searchCriteria.getFirstname().toUpperCase() + '%'));
+        if (searchCriteria.getFirstname() != null && !searchCriteria.getFirstname().isBlank()) {
+            predicates.add(criteriaBuilder.like(root.get("firstname"), searchCriteria.getFirstname().trim().toUpperCase() + '%'));
         }
-        if (searchCriteria.getPatronymic() != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.trim(root.get("lastname")), searchCriteria.getPatronymic().toUpperCase() + '%'));
+        if (searchCriteria.getPatronymic() != null && !searchCriteria.getPatronymic().isBlank()) {
+            predicates.add(criteriaBuilder.like(root.get("lastname"), searchCriteria.getPatronymic().trim().toUpperCase() + '%'));
+        }
+        if (searchCriteria.getPassportData() != null && !searchCriteria.getPassportData().isBlank()) {
+            predicates.add(criteriaBuilder.like(root.get("passportData"), searchCriteria.getPassportData().trim() + '%'));
+        }
+        if (searchCriteria.getNumberFile() != null && !searchCriteria.getNumberFile().isBlank()) {
+            predicates.add(criteriaBuilder.like(root.get("numberFile"), searchCriteria.getNumberFile().trim() + '%'));
         }
 
         predicates.add(criteriaBuilder.isFalse(root.get("isDeleted")));
