@@ -2,6 +2,8 @@ package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.dto.RegMailingMessageDto;
@@ -15,6 +17,7 @@ import ru.sibdigital.proccovid.service.MailingMessageService;
 import ru.sibdigital.proccovid.service.StatisticService;
 
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -100,9 +103,27 @@ public class MailsController {
         return "Статус изменен";
     }
 
+//    @GetMapping("/reg_mailing_message")
+//    public @ResponseBody List<RegMailingMessage> getListMailingMessages() {
+//        return regMailingMessageRepo.findAll(Sort.by("id"));
+//    }
+
     @GetMapping("/reg_mailing_message")
-    public @ResponseBody List<RegMailingMessage> getListMailingMessages() {
-        return regMailingMessageRepo.findAll(Sort.by("id"));
+    public Map<String, Object> getListMailingMessages(
+                                           @RequestParam(value = "start", required = false) Integer start,
+                                           @RequestParam(value = "count", required = false) Integer count) {
+
+        int page = start == null ? 0 : start / 25;
+        int size = count == null ? 25 : count;
+
+        Page<RegMailingMessage> regMailingMessagePage = regMailingMessageRepo.findAll(PageRequest.of(page, size, Sort.by("id")));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", regMailingMessagePage.getContent());
+        result.put("pos", (long) page * size);
+        result.put("total_count", regMailingMessagePage.getTotalElements());
+
+        return result;
     }
 
     @GetMapping("/reg_mailing_message/{id_message}")

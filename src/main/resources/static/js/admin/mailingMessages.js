@@ -66,16 +66,21 @@ const mailingMessages = {
                 autoheight: true,
                 rows: [
                     {
-                        view: 'toolbar',
-                        id: 'mMToolbar',
-                        cols:[
+                        cols: [
+                            { view: 'button', id: 'BtnQueueUp', value: 'Поставить в очередь', align: 'left', click: queueUp},
+                            { view: 'button', id: 'BtnDeleteFromQueue', value: 'Удалить из очереди', align: 'left', click: deleteFromQueue},
                             {},
                             {},
-                            {},
-                            {},
-                            { view: 'button', id: 'BtnQueueUp', value: 'Поставить в очередь', align: 'right', click: queueUp},
-                            { view: 'button', id: 'BtnDeleteFromQueue', value: 'Удалить из очереди', align: 'right', click: deleteFromQueue}
-                            ]
+                            {
+                                view: 'button',
+                                css: 'webix_primary',
+                                align: 'right',
+                                value: 'Добавить',
+                                click: function () {
+                                    webix.ui(mailingMessageForm, $$('mailingMessagesId'));
+                                }
+                            }
+                        ]
                     },
                     {
                         id: 'mailing_messages_table',
@@ -84,6 +89,8 @@ const mailingMessages = {
                         multiselect: true,
                         resizeColumn:true,
                         readonly: true,
+                        pager: 'mailingMessagePager',
+                        datafetch: 25,
                         columns: [
                             { id: 'sendingTime', header: 'Время начала отправки', adjust: true, format: dateFormat, sort: "date", fillspace: true },
                             { id: 'mailing', header: 'Тип рассылки', template: '#clsMailingList.name#', adjust: true, sort: 'string', fillspace: true },
@@ -94,7 +101,7 @@ const mailingMessages = {
                                     else {
                                         return 'Действует';
                                     }}, adjust: true, sort: 'string', fillspace: true },
-                            { id: 'message', header: 'Текст сообщения', adjust: true, fillspace: true, sort: 'text'},
+                            { id: 'subject', header: 'Тема сообщения', adjust: true, fillspace: true, sort: 'text'},
                             { id: 'status', template: function (obj) {
                                     switch (obj.status) {
                                         case 0: return 'Создано';
@@ -121,13 +128,9 @@ const mailingMessages = {
                                 let item = $$('mailing_messages_table').getItem(id);
                                 var xhr = webix.ajax().sync().get('reg_mailing_message/' + item.id);
                                 var jsonResponse = JSON.parse(xhr.responseText);
-                                var data = {
-                                    id: item.id,
-                                    mailingId: jsonResponse.clsMailingList.id,
-                                    message: jsonResponse.message,
-                                    sendingTime: (jsonResponse.sendingTime != null ? jsonResponse.sendingTime.replace("T", " ") : ""),
-                                    status: ''+jsonResponse.status
-                                };
+                                var data = jsonResponse;
+                                data.mailingId = jsonResponse.clsMailingList.id;
+                                data.sendingTime = (jsonResponse.sendingTime != null ? jsonResponse.sendingTime.replace("T", " ") : "");
 
                                 webix.ui(mailingMessageForm, $$('mailingMessagesId'));
 
@@ -138,22 +141,15 @@ const mailingMessages = {
                         url: 'reg_mailing_message',
                     },
                     {
-                        cols: [
-                            {},
-                            {},
-                            {},
-                            {},
-                            {
-                                view: 'button',
-                                css: 'webix_primary',
-                                align: 'right',
-                                value: 'Добавить',
-                                click: function () {
-                                    webix.ui(mailingMessageForm, $$('mailingMessagesId'));
-                                }
-                            }
-                        ]
-                    }]
+                        view: 'pager',
+                        id: 'mailingMessagePager',
+                        height: 38,
+                        size: 25,
+                        group: 7,
+                        template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                    },
+
+                    ]
             }]
     }
 }
