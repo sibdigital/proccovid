@@ -166,12 +166,30 @@ const mailingMessageForm = {
                 view: 'form',
                 id: 'mailingMessageForm',
                 rows: [
-                    { view: 'text',
-                        label: 'Тема',
-                        id: 'subject',
-                        name: 'subject',
-                        required: true,
-                        validate: webix.rules.isNotEmpty
+                    {
+                        cols: [
+                            { view: 'text',
+                                label: 'Тема',
+                                labelPosition: 'top',
+                                id: 'subject',
+                                name: 'subject',
+                                required: true,
+                                validate: webix.rules.isNotEmpty
+                            },
+                            { view: 'richselect',
+                                name: 'status',
+                                id: 'status',
+                                label: 'Статус',
+                                labelPosition: 'top',
+                                required: true,
+                                options: [
+                                    {id: "0", value:'Создано'},
+                                    {id: "1", value:'В очереди на отправку'},
+                                    {id: "2", value: 'Отправка проведена'}
+                                ]
+                            },
+
+                        ]
                     },
                     {
                         cols: [
@@ -180,25 +198,13 @@ const mailingMessageForm = {
                                 name: 'mailingId',
                                 id: 'mailingId',
                                 label: 'Тип рассылки',
-                                labelPosition: 'left',
+                                labelPosition: 'top',
                                 required: true,
                                 options: 'mailing_list_short',
                             },
-                            { view: 'richselect',
-                                name: 'status',
-                                id: 'status',
-                                label: 'Статус',
-                                labelPosition: 'left',
-                                required: true,
-                                options: [
-                                    {id: "0", value:'Создано'},
-                                    {id: "1", value:'В очереди на отправку'},
-                                    {id: "2", value: 'Отправка проведена'}
-                                ]
-                            },
                             { view: 'datepicker',
                                 label: 'Время начала отправки',
-                                labelPosition: 'left',
+                                labelPosition: 'top',
                                 name: 'sendingTime',
                                 stringResult:true,
                                 timepicker:true,
@@ -233,21 +239,25 @@ const mailingMessageForm = {
                     },
                     {
                         cols: [
-                            {},
-                            { view: 'text',
+                            {   view: 'label',
                                 label: 'Адрес тестового сообщения',
+                            },
+                            {   view: 'text',
+                                // label: 'Адрес тестового сообщения',
+                                // labelPosition: 'left',
                                 id: 'test_adress',
                                 name: 'test_adress',
                                 maxWidth: 200,
                             },
                             {
                                 view: 'button',
-                                align: 'right',
+                                align: 'left',
                                 maxWidth: 200,
                                 css: 'webix_secondary',
                                 value: 'Отправить тест',
                                 click: sendTest
                             },
+                            {},
                             {
                                 view: 'button',
                                 align: 'right',
@@ -316,9 +326,20 @@ function sendTest(){
         .then(function (data) {
             const responce = data.json();
             if (responce.success == true) {
-                webix.message({text: responce.message(), type: 'success'});
+                // webix.message({text: responce.message(), type: 'success'});
+                webix.alert({
+                    title: "Success",
+                    ok: "Ok",
+                    text:responce.message,
+                });
             } else {
-                webix.message({text: responce.message(), type: 'error'});
+                // webix.message({text: responce.message(), type: 'error'});
+                webix.alert({
+                    title: "Error",
+                    ok: "Ok",
+                    text:responce.message,
+                    type:"alert-error",
+                });
             }
         })
 }
