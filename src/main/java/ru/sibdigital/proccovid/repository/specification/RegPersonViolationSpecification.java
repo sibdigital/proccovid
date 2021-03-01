@@ -37,6 +37,9 @@ public class RegPersonViolationSpecification implements Specification<RegPersonV
         if (searchCriteria.getNumberFile() != null && !searchCriteria.getNumberFile().isBlank()) {
             predicates.add(criteriaBuilder.like(root.get("numberFile"), searchCriteria.getNumberFile().trim() + '%'));
         }
+        if (searchCriteria.getIdDistrict() != null) {
+            predicates.add(criteriaBuilder.equal(root.get("district").get("id"), searchCriteria.getIdDistrict()));
+        }
 
         predicates.add(criteriaBuilder.isFalse(root.get("isDeleted")));
 

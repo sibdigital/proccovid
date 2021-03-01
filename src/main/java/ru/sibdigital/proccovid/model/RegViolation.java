@@ -61,6 +61,10 @@ public class RegViolation {
     @JsonIgnore
     private RegFilial regFilial;
 
+    @OneToOne
+    @JoinColumn(name = "id_district", referencedColumnName = "id")
+    private ClsDistrict district;
+
     public Long getId() {
         return id;
     }
@@ -225,5 +229,13 @@ public class RegViolation {
 
     public void setRegFilial(RegFilial regFilial) {
         this.regFilial = regFilial;
+    }
+
+    public ClsDistrict getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(ClsDistrict district) {
+        this.district = district;
     }
 }

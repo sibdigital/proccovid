@@ -16,4 +16,5 @@ public class RegViolationSearchCriteria {
     private String numberFile;
     private Date beginDateRegOrg;
     private Date endDateRegOrg;
+    private Long idDistrict;
 }

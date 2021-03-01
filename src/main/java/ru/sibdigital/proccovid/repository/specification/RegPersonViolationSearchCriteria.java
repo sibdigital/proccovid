@@ -14,4 +14,5 @@ public class RegPersonViolationSearchCriteria {
     private String patronymic;
     private String passportData;
     private String numberFile;
+    private Long idDistrict;
 }

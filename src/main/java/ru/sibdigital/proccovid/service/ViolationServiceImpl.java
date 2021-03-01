@@ -42,6 +42,9 @@ public class ViolationServiceImpl implements ViolationService {
     @Autowired
     private RegPersonViolationRepo regPersonViolationRepo;
 
+    @Autowired
+    private ClsDistrictRepo clsDistrictRepo;
+
     @Override
     public ClsTypeViolation saveClsTypeViolation(ClsTypeViolationDto dto) throws Exception {
         if (dto.getName() == null || dto.getName().isBlank()) {
@@ -88,6 +91,11 @@ public class ViolationServiceImpl implements ViolationService {
         }
         ClsTypeViolation clsTypeViolation = clsTypeViolationRepo.findById(dto.getIdTypeViolation()).orElse(null);
 
+        if (dto.getIdDistrict() == null) {
+            throw new Exception("Не указан район");
+        }
+        ClsDistrict clsDistrict = clsDistrictRepo.findById(dto.getIdDistrict()).orElse(null);
+
         RegViolation regViolation;
 
         Timestamp time = new Timestamp(System.currentTimeMillis());
@@ -116,6 +124,7 @@ public class ViolationServiceImpl implements ViolationService {
                     .numberFile(dto.getNumberFile())
                     .dateFile(dto.getDateFile())
                     .isDeleted(false)
+                    .district(clsDistrict)
                     .build();
 
             if (dto.getIdEgrul() != null) {
@@ -148,6 +157,7 @@ public class ViolationServiceImpl implements ViolationService {
                     .numberFile(dto.getNumberFile())
                     .dateFile(dto.getDateFile())
                     .isDeleted(dto.getIsDeleted() == null ? false : dto.getIsDeleted())
+                    .district(clsDistrict)
                     .build();
         }
 
@@ -175,6 +185,11 @@ public class ViolationServiceImpl implements ViolationService {
             throw new Exception("Не указан вид нарушения");
         }
         ClsTypeViolation clsTypeViolation = clsTypeViolationRepo.findById(dto.getIdTypeViolation()).orElse(null);
+
+        if (dto.getIdDistrict() == null) {
+            throw new Exception("Не указан район");
+        }
+        ClsDistrict clsDistrict = clsDistrictRepo.findById(dto.getIdDistrict()).orElse(null);
 
         RegPersonViolation regPersonViolation;
 
@@ -207,6 +222,7 @@ public class ViolationServiceImpl implements ViolationService {
                     .numberFile(dto.getNumberFile())
                     .dateFile(dto.getDateFile())
                     .isDeleted(false)
+                    .district(clsDistrict)
                     .build();
         } else {
             ClsUser updatedUser;
@@ -229,6 +245,7 @@ public class ViolationServiceImpl implements ViolationService {
                     .numberFile(dto.getNumberFile())
                     .dateFile(dto.getDateFile())
                     .isDeleted(dto.getIsDeleted() == null ? false : dto.getIsDeleted())
+                    .district(clsDistrict)
                     .build();
         }
 

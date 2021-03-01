@@ -47,6 +47,10 @@ public class RegPersonViolation {
     @JoinColumn(name = "id_updated_user", referencedColumnName = "id")
     private ClsUser updatedUser;
 
+    @OneToOne
+    @JoinColumn(name = "id_district", referencedColumnName = "id")
+    private ClsDistrict district;
+
     public Long getId() {
         return id;
     }
@@ -217,5 +221,13 @@ public class RegPersonViolation {
 
     public void setUpdatedUser(ClsUser updatedUser) {
         this.updatedUser = updatedUser;
+    }
+
+    public ClsDistrict getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(ClsDistrict district) {
+        this.district = district;
     }
 }

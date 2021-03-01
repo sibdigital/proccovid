@@ -50,7 +50,13 @@ const violations = {
                                 },
                             ]
                         },
-                        {},
+                        {
+                            view: 'richselect',
+                            id: 'search_district',
+                            label: 'Район',
+                            maxWidth: 300,
+                            options: 'cls_districts',
+                        },
                         {
                             view: 'button',
                             id: 'search_button',
@@ -58,7 +64,7 @@ const violations = {
                             value: 'Найти',
                             maxWidth: 300,
                             click: function () {
-                                reload()
+                                reloadViolations()
                             }
                         }
                     ]
@@ -196,6 +202,7 @@ function showOrganizationSearchForm() {
                                 setTimeout(function () {
                                     showViolationForm();
 
+                                    $$('idDistrict').setValue(ID_DISTRICT);
                                     $$('idEgrul').setValue(item.idEgrul);
                                     $$('idEgrip').setValue(item.idEgrip);
                                     $$('idFilial').setValue(item.idFilial);
@@ -245,6 +252,7 @@ function showOrganizationSearchForm() {
 
                             showViolationForm();
 
+                            $$('idDistrict').setValue(ID_DISTRICT);
                             $$('innOrg').setValue(inn);
                             $$('innOrg').define('readonly', true);
                             $$('innOrg').refresh();
@@ -423,6 +431,16 @@ function showViolationForm() {
                 invalidMessage: 'Поле не может быть пустым',
             },
             {
+                view: 'richselect',
+                name: 'idDistrict',
+                id: 'idDistrict',
+                label: 'Район',
+                labelPosition: 'top',
+                options: 'cls_districts',
+                required: true,
+                validate: webix.rules.isNotEmpty
+            },
+            {
                 view: 'template',
                 type: 'section',
                 template: 'Реквизиты судебного решения'
@@ -513,7 +531,7 @@ function showViolations() {
     }, $$('content'))
 }
 
-function reload() {
+function reloadViolations() {
     $$('violations_table').clearAll();
 
     const params = {};
@@ -537,6 +555,10 @@ function reload() {
     const endDateRegOrg = $$('search_endDateRegOrg').getValue();
     if (endDateRegOrg != null) {
         params.edr = format(endDateRegOrg);
+    }
+    const idDistrict = $$('search_district').getValue();
+    if (idDistrict) {
+        params.d = idDistrict;
     }
 
     $$('violations_table').load(function() {

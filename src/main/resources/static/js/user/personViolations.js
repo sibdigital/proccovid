@@ -44,12 +44,17 @@ const personViolations = {
                             labelWidth: 100,
                             width: 300,
                         },
-                        {},
+                        {
+                            view: 'richselect',
+                            id: 'search_district',
+                            label: 'Район',
+                            maxWidth: 300,
+                            options: 'cls_districts',
+                        },
                         {
                             view: 'button',
                             id: 'search_button',
-                            minWidth: 220,
-                            maxWidth: 350,
+                            maxWidth: 300,
                             css: 'webix_primary',
                             value: 'Найти',
                             click: function () {
@@ -137,6 +142,8 @@ const personViolations = {
                     value: 'Добавить',
                     click: function () {
                         showPersonViolationForm();
+
+                        $$('idDistrict').setValue(ID_DISTRICT);
                     },
                 }
             ]
@@ -260,6 +267,16 @@ function showPersonViolationForm() {
                 invalidMessage: 'Поле не может быть пустым',
             },
             {
+                view: 'richselect',
+                name: 'idDistrict',
+                id: 'idDistrict',
+                label: 'Район',
+                labelPosition: 'top',
+                options: 'cls_districts',
+                required: true,
+                validate: webix.rules.isNotEmpty
+            },
+            {
                 view: 'template',
                 type: 'section',
                 template: 'Реквизиты судебного решения'
@@ -373,6 +390,10 @@ function reloadPersonViolations() {
     const passportData = $$('search_passportData').getValue();
     if (passportData != '') {
         params.pd = passportData;
+    }
+    const idDistrict = $$('search_district').getValue();
+    if (idDistrict) {
+        params.d = idDistrict;
     }
 
     $$('person_violations_table').load(function() {

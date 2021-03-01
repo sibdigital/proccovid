@@ -66,6 +66,9 @@ public class MainController {
         ClsUser clsUser = currentUser.getClsUser();
         model.addAttribute("id_department", clsUser.getIdDepartment().getId());
         model.addAttribute("department_name", clsUser.getIdDepartment().getName());
+        if (clsUser.getDistrict() != null) {
+            model.addAttribute("id_district", clsUser.getDistrict().getId());
+        }
         model.addAttribute("user_lastname", clsUser.getLastname());
         model.addAttribute("user_firstname", clsUser.getFirstname());
         model.addAttribute("application_name", applicationConstants.getApplicationName());

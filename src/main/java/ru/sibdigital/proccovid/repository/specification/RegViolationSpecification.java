@@ -39,6 +39,9 @@ public class RegViolationSpecification implements Specification<RegViolation> {
         } else if (searchCriteria.getEndDateRegOrg() != null) {
             predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("dateRegOrg").as(Date.class), searchCriteria.getEndDateRegOrg()));
         }
+        if (searchCriteria.getIdDistrict() != null) {
+            predicates.add(criteriaBuilder.equal(root.get("district").get("id"), searchCriteria.getIdDistrict()));
+        }
 
         predicates.add(criteriaBuilder.isFalse(root.get("isDeleted")));
 

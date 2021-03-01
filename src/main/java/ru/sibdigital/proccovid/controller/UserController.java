@@ -38,6 +38,7 @@ public class UserController {
                                                               @RequestParam(value = "nf", required = false) String numberFile,
                                                               @RequestParam(value = "bdr", required = false) Date beginDateRegOrg,
                                                               @RequestParam(value = "edr", required = false) Date endDateRegOrg,
+                                                              @RequestParam(value = "d", required = false) Long idDistrict,
                                                               @RequestParam(value = "start", required = false) Integer start,
                                                               @RequestParam(value = "count", required = false) Integer count) {
         int page = start == null ? 0 : start / 25;
@@ -49,6 +50,7 @@ public class UserController {
         searchCriteria.setNumberFile(numberFile);
         searchCriteria.setBeginDateRegOrg(beginDateRegOrg);
         searchCriteria.setEndDateRegOrg(endDateRegOrg);
+        searchCriteria.setIdDistrict(idDistrict);
 
         Page<RegViolation> regViolationPage = violationService.getViolationsByCriteria(searchCriteria, page, size);
 
@@ -90,6 +92,7 @@ public class UserController {
                                                                     @RequestParam(value = "p", required = false) String patronymic,
                                                                     @RequestParam(value = "pd", required = false) String passportData,
                                                                     @RequestParam(value = "nf", required = false) String numberFile,
+                                                                    @RequestParam(value = "d", required = false) Long idDistrict,
                                                                     @RequestParam(value = "start", required = false) Integer start,
                                                                     @RequestParam(value = "count", required = false) Integer count) {
         int page = start == null ? 0 : start / 25;
@@ -101,6 +104,7 @@ public class UserController {
         searchCriteria.setPatronymic(patronymic);
         searchCriteria.setPassportData(passportData);
         searchCriteria.setNumberFile(numberFile);
+        searchCriteria.setIdDistrict(idDistrict);
 
         Page<RegPersonViolation> regViolationPage = violationService.getPersonViolationsByCriteria(searchCriteria, page, size);
 
