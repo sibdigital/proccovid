@@ -20,5 +20,5 @@ public class ClsUserDto {
     private String newPassword;
     private Boolean admin;
     private String email;
-
+    private Long districtId;
 }

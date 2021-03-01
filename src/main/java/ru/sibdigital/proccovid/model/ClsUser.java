@@ -35,6 +35,10 @@ public class ClsUser implements Serializable {
     private Boolean isAdmin;
     private String email;
 
+    @OneToOne
+    @JoinColumn(name = "id_district", referencedColumnName = "id")
+    private ClsDistrict district;
+
     public Long getId() {
         return id;
     }
@@ -121,6 +125,14 @@ public class ClsUser implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public ClsDistrict getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(ClsDistrict district) {
+        this.district = district;
     }
 
     public String getFullName() {

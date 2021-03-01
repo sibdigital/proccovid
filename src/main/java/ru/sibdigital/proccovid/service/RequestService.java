@@ -115,6 +115,9 @@ public class RequestService {
     @Autowired
     private RegDocRequestFileRepo regDocRequestFileRepo;
 
+    @Autowired
+    private ClsDistrictRepo clsDistrictRepo;
+
     @Value("${upload.path:/uploads}")
     String uploadingDir;
 
@@ -496,13 +499,22 @@ public class RequestService {
         return clsUserRepo.findByLogin(login);
     }
 
-    public ClsUser saveClsUser(ClsUserDto clsUserDto) {
+    public ClsUser saveClsUser(ClsUserDto clsUserDto) throws Exception {
 
         ClsDepartment clsDepartment = clsDepartmentRepo.findById(clsUserDto.getDepartmentId()).orElse(null);
+        if (clsDepartment == null) {
+            throw new Exception("Не указано подразделение");
+        }
+
+        ClsDistrict clsDistrict = clsDistrictRepo.findById(clsUserDto.getDistrictId()).orElse(null);
+        if (clsDistrict == null) {
+            throw new Exception("Не указан район");
+        }
 
         ClsUser clsUser = ClsUser.builder()
                 .id(clsUserDto.getId())
                 .idDepartment(clsDepartment)
+                .district(clsDistrict)
                 .lastname(clsUserDto.getLastname())
                 .firstname(clsUserDto.getFirstname())
                 .patronymic(clsUserDto.getPatronymic())
