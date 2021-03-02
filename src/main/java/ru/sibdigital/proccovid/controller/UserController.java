@@ -10,6 +10,7 @@ import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.PersonViolationDto;
 import ru.sibdigital.proccovid.dto.ViolationDto;
+import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.RegPersonViolation;
 import ru.sibdigital.proccovid.model.RegViolation;
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchCriteria;
@@ -41,18 +42,15 @@ public class UserController {
                                                               @RequestParam(value = "d", required = false) Long idDistrict,
                                                               @RequestParam(value = "start", required = false) Integer start,
                                                               @RequestParam(value = "count", required = false) Integer count) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
-        RegViolationSearchCriteria searchCriteria = new RegViolationSearchCriteria();
-        searchCriteria.setInn(inn);
-        searchCriteria.setNameOrg(nameOrg);
-        searchCriteria.setNumberFile(numberFile);
-        searchCriteria.setBeginDateRegOrg(beginDateRegOrg);
-        searchCriteria.setEndDateRegOrg(endDateRegOrg);
-        searchCriteria.setIdDistrict(idDistrict);
+        RegViolationSearchCriteria searchCriteria = new RegViolationSearchCriteria(inn, nameOrg, numberFile, beginDateRegOrg, endDateRegOrg, idDistrict);
 
-        Page<RegViolation> regViolationPage = violationService.getViolationsByCriteria(searchCriteria, page, size);
+        Page<RegViolation> regViolationPage = violationService.getViolationsByCriteria(searchCriteria, page, size, clsUser.getId());
 
         List<ViolationDto> violationDtos = regViolationPage.getContent().stream()
                 .map(o -> new ViolationDto(o))
@@ -95,18 +93,15 @@ public class UserController {
                                                                     @RequestParam(value = "d", required = false) Long idDistrict,
                                                                     @RequestParam(value = "start", required = false) Integer start,
                                                                     @RequestParam(value = "count", required = false) Integer count) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
-        RegPersonViolationSearchCriteria searchCriteria = new RegPersonViolationSearchCriteria();
-        searchCriteria.setLastname(lastname);
-        searchCriteria.setFirstname(firstname);
-        searchCriteria.setPatronymic(patronymic);
-        searchCriteria.setPassportData(passportData);
-        searchCriteria.setNumberFile(numberFile);
-        searchCriteria.setIdDistrict(idDistrict);
+        RegPersonViolationSearchCriteria searchCriteria = new RegPersonViolationSearchCriteria(lastname, firstname, patronymic, passportData, numberFile, idDistrict);
 
-        Page<RegPersonViolation> regViolationPage = violationService.getPersonViolationsByCriteria(searchCriteria, page, size);
+        Page<RegPersonViolation> regViolationPage = violationService.getPersonViolationsByCriteria(searchCriteria, page, size, clsUser.getId());
 
         List<PersonViolationDto> violationDtos = regViolationPage.getContent().stream()
                 .map(o -> new PersonViolationDto(o))

@@ -20,13 +20,13 @@ public interface ViolationService {
 
     List<ClsTypeViolation> getClsTypeViolations();
 
-    Page<RegViolation> getViolationsByCriteria(RegViolationSearchCriteria searchCriteria, int page, int size);
+    Page<RegViolation> getViolationsByCriteria(RegViolationSearchCriteria searchCriteria, int page, int size, Long idUser);
 
     RegViolation saveRegViolation(ViolationDto dto) throws Exception;
 
     RegViolation getRegViolation(Long id);
 
-    Page<RegPersonViolation> getPersonViolationsByCriteria(RegPersonViolationSearchCriteria searchCriteria, int page, int size);
+    Page<RegPersonViolation> getPersonViolationsByCriteria(RegPersonViolationSearchCriteria searchCriteria, int page, int size, Long idUser);
 
     RegPersonViolation saveRegPersonViolation(PersonViolationDto dto) throws Exception;
 

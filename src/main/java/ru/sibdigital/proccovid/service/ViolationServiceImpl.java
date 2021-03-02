@@ -45,6 +45,12 @@ public class ViolationServiceImpl implements ViolationService {
     @Autowired
     private ClsDistrictRepo clsDistrictRepo;
 
+    @Autowired
+    private RegViolationSearchRepo regViolationSearchRepo;
+
+    @Autowired
+    private RegPersonViolationSearchRepo regPersonViolationSearchRepo;
+
     @Override
     public ClsTypeViolation saveClsTypeViolation(ClsTypeViolationDto dto) throws Exception {
         if (dto.getName() == null || dto.getName().isBlank()) {
@@ -77,10 +83,34 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public Page<RegViolation> getViolationsByCriteria(RegViolationSearchCriteria searchCriteria, int page, int size) {
+    public Page<RegViolation> getViolationsByCriteria(RegViolationSearchCriteria searchCriteria, int page, int size, Long idUser) {
         RegViolationSpecification specification = new RegViolationSpecification();
         specification.setSearchCriteria(searchCriteria);
         Page<RegViolation> regViolationsPage = regViolationRepo.findAll(specification, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timeCreate")));
+
+        if (searchCriteria.isNotEmpty()) {
+            ClsUser clsUser = null;
+            if (idUser != null) {
+                clsUser = clsUserRepo.findById(idUser).orElse(null);
+            }
+            ClsDistrict clsDistrict = null;
+            if (searchCriteria.getIdDistrict() != null) {
+                clsDistrict = clsDistrictRepo.findById(searchCriteria.getIdDistrict()).orElse(null);
+            }
+            RegViolationSearch regViolationSearch = RegViolationSearch.builder()
+                    .user(clsUser)
+                    .district(clsDistrict)
+                    .timeCreate(new Timestamp(System.currentTimeMillis()))
+                    .innOrg(searchCriteria.getInn())
+                    .nameOrg(searchCriteria.getNameOrg())
+                    .numberFile(searchCriteria.getNumberFile())
+                    .beginDateRegOrg(searchCriteria.getBeginDateRegOrg())
+                    .endDateRegOrg(searchCriteria.getEndDateRegOrg())
+                    .numberFound(regViolationsPage.getTotalElements())
+                    .build();
+            regViolationSearchRepo.save(regViolationSearch);
+        }
+
         return regViolationsPage;
     }
 
@@ -172,10 +202,34 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public Page<RegPersonViolation> getPersonViolationsByCriteria(RegPersonViolationSearchCriteria searchCriteria, int page, int size) {
+    public Page<RegPersonViolation> getPersonViolationsByCriteria(RegPersonViolationSearchCriteria searchCriteria, int page, int size, Long idUser) {
         RegPersonViolationSpecification specification = new RegPersonViolationSpecification();
         specification.setSearchCriteria(searchCriteria);
         Page<RegPersonViolation> regPersonViolationsPage = regPersonViolationRepo.findAll(specification, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timeCreate")));
+
+        if (searchCriteria.isNotEmpty()) {
+            ClsUser clsUser = null;
+            if (idUser != null) {
+                clsUser = clsUserRepo.findById(idUser).orElse(null);
+            }
+            ClsDistrict clsDistrict = null;
+            if (searchCriteria.getIdDistrict() != null) {
+                clsDistrict = clsDistrictRepo.findById(searchCriteria.getIdDistrict()).orElse(null);
+            }
+            RegPersonViolationSearch regPersonViolationSearch = RegPersonViolationSearch.builder()
+                    .user(clsUser)
+                    .district(clsDistrict)
+                    .timeCreate(new Timestamp(System.currentTimeMillis()))
+                    .lastname(searchCriteria.getLastname())
+                    .firstname(searchCriteria.getFirstname())
+                    .patronymic(searchCriteria.getPatronymic())
+                    .passportData(searchCriteria.getPassportData())
+                    .numberFile(searchCriteria.getNumberFile())
+                    .numberFound(regPersonViolationsPage.getTotalElements())
+                    .build();
+            regPersonViolationSearchRepo.save(regPersonViolationSearch);
+        }
+
         return regPersonViolationsPage;
     }
 
