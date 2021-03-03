@@ -10,10 +10,7 @@ import ru.sibdigital.proccovid.dto.PersonViolationDto;
 import ru.sibdigital.proccovid.dto.ViolationDto;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
-import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchCriteria;
-import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSpecification;
-import ru.sibdigital.proccovid.repository.specification.RegViolationSearchCriteria;
-import ru.sibdigital.proccovid.repository.specification.RegViolationSpecification;
+import ru.sibdigital.proccovid.repository.specification.*;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -311,5 +308,31 @@ public class ViolationServiceImpl implements ViolationService {
     @Override
     public RegPersonViolation getRegPersonViolation(Long id) {
         return regPersonViolationRepo.findById(id).orElse(null);
+    }
+
+    @Override
+    public Page<RegViolationSearch> getViolationSearchQueriesByCriteria(RegViolationSearchSearchCriteria searchCriteria, int page, int size) {
+        RegViolationSearchSpecification specification = new RegViolationSearchSpecification();
+        specification.setSearchCriteria(searchCriteria);
+        Page<RegViolationSearch> regViolationSearchPage = regViolationSearchRepo.findAll(specification, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timeCreate")));
+        return regViolationSearchPage;
+    }
+
+    @Override
+    public RegViolationSearch getRegViolationSearch(Long id) {
+        return regViolationSearchRepo.findById(id).orElse(null);
+    }
+
+    @Override
+    public Page<RegPersonViolationSearch> getPersonViolationSearchQueriesByCriteria(RegPersonViolationSearchSearchCriteria searchCriteria, int page, int size) {
+        RegPersonViolationSearchSpecification specification = new RegPersonViolationSearchSpecification();
+        specification.setSearchCriteria(searchCriteria);
+        Page<RegPersonViolationSearch> regPersonViolationSearchPage = regPersonViolationSearchRepo.findAll(specification, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timeCreate")));
+        return regPersonViolationSearchPage;
+    }
+
+    @Override
+    public RegPersonViolationSearch getRegPersonViolationSearch(Long id) {
+        return regPersonViolationSearchRepo.findById(id).orElse(null);
     }
 }

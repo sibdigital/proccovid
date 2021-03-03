@@ -229,6 +229,7 @@ webix.ready(function() {
                         view: 'sidebar',
                         id: 'sidebar',
                         css: 'webix_dark',
+                        width: 300,
                         data: [
                             { id: "Departments", icon: "fas fa-globe", value: 'Подразделения' },
                             { id: "DepartmentUsers", icon: "fas fa-user-tie", value: 'Пользователи подразделений' },
@@ -238,6 +239,8 @@ webix.ready(function() {
                             // { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
                             { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
                             { id: "TypeViolations", icon: "fas fa-file-alt", value: 'Виды нарушений' },
+                            { id: "ViolationSearchQueries", icon: "fas fa-file-alt", value: 'Поиск нарушений организаций' },
+                            { id: "PersonViolationSearchQueries", icon: "fas fa-file-alt", value: 'Поиск нарушений физ. лиц' },
                             { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
                             { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
                             { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
@@ -282,6 +285,14 @@ webix.ready(function() {
                                     }
                                     case 'TypeViolations': {
                                         view = typeViolations;
+                                        break;
+                                    }
+                                    case 'ViolationSearchQueries': {
+                                        view = violationSearchQueries;
+                                        break;
+                                    }
+                                    case 'PersonViolationSearchQueries': {
+                                        view = personViolationSearchQueries;
                                         break;
                                     }
                                     case 'Statistic': {

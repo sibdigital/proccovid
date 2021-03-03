@@ -495,6 +495,10 @@ public class RequestService {
         return clsUserRepo.findAll(PageRequest.of(page, size, Sort.by("lastname", "firstname", "patronymic")));
     }
 
+    public List<ClsUser> getClsUsers() {
+        return clsUserRepo.findAll(Sort.by("lastname", "firstname", "patronymic"));
+    }
+
     public ClsUser findUserByLogin(String login) {
         return clsUserRepo.findByLogin(login);
     }
