@@ -304,7 +304,6 @@ function findOrganizations() {
             let organizations = [];
             const result = response.data;
             if (type === 'egrul') {
-                console.log(result)
                 if (result.filials && result.filials.length > 0) {
                     const template = '<div style="line-height: 1em; margin-bottom: 0.5em">' + result.shortName + '</div>' +
                         '<div style="font-size: 0.85em; line-height: 1em">ИНН: ' + result.inn + '</div>' +
