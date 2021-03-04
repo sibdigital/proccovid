@@ -289,9 +289,15 @@ function showPersonViolationForm() {
                         id: 'numberFile',
                         label: 'Номер дела',
                         labelPosition: 'top',
-                        // required: true,
-                        // validate: webix.rules.isNotEmpty,
-                        // invalidMessage: 'Поле не может быть пустым',
+                        invalidMessage: 'Длина номера дела превышает 100 символов',
+                        validate: function (val) {
+                            if (val) {
+                                if (val.length > 100) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
                     },
                     {
                         view: 'datepicker',

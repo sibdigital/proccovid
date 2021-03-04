@@ -372,8 +372,19 @@ function showViolationForm() {
                 label: 'Наименование организации/ИП',
                 labelPosition: 'top',
                 required: true,
-                validate: webix.rules.isNotEmpty,
-                invalidMessage: 'Поле не может быть пустым',
+                invalidMessage: 'ИНН не соответствует формату',
+                validate: function (val) {
+                    if (!val) {
+                        return false;
+                    }
+                    if (isNaN(val)) {
+                        return false;
+                    }
+                    if (val.length > 12) {
+                        return false;
+                    }
+                    return true;
+                }
             },
             {
                 view: 'text',
@@ -402,8 +413,19 @@ function showViolationForm() {
                 label: 'ОГРН',
                 labelPosition: 'top',
                 required: true,
-                validate: webix.rules.isNotEmpty,
-                invalidMessage: 'Поле не может быть пустым',
+                invalidMessage: 'ОГРН не соответствует формату',
+                validate: function (val) {
+                    if (!val) {
+                        return false;
+                    }
+                    if (isNaN(val)) {
+                        return false;
+                    }
+                    if (val.length != 15) {
+                        return false;
+                    }
+                    return true;
+                }
             },
             {
                 view: 'text',
@@ -411,6 +433,18 @@ function showViolationForm() {
                 id: 'kppOrg',
                 label: 'КПП',
                 labelPosition: 'top',
+                invalidMessage: 'КПП не соответствует формату',
+                validate: function (val) {
+                    if (val) {
+                        if (isNaN(val)) {
+                            return false;
+                        }
+                        if (val.length != 9) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
             },
             {
                 view: 'datepicker',
@@ -456,9 +490,15 @@ function showViolationForm() {
                         id: 'numberFile',
                         label: 'Номер дела',
                         labelPosition: 'top',
-                        // required: true,
-                        // validate: webix.rules.isNotEmpty,
-                        // invalidMessage: 'Поле не может быть пустым',
+                        invalidMessage: 'Длина номера дела превышает 100 символов',
+                        validate: function (val) {
+                            if (val) {
+                                if (val.length > 100) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
                     },
                     {
                         view: 'datepicker',
