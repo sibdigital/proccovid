@@ -372,19 +372,8 @@ function showViolationForm() {
                 label: 'Наименование организации/ИП',
                 labelPosition: 'top',
                 required: true,
-                invalidMessage: 'ИНН не соответствует формату',
-                validate: function (val) {
-                    if (!val) {
-                        return false;
-                    }
-                    if (isNaN(val)) {
-                        return false;
-                    }
-                    if (val.length > 12) {
-                        return false;
-                    }
-                    return true;
-                }
+                validate: webix.rules.isNotEmpty,
+                invalidMessage: 'Поле не может быть пустым',
             },
             {
                 view: 'text',
@@ -403,8 +392,13 @@ function showViolationForm() {
                 label: 'ИНН',
                 labelPosition: 'top',
                 required: true,
-                validate: webix.rules.isNumber,
-                invalidMessage: 'Поле не может быть пустым',
+                validate: function (val) {
+                    if (!val || isNaN(val) || !(val.length == 10 || val.length == 12) ) {
+                        return false;
+                    }
+                    return true;
+                },
+                invalidMessage: 'ИНН не соответствует формату',
             },
             {
                 view: 'text',
