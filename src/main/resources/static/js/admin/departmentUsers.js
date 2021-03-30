@@ -48,34 +48,24 @@ const departmentUsers = {
                                 this.hideOverlay();
                             },
                             onItemDblClick: function (id) {
-
                                 let data = $$('department_users_table').getItem(id);
-                                if (data.idDepartment) {
-                                    data.departmentId = data.idDepartment.id;
-                                }
 
-                                let window = webix.ui({
-                                    view: 'window',
-                                    id: 'window',
-                                    head: 'Редактирование пользователя подразделения (id: ' + data.id + ').',
-                                    close: true,
-                                    width: 1000,
-                                    height: 800,
-                                    position: 'center',
-                                    modal: true,
-                                    body: departmentUserForm,
-                                    on: {
-                                        'onShow': function () {
-                                        }
+                                setTimeout(function () {
+                                    showDepartmentUserForm()
+
+                                    if (data.idDepartment) {
+                                        data.departmentId = data.idDepartment.id;
                                     }
-                                });
 
-                                $$('departmentUserForm').parse(data);
+                                    if (data.district) {
+                                        data.districtId = data.district.id;
+                                    }
 
-                                window.show();
+                                    $$('departmentUserForm').parse(data);
 
-                                $$('newPassword').define('label', 'Новый пароль');
-                                $$('newPassword').refresh();
+                                    $$('newPassword').define('label', 'Новый пароль');
+                                    $$('newPassword').refresh();
+                                }, 100);
                             }
                         },
                         url: 'cls_users'
@@ -90,39 +80,20 @@ const departmentUsers = {
                                 group: 5,
                                 template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
                             },
-                            {},
-                            {},
-                            {},
-                            {},
                             {
                                 view: 'button',
+                                align: 'right',
+                                maxWidth: 300,
                                 css: 'webix_primary',
                                 value: 'Добавить',
                                 click: function () {
-
-                                    let window = webix.ui({
-                                        view: 'window',
-                                        id: 'window',
-                                        head: 'Добавление пользователя подразделения',
-                                        close: true,
-                                        width: 1000,
-                                        height: 800,
-                                        position: 'center',
-                                        modal: true,
-                                        body: departmentUserForm,
-                                        on: {
-                                            'onShow': function () {
-                                            }
-                                        }
-                                    });
-
-                                    window.show();
+                                    showDepartmentUserForm();
 
                                     $$('newPassword').define('label', 'Пароль');
                                     $$('newPassword').define('required', true);
                                     $$('newPassword').refresh();
-                                }
-                            }
+                                },
+                            },
                         ]
                     }
                 ]
@@ -131,67 +102,106 @@ const departmentUsers = {
     }
 }
 
-const departmentUserForm = {
-    view: 'scrollview',
-    scroll: 'y',
-    id: 'show_layout',
-    autowidth: true,
-    autoheight: true,
-    body: {
-        type: 'space',
-        rows: [
-            {
-                view: 'form',
-                id: 'departmentUserForm',
-                elements: [
-                    {
-                        view: 'combo',
-                        name: 'departmentId',
-                        label: 'Подразделение',
-                        labelPosition: 'top',
-                        options: 'cls_departments',
-                        required: true,
-                        validate: webix.rules.isNotEmpty
-                    },
-                    { view: 'text', label: 'Фамилия', labelPosition: 'top', name: 'lastname', required: true, validate: webix.rules.isNotEmpty },
-                    { view: 'text', label: 'Имя', labelPosition: 'top', name: 'firstname', required: true, validate: webix.rules.isNotEmpty },
-                    { view: 'text', label: 'Отчество', labelPosition: 'top', name: 'patronymic' },
-                    { view: 'text', label: 'Логин', labelPosition: 'top', name: 'login', required: true, validate: webix.rules.isNotEmpty },
-                    { view: 'text', id: 'newPassword', type: 'password', label: 'Новый пароль', labelPosition: 'top', name: 'newPassword', attributes: { autocomplete: 'new-password' } },
-                    { view: 'checkbox', label: 'Администратор', labelPosition: 'top', name: 'admin' },
-                    {
-                        view: 'button',
-                        css: 'webix_primary',
-                        value: 'Сохранить',
-                        click: function () {
-                            if ($$('departmentUserForm').validate()) {
-                                let params = $$('departmentUserForm').getValues();
+function showDepartmentUserForm() {
+    const departmentUserForm = {
+        view: 'scrollview',
+        scroll: 'y',
+        id: 'show_layout',
+        autowidth: true,
+        autoheight: true,
+        body: {
+            type: 'space',
+            rows: [
+                {
+                    view: 'form',
+                    id: 'departmentUserForm',
+                    elements: [
+                        {
+                            view: 'combo',
+                            name: 'departmentId',
+                            label: 'Подразделение',
+                            labelPosition: 'top',
+                            options: 'cls_departments',
+                            required: true,
+                            validate: webix.rules.isNotEmpty
+                        },
+                        {
+                            view: 'combo',
+                            name: 'districtId',
+                            label: 'Район',
+                            labelPosition: 'top',
+                            options: 'cls_districts',
+                            required: true,
+                            validate: webix.rules.isNotEmpty
+                        },
+                        { view: 'text', label: 'Фамилия', labelPosition: 'top', name: 'lastname', required: true, validate: webix.rules.isNotEmpty },
+                        { view: 'text', label: 'Имя', labelPosition: 'top', name: 'firstname', required: true, validate: webix.rules.isNotEmpty },
+                        { view: 'text', label: 'Отчество', labelPosition: 'top', name: 'patronymic' },
+                        { view: 'text', label: 'Адрес электронной почты', labelPosition: 'top', name: 'email', required: true, validate: webix.rules.isEmail },
+                        { view: 'text', label: 'Логин', labelPosition: 'top', name: 'login', required: true, validate: webix.rules.isNotEmpty },
+                        { view: 'text', id: 'newPassword', type: 'password', label: 'Новый пароль', labelPosition: 'top', name: 'newPassword', attributes: { autocomplete: 'new-password' } },
+                        { view: 'checkbox', label: 'Администратор', labelPosition: 'top', name: 'admin' },
+                        {
+                            cols: [
+                                {},
+                                {
+                                    view: 'button',
+                                    css: 'webix_primary',
+                                    value: 'Сохранить',
+                                    maxWidth: 300,
+                                    click: function () {
+                                        if ($$('departmentUserForm').validate()) {
+                                            let params = $$('departmentUserForm').getValues();
 
-                                webix.ajax().headers({
-                                    'Content-Type': 'application/json'
-                                }).post('/save_cls_user',
-                                    JSON.stringify(params)
-                                ).then(function (data) {
-                                    if (data.text() === 'Пользователь сохранен') {
-                                        webix.message({text: data.text(), type: 'success'});
-
-                                        $$('window').close();
-
-                                        const departmentUsersTable = $$('department_users_table');
-                                        const url = departmentUsersTable.data.url;
-                                        departmentUsersTable.clearAll();
-                                        departmentUsersTable.load(url);
-                                    } else {
-                                        webix.message({text: data.text(), type: 'error'});
+                                            webix.ajax().headers({
+                                                'Content-Type': 'application/json'
+                                            }).post('/save_cls_user',
+                                                JSON.stringify(params)
+                                            ).then(function (data) {
+                                                if (data.text() === 'Пользователь сохранен') {
+                                                    webix.message({text: data.text(), type: 'success'});
+                                                    showDepartmentUsers();
+                                                } else {
+                                                    webix.message({text: data.text(), type: 'error'});
+                                                }
+                                            })
+                                        } else {
+                                            webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                        }
                                     }
-                                })
-                            } else {
-                                webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
-                            }
-                        }
-                    }
-                ]
-            }
-        ]
+                                },
+                                {
+                                    view: 'button',
+                                    align: 'right',
+                                    css: 'webix_primary',
+                                    value: 'Отмена',
+                                    maxWidth: 300,
+                                    click: function () {
+                                        showDepartmentUsers();
+                                    }
+                                }
+                            ]
+                        },
+                        {}
+                    ]
+                }
+            ]
+        }
     }
+
+    webix.ui({
+        id: 'content',
+        rows: [
+            departmentUserForm
+        ]
+    }, $$('content'))
+}
+
+function showDepartmentUsers() {
+    webix.ui({
+        id: 'content',
+        rows: [
+            departmentUsers
+        ]
+    }, $$('content'))
 }

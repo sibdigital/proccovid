@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
@@ -47,6 +48,9 @@ import java.util.stream.StreamSupport;
 public class RequestService {
 
     private final static Logger actualizationFilesLogger = LoggerFactory.getLogger("actualizationFilesLogger");
+
+    @Autowired
+    private ApplicationConstants applicationConstants;
 
     @Autowired
     ClsOrganizationRepo clsOrganizationRepo;
@@ -110,6 +114,9 @@ public class RequestService {
 
     @Autowired
     private RegDocRequestFileRepo regDocRequestFileRepo;
+
+    @Autowired
+    private ClsDistrictRepo clsDistrictRepo;
 
     @Value("${upload.path:/uploads}")
     String uploadingDir;
@@ -388,7 +395,7 @@ public class RequestService {
                 String link = formAddr + "?inn="+ org.getInn();
                 String subject = org.getName() + ", " +
                         (actualizeSubject != null ? actualizeSubject.getStringValue()
-                        : "актуализируйте утвержденную заявку на портале Работающая Бурятия");
+                        : "актуализируйте утвержденную заявку на портале " + applicationConstants.getApplicationName());
                 Map<String, String> params = Map.of(":link", link, "subject", subject);
                 if (org.getEmail() != null) {
                     emailService.sendMessage(org.getEmail().trim(), clsTemplate, params);
@@ -488,22 +495,36 @@ public class RequestService {
         return clsUserRepo.findAll(PageRequest.of(page, size, Sort.by("lastname", "firstname", "patronymic")));
     }
 
+    public List<ClsUser> getClsUsers() {
+        return clsUserRepo.findAll(Sort.by("lastname", "firstname", "patronymic"));
+    }
+
     public ClsUser findUserByLogin(String login) {
         return clsUserRepo.findByLogin(login);
     }
 
-    public ClsUser saveClsUser(ClsUserDto clsUserDto) {
+    public ClsUser saveClsUser(ClsUserDto clsUserDto) throws Exception {
 
         ClsDepartment clsDepartment = clsDepartmentRepo.findById(clsUserDto.getDepartmentId()).orElse(null);
+        if (clsDepartment == null) {
+            throw new Exception("Не указано подразделение");
+        }
+
+        ClsDistrict clsDistrict = clsDistrictRepo.findById(clsUserDto.getDistrictId()).orElse(null);
+        if (clsDistrict == null) {
+            throw new Exception("Не указан район");
+        }
 
         ClsUser clsUser = ClsUser.builder()
                 .id(clsUserDto.getId())
                 .idDepartment(clsDepartment)
+                .district(clsDistrict)
                 .lastname(clsUserDto.getLastname())
                 .firstname(clsUserDto.getFirstname())
                 .patronymic(clsUserDto.getPatronymic())
                 .login(clsUserDto.getLogin())
                 .isAdmin(clsUserDto.getAdmin())
+                .email(clsUserDto.getEmail())
                 .build();
 
         if (clsUserDto.getNewPassword() != null && !clsUserDto.getNewPassword().isBlank()) {

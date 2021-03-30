@@ -2,11 +2,13 @@ package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,11 +18,16 @@ import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.*;
+import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
+import ru.sibdigital.proccovid.repository.ClsMailingListOkvedRepo;
+import ru.sibdigital.proccovid.repository.ClsMailingListRepo;
+import ru.sibdigital.proccovid.repository.ClsNewsRepo;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
+import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchSearchCriteria;
+import ru.sibdigital.proccovid.repository.specification.RegViolationSearchSearchCriteria;
 import ru.sibdigital.proccovid.service.*;
 
-import java.text.ParseException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +68,15 @@ public class AdminController {
     private NewsService newsService;
 
 
+
+    @Autowired
+    private ViolationService violationService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${spring.mail.from}")
+    private String fromAddress;
 
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -226,6 +242,14 @@ public class AdminController {
         return result;
     }
 
+    @GetMapping("all_cls_users")
+    public @ResponseBody List<KeyValue> allUsers() {
+        List<KeyValue> list = requestService.getClsUsers().stream()
+                .map(o -> new KeyValue(o.getClass().getSimpleName(), o.getId(), o.getFullName()))
+                .collect(Collectors.toList());
+        return list;
+    }
+
     @PostMapping("/save_cls_user")
     public @ResponseBody String saveClsUser(@RequestBody ClsUserDto clsUserDto) {
         try {
@@ -233,7 +257,15 @@ public class AdminController {
             if (clsUser != null && clsUserDto.getId() != clsUser.getId()) {
                 return "Пользователь с таким логином уже существует";
             }
-            requestService.saveClsUser(clsUserDto);
+            clsUser = requestService.saveClsUser(clsUserDto);
+            // отправим логин и пароль на почту
+            String text = "Логин и пароль от личного кабинета на портале " + applicationConstants.getApplicationName() + ":\n"
+                    + clsUser.getLogin() + "\n"
+                    + clsUser.getPassword();
+            emailService.sendSimpleMessage(clsUserDto.getEmail(), applicationConstants.getApplicationName(), text, fromAddress);
+        } catch (MailException e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось отправить письмо";
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return "Не удалось сохранить пользователя";
@@ -427,5 +459,84 @@ public class AdminController {
     public @ResponseBody String createPrescriptions() {
         organizationService.createPrescriptions();
         return "Создание предписаний выполнено";
+    }
+
+    @GetMapping("/type_violations")
+    public @ResponseBody List<ClsTypeViolationDto> getClsTypeViolations() {
+        return violationService.getClsTypeViolations().stream()
+                .map(o -> new ClsTypeViolationDto(o.getId(), o.getName(), o.getDescription())).collect(Collectors.toList());
+    }
+
+    @PostMapping("/save_type_violation")
+    public @ResponseBody String saveClsTypeViolation(@RequestBody ClsTypeViolationDto dto) {
+        try {
+            violationService.saveClsTypeViolation(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить вид нарушения";
+        }
+        return "Вид нарушения сохранен";
+    }
+
+    @GetMapping("/violation_search_queries")
+    public @ResponseBody Map<String, Object> getViolationSearchQueries(@RequestParam(value = "bst", required = false) Timestamp beginSearchTime,
+                                                                       @RequestParam(value = "est", required = false) Timestamp endSearchTime,
+                                                                       @RequestParam(value = "u", required = false) Long idUser,
+                                                                       @RequestParam(value = "start", required = false) Integer start,
+                                                                       @RequestParam(value = "count", required = false) Integer count) {
+        int page = start == null ? 0 : start / 25;
+        int size = count == null ? 25 : count;
+
+        RegViolationSearchSearchCriteria searchCriteria = new RegViolationSearchSearchCriteria(beginSearchTime, endSearchTime, idUser);
+
+        Page<RegViolationSearch> regViolationSearchPage = violationService.getViolationSearchQueriesByCriteria(searchCriteria, page, size);
+
+        List<ViolationSearchDto> violationSearchDtos = regViolationSearchPage.getContent().stream()
+                .map(o -> new ViolationSearchDto(o))
+                .collect(Collectors.toList());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", violationSearchDtos);
+        result.put("pos", (long) page * size);
+        result.put("total_count", regViolationSearchPage.getTotalElements());
+        return result;
+    }
+
+    @GetMapping("/violation_search_query")
+    public @ResponseBody ViolationSearchDto getViolation(@RequestParam Long id) {
+        RegViolationSearch regViolationSearch = violationService.getRegViolationSearch(id);
+        ViolationSearchDto dto = new ViolationSearchDto(regViolationSearch);
+        return dto;
+    }
+
+    @GetMapping("/person_violation_search_queries")
+    public @ResponseBody Map<String, Object> getPersonViolationSearchQueries(@RequestParam(value = "bst", required = false) Timestamp beginSearchTime,
+                                                                             @RequestParam(value = "est", required = false) Timestamp endSearchTime,
+                                                                             @RequestParam(value = "u", required = false) Long idUser,
+                                                                             @RequestParam(value = "start", required = false) Integer start,
+                                                                             @RequestParam(value = "count", required = false) Integer count) {
+        int page = start == null ? 0 : start / 25;
+        int size = count == null ? 25 : count;
+
+        RegPersonViolationSearchSearchCriteria searchCriteria = new RegPersonViolationSearchSearchCriteria(beginSearchTime, endSearchTime, idUser);
+
+        Page<RegPersonViolationSearch> regPersonViolationSearchPage = violationService.getPersonViolationSearchQueriesByCriteria(searchCriteria, page, size);
+
+        List<PersonViolationSearchDto> personViolationSearchDtos = regPersonViolationSearchPage.getContent().stream()
+                .map(o -> new PersonViolationSearchDto(o))
+                .collect(Collectors.toList());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", personViolationSearchDtos);
+        result.put("pos", (long) page * size);
+        result.put("total_count", regPersonViolationSearchPage.getTotalElements());
+        return result;
+    }
+
+    @GetMapping("/person_violation_search_query")
+    public @ResponseBody PersonViolationSearchDto getPersonViolation(@RequestParam Long id) {
+        RegPersonViolationSearch regPersonViolationSearch = violationService.getRegPersonViolationSearch(id);
+        PersonViolationSearchDto dto = new PersonViolationSearchDto(regPersonViolationSearch);
+        return dto;
     }
 }

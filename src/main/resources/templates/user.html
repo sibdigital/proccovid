@@ -14,6 +14,7 @@
 <script th:inline="javascript">
     const APPLICATION_NAME = [[${application_name}]]
     const ID_DEPARTMENT = [[${id_department}]]
+    const ID_DISTRICT = [[${id_district}]]
     const DEPARTMENT = [[${department_name}]]
     const USER_NAME = [[${user_lastname + " " + user_firstname}]]
     const LINK_PREFIX = [[${link_prefix}]]
@@ -29,6 +30,8 @@
 <script th:src="@{/js/views/request_form.js}"></script>
 <script th:src="@{/js/utils/filter.js}"></script>
 <script th:src="@{/js/user/requests.js}"></script>
+<script th:src="@{/js/user/violations.js}"></script>
+<script th:src="@{/js/user/personViolations.js}"></script>
 <script th:src="@{/js/user/prescriptions.js}"></script>
 </body>
 </html>

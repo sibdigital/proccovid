@@ -9,6 +9,7 @@ import org.springframework.mail.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.RegMailingHistoryRepo;
 
@@ -25,6 +26,9 @@ import java.util.Map;
 @Service
 @Slf4j
 public class EmailServiceImpl implements EmailService {
+
+    @Autowired
+    private ApplicationConstants applicationConstants;
 
     @Autowired
     private JavaMailSender javaMailSender;
@@ -55,7 +59,7 @@ public class EmailServiceImpl implements EmailService {
             } else if (docRequest.getStatusReview() == ReviewStatuses.REJECTED.getValue()) {
                 text = "Ваша заявка рассмотрена " + docRequest.getDepartment().getName() + " и отклонена по причине: " + docRequest.getRejectComment();
             }
-            sendSimpleMessage(organization.getEmail(), "Работающая Бурятия", text, "rabota@govrb.ru");
+            sendSimpleMessage(organization.getEmail(), applicationConstants.getApplicationName(), text, "rabota@govrb.ru");
             textLog += "0";
         } catch (MailException e) {
             textLog += "1" + sep + e.getMessage();
@@ -68,7 +72,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private void sendSimpleMessage(String to, String subject, String text, String from) {
+    public void sendSimpleMessage(String to, String subject, String text, String from) throws MailException {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);
@@ -269,7 +273,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(address.getAddress());
-        String subject = params.get("subject") == null ? "Работающая Бурятия" : params.get("subject");
+        String subject = params.get("subject") == null ? applicationConstants.getApplicationName() : params.get("subject");
         helper.setSubject(subject);
         helper.setFrom(fromAdress);
 
@@ -287,7 +291,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(address.getAddress());
-        String subject = params.get("subject") == null ? "Работающая Бурятия" : params.get("subject");
+        String subject = params.get("subject") == null ? applicationConstants.getApplicationName() : params.get("subject");
         helper.setSubject(subject);
         helper.setFrom(fromAdress);
 

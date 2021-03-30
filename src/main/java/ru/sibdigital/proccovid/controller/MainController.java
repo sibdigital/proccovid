@@ -66,6 +66,9 @@ public class MainController {
         ClsUser clsUser = currentUser.getClsUser();
         model.addAttribute("id_department", clsUser.getIdDepartment().getId());
         model.addAttribute("department_name", clsUser.getIdDepartment().getName());
+        if (clsUser.getDistrict() != null) {
+            model.addAttribute("id_district", clsUser.getDistrict().getId());
+        }
         model.addAttribute("user_lastname", clsUser.getLastname());
         model.addAttribute("user_firstname", clsUser.getFirstname());
         model.addAttribute("application_name", applicationConstants.getApplicationName());
@@ -122,36 +125,6 @@ public class MainController {
     public @ResponseBody ClsTypeRequest getClsTypeRequest(@RequestParam Long id) {
         return requestService.getClsTypeRequest(id);
     }
-
-//    @CrossOrigin
-//    @GetMapping("/egrul")
-//    public @ResponseBody EgrulResponse getEgrul(@RequestParam(name = "inn") String inn) {
-//        EgrulResponse response = new EgrulResponse();
-//        RegEgrul egrul = egrulService.getEgrul(inn);
-//        if (egrul != null) {
-//            try {
-//                response.setData(mapper.readValue(egrul.getData(), EGRUL.СвЮЛ.class));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return response;
-//    }
-//
-//    @CrossOrigin
-//    @GetMapping("/egrip")
-//    public @ResponseBody  EgripResponse getEgrip(@RequestParam(name = "inn") String inn) {
-//        EgripResponse response = new EgripResponse();
-//        RegEgrip egrip = egrulService.getEgrip(inn);
-//        if (egrip != null) {
-//            try {
-//                response.setData(mapper.readValue(egrip.getData(), EGRIP.СвИП.class));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return response;
-//    }
 
     @GetMapping("/migration_data")
     public @ResponseBody  List<ClsMigration> getMigrationData() {
