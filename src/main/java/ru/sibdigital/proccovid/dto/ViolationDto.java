@@ -37,6 +37,7 @@ public class ViolationDto {
     private Date dateFile;
     private Boolean isDeleted;
     private Long idDistrict;
+    private String nameDistrict;
 
     public ViolationDto(RegViolation regViolation) {
         this.setId(regViolation.getId());
@@ -56,5 +57,6 @@ public class ViolationDto {
         this.setDateFile(regViolation.getDateFile());
         this.setIsDeleted(regViolation.getDeleted());
         this.setIdDistrict(regViolation.getDistrict().getId());
+        this.setNameDistrict(regViolation.getDistrict().getName());
     }
 }
