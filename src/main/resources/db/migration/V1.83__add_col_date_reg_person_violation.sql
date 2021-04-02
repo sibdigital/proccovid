@@ -1,0 +1,1 @@
+ALTER TABLE reg_person_violation ADD date_reg_person Date;
