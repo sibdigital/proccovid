@@ -173,17 +173,17 @@ const violations = {
             datafetch: 25,
             columns: [
                 {id: "nameOrg", width:350, minWidth: 300, header: "Организация", template: "#nameOrg#", fillspace: true},
-                {id: "inn", width: 150, header: "ИНН",template: "#innOrg#"},
+                {id: "inn", width: 150, header: "ИНН", template: "#innOrg#"},
                 {id: "district", width:200, header: "Район", template: "#nameDistrict#"},
                 {id: "deal_number", width: 200, header: "Номер дела", template: "#numberFile#"},
                 {id: "nameTypeViolation", width: 300, minWidth: 200, header: "Вид нарушения", template: "#nameTypeViolation#"},
-                {id: "time_Create", width: 200, header: "Дата регистрации", format: DATE_FORMAT},
+                {id: "date_reg_org", width: 200, header: "Дата регистрации", template: (obj) => { return obj.dateRegOrg || ""}},
             ],
-            scheme: {
-                $init: function (obj) {
-                    obj.time_Create = obj.timeCreate.replace("T", " ")
-                },
-            },
+            // scheme: {
+            //     $init: function (obj) {
+            //          obj.time_Create = obj.timeCreate.replace("T", " ")
+            //     },
+            // },
             on: {
                 onBeforeLoad: function () {
                     this.showOverlay("Загружаю...");

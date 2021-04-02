@@ -33,6 +33,7 @@ public class PersonViolationDto {
     private String residenceAddress;
     private String passportData;
     private String placeWork;
+    private Date dateRegPerson;
     private String numberFile;
     private Date dateFile;
     private Boolean isDeleted;
@@ -56,6 +57,7 @@ public class PersonViolationDto {
         this.setResidenceAddress(regPersonViolation.getResidenceAddress());
         this.setPassportData(regPersonViolation.getPassportData());
         this.setPlaceWork(regPersonViolation.getPlaceWork());
+        this.setDateRegPerson(regPersonViolation.getDateRegPerson());
         this.setNumberFile(regPersonViolation.getNumberFile());
         this.setDateFile(regPersonViolation.getDateFile());
         this.setIsDeleted(regPersonViolation.getDeleted());

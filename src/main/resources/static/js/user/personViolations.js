@@ -166,13 +166,8 @@ const personViolations = {
                     fillspace: true
                 },
                 {id: "nameTypeViolation", width: 250, header: "Вид нарушения", template: "#nameTypeViolation#"},
-                {id: "time_Create", width: 200, header: "Дата регистрации", format: DATE_FORMAT},
+                {id: "date_reg_person", width: 200, header: "Дата регистрации", template: (obj) => { return obj.dateRegPerson || ""}},
             ],
-            scheme: {
-                $init: function (obj) {
-                    obj.time_Create = obj.timeCreate.replace("T", " ")
-                },
-            },
             on: {
                 onBeforeLoad: function () {
                     this.showOverlay("Загружаю...");
@@ -359,11 +354,14 @@ function showPersonViolationForm() {
                 margin: 10,
                 cols: [
                     {
-                        view: 'text',
-                        id: 'timeCreate',
-                        name: 'timeCreate',
-                        label: "Дата регистрации",
-                        labelPosition: 'top'
+                        view: 'datepicker',
+                        name: 'dateRegPerson',
+                        id: 'dateRegPerson',
+                        label: 'Дата регистрации',
+                        labelPosition: 'top',
+                        // required: true,
+                        // validate: webix.rules.isNotEmpty,
+                        // invalidMessage: 'Поле не может быть пустым',
                     },
                     {
                         view: 'richselect',

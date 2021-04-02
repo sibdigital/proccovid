@@ -31,6 +31,7 @@ public class RegPersonViolation {
     private String residenceAddress;
     private String passportData;
     private String placeWork;
+    private Date dateRegPerson;
     private String numberFile;
     private Date dateFile;
     private Boolean isDeleted;
@@ -168,6 +169,12 @@ public class RegPersonViolation {
     public void setPlaceWork(String placeWork) {
         this.placeWork = placeWork;
     }
+
+    @Basic
+    @Column(name = "date_reg_person")
+    public Date getDateRegPerson() { return dateRegPerson; }
+
+    public void setDateRegPerson(Date dateRegPerson) { this.dateRegPerson = dateRegPerson; }
 
     @Basic
     @Column(name = "number_file")
