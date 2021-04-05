@@ -66,7 +66,7 @@ webix.ready(function() {
                                     margin = {"margin-top":"10px !important"};
                                 } else if (id == 'PersonViolations') {
                                     view = personViolations;
-                                    margin = {"margin-top":"10px !important"};
+                                    margin = {"margin-top":"10px !important","width":"100% !important"};
                                 }
                                 this.select(id)
                                 if (view != null) {
@@ -118,10 +118,11 @@ webix.ready(function() {
                     {
                         view: 'scrollview',
                         scroll: 'xy',
+                        css: {'overflow':'hidden !important'},
                         body: {
                             padding: 20,
                             rows: [
-                                {id: 'content'}
+                                {id: 'content',}
                             ]
                         }
                     }

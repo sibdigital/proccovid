@@ -146,89 +146,95 @@ const personViolations = {
             ]
         },
         {
-            view: 'datatable',
-            id: 'person_violations_table',
-            select: 'row',
-            scrollX: false,
-            navigation: true,
-            resizeColumn: true,
-            pager: 'Pager',
-            datafetch: 25,
-            columns: [
-                {id: "fullName", minWidth: 300, header: "ФИО", template: "#fullName#", fillspace: true},
-                {id: "district", width: 200, header: "Район", template: "#nameDistrict#"},
-                {id: "deal_number", width: 200, header: "Номер дела", template: "#numberFile#"},
-                {
-                    id: "regAddress",
-                    width: 250,
-                    header: "Адрес регистрации",
-                    template: "#registrationAddress#",
-                    fillspace: true
-                },
-                {id: "nameTypeViolation", width: 250, header: "Вид нарушения", template: "#nameTypeViolation#"},
-                {id: "date_reg_person", width: 200, header: "Дата регистрации", template: (obj) => { return obj.dateRegPerson || ""}},
-            ],
-            on: {
-                onBeforeLoad: function () {
-                    this.showOverlay("Загружаю...");
-                },
-                onAfterLoad: function () {
-                    this.hideOverlay();
-                    if (!this.count()) {
-                        this.showOverlay("Отсутствуют данные")
-                    }
-                },
-                onLoadError: function () {
-                    this.hideOverlay();
-                },
-                onItemClick: function (id) {
-                    let item = $$('person_violations_table').getItem(id);
+            margin: 10,
+            rows: [
 
-                    setTimeout(function () {
-                        showPersonViolationForm();
-
-                        webix.ajax().get('person_violation', {id: item.id})
-                            .then(function (data) {
-                                data = data.json();
-                                $$('personViolationForm').parse(data);
-                                $$('lastname').define('readonly', true);
-                                $$('lastname').refresh();
-                                $$('firstname').define('readonly', true);
-                                $$('firstname').refresh();
-                                $$('patronymic').define('readonly', true);
-                                $$('patronymic').refresh();
-                                $$('birthday').define('readonly', true);
-                                $$('birthday').refresh();
-                                $$('placeBirth').define('readonly', true);
-                                $$('placeBirth').refresh();
-                            });
-                    }, 100);
-                }
-            },
-            url: 'person_violations'
-        },
-        {
-            cols: [
                 {
-                    view: 'pager',
-                    id: 'Pager',
-                    height: 38,
-                    size: 25,
-                    group: 5,
-                    template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
-                },
-                {
-                    view: 'button',
-                    align: 'right',
-                    minWidth: 220,
-                    maxWidth: 350,
-                    css: 'webix_primary',
-                    value: 'Добавить',
-                    click: function () {
-                        showPersonViolationForm();
+                    view: 'datatable',
+                    id: 'person_violations_table',
+                    select: 'row',
+                    scrollX: false,
+                    navigation: true,
+                    resizeColumn: true,
+                    pager: 'Pager',
+                    datafetch: 25,
+                    columns: [
+                        {id: "fullName", minWidth: 300, header: "ФИО", template: "#fullName#", fillspace: true},
+                        {id: "district", width: 200, header: "Район", template: "#nameDistrict#"},
+                        {id: "deal_number", width: 200, header: "Номер дела", template: "#numberFile#"},
+                        {
+                            id: "regAddress",
+                            width: 250,
+                            header: "Адрес регистрации",
+                            template: "#registrationAddress#",
+                            fillspace: true
+                        },
+                        {id: "nameTypeViolation", width: 250, header: "Вид нарушения", template: "#nameTypeViolation#"},
+                        {id: "date_reg_person", width: 200, header: "Дата регистрации", template: (obj) => { return obj.dateRegPerson || ""}},
+                    ],
+                    on: {
+                        onBeforeLoad: function () {
+                            this.showOverlay("Загружаю...");
+                        },
+                        onAfterLoad: function () {
+                            this.hideOverlay();
+                            if (!this.count()) {
+                                this.showOverlay("Отсутствуют данные")
+                            }
+                        },
+                        onLoadError: function () {
+                            this.hideOverlay();
+                        },
+                        onItemDblClick: function (id) {
+                            let item = $$('person_violations_table').getItem(id);
 
-                        $$('idDistrict').setValue(ID_DISTRICT);
+                            setTimeout(function () {
+                                showPersonViolationForm();
+
+                                webix.ajax().get('person_violation', {id: item.id})
+                                    .then(function (data) {
+                                        data = data.json();
+                                        $$('personViolationForm').parse(data);
+                                        $$('lastname').define('readonly', true);
+                                        $$('lastname').refresh();
+                                        $$('firstname').define('readonly', true);
+                                        $$('firstname').refresh();
+                                        $$('patronymic').define('readonly', true);
+                                        $$('patronymic').refresh();
+                                        $$('birthday').define('readonly', true);
+                                        $$('birthday').refresh();
+                                        $$('placeBirth').define('readonly', true);
+                                        $$('placeBirth').refresh();
+                                    });
+                            }, 100);
+                        }
                     },
+                    url: 'person_violations'
+                },
+                {
+                    cols: [
+                        {
+                            view: 'pager',
+                            id: 'Pager',
+                            height: 38,
+                            size: 25,
+                            group: 5,
+                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                        },
+                        {
+                            view: 'button',
+                            align: 'right',
+                            minWidth: 220,
+                            maxWidth: 350,
+                            css: 'webix_primary',
+                            value: 'Добавить',
+                            click: function () {
+                                showPersonViolationForm();
+
+                                $$('idDistrict').setValue(ID_DISTRICT);
+                            },
+                        }
+                    ]
                 }
             ]
         }
