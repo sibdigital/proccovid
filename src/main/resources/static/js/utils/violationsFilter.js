@@ -14,14 +14,14 @@ const get_group_filter_btns = (filter_data, type) => {
     let result_html = '';
     filter_data.map(panel =>
         result_html +=
-            `<div id="cart" style="margin-left:12px" class="input-group noclose" id="adv-search">
+            `<div id="cart" style="margin-left:12px" class="input-group" id="adv-search">
                 <button id="` + panel.id + `" onclick=get_webix_object_by_css("` + panel.id + `","` + panel.css + `") aria-expanded="false" class="btn btn-default dropdown-toggle btn-filter" data-toggle="dropdown" type="button">
                     ` + panel.name + `<span class="caret"></span></button>
-                <div style="padding: 0;" class="dropup dropdown-menu noclose" role="menu">
-                    <form class="form-horizontal" role="form"> 
-                        <div id="test2" class="form-group form-group--` + panel.css + `">
-                            <button aria-expanded="false" class="btn btn-default dropdown-toggle inner-btn-filter" data-toggle="collapse" type="button">
+                <div style="padding: 0;" class="dropup dropdown-menu" role="menu">
+                    <button aria-expanded="false" class="btn btn-default dropdown-toggle inner-btn-filter" data-toggle="collapse" type="button">
                                 ` + panel.name + `<span class="caret"></span></button>
+                    <form class="form-horizontal noclose" role="form"> 
+                        <div id="test2" class="form-group form-group--` + panel.css + `">
                         </div>
                     </form>
                 </div>

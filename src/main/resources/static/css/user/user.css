@@ -349,11 +349,6 @@ body {margin: 0}
     box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.25);
 }
 
-.inner-btn-filter {
-    padding-top: 0 !important;
-    padding-left: 0 !important;
-}
-
 .filter-func-btn {
     display: flex !important;
     background: transparent !important;
