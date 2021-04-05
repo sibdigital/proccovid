@@ -17,7 +17,7 @@ import java.util.Objects;
 public class RegOrganizationInspection {
     @Id
     @Column(name = "id", nullable = false)
-    @SequenceGenerator(name = "REG_ORG_INSPECTION_SEQ_GEN", sequenceName = "reg_organization_inspectionid_seq", allocationSize = 1, schema = "public")
+    @SequenceGenerator(name = "REG_ORG_INSPECTION_SEQ_GEN", sequenceName = "reg_organization_inspection_id_seq", allocationSize = 1, schema = "public")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REG_ORG_INSPECTION_SEQ_GEN")
     private Long id;
 
