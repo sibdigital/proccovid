@@ -67,13 +67,14 @@ public class AdminController {
     @Autowired
     private NewsService newsService;
 
-
-
     @Autowired
     private ViolationService violationService;
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ControlAuthorityService controlAuthorityService;
 
     @Value("${spring.mail.from}")
     private String fromAddress;
@@ -538,5 +539,25 @@ public class AdminController {
         RegPersonViolationSearch regPersonViolationSearch = violationService.getRegPersonViolationSearch(id);
         PersonViolationSearchDto dto = new PersonViolationSearchDto(regPersonViolationSearch);
         return dto;
+    }
+
+    @GetMapping("/delete_control_authority")
+    public @ResponseBody String deleteControlAuthority(@RequestParam(value = "id") Long id) {
+        boolean deleted = controlAuthorityService.deleteControlAuthority(id);
+        if (deleted) {
+            return "Контрольно-надзорный орган удален";
+        }
+        return "Не удалось удалить контрольно-надзорный орган";
+    }
+
+    @PostMapping("/save_control_authority")
+    public @ResponseBody String saveClsTypeViolation(@RequestBody ClsControlAuthorityDto dto) {
+        try {
+            controlAuthorityService.saveControlAuthority(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить контрольно-надзорный орган";
+        }
+        return "Контрольно-надзорный орган сохранен";
     }
 }
