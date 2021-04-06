@@ -170,7 +170,7 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
     public List<Map<String, Object>> getStatisticForEachDay(@Param("id_type_request") int id_type_request);
 
     @Query(nativeQuery = true, value = "with slice_doc_request as(\n" +
-            "    select co.inn,  max(time_create) as time_create\n" +
+            "    select co.inn,  max(dr.time_create) as time_create\n" +
             "    from doc_request as dr\n" +
             "             inner join cls_organization as co\n" +
             "                        on dr.id_organization = co.id\n" +
@@ -196,7 +196,7 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
     public Map<String, Object> getActualRequestStatisticForEeachOrganization();
 
     @Query(nativeQuery = true, value = "with slice_doc_request as(\n" +
-            "    select co.inn,  max(time_create) as time_create\n" +
+            "    select co.inn,  max(dr.time_create) as time_create\n" +
             "    from doc_request as dr\n" +
             "             inner join cls_organization as co\n" +
             "                        on dr.id_organization = co.id\n" +
@@ -223,7 +223,7 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
     public List<Map<String, Object>> getActualRequestStatisticForEeachDepartment();
 
     @Query(nativeQuery = true, value = "with slice_doc_request as(\n" +
-            "    select co.inn,  max(time_create) as time_create\n" +
+            "    select co.inn,  max(dr.time_create) as time_create\n" +
             "    from doc_request as dr\n" +
             "             inner join cls_organization as co\n" +
             "                        on dr.id_organization = co.id\n" +
@@ -250,7 +250,7 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
     public Map<String, Object> getActualNumberWorkerForEachOrganization();
 
     @Query(nativeQuery = true, value = "with slice_doc_request as(\n" +
-            "    select co.inn,  max(time_create) as time_create\n" +
+            "    select co.inn,  max(dr.time_create) as time_create\n" +
             "    from doc_request as dr\n" +
             "             inner join cls_organization as co\n" +
             "                        on dr.id_organization = co.id\n" +
