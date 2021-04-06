@@ -107,12 +107,10 @@ const mailingMessages = {
                         ],
                         scheme: {
                             $init: function (obj) {
-                                obj.sendingTime = obj.sendingTime.replace("T", " ");
-                                obj.sendingTime = xml_format(obj.sendingTime);
+                                obj.sendingTime = new Date(obj.sendingTime);
                             },
                             $update:function (obj) {
-                                obj.sendingTime = obj.sendingTime.replace("T", " ");
-                                obj.sendingTime = xml_format(obj.sendingTime);
+                                obj.sendingTime = new Date(obj.sendingTime);
                             },
 
                         },
@@ -125,7 +123,7 @@ const mailingMessages = {
                                     id: item.id,
                                     mailingId: jsonResponse.clsMailingList.id,
                                     message: jsonResponse.message,
-                                    sendingTime: (jsonResponse.sendingTime != null ? jsonResponse.sendingTime.replace("T", " ") : ""),
+                                    sendingTime: (jsonResponse.sendingTime != null ? new Date(jsonResponse.sendingTime) : ""),
                                     status: ''+jsonResponse.status
                                 };
 
@@ -170,7 +168,8 @@ const mailingMessageForm = {
                 view: 'form',
                 id: 'mailingMessageForm',
                 rows: [
-                    { view: 'text',
+                    {
+                        view: 'text',
                         label: 'Тема',
                         id: 'subject',
                         name: 'subject',
@@ -188,7 +187,8 @@ const mailingMessageForm = {
                                 required: true,
                                 options: 'mailing_list_short',
                             },
-                            { view: 'richselect',
+                            {
+                                view: 'richselect',
                                 name: 'status',
                                 id: 'status',
                                 label: 'Статус',
@@ -200,13 +200,15 @@ const mailingMessageForm = {
                                     {id: "2", value: 'Отправка проведена'}
                                 ]
                             },
-                            { view: 'datepicker',
+                            {
+                                view: 'datepicker',
                                 label: 'Время начала отправки',
                                 labelPosition: 'left',
                                 name: 'sendingTime',
-                                stringResult:true,
-                                timepicker:true,
-                                format:webix.i18n.fullDateFormat
+                                stringResult: true,
+                                timepicker: true,
+                                format: webix.i18n.fullDateFormat,
+                                // format: dateFormat
                             },
                         ]
                     },
@@ -238,7 +240,8 @@ const mailingMessageForm = {
                     {
                         cols: [
                             {},
-                            { view: 'text',
+                            {
+                                view: 'text',
                                 label: 'Адрес тестового сообщения',
                                 id: 'test_adress',
                                 name: 'test_adress',
