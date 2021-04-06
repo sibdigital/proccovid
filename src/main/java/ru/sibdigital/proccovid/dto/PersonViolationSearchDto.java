@@ -29,8 +29,10 @@ public class PersonViolationSearchDto {
 
     public PersonViolationSearchDto(RegPersonViolationSearch o) {
         this.setId(o.getId());
-        this.setIdUser(o.getUser().getId());
-        this.setNameUser(o.getUser().getFullName());
+        if (o.getUser() != null) {
+            this.setIdUser(o.getUser().getId());
+            this.setNameUser(o.getUser().getFullName());
+        }
         this.setTimeCreate(o.getTimeCreate());
         this.setLastname(o.getLastname());
         this.setFirstname(o.getFirstname());

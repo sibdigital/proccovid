@@ -40,10 +40,16 @@ public class ViolationDto {
 
     public ViolationDto(RegViolation regViolation) {
         this.setId(regViolation.getId());
-        this.setIdTypeViolation(regViolation.getTypeViolation().getId());
-        this.setNameTypeViolation(regViolation.getTypeViolation().getName());
-        this.setNameAddedUser(regViolation.getAddedUser().getFullName());
-        this.setNameUpdatedUser(regViolation.getUpdatedUser().getFullName());
+        if (regViolation.getTypeViolation() != null) {
+            this.setIdTypeViolation(regViolation.getTypeViolation().getId());
+            this.setNameTypeViolation(regViolation.getTypeViolation().getName());
+        }
+        if (regViolation.getAddedUser() != null) {
+            this.setNameAddedUser(regViolation.getAddedUser().getFullName());
+        }
+        if (regViolation.getUpdatedUser() != null) {
+            this.setNameUpdatedUser(regViolation.getUpdatedUser().getFullName());
+        }
         this.setTimeCreate(regViolation.getTimeCreate());
         this.setTimeUpdate(regViolation.getTimeCreate());
         this.setNameOrg(regViolation.getNameOrg());
@@ -55,6 +61,8 @@ public class ViolationDto {
         this.setNumberFile(regViolation.getNumberFile());
         this.setDateFile(regViolation.getDateFile());
         this.setIsDeleted(regViolation.getDeleted());
-        this.setIdDistrict(regViolation.getDistrict().getId());
+        if (regViolation.getDistrict() != null) {
+            this.setIdDistrict(regViolation.getDistrict().getId());
+        }
     }
 }
