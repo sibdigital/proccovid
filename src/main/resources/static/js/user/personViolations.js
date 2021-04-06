@@ -1,37 +1,83 @@
+const person_form_data = [
+    {id: 'search_lastname', css: 'input_lastname', name: 'Фамилия'},
+    {id: 'search_firstname', css: 'input_firstname', name: 'Имя'},
+    {id: 'search_patronymic', css: 'input_patronymic', name: 'Отчество'},
+    {id: 'search_passportData', css: 'input_passport_data', name: 'Паспортные данные'},
+    {id: 'search_numberFile', css: 'input_deal_number_person', name: 'Номер дела'},
+    {id: 'search_district', css: 'select_district', name: 'Район'},
+]
+
 const personViolations = {
     rows: [
         {
-            view: 'toolbar',
+            height: 1,
+            width: 1,
             rows: [
                 {
-                    cols:[
+                    cols: [
                         {
                             view: 'text',
+                            css: 'input_lastname',
                             id: 'search_lastname',
-                            label: 'Фамилия',
-                            labelWidth: 100,
+                            label: 'Ввести',
+                            labelPosition: 'top',
+                            placeholder: 'Фамилия',
+                            hidden: true,
                             maxWidth: 300,
+                            on: {
+                                onChange: () => {
+                                    let inn = $$('search_lastname').getValue();
+                                    inn !== "" ? $('#search_lastname').addClass('filter-data') : $('#search_lastname').removeClass('filter-data');
+                                }
+                            }
                         },
                         {
                             view: 'text',
+                            css: 'input_firstname',
                             id: 'search_firstname',
-                            label: 'Имя',
-                            labelWidth: 100,
+                            label: 'Ввести',
+                            labelPosition: 'top',
+                            placeholder: 'Имя',
+                            hidden: true,
                             maxWidth: 300,
+                            on: {
+                                onChange: () => {
+                                    let inn = $$('search_firstname').getValue();
+                                    inn !== "" ? $('#search_firstname').addClass('filter-data') : $('#search_firstname').removeClass('filter-data');
+                                }
+                            }
                         },
                         {
                             view: 'text',
+                            css: 'input_patronymic',
                             id: 'search_patronymic',
-                            label: 'Отчество',
-                            labelWidth: 100,
+                            label: 'Ввести',
+                            labelPosition: 'top',
+                            placeholder: 'Фамилия',
+                            hidden: true,
                             maxWidth: 300,
+                            on: {
+                                onChange: () => {
+                                    let inn = $$('search_patronymic').getValue();
+                                    inn !== "" ? $('#search_patronymic').addClass('filter-data') : $('#search_patronymic').removeClass('filter-data');
+                                }
+                            }
                         },
                         {
                             view: 'text',
+                            css: 'input_passport_data',
                             id: 'search_passportData',
-                            label: 'Паспортные данные',
-                            labelWidth: 200,
-                            // width: 300,
+                            label: 'Ввести',
+                            labelPosition: 'top',
+                            placeholder: 'Паспортные данные',
+                            hidden: true,
+                            maxWidth: 300,
+                            on: {
+                                onChange: () => {
+                                    let inn = $$('search_passportData').getValue();
+                                    inn !== "" ? $('#search_passportData').addClass('filter-data') : $('#search_passportData').removeClass('filter-data');
+                                }
+                            }
                         },
                     ]
                 },
@@ -39,22 +85,42 @@ const personViolations = {
                     cols: [
                         {
                             view: 'text',
+                            css: 'input_deal_number_person',
                             id: 'search_numberFile',
-                            label: 'Номер дела',
-                            labelWidth: 100,
+                            label: 'Ввести',
+                            labelPosition: 'top',
+                            placeholder: 'Номер дела',
+                            hidden: true,
                             width: 300,
+                            on: {
+                                onChange: () => {
+                                    let inn = $$('search_numberFile').getValue();
+                                    inn !== "" ? $('#search_numberFile').addClass('filter-data') : $('#search_numberFile').removeClass('filter-data');
+                                }
+                            }
                         },
                         {
                             view: 'richselect',
+                            css: 'select_district',
                             id: 'search_district',
-                            label: 'Район',
+                            label: 'Выбрать',
+                            labelPosition: 'top',
+                            placeholder: 'Район',
                             maxWidth: 300,
+                            hidden: true,
                             options: 'cls_districts',
+                            on: {
+                                onChange: () => {
+                                    let inn = $$('search_district').getValue();
+                                    inn !== "" ? $('#search_district').addClass('filter-data') : $('#search_district').removeClass('filter-data');
+                                }
+                            }
                         },
                         {
                             view: 'button',
                             id: 'search_button',
                             maxWidth: 300,
+                            hidden: true,
                             css: 'webix_primary',
                             value: 'Найти',
                             click: function () {
@@ -66,85 +132,109 @@ const personViolations = {
             ]
         },
         {
-            view: 'datatable',
-            id: 'person_violations_table',
-            select: 'row',
-            navigation: true,
-            resizeColumn: true,
-            pager: 'Pager',
-            datafetch: 25,
-            columns: [
-                {id: "fullName", header: "ФИО", template: "#fullName#", fillspace: true},
-                {id: "regAddress", header: "Адрес регистрации", template: "#registrationAddress#", fillspace: true},
-                {id: "nameTypeViolation", header: "Вид нарушения", template: "#nameTypeViolation#"},
-                {id: "time_Create", header: "Дата добавления", format: DATE_FORMAT},
-            ],
-            scheme: {
-                $init: function (obj) {
-                    obj.time_Create = obj.timeCreate.replace("T", " ")
-                },
-            },
-            on: {
-                onBeforeLoad: function () {
-                    this.showOverlay("Загружаю...");
-                },
-                onAfterLoad: function () {
-                    this.hideOverlay();
-                    if (!this.count()) {
-                        this.showOverlay("Отсутствуют данные")
-                    }
-                },
-                onLoadError: function () {
-                    this.hideOverlay();
-                },
-                onItemClick: function (id) {
-                    let item = $$('person_violations_table').getItem(id);
-
-                    setTimeout(function () {
-                        showPersonViolationForm();
-
-                        webix.ajax().get('person_violation', {id: item.id})
-                            .then(function (data) {
-                                data = data.json();
-                                $$('personViolationForm').parse(data);
-                                $$('lastname').define('readonly', true);
-                                $$('lastname').refresh();
-                                $$('firstname').define('readonly', true);
-                                $$('firstname').refresh();
-                                $$('patronymic').define('readonly', true);
-                                $$('patronymic').refresh();
-                                $$('birthday').define('readonly', true);
-                                $$('birthday').refresh();
-                                $$('placeBirth').define('readonly', true);
-                                $$('placeBirth').refresh();
-                            });
-                    }, 100);
-                }
-            },
-            url: 'person_violations'
-        },
-        {
             cols: [
                 {
-                    view: 'pager',
-                    id: 'Pager',
-                    height: 38,
-                    size: 25,
-                    group: 5,
-                    template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                    borderless: true,
+                    height: 55,
+                    template: () => {
+                        let result = get_group_filter_btns(person_form_data, 'person');
+                        return `<div style="position: absolute; display: flex; flex-direction: row;">
+                                    ` + result + `
+                                </div>`;
+                    }
+                },
+            ]
+        },
+        {
+            margin: 10,
+            rows: [
+
+                {
+                    view: 'datatable',
+                    id: 'person_violations_table',
+                    select: 'row',
+                    scrollX: false,
+                    navigation: true,
+                    resizeColumn: true,
+                    pager: 'Pager',
+                    datafetch: 25,
+                    columns: [
+                        {id: "fullName", minWidth: 300, header: "ФИО", template: "#fullName#", fillspace: true},
+                        {id: "district", width: 200, header: "Район", template: "#nameDistrict#"},
+                        {id: "deal_number", width: 200, header: "Номер дела", template: "#numberFile#"},
+                        {
+                            id: "regAddress",
+                            width: 250,
+                            header: "Адрес регистрации",
+                            template: "#registrationAddress#",
+                            fillspace: true
+                        },
+                        {id: "nameTypeViolation", width: 250, header: "Вид нарушения", template: "#nameTypeViolation#"},
+                        {id: "date_reg_person", width: 200, header: "Дата регистрации", template: (obj) => { return obj.dateRegPerson || ""}},
+                    ],
+                    on: {
+                        onBeforeLoad: function () {
+                            this.showOverlay("Загружаю...");
+                        },
+                        onAfterLoad: function () {
+                            this.hideOverlay();
+                            if (!this.count()) {
+                                this.showOverlay("Отсутствуют данные")
+                            }
+                        },
+                        onLoadError: function () {
+                            this.hideOverlay();
+                        },
+                        onItemDblClick: function (id) {
+                            let item = $$('person_violations_table').getItem(id);
+
+                            setTimeout(function () {
+                                showPersonViolationForm();
+
+                                webix.ajax().get('person_violation', {id: item.id})
+                                    .then(function (data) {
+                                        data = data.json();
+                                        $$('personViolationForm').parse(data);
+                                        $$('lastname').define('readonly', true);
+                                        $$('lastname').refresh();
+                                        $$('firstname').define('readonly', true);
+                                        $$('firstname').refresh();
+                                        $$('patronymic').define('readonly', true);
+                                        $$('patronymic').refresh();
+                                        $$('birthday').define('readonly', true);
+                                        $$('birthday').refresh();
+                                        $$('placeBirth').define('readonly', true);
+                                        $$('placeBirth').refresh();
+                                    });
+                            }, 100);
+                        }
+                    },
+                    url: 'person_violations'
                 },
                 {
-                    view: 'button',
-                    align: 'right',
-                    minWidth: 220,
-                    maxWidth: 350,
-                    css: 'webix_primary',
-                    value: 'Добавить',
-                    click: function () {
-                        showPersonViolationForm();
+                    cols: [
+                        {
+                            view: 'pager',
+                            id: 'Pager',
+                            height: 38,
+                            size: 25,
+                            group: 5,
+                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                        },
+                        {
+                            view: 'button',
+                            align: 'right',
+                            minWidth: 220,
+                            maxWidth: 350,
+                            css: 'webix_primary',
+                            value: 'Добавить',
+                            click: function () {
+                                showPersonViolationForm();
 
-                        $$('idDistrict').setValue(ID_DISTRICT);
-                    },
+                                $$('idDistrict').setValue(ID_DISTRICT);
+                            },
+                        }
+                    ]
                 }
             ]
         }
@@ -157,13 +247,15 @@ function showPersonViolationForm() {
         id: 'personViolationForm',
         elements: [
             {
+                margin: 10,
                 cols: [
                     {
                         view: 'text',
                         name: 'lastname',
                         id: 'lastname',
                         label: 'Фамилия',
-                        labelPosition: 'top',
+                        labelWidth: 85,
+                        width: 528,
                         required: true,
                         validate: webix.rules.isNotEmpty,
                         invalidMessage: 'Поле не может быть пустым',
@@ -173,7 +265,8 @@ function showPersonViolationForm() {
                         name: 'firstname',
                         id: 'firstname',
                         label: 'Имя',
-                        labelPosition: 'top',
+                        labelWidth: 135,
+                        labelPosition: 'right',
                         required: true,
                         validate: webix.rules.isNotEmpty,
                         invalidMessage: 'Поле не может быть пустым',
@@ -183,7 +276,6 @@ function showPersonViolationForm() {
                         name: 'patronymic',
                         id: 'patronymic',
                         label: 'Отчество',
-                        labelPosition: 'top',
                         // required: true,
                         // validate: webix.rules.isNumber,
                         // invalidMessage: 'Поле не может быть пустым',
@@ -191,14 +283,16 @@ function showPersonViolationForm() {
                 ]
             },
             {
+                margin: 10,
                 cols: [
                     {
                         view: 'datepicker',
                         name: 'birthday',
                         id: 'birthday',
                         label: 'Дата рождения',
-                        labelPosition: 'top',
-                        maxWidth: 200,
+                        labelWidth: 130,
+                        editable:true,
+                        width: 528,
                         required: true,
                         validate: webix.rules.isNotEmpty,
                         invalidMessage: 'Поле не может быть пустым',
@@ -208,6 +302,43 @@ function showPersonViolationForm() {
                         name: 'placeBirth',
                         id: 'placeBirth',
                         label: 'Место рождения',
+                        labelWidth: 135,
+                        required: true,
+                        validate: webix.rules.isNotEmpty,
+                        invalidMessage: 'Поле не может быть пустым',
+                    },
+                ]
+            },
+            {
+                margin: 10,
+                cols: [
+                    {
+                        view: 'textarea',
+                        name: 'registrationAddress',
+                        height: 90,
+                        id: 'registrationAddress',
+                        label: 'Адрес регистрации',
+                        labelPosition: 'top',
+                        required: true,
+                        validate: webix.rules.isNotEmpty,
+                        invalidMessage: 'Поле не может быть пустым',
+                    },
+                    // {
+                    //     view: 'text',
+                    //     name: 'residenceAddress',
+                    //     id: 'residenceAddress',
+                    //     label: 'Адрес проживания',
+                    //     labelPosition: 'top',
+                    //     required: true,
+                    //     validate: webix.rules.isNotEmpty,
+                    //     invalidMessage: 'Поле не может быть пустым',
+                    // },
+                    {
+                        view: 'textarea',
+                        name: 'passportData',
+                        height: 90,
+                        id: 'passportData',
+                        label: 'Паспортные данные',
                         labelPosition: 'top',
                         required: true,
                         validate: webix.rules.isNotEmpty,
@@ -217,64 +348,49 @@ function showPersonViolationForm() {
             },
             {
                 view: 'text',
-                name: 'registrationAddress',
-                id: 'registrationAddress',
-                label: 'Адрес регистрации',
-                labelPosition: 'top',
-                required: true,
-                validate: webix.rules.isNotEmpty,
-                invalidMessage: 'Поле не может быть пустым',
-            },
-            // {
-            //     view: 'text',
-            //     name: 'residenceAddress',
-            //     id: 'residenceAddress',
-            //     label: 'Адрес проживания',
-            //     labelPosition: 'top',
-            //     required: true,
-            //     validate: webix.rules.isNotEmpty,
-            //     invalidMessage: 'Поле не может быть пустым',
-            // },
-            {
-                view: 'text',
-                name: 'passportData',
-                id: 'passportData',
-                label: 'Паспортные данные',
-                labelPosition: 'top',
-                required: true,
-                validate: webix.rules.isNotEmpty,
-                invalidMessage: 'Поле не может быть пустым',
-            },
-            {
-                view: 'text',
                 name: 'placeWork',
                 id: 'placeWork',
                 label: 'Место работы',
-                labelPosition: 'top',
+                labelWidth: 105,
                 // required: true,
                 // validate: webix.rules.isNotEmpty,
                 // invalidMessage: 'Поле не может быть пустым',
             },
             {
-                view: 'richselect',
-                id: 'idTypeViolation',
-                name: 'idTypeViolation',
-                label: 'Вид нарушения',
-                labelPosition: 'top',
-                required: true,
-                validate: webix.rules.isNotEmpty,
-                options: 'type_violations',
-                invalidMessage: 'Поле не может быть пустым',
-            },
-            {
-                view: 'richselect',
-                name: 'idDistrict',
-                id: 'idDistrict',
-                label: 'Район',
-                labelPosition: 'top',
-                options: 'cls_districts',
-                required: true,
-                validate: webix.rules.isNotEmpty
+                margin: 10,
+                cols: [
+                    {
+                        view: 'datepicker',
+                        name: 'dateRegPerson',
+                        id: 'dateRegPerson',
+                        label: 'Дата регистрации',
+                        labelPosition: 'top',
+                        // required: true,
+                        // validate: webix.rules.isNotEmpty,
+                        // invalidMessage: 'Поле не может быть пустым',
+                    },
+                    {
+                        view: 'richselect',
+                        id: 'idTypeViolation',
+                        name: 'idTypeViolation',
+                        label: 'Вид нарушения',
+                        labelPosition: 'top',
+                        required: true,
+                        validate: webix.rules.isNotEmpty,
+                        options: 'type_violations',
+                        invalidMessage: 'Поле не может быть пустым',
+                    },
+                    {
+                        view: 'richselect',
+                        name: 'idDistrict',
+                        id: 'idDistrict',
+                        label: 'Район',
+                        labelPosition: 'top',
+                        options: 'cls_districts',
+                        required: true,
+                        validate: webix.rules.isNotEmpty
+                    },
+                ]
             },
             {
                 view: 'template',
@@ -282,6 +398,7 @@ function showPersonViolationForm() {
                 template: 'Реквизиты судебного решения'
             },
             {
+                margin: 10,
                 cols: [
                     {
                         view: 'text',
@@ -312,6 +429,7 @@ function showPersonViolationForm() {
                 ]
             },
             {
+                margin: 10,
                 cols: [
                     {},
                     {
@@ -353,7 +471,7 @@ function showPersonViolationForm() {
                     }
                 ]
             }
-        ]
+        ],
     }
 
     webix.ui({
@@ -367,6 +485,7 @@ function showPersonViolationForm() {
 function showPersonViolations() {
     webix.ui({
         id: 'content',
+        css: {"margin-top": "10px !important"},
         rows: [
             personViolations
         ]

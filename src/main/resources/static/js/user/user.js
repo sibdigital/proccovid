@@ -47,6 +47,7 @@ webix.ready(function() {
                                 let itemValue;
                                 let requestsBadge = "";
                                 let prescriptBadge = "";
+                                let margin = "";
                                 if (id == 'Requests') {
                                     view = userRequests;
                                 } else if (id == 'Prescriptions') {
@@ -62,13 +63,16 @@ webix.ready(function() {
                                     }
                                 } else if (id == 'Violations') {
                                     view = violations;
+                                    margin = {"margin-top":"10px !important"};
                                 } else if (id == 'PersonViolations') {
                                     view = personViolations;
+                                    margin = {"margin-top":"10px !important","width":"100% !important"};
                                 }
                                 this.select(id)
                                 if (view != null) {
                                     webix.ui({
                                         id: 'content',
+                                        css: margin ?? '',
                                         rows: [
                                             view
                                         ]
@@ -114,10 +118,11 @@ webix.ready(function() {
                     {
                         view: 'scrollview',
                         scroll: 'xy',
+                        css: {'overflow':'hidden !important'},
                         body: {
                             padding: 20,
                             rows: [
-                                {id: 'content'}
+                                {id: 'content',}
                             ]
                         }
                     }

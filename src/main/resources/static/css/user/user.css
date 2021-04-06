@@ -301,3 +301,83 @@ body {margin: 0}
 .backBtnStyle button.webix_button{
   background-color: transparent;
 }
+
+/*BS FILTER & DROPDOWN*/
+
+.dropdown.dropdown-lg .dropdown-menu {
+    margin-top: -1px;
+    padding: 6px 20px;
+}
+.input-group-btn .btn-group {
+    display: flex !important;
+}
+.btn-group .btn {
+    border-radius: 0;
+    margin-left: -1px;
+}
+.btn-group .btn:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+.btn-group .form-horizontal .btn[type="submit"] {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+.form-horizontal .form-group {
+    margin: 5px 12px 12px 12px;
+}
+.form-group .form-control:last-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.dropdown-menu {
+    transform: translate3d(0,-2px,0) !important;
+}
+
+.dropdown-menu.show {
+    border: 1px solid transparent !important;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.btn:focus, .btn.focus:focus {
+    box-shadow: none !important;
+}
+
+.btn-filter {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.25rem;
+
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.filter-func-btn {
+    display: flex !important;
+    background: transparent !important;
+    color: #212529 !important;
+    margin-left: 12px !important;
+}
+
+.filter-func-btn:last-child {
+    margin-left: 0px !important;
+}
+
+.filter-data {
+    background: rgba(1,1,1,0.05) !important;
+}
+
+.filter-func-btn > i {
+    padding: 4px 0 0 6px !important;
+}
+
+.filter-func-btn:hover {
+    background: rgba(1,1,1,0.05) !important;
+}
+
+.btn-group .btn {
+    border-radius: 0.25rem !important;
+}
+
+.dropdown-menu {
+    z-index: 100 !important;
+}

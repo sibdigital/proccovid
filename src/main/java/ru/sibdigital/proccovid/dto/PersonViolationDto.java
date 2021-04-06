@@ -73,6 +73,7 @@ public class PersonViolationDto {
         if (regPersonViolation.getDistrict() != null) {
             this.setIdDistrict(regPersonViolation.getDistrict().getId());
             this.setNameDistrict(regPersonViolation.getDistrict().getName());
+            this.setNameDistrict(regPersonViolation.getDistrict().getName());
         }
     }
 
