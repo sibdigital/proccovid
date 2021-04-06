@@ -196,7 +196,7 @@ const mailingForm = {
 
                                     webix.ajax().headers({
                                         'Content-Type': 'application/json'
-                                    }).post('/save_cls_mailing_list',
+                                    }).post('save_cls_mailing_list',
                                         params).then(function (data) {
                                         if (data.text() === 'Рассылка сохранена') {
                                             webix.message({text: data.text(), type: 'success'});

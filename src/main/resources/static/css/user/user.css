@@ -302,6 +302,8 @@ body {margin: 0}
   background-color: transparent;
 }
 
+/*BS FILTER & DROPDOWN*/
+
 .dropdown.dropdown-lg .dropdown-menu {
     margin-top: -1px;
     padding: 6px 20px;
@@ -322,7 +324,7 @@ body {margin: 0}
   border-bottom-left-radius: 4px;
 }
 .form-horizontal .form-group {
-    margin: 5px 12px 5px 12px;
+    margin: 5px 12px 12px 12px;
 }
 .form-group .form-control:last-child {
     border-top-left-radius: 4px;

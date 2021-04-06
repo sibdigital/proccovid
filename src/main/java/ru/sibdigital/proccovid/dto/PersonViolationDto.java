@@ -41,11 +41,20 @@ public class PersonViolationDto {
     private String nameDistrict;
 
     public PersonViolationDto(RegPersonViolation regPersonViolation) {
-        this.setId(regPersonViolation.getId());;
-        this.setIdTypeViolation(regPersonViolation.getTypeViolation().getId());
-        this.setNameTypeViolation(regPersonViolation.getTypeViolation().getName());
-        this.setNameAddedUser(regPersonViolation.getAddedUser().getFullName());
-        this.setNameUpdatedUser(regPersonViolation.getUpdatedUser().getFullName());
+        if (regPersonViolation == null){
+            return;
+        }
+        this.setId(regPersonViolation.getId());
+        if (regPersonViolation.getTypeViolation() != null) {
+            this.setIdTypeViolation(regPersonViolation.getTypeViolation().getId());
+            this.setNameTypeViolation(regPersonViolation.getTypeViolation().getName());
+        }
+        if (regPersonViolation.getAddedUser() != null) {
+            this.setNameAddedUser(regPersonViolation.getAddedUser().getFullName());
+        }
+        if (regPersonViolation.getUpdatedUser() != null) {
+            this.setNameUpdatedUser(regPersonViolation.getUpdatedUser().getFullName());
+        }
         this.setTimeCreate(regPersonViolation.getTimeCreate());
         this.setTimeUpdate(regPersonViolation.getTimeCreate());
         this.setLastname(regPersonViolation.getLastname());
@@ -61,8 +70,11 @@ public class PersonViolationDto {
         this.setNumberFile(regPersonViolation.getNumberFile());
         this.setDateFile(regPersonViolation.getDateFile());
         this.setIsDeleted(regPersonViolation.getDeleted());
-        this.setIdDistrict(regPersonViolation.getDistrict().getId());
-        this.setNameDistrict(regPersonViolation.getDistrict().getName());
+        if (regPersonViolation.getDistrict() != null) {
+            this.setIdDistrict(regPersonViolation.getDistrict().getId());
+            this.setNameDistrict(regPersonViolation.getDistrict().getName());
+            this.setNameDistrict(regPersonViolation.getDistrict().getName());
+        }
     }
 
     public String getFullName() {

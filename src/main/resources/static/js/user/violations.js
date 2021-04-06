@@ -161,108 +161,114 @@ const violations = {
             ]
         },
         {
-            view: 'datatable',
-            id: 'violations_table',
-            select: 'row',
-            scrollX: false,
-            navigation: true,
-            fixedRowHeight: false,
-            rowLineHeight: 28,
-            resizeColumn: true,
-            pager: 'Pager',
-            datafetch: 25,
-            columns: [
-                {id: "nameOrg", width:350, minWidth: 300, header: "Организация", template: "#nameOrg#", fillspace: true},
-                {id: "inn", width: 150, header: "ИНН", template: "#innOrg#"},
-                {id: "district", width:200, header: "Район", template: "#nameDistrict#"},
-                {id: "deal_number", width: 200, header: "Номер дела", template: "#numberFile#"},
-                {id: "nameTypeViolation", width: 300, minWidth: 200, header: "Вид нарушения", template: "#nameTypeViolation#"},
-                {id: "date_reg_org", width: 200, header: "Дата регистрации", template: (obj) => { return obj.dateRegOrg || ""}},
-            ],
-            // scheme: {
-            //     $init: function (obj) {
-            //          obj.time_Create = obj.timeCreate.replace("T", " ")
-            //     },
-            // },
-            on: {
-                onBeforeLoad: function () {
-                    this.showOverlay("Загружаю...");
-                },
-                onAfterLoad: function () {
-                    this.hideOverlay();
-                    if (!this.count()) {
-                        this.showOverlay("Отсутствуют данные")
-                    }
-                },
-                onLoadError: function () {
-                    this.hideOverlay();
-                },
-                onItemClick: function (id) {
-                    let item = $$('violations_table').getItem(id);
+            margin: 10,
+            rows: [
 
-                    setTimeout(function () {
-                        showViolationForm();
+                {
+                    view: 'datatable',
+                    id: 'violations_table',
+                    select: 'row',
+                    scrollX: false,
+                    navigation: true,
+                    fixedRowHeight: false,
+                    rowLineHeight: 28,
+                    resizeColumn: true,
+                    pager: 'Pager',
+                    datafetch: 25,
+                    columns: [
+                        {id: "nameOrg", width:350, minWidth: 300, header: "Организация", template: "#nameOrg#", fillspace: true},
+                        {id: "inn", width: 150, header: "ИНН", template: "#innOrg#"},
+                        {id: "district", width:200, header: "Район", template: "#nameDistrict#"},
+                        {id: "deal_number", width: 200, header: "Номер дела", template: "#numberFile#"},
+                        {id: "nameTypeViolation", width: 300, minWidth: 200, header: "Вид нарушения", template: "#nameTypeViolation#"},
+                        {id: "date_reg_org", width: 200, header: "Дата регистрации", template: (obj) => { return obj.dateRegOrg || ""}},
+                    ],
+                    // scheme: {
+                    //     $init: function (obj) {
+                    //          obj.time_Create = obj.timeCreate.replace("T", " ")
+                    //     },
+                    // },
+                    on: {
+                        onBeforeLoad: function () {
+                            this.showOverlay("Загружаю...");
+                        },
+                        onAfterLoad: function () {
+                            this.hideOverlay();
+                            if (!this.count()) {
+                                this.showOverlay("Отсутствуют данные")
+                            }
+                        },
+                        onLoadError: function () {
+                            this.hideOverlay();
+                        },
+                        onItemDblClick: function (id) {
+                            let item = $$('violations_table').getItem(id);
 
-                        webix.ajax().get('violation', {id: item.id})
-                            .then(function (data) {
-                                data = data.json();
-                                $$('violationForm').parse(data);
-                                $$('nameOrg').define('readonly', true);
-                                $$('nameOrg').refresh();
-                                $$('opfOrg').define('readonly', true);
-                                $$('opfOrg').refresh();
-                                $$('innOrg').define('readonly', true);
-                                $$('innOrg').refresh();
-                                if (data.ogrnOrg) {
-                                    $$('ogrnOrg').define('readonly', true);
-                                    $$('ogrnOrg').refresh();
-                                } else {
-                                    $$('ogrnOrg').hide();
-                                }
-                                if (data.kppOrg) {
-                                    $$('kppOrg').define('readonly', true);
-                                    $$('kppOrg').refresh();
-                                } else {
-                                    $$('kppOrg').hide();
-                                }
-                                $$('dateRegOrg').define('readonly', true);
-                                $$('dateRegOrg').refresh();
-                                $$('idTypeViolation').define('readonly', true);
-                                $$('idTypeViolation').refresh();
-                            });
-                    }, 100);
-                },
-                'data->onStoreUpdated': function() {
-                    this.adjustRowHeight(null, true);
-                },
-            },
-            // onClick: {
-            //     'data->onStoreUpdated': function() {
-            //         this.adjustRowHeight(null, true);
-            //     },
-            // },
-            url: 'violations'
-        },
-        {
-            cols: [
-                {
-                    view: 'pager',
-                    id: 'Pager',
-                    height: 38,
-                    size: 25,
-                    group: 5,
-                    template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
-                },
-                {
-                    view: 'button',
-                    align: 'right',
-                    minWidth: 220,
-                    maxWidth: 350,
-                    css: 'webix_primary',
-                    value: 'Добавить',
-                    click: function () {
-                        showOrganizationSearchForm()
+                            setTimeout(function () {
+                                showViolationForm();
+
+                                webix.ajax().get('violation', {id: item.id})
+                                    .then(function (data) {
+                                        data = data.json();
+                                        $$('violationForm').parse(data);
+                                        $$('nameOrg').define('readonly', true);
+                                        $$('nameOrg').refresh();
+                                        $$('opfOrg').define('readonly', true);
+                                        $$('opfOrg').refresh();
+                                        $$('innOrg').define('readonly', true);
+                                        $$('innOrg').refresh();
+                                        if (data.ogrnOrg) {
+                                            $$('ogrnOrg').define('readonly', true);
+                                            $$('ogrnOrg').refresh();
+                                        } else {
+                                            $$('ogrnOrg').hide();
+                                        }
+                                        if (data.kppOrg) {
+                                            $$('kppOrg').define('readonly', true);
+                                            $$('kppOrg').refresh();
+                                        } else {
+                                            $$('kppOrg').hide();
+                                        }
+                                        $$('dateRegOrg').define('readonly', true);
+                                        $$('dateRegOrg').refresh();
+                                        $$('idTypeViolation').define('readonly', true);
+                                        $$('idTypeViolation').refresh();
+                                    });
+                            }, 100);
+                        },
+                        'data->onStoreUpdated': function() {
+                            this.adjustRowHeight(null, true);
+                        },
                     },
+                    // onClick: {
+                    //     'data->onStoreUpdated': function() {
+                    //         this.adjustRowHeight(null, true);
+                    //     },
+                    // },
+                    url: 'violations'
+                },
+                {
+                    cols: [
+                        {
+                            view: 'pager',
+                            id: 'Pager',
+                            height: 38,
+                            size: 25,
+                            group: 5,
+                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                        },
+                        {
+                            view: 'button',
+                            align: 'right',
+                            minWidth: 220,
+                            maxWidth: 350,
+                            css: 'webix_primary',
+                            value: 'Добавить',
+                            click: function () {
+                                showOrganizationSearchForm()
+                            },
+                        }
+                    ]
                 }
             ]
         }
@@ -277,7 +283,7 @@ function showOrganizationSearchForm() {
             {
                 view: 'search',
                 id: 'searchInn',
-                label: 'ИНН',
+                label: 'Введите ИНН организации',
                 labelPosition: 'top',
                 required: true,
                 validate: webix.rules.isNumber,
@@ -682,7 +688,7 @@ function showViolationForm() {
 
                                 let params = $$('violationForm').getValues();
 
-                                webix.ajax().headers({'Content-Type': 'application/json'}).post('/save_violation', JSON.stringify(params))
+                                webix.ajax().headers({'Content-Type': 'application/json'}).post('save_violation', JSON.stringify(params))
                                     .then(function (data) {
                                         if (data.text() === 'Нарушение сохранено') {
                                             webix.message({text: data.text(), type: 'success'});

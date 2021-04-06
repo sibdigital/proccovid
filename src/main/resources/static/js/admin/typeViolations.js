@@ -131,7 +131,7 @@ const typeViolationForm = {
 
                                         webix.ajax().headers({
                                             'Content-Type': 'application/json'
-                                        }).post('/save_type_violation',
+                                        }).post('save_type_violation',
                                             JSON.stringify(params)
                                         ).then(function (data) {
                                             if (data.text() === 'Вид нарушения сохранен') {

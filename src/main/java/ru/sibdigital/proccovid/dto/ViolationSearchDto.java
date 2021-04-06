@@ -30,8 +30,10 @@ public class ViolationSearchDto {
 
     public ViolationSearchDto(RegViolationSearch o) {
         this.setId(o.getId());
-        this.setIdUser(o.getUser().getId());
-        this.setNameUser(o.getUser().getFullName());
+        if (o.getUser() != null) {
+            this.setIdUser(o.getUser().getId());
+            this.setNameUser(o.getUser().getFullName());
+        }
         this.setTimeCreate(o.getTimeCreate());
         this.setNameOrg(o.getNameOrg());
         this.setInnOrg(o.getInnOrg());

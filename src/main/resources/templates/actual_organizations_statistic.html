@@ -5,33 +5,21 @@
     <title>Cтатиcтика организаций по актуальным заявкам</title>
 
     <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
 
     <!-- Compiled and minified JavaScript -->
 
-    <link type="text/css" rel="stylesheet" href="/js/">
-    <script src="/libs/webix.min.js"></script>
+    <link type="text/css" rel="stylesheet" th:href="@{/js/}">
+    <script th:src="@{/libs/webix.min.js}"></script>
 
 
-    <script src="/libs/popper.min.js"></script>
-    <script src="/libs/jquery-3.4.1.min.js"></script>
-    <script src="/libs/bootstrap.min.js"></script>
-    <link type="text/css" rel="stylesheet" href="/libs/webix.min.css">
-    <script src="/libs/webix.min.js"></script>
+    <script th:src="@{/libs/popper.min.js}"></script>
+    <script th:src="@{/libs/jquery-3.4.1.min.js}"></script>
+    <script th:src="@{/libs/bootstrap.min.js}"></script>
+    <link type="text/css" rel="stylesheet" th:href="@{/libs/webix.min.css}">
+    <script th:src="@{/libs/webix.min.js}"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        /*.test .webix_canvas_text {*/
-        /*   font-size: 15px !important;-->*/
-        /*    offset: 1.5em !important;-->*/
-        /*}*/
-
-        /*tr {*/
-        /*    line-height: 10px;*/
-        /*    min-height: 10px;*/
-        /*    height: 10px;*/
-        /*}*/
-    </style>
 </head>
 <body>
 <div th:insert="~{navbar-bootstrap::frag ('Актуализация по организациям.', ${application_name})}"></div>

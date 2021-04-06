@@ -1,14 +1,17 @@
 /*FIX BOOTSTRAP CLICK INNER*/
-$(document).on("click.bs.dropdown.data-api", ".noclose", function (e) { e.stopPropagation() });
+$(document).on("click.bs.dropdown.data-api", ".noclose",
+    (e) => { e.stopPropagation() }
+);
 
 /*FIX WEBIX SELECT CLICK EVENT INNER DROPDOWN PANEL*/
-$(document).on("click.bs.dropdown",".webix_popup", function (e) { e.stopPropagation() });
+$(document).on("click.bs.dropdown.data-api",".webix_popup",
+    (e) => { e.stopPropagation() }
+);
 
 /*FIX WEBIX CALENDAR CLICK EVENTS INNER DROPDOWN PANEL*/
-$(document).on("click.bs.dropdown.webix_popup.webix_calendar",".webix_cal_month", function (e) { e.stopPropagation() });
-$(document).on("click.bs.dropdown.webix_popup.webix_calendar",".webix_cal_header", function (e) { e.stopPropagation() });
-$(document).on("click.bs.dropdown.webix_popup.webix_calendar",".webix_cal_body", function (e) { e.stopPropagation() });
-$(document).on("click.bs.dropdown.webix_popup.webix_calendar",".webix_cal_footer", function (e) { e.stopPropagation() });
+$(document).on("click.bs.dropdown.data-api.webix_popup.webix_calendar",".webix_cal_month, .webix_cal_header, .webix_cal_body, .webix_cal_footer",
+    (e) => { e.stopPropagation() }
+);
 
 const get_group_filter_btns = (filter_data, type) => {
     let result_html = '';
@@ -17,10 +20,10 @@ const get_group_filter_btns = (filter_data, type) => {
             `<div id="cart" style="margin-left:12px" class="input-group" id="adv-search">
                 <button id="` + panel.id + `" onclick=get_webix_object_by_css("` + panel.id + `","` + panel.css + `") aria-expanded="false" class="btn btn-default dropdown-toggle btn-filter" data-toggle="dropdown" type="button">
                     ` + panel.name + `<span class="caret"></span></button>
-                <div style="padding: 0;" class="dropup dropdown-menu" role="menu">
+                <div id="dropMenu" style="padding: 0;" class="dropup dropdown-menu" role="menu">
                     <button aria-expanded="false" class="btn btn-default dropdown-toggle inner-btn-filter" data-toggle="collapse" type="button">
                                 ` + panel.name + `<span class="caret"></span></button>
-                    <form class="form-horizontal noclose" role="form"> 
+                    <form class="form-horizontal noclose" role="form" onsubmit="$('.dropdown-menu').removeClass('show'); return false;"> 
                         <div id="test2" class="form-group form-group--` + panel.css + `">
                         </div>
                     </form>
@@ -38,8 +41,6 @@ const get_group_filter_btns = (filter_data, type) => {
                             <i class="fas fa-filter fa-sm"></i>                               
                         </button>
                     </div>`
-
-    console.log(result_html)
 
     return result_html;
 }
@@ -61,6 +62,7 @@ const drop_filters = (type) => {
         $$("search_passportData").setValue("");
         $$("search_numberFile").setValue("");
         $$("search_district").setValue("");
+        reloadPersonViolations();
     } else {
         $$("search_district").setValue("");
         $$("search_beginDateRegOrg").setValue("");
@@ -69,5 +71,6 @@ const drop_filters = (type) => {
         $$("search_name").setValue("");
         $$("search_inn").setValue("");
         $$("search_district").setValue("");
+        reloadViolations();
     }
 }

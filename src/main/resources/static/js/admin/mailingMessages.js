@@ -7,7 +7,7 @@ function queueUp() {
                 selectedRows.forEach(element => {
                     var item = $$('mailing_messages_table').getItem(element.id);
                     params = {id: item.id, status: 1, sendingTime: item.sendingTime};
-                    webix.ajax().get('/change_status', params).then(function (data) {
+                    webix.ajax().get('change_status', params).then(function (data) {
                         if (data.text() === 'Статус изменен') {
                             webix.message({
                                 text: 'Сообщение (id: ' + item.id + ') поставлено в очередь',
@@ -36,7 +36,7 @@ function deleteFromQueue() {
                 selectedRows.forEach(element => {
                     var item = $$('mailing_messages_table').getItem(element.id);
                     params = {id: item.id, status: 0, sendingTime: item.sendingTime};
-                    webix.ajax().get('/change_status', params).then(function (data) {
+                    webix.ajax().get('change_status', params).then(function (data) {
                         if (data.text() === 'Статус изменен') {
                             webix.message({
                                 text: 'Сообщение (id: ' + item.id + ') удалено из очереди',
@@ -107,12 +107,10 @@ const mailingMessages = {
                         ],
                         scheme: {
                             $init: function (obj) {
-                                obj.sendingTime = obj.sendingTime.replace("T", " ");
-                                obj.sendingTime = xml_format(obj.sendingTime);
+                                obj.sendingTime = new Date(obj.sendingTime);
                             },
                             $update:function (obj) {
-                                obj.sendingTime = obj.sendingTime.replace("T", " ");
-                                obj.sendingTime = xml_format(obj.sendingTime);
+                                obj.sendingTime = new Date(obj.sendingTime);
                             },
 
                         },
@@ -125,7 +123,7 @@ const mailingMessages = {
                                     id: item.id,
                                     mailingId: jsonResponse.clsMailingList.id,
                                     message: jsonResponse.message,
-                                    sendingTime: (jsonResponse.sendingTime != null ? jsonResponse.sendingTime.replace("T", " ") : ""),
+                                    sendingTime: (jsonResponse.sendingTime != null ? new Date(jsonResponse.sendingTime) : ""),
                                     status: ''+jsonResponse.status
                                 };
 
@@ -170,7 +168,8 @@ const mailingMessageForm = {
                 view: 'form',
                 id: 'mailingMessageForm',
                 rows: [
-                    { view: 'text',
+                    {
+                        view: 'text',
                         label: 'Тема',
                         id: 'subject',
                         name: 'subject',
@@ -188,7 +187,8 @@ const mailingMessageForm = {
                                 required: true,
                                 options: 'mailing_list_short',
                             },
-                            { view: 'richselect',
+                            {
+                                view: 'richselect',
                                 name: 'status',
                                 id: 'status',
                                 label: 'Статус',
@@ -200,13 +200,15 @@ const mailingMessageForm = {
                                     {id: "2", value: 'Отправка проведена'}
                                 ]
                             },
-                            { view: 'datepicker',
+                            {
+                                view: 'datepicker',
                                 label: 'Время начала отправки',
                                 labelPosition: 'left',
                                 name: 'sendingTime',
-                                stringResult:true,
-                                timepicker:true,
-                                format:webix.i18n.fullDateFormat
+                                stringResult: true,
+                                timepicker: true,
+                                format: webix.i18n.fullDateFormat,
+                                // format: dateFormat
                             },
                         ]
                     },
@@ -238,7 +240,8 @@ const mailingMessageForm = {
                     {
                         cols: [
                             {},
-                            { view: 'text',
+                            {
+                                view: 'text',
                                 label: 'Адрес тестового сообщения',
                                 id: 'test_adress',
                                 name: 'test_adress',
@@ -287,7 +290,7 @@ function saveMessage(){
             .headers({
                 'Content-Type': 'application/json'
             })
-            .post('/save_reg_mailing_message',params)
+            .post('save_reg_mailing_message',params)
             .then(function (data) {
                 if (data.text() === 'Сообщение сохранено') {
                     webix.message({text: data.text(), type: 'success'});
@@ -316,7 +319,7 @@ function sendTest(){
         .headers({
             'Content-Type': 'application/json'
         })
-        .post('/send_test_message',postParams)
+        .post('send_test_message',postParams)
         .then(function (data) {
             const responce = data.json();
             if (responce.success == true) {

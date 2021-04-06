@@ -216,7 +216,7 @@ webix.ready(function() {
                             {},
                             {
                                 view: 'label',
-                                label: DEPARTMENT + ' (<a href="/logout" title="Выйти">' + USER_NAME + '</a>)',
+                                label: DEPARTMENT + ' (<a href="logout" title="Выйти">' + USER_NAME + '</a>)',
                                 align: 'right'
                             }
                         ]

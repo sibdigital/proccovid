@@ -245,7 +245,7 @@ const typeRequestForm = {
 
                                         webix.ajax().headers({
                                             'Content-Type': 'application/json'
-                                        }).post('/save_cls_type_request',
+                                        }).post('save_cls_type_request',
                                             JSON.stringify(params)
                                         ).then(function (data) {
                                             if (data.text() === 'Тип заявки сохранен') {

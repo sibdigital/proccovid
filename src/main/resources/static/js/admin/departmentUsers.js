@@ -155,7 +155,7 @@ function showDepartmentUserForm() {
 
                                             webix.ajax().headers({
                                                 'Content-Type': 'application/json'
-                                            }).post('/save_cls_user',
+                                            }).post('save_cls_user',
                                                 JSON.stringify(params)
                                             ).then(function (data) {
                                                 if (data.text() === 'Пользователь сохранен') {

@@ -2,7 +2,7 @@ function saveOkved() {
     let params = $$('okvedForm').getValues();
     webix.ajax().headers({
         'Content-Type': 'application/json'
-    }).post('/save_okved',
+    }).post('save_okved',
         JSON.stringify(params)
     ).then(function (data) {
         if (data.text() === 'ОКВЭД сохранен') {
@@ -27,7 +27,7 @@ function deleteOkved() {
                 function () {
                     webix.ajax().headers({
                         'Content-Type': 'application/json'
-                    }).post('/delete_okved',
+                    }).post('delete_okved',
                         JSON.stringify(params)
                     ).then(function (data) {
                         if (data.text() === 'ОКВЭД удален') {
