@@ -283,7 +283,7 @@ function showOrganizationSearchForm() {
             {
                 view: 'search',
                 id: 'searchInn',
-                label: 'ИНН',
+                label: 'Введите ИНН организации',
                 labelPosition: 'top',
                 required: true,
                 validate: webix.rules.isNumber,
