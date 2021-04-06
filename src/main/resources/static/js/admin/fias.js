@@ -4,7 +4,7 @@ function processFiles() {
             function () {
                 // webix.ajax().sync().get('/process_egrul_egrip_files');
                 // webix.ajax().get('/process_egrul_egrip_files');
-                webix.ajax().get('/process_egrul_files', )
+                webix.ajax().get('process_egrul_files', )
                     .then(function (data) {
                     if (data.text() === 'Ok') {
                         webix.message({
@@ -25,7 +25,7 @@ function processFilesEgrip() {
     webix.confirm('Вы действительно хотите запустить загрузку ЕГРИП?')
         .then(
             function () {
-                webix.ajax().get('/process_egrip_files', )
+                webix.ajax().get('process_egrip_files', )
                     .then(function (data) {
                         if (data.text() === 'Ok') {
                             webix.message({
@@ -46,7 +46,7 @@ function processFullZipFias() {
     webix.confirm('Вы действительно хотите запустить полную загрузку ФИАС?')
         .then(
             function () {
-                webix.ajax().get('/process_fias_zip_full', )
+                webix.ajax().get('process_fias_zip_full', )
                     .then(function (data) {
                         if (data.text() === 'Ok') {
                             webix.message({
@@ -68,7 +68,7 @@ function processUpdatesZipFias() {
     webix.confirm('Вы действительно хотите запустить загрузку обновлений ФИАС?')
         .then(
             function () {
-                webix.ajax().get('/process_fias_files', )
+                webix.ajax().get('process_fias_files', )
                     .then(function (data) {
                         if (data.text() === 'Ok') {
                             webix.message({
@@ -152,7 +152,7 @@ const fias = {
                                 maxWidth: 400,
                                 css: 'webix_primary',
                                 click: function () {
-                                    window.open('/migration_data');
+                                    window.open('migration_data');
                                 }
                             }
                         ],

@@ -3,7 +3,7 @@ function createOkved() {
     let params = $$('okvedCreateForm').getValues();
     webix.ajax().headers({
         'Content-Type': 'application/json'
-    }).post('/save_okved',
+    }).post('save_okved',
         JSON.stringify(params)
     ).then(function (data) {
         if (data.text() === 'ОКВЭД сохранен') {
@@ -168,7 +168,7 @@ const okveds = {
                                         hidden: true,
                                         click: function() {
                                             var version = $$('tabbar').getValue();
-                                            window.open('/upload?version=' + version);
+                                            window.open('upload?version=' + version);
                                         }
                                     }
                                 ],

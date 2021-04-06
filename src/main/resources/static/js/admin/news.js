@@ -233,7 +233,7 @@ const newsFormTab = {
                                         ],
                                         onClick: {
                                             "wxi-trash": function (event, id, node) {
-                                                webix.ajax().get('/delete_news_file',
+                                                webix.ajax().get('delete_news_file',
                                                     {id: id.row}
                                                 ).then(function (data) {
                                                     if (data.text() === 'Файл удален') {
@@ -259,7 +259,7 @@ const newsFormTab = {
                                                 css: 'webix_primary',
                                                 value: 'Прикрепить файл(-ы)',
                                                 autosend: false,
-                                                upload: '/upload_news_file',
+                                                upload: 'upload_news_file',
                                                 required: true,
                                                 accept: 'application/pdf, application/zip',
                                                 multiple: true,
@@ -455,7 +455,7 @@ const newsFormTab = {
 
                                         webix.ajax().headers({
                                             'Content-Type': 'application/json'
-                                        }).post('/save_news',
+                                        }).post('save_news',
                                             params).then(function (data) {
                                             const savedNews = data.json();
                                             if (savedNews.id)  {

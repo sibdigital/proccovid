@@ -124,7 +124,7 @@ const prescriptions = {
                                                         css: 'webix_primary',
                                                         value: 'Прикрепить файл(-ы)',
                                                         autosend: false,
-                                                        upload: '/upload_prescription_file',
+                                                        upload: 'upload_prescription_file',
                                                         required: true,
                                                         accept: 'application/pdf, application/zip',
                                                         multiple: true,
@@ -367,7 +367,7 @@ const prescriptionForm = {
                                                                         css: 'webix_primary',
                                                                         value: 'Прикрепить файл(-ы)',
                                                                         autosend: false,
-                                                                        upload: '/upload_prescription_file',
+                                                                        upload: 'upload_prescription_file',
                                                                         required: true,
                                                                         accept: 'application/pdf, application/zip',
                                                                         multiple: true,
@@ -644,7 +644,7 @@ const prescriptionForm = {
                                                     if ($$('prescriptionForm').validate()) {
                                                         webix.ajax().headers({
                                                             'Content-Type': 'application/json'
-                                                        }).post('/save_cls_prescription',
+                                                        }).post('save_cls_prescription',
                                                             JSON.stringify(getPrescriptionFormParams())
                                                         ).then(function (data) {
                                                             const savedPrescription = data.json();
@@ -698,7 +698,7 @@ const prescriptionForm = {
                                                         if ($$('prescriptionForm').validate()) {
                                                             webix.ajax().headers({
                                                                 'Content-Type': 'application/json'
-                                                            }).post('/save_cls_prescription',
+                                                            }).post('save_cls_prescription',
                                                                 JSON.stringify(getPrescriptionFormParams())
                                                             ).then(function (data) {
                                                                 const savedPrescription = data.json();

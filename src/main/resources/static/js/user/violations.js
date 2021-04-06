@@ -688,7 +688,7 @@ function showViolationForm() {
 
                                 let params = $$('violationForm').getValues();
 
-                                webix.ajax().headers({'Content-Type': 'application/json'}).post('/save_violation', JSON.stringify(params))
+                                webix.ajax().headers({'Content-Type': 'application/json'}).post('save_violation', JSON.stringify(params))
                                     .then(function (data) {
                                         if (data.text() === 'Нарушение сохранено') {
                                             webix.message({text: data.text(), type: 'success'});

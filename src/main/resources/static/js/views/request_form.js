@@ -182,7 +182,7 @@ function showRequestForm(id) {
                                                                                                             'Content-type': 'application/json'
                                                                                                         }
                                                                                                     )
-                                                                                                    .put('/doc_requests/' + params.id + '/update',
+                                                                                                    .put('doc_requests/' + params.id + '/update',
                                                                                                         JSON.stringify(params))
                                                                                                     .then(
                                                                                                         function (text, data, xhr) {
@@ -206,7 +206,7 @@ function showRequestForm(id) {
                                                                                                                 text: httpRequest.response,
                                                                                                                 ok: 'Выйти'
                                                                                                             }).then(function (result) {
-                                                                                                                window.location.href = '/logout';
+                                                                                                                window.location.href = 'logout';
                                                                                                             })
                                                                                                         } else {
                                                                                                             webix.alert({
@@ -367,7 +367,7 @@ function showRequestForm(id) {
                                                                                 'Content-type': 'application/json'
                                                                             }
                                                                         )
-                                                                        .put('/doc_requests/' + params.id + '/process',
+                                                                        .put('doc_requests/' + params.id + '/process',
                                                                             JSON.stringify(params))
                                                                         .then(function (text, data, xhr) {
                                                                             let modal = $$('form').getTopParentView();
@@ -390,7 +390,7 @@ function showRequestForm(id) {
                                                                                     text: httpRequest.response,
                                                                                     ok: 'Выйти'
                                                                                 }).then(function (result) {
-                                                                                    window.location.href = '/logout';
+                                                                                    window.location.href = 'logout';
                                                                                 })
                                                                             } else {
                                                                                 webix.alert({
@@ -432,7 +432,7 @@ function showRequestForm(id) {
                                                                                 'Content-type': 'application/json'
                                                                             }
                                                                         )
-                                                                        .put('/doc_requests/' + params.id + '/process',
+                                                                        .put('doc_requests/' + params.id + '/process',
                                                                             JSON.stringify(params))
                                                                         .then(function (httpRequest) {
                                                                             let modal = $$('form').getTopParentView();
@@ -464,7 +464,7 @@ function showRequestForm(id) {
                                                                                     text: httpRequest.response,
                                                                                     ok: 'Выйти'
                                                                                 }).then(function (result) {
-                                                                                    window.location.href = '/logout';
+                                                                                    window.location.href = 'logout';
                                                                                 })
                                                                             } else {
                                                                                 webix.alert({
@@ -729,7 +729,7 @@ function showRequestForm(id) {
                                                                         header: 'Заявка',
                                                                         template: function (obj) {
                                                                             var linkLabel = "Заявка №" + obj.id;
-                                                                            var link = "<a target='_blank' href='/request/view?id=" + obj.id + "'>" + linkLabel;
+                                                                            var link = "<a target='_blank' href='request/view?id=" + obj.id + "'>" + linkLabel;
                                                                             return link + "</a>";
                                                                         },
                                                                         sort: 'string',

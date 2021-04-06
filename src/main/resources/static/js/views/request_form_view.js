@@ -508,7 +508,7 @@ webix.ready(function () {
                                                                     header: 'Заявка',
                                                                     template: function (obj) {
                                                                         var linkLabel = "Заявка №" + obj.id;
-                                                                        var link = "<a target='_blank' href='/request/view?id=" + obj.id + "'>" + linkLabel;
+                                                                        var link = "<a target='_blank' href='request/view?id=" + obj.id + "'>" + linkLabel;
                                                                         return link + "</a>";
                                                                     },
                                                                     sort: 'string',

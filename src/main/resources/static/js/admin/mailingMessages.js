@@ -7,7 +7,7 @@ function queueUp() {
                 selectedRows.forEach(element => {
                     var item = $$('mailing_messages_table').getItem(element.id);
                     params = {id: item.id, status: 1, sendingTime: item.sendingTime};
-                    webix.ajax().get('/change_status', params).then(function (data) {
+                    webix.ajax().get('change_status', params).then(function (data) {
                         if (data.text() === 'Статус изменен') {
                             webix.message({
                                 text: 'Сообщение (id: ' + item.id + ') поставлено в очередь',
@@ -36,7 +36,7 @@ function deleteFromQueue() {
                 selectedRows.forEach(element => {
                     var item = $$('mailing_messages_table').getItem(element.id);
                     params = {id: item.id, status: 0, sendingTime: item.sendingTime};
-                    webix.ajax().get('/change_status', params).then(function (data) {
+                    webix.ajax().get('change_status', params).then(function (data) {
                         if (data.text() === 'Статус изменен') {
                             webix.message({
                                 text: 'Сообщение (id: ' + item.id + ') удалено из очереди',
@@ -290,7 +290,7 @@ function saveMessage(){
             .headers({
                 'Content-Type': 'application/json'
             })
-            .post('/save_reg_mailing_message',params)
+            .post('save_reg_mailing_message',params)
             .then(function (data) {
                 if (data.text() === 'Сообщение сохранено') {
                     webix.message({text: data.text(), type: 'success'});
@@ -319,7 +319,7 @@ function sendTest(){
         .headers({
             'Content-Type': 'application/json'
         })
-        .post('/send_test_message',postParams)
+        .post('send_test_message',postParams)
         .then(function (data) {
             const responce = data.json();
             if (responce.success == true) {

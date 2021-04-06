@@ -314,7 +314,7 @@ const departmentForm = {
 
                                         webix.ajax().headers({
                                             'Content-Type': 'application/json'
-                                        }).post('/save_cls_department',
+                                        }).post('save_cls_department',
                                             params).then(function (data) {
                                             if (data.text() === 'Подразделение сохранено') {
                                                 webix.message({text: data.text(), type: 'success'});

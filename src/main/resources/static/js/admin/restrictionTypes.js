@@ -112,7 +112,7 @@ const restrictionTypeForm = {
 
                                         webix.ajax().headers({
                                             'Content-Type': 'application/json'
-                                        }).post('/save_cls_restriction_type',
+                                        }).post('save_cls_restriction_type',
                                             params).then(function (data) {
                                             if (data.text() === 'Тип ограничения сохранен') {
                                                 webix.message({text: data.text(), type: 'success'});
