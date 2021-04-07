@@ -45,15 +45,16 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
         ClsControlAuthority clsControlAuthority = null;
 
         if(clsControlAuthorityDto.getId() == null) {
+            ClsControlAuthorityParent controlAuthorityParent =
+                    clsControlAuthorityDto.getControlAuthorityParent().getId() == null ? null : clsControlAuthorityDto.getControlAuthorityParent();
             clsControlAuthority = clsControlAuthority.builder()
                 .id(clsControlAuthorityDto.getId())
-                .controlAuthorityParent(clsControlAuthorityDto.getControlAuthorityParent())
+                .controlAuthorityParent(controlAuthorityParent)
                 .name(clsControlAuthorityDto.getName())
                 .shortName(clsControlAuthorityDto.getShortName())
                 .build();
         } else {
             clsControlAuthority = clsControlAuthorityRepo.findById(clsControlAuthorityDto.getId()).orElse(null);
-            System.out.println(clsControlAuthority.getControlAuthorityParent().getId());
             clsControlAuthority = clsControlAuthority.builder()
                     .id(clsControlAuthorityDto.getId())
                     .controlAuthorityParent(clsControlAuthorityDto.getControlAuthorityParent())
@@ -61,9 +62,8 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
                     .shortName(clsControlAuthorityDto.getShortName())
                     .build();
         }
-
         clsControlAuthorityRepo.save(clsControlAuthority);
-
+        System.out.println('w');
         return clsControlAuthority;
     }
 
