@@ -86,6 +86,7 @@ controlAuthority = {
                                 css: "webix_primary",
                                 click: () => {
                                     getControlAuthorityEditForm();
+                                    $$('del_btn').hide();
                                 }
                             }
                         ]
@@ -138,6 +139,7 @@ function getControlAuthorityEditForm(item) {
                             {
                                 view: "button",
                                 label: "Удалить",
+                                id: "del_btn",
                                 type: "icon",
                                 width: 170,
                                 icon: "fas fa-minus",
