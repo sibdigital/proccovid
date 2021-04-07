@@ -19,14 +19,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     ClsUserRepo clsUserRepo;
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         ClsUser clsUser = clsUserRepo.findByLogin(login);

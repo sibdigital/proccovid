@@ -12,17 +12,21 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.service.UserDetailsServiceImpl;
 
 @EnableWebSecurity()
 @Configuration
-@ComponentScan("ru.sibdigital.proccovid.service")
+@ComponentScan({"ru.sibdigital.proccovid.service"})
 @Order(1)
 public class MainUserConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
     @Autowired
     UserDetailsService userDetailsService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     public MainUserConfigurationAdapter() {
         super();
@@ -30,7 +34,8 @@ public class MainUserConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService);//.passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder);
     }
 
     @Override
