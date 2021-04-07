@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.sibdigital.proccovid.model.ClsControlAuthorityParent;
 
 @Data
 @Builder(toBuilder = true)
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class ClsControlAuthorityDto {
 
     private Long id;
-    private Long idParent;
+    private ClsControlAuthorityParent controlAuthorityParent;
     private String name;
     private String shortName;
 }
