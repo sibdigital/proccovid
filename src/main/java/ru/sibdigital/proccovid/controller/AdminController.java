@@ -18,19 +18,14 @@ import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
-import ru.sibdigital.proccovid.repository.ClsMailingListOkvedRepo;
-import ru.sibdigital.proccovid.repository.ClsMailingListRepo;
-import ru.sibdigital.proccovid.repository.ClsNewsRepo;
+import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegViolationSearchSearchCriteria;
 import ru.sibdigital.proccovid.service.*;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -75,6 +70,9 @@ public class AdminController {
 
     @Autowired
     private ControlAuthorityService controlAuthorityService;
+
+    @Autowired
+    private UserRolesEntityRepo userRolesEntityRepo;
 
     @Value("${spring.mail.from}")
     private String fromAddress;
@@ -559,5 +557,12 @@ public class AdminController {
             return "Не удалось сохранить контрольно-надзорный орган";
         }
         return "Контрольно-надзорный орган сохранен";
+    }
+
+    @GetMapping("/user_roles/{id_dep_user}")
+    public @ResponseBody List<UserRolesEntity> getRolesByUserId(@PathVariable("id_dep_user") Long idDepUser){
+        List<UserRolesEntity> list = userRolesEntityRepo.getRolesByUserId(idDepUser);
+        list.sort(Comparator.comparing(UserRolesEntity::getName));
+        return list;
     }
 }
