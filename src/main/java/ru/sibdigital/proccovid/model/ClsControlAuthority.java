@@ -18,7 +18,6 @@ public class ClsControlAuthority {
     @SequenceGenerator(name = "CLS_AUTHORITY_GEN", sequenceName = "cls_control_authority_id_seq", allocationSize = 1, schema = "public")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CLS_AUTHORITY_GEN")
     private Long id;
-    private Long idParent;
     private String name;
     private String shortName;
 
@@ -32,15 +31,17 @@ public class ClsControlAuthority {
     @Column(name = "name", nullable = false)
     public String getName() { return name; }
 
-    public void setIdParent(Long parentId) { this.idParent = idParent; }
-
-    @Basic
-    @Column(name = "id_parent", nullable = true)
-    public Long getIdParent() { return idParent; }
-
     public void setShortName(String shortName) { this.shortName = shortName; }
 
     @Basic
     @Column(name = "short_name")
     public String getShortName() { return shortName; }
+
+    @ManyToOne
+    @JoinColumn(name = "id_parent")
+    private ClsControlAuthorityParent controlAuthorityParent;
+
+    public void setControlAuthorityParent(ClsControlAuthorityParent clsControlAuthorityParent) { this.controlAuthorityParent = clsControlAuthorityParent; }
+
+    public ClsControlAuthorityParent getControlAuthorityParent() { return controlAuthorityParent; }
 }

@@ -18,7 +18,11 @@ import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.*;
+import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
+import ru.sibdigital.proccovid.repository.ClsMailingListOkvedRepo;
+import ru.sibdigital.proccovid.repository.ClsMailingListRepo;
+import ru.sibdigital.proccovid.repository.ClsNewsRepo;
+import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegViolationSearchSearchCriteria;
@@ -539,25 +543,75 @@ public class AdminController {
         return dto;
     }
 
+    @GetMapping("/control_authorities")
+    public @ResponseBody Map<String, Object> getControlAuthoritiesList(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "shortName", required = false) String shortName,
+            @RequestParam(value = "start", required = false) Integer start,
+            @RequestParam(value = "count", required = false) Integer count
+    ) {
+        int page = start == null ? 0 : start / 25;
+        int size = count == null ? 25 : count;
+
+        ClsControlAuthoritySearchCriteria searchCriteria = new ClsControlAuthoritySearchCriteria();
+        searchCriteria.setName(name);
+
+        Page<ClsControlAuthority> clsControlAuthoritiesPage = controlAuthorityService.getControlAuthoritiesBySearchCriteria(searchCriteria, page, size);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", clsControlAuthoritiesPage.getContent());
+        result.put("pos", (long) page * size);
+        result.put("total_count", clsControlAuthoritiesPage.getTotalElements());
+        return result;
+    }
+
+    //    @GetMapping("/cls_organizations")
+//    public @ResponseBody Map<String, Object> getListOrganizations(@RequestParam(value = "inn", required = false) String inn,
+//                                           @RequestParam(value = "id_prescription", required = false) Long idPrescription,
+//                                           @RequestParam(value = "start", required = false) Integer start,
+//                                           @RequestParam(value = "count", required = false) Integer count) {
+//
+//        int page = start == null ? 0 : start / 25;
+//        int size = count == null ? 25 : count;
+//
+//        ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
+//        searchCriteria.setInn(inn);
+//        searchCriteria.setIdPrescription(idPrescription);
+//
+//        Page<ClsOrganization> clsOrganizationPage = organizationService.getOrganizationsByCriteria(searchCriteria, page, size);
+//
+//        Map<String, Object> result = new HashMap<>();
+//        result.put("data", clsOrganizationPage.getContent());
+//        result.put("pos", (long) page * size);
+//        result.put("total_count", clsOrganizationPage.getTotalElements());
+//        return result;
+//    }
     @GetMapping("/delete_control_authority")
-    public @ResponseBody String deleteControlAuthority(@RequestParam(value = "id") Long id) {
+    public @ResponseBody Boolean deleteControlAuthority(@RequestParam(value = "id") Long id) {
         boolean deleted = controlAuthorityService.deleteControlAuthority(id);
-        if (deleted) {
-            return "Контрольно-надзорный орган удален";
-        }
-        return "Не удалось удалить контрольно-надзорный орган";
+
+        return deleted;
     }
 
     @PostMapping("/save_control_authority")
-    public @ResponseBody String saveClsTypeViolation(@RequestBody ClsControlAuthorityDto dto) {
+    public @ResponseBody Boolean saveClsTypeViolation(@RequestBody ClsControlAuthorityDto dto) {
         try {
             controlAuthorityService.saveControlAuthority(dto);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return "Не удалось сохранить контрольно-надзорный орган";
+            return false;
         }
-        return "Контрольно-надзорный орган сохранен";
+        return true;
     }
+
+    @GetMapping("/cls_control_authority_parents")
+    public @ResponseBody List<KeyValue> getClsPrescriptionsShort() {
+        List<KeyValue> list = controlAuthorityService.getControlAuthorityParentsList().stream()
+                .map(cap -> new KeyValue(cap.getClass().getSimpleName(), cap.getId(), cap.getName()))
+                .collect(Collectors.toList());
+        return list;
+    }
+
 
     @GetMapping("/user_roles/{id_dep_user}")
     public @ResponseBody List<UserRolesEntity> getRolesByUserId(@PathVariable("id_dep_user") Long idDepUser){

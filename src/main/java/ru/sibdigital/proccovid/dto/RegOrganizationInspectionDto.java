@@ -4,16 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.sibdigital.proccovid.model.ClsControlAuthorityParent;
+
+import java.sql.Date;
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClsControlAuthorityDto {
-
+public class RegOrganizationInspectionDto {
     private Long id;
-    private ClsControlAuthorityParent controlAuthorityParent;
-    private String name;
-    private String shortName;
+    private Long organizationId;
+    private Long controlAuthorityId;
+    private Long inspectionResultId;
+    private Date dateOfInspection;
+    private String comment;
 }
