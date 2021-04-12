@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.model.Okved;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Repository
@@ -66,4 +67,7 @@ public interface OkvedRepo extends JpaRepository<Okved, Integer>, JpaSpecificati
     @Query(nativeQuery = true, value = "select * from okved where kind_code = :kind_code and version = :version")
     Okved findByKindCodeAndVersion(String kind_code, String version);
 
+    @Query(nativeQuery = true, value = "select ltree2text(path) as id, kind_name as value from okved " +
+            "where ltree2text(path) like %:parentNode% and type_code = :typeCode")
+    List<Map<String,Object>> findNode(String parentNode, int typeCode);
 }
