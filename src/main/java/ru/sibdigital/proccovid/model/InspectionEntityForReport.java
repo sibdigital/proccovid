@@ -8,11 +8,16 @@ public class InspectionEntityForReport {
         private Long id;
         private String organization;
         private String authority;
+        private Integer totalOrganization;
+        private Integer totalAuthority;
 
-        public InspectionEntityForReport(Long id, String organization, String authority) {
+        public InspectionEntityForReport(Long id, String organization, String authority,
+                                         Integer totalOrganization, Integer totalAuthority) {
                 this.id = id;
                 this.organization = organization;
                 this.authority = authority;
+                this.totalOrganization = totalOrganization;
+                this.totalAuthority    = totalAuthority;
         }
 
         public InspectionEntityForReport() {
@@ -38,5 +43,19 @@ public class InspectionEntityForReport {
         }
         public void setAuthority(String authority) {
                 this.authority = authority;
+        }
+
+        public Integer getTotalOrganization() {
+                return totalOrganization;
+        }
+        public void setTotalOrganization(Integer totalOrganization) {
+                this.totalOrganization = totalOrganization;
+        }
+
+        public Integer getTotalAuthority() {
+                return totalAuthority;
+        }
+        public void setTotalAuthority(Integer totalAuthority) {
+                this.totalAuthority = totalAuthority;
         }
 }

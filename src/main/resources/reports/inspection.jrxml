@@ -50,6 +50,8 @@
 <!--	test.authority-->
 <!--FROM test]]>-->
 <!--	</queryString>-->
+	<parameter name="totalAuthority" >
+	</parameter>
 	<field name="id" class="java.lang.Long">
 <!--		<property name="com.jaspersoft.studio.field.name" value="id"/>-->
 <!--		<property name="com.jaspersoft.studio.field.label" value="id"/>-->
@@ -65,6 +67,17 @@
 <!--		<property name="com.jaspersoft.studio.field.label" value="authority"/>-->
 <!--		<property name="com.jaspersoft.studio.field.tree.path" value="test"/>-->
 	</field>
+	<field  name="totalOrganization" class="java.lang.Integer">
+		<!--		<property name="com.jaspersoft.studio.field.name" value="authority"/>-->
+		<!--		<property name="com.jaspersoft.studio.field.label" value="authority"/>-->
+		<!--		<property name="com.jaspersoft.studio.field.tree.path" value="test"/>-->
+	</field>
+	<field  name="totalAuthority" class="java.lang.Integer">
+		<!--		<property name="com.jaspersoft.studio.field.name" value="authority"/>-->
+		<!--		<property name="com.jaspersoft.studio.field.label" value="authority"/>-->
+		<!--		<property name="com.jaspersoft.studio.field.tree.path" value="test"/>-->
+	</field>
+<!--	<sortField name="totalAuthority" order="Descending"/>-->
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -85,9 +98,9 @@
 					<dataset resetType="Report"/>
 				</crosstabDataset>
 				<rowGroup name="organization" width="60" totalPosition="End">
-					<bucket class="java.lang.String">
+					<bucket order="Descending"  class="java.lang.String">
 						<bucketExpression><![CDATA[$F{organization}]]></bucketExpression>
-<!--						<orderByExpression><![CDATA[($V{organizationSort}==null?0:$V{organizationSort})]]></orderByExpression>-->
+						<orderByExpression><![CDATA[$V{order_measure_organization}]]></orderByExpression>
 					</bucket>
 					<crosstabRowHeader>
 						<cellContents mode="Opaque" style="Crosstab_CH">
@@ -107,8 +120,9 @@
 					</crosstabTotalRowHeader>
 				</rowGroup>
 				<columnGroup name="authority" height="20" totalPosition="End">
-					<bucket class="java.lang.String">
+					<bucket order="Descending" class="java.lang.String">
 						<bucketExpression><![CDATA[$F{authority}]]></bucketExpression>
+						<orderByExpression><![CDATA[$V{order_measure_authority}]]></orderByExpression>
 					</bucket>
 					<crosstabColumnHeader>
 						<cellContents mode="Opaque" style="Crosstab_CH">
@@ -132,9 +146,12 @@
 				<measure name="id_MEASURE" class="java.lang.Integer" calculation="Count">
 					<measureExpression><![CDATA[$F{id}]]></measureExpression>
 				</measure>
-<!--				<measure name="organizationSort" class="java.lang.Long">-->
-<!--					<measureExpression><![CDATA[$V{id_MEASURE}]]></measureExpression>-->
-<!--				</measure>-->
+				<measure name="order_measure_organization" class="java.lang.Integer">
+					<measureExpression><![CDATA[$F{totalOrganization}]]></measureExpression>
+				</measure>
+				<measure name="order_measure_authority" class="java.lang.Integer">
+					<measureExpression><![CDATA[$F{totalAuthority}]]></measureExpression>
+				</measure>
 				<crosstabCell width="60" height="20">
 					<cellContents mode="Opaque" style="Crosstab_CD">
 						<textField>
