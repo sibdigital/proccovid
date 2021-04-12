@@ -26,13 +26,8 @@ update okved
         else section_code
     end;
 
-alter table okved alter column kind_code type varchar(11);
+update okved set path = concat(version,'.',section_code,'.',kind_code)::ltree where kind_code is not null;
 
-update okved set kind_code = concat(section_code,'.',kind_code) where kind_code is not null;
-update okved set kind_code = section_code where kind_code is null;
-
-update okved
-    set path = concat(version,'.',kind_code)::ltree where section_code IS NOT NULL;
 insert into okved
     (id,section_code,type_code,status,kind_name,version,path)
     values
