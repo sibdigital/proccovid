@@ -19,6 +19,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     ClsUserRepo clsUserRepo;
 
+    @Autowired
+    RoleService roleService;
+
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         ClsUser clsUser = clsUserRepo.findByLogin(login);
@@ -28,11 +31,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             builder = User.withUsername(login);
 //            builder.password(passwordEncoder.encode(clsUser.getPassword()));
             builder.password(clsUser.getPassword());
-            if (clsUser.getAdmin()) {
-                builder.roles("ADMIN");
-            } else {
-                builder.roles("USER");
-            }
+//            if (clsUser.getAdmin()) {
+//                builder.roles("ADMIN");
+//            } else {
+//                builder.roles("USER");
+//            }
+            builder.authorities(roleService.getUserAuthorities(clsUser));
         } else {
             throw new UsernameNotFoundException("User no found.");
         }

@@ -118,6 +118,13 @@ public class RequestService {
     @Autowired
     private ClsDistrictRepo clsDistrictRepo;
 
+    @Autowired
+    private ClsRoleRepo clsRoleRepo;
+
+    @Autowired
+    private RegUserRoleRepo regUserRoleRepo;
+
+
     @Value("${upload.path:/uploads}")
     String uploadingDir;
 
@@ -539,9 +546,57 @@ public class RequestService {
         }
 
         clsUserRepo.save(clsUser);
+        saveUserRoles(clsUserDto, clsUser);
 
         return clsUser;
     }
+
+    void saveUserRoles(ClsUserDto clsUserDto, ClsUser user) {
+        Map<Long, ClsRole> roleMap = getAllRoles();
+
+        List<UserRolesEntityDto> ured = clsUserDto.getUserRoles();
+        Set<Long> activeRoleIds = ured.stream()
+                                    .filter(ctr -> ctr.getStatus())
+                                    .map(ctr -> ctr.getId())
+                                    .collect(Collectors.toSet());
+
+        List<RegUserRole> oldRoles = regUserRoleRepo.findAllByUser(user);
+        Set<Long> oldRoleIds = oldRoles.stream()
+                                .map(ctr -> ctr.getRole().getId())
+                                .collect(Collectors.toSet());
+
+        Set<Long> deletedRoleIds = (Set<Long>) getDifferences(oldRoleIds, activeRoleIds);
+        regUserRoleRepo.deleteAllByUserIdAndRoleIds(user.getId(), deletedRoleIds);
+
+        Set<Long> addedRoleIds = (Set<Long>) getDifferences(activeRoleIds, oldRoleIds);
+        List<RegUserRole> rurs = new ArrayList<>();
+        addedRoleIds.forEach(ctr -> {
+            ClsRole role = roleMap.get(ctr);
+            RegUserRole rur = RegUserRole.builder()
+                                .user(user)
+                                .role(role)
+                                .build();
+            rurs.add(rur);
+        });
+        regUserRoleRepo.saveAll(rurs);
+
+
+    }
+
+    private Map<Long, ClsRole> getAllRoles() {
+        List<ClsRole> roleList = clsRoleRepo.findAll();
+        Map<Long, ClsRole> roleMap = roleList.stream()
+                                .collect(Collectors.toMap(ClsRole::getId, clsRole -> clsRole));
+        return roleMap;
+    }
+
+    private <T> Set<T> getDifferences(Set<T> decreasing, Set<T> substruction) {// уменьшаемое, вычитаемое
+        Set<T> difference = new HashSet<T>();
+        difference.addAll(decreasing);
+        difference.removeAll(substruction);
+        return difference;
+    }
+
 
     public ClsMailingList saveClsMailingList(ClsMailingListDto clsMailingListDto) {
 

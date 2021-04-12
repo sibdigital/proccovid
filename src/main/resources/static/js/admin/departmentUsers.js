@@ -62,6 +62,7 @@ const departmentUsers = {
                                     }
 
                                     $$('departmentUserForm').parse(data);
+                                    fillRoleList($$('user_role_table'), data.id)
 
                                     $$('newPassword').define('label', 'Новый пароль');
                                     $$('newPassword').refresh();
@@ -88,7 +89,7 @@ const departmentUsers = {
                                 value: 'Добавить',
                                 click: function () {
                                     showDepartmentUserForm();
-
+                                    fillRoleList($$('user_role_table'), -1)
                                     $$('newPassword').define('label', 'Пароль');
                                     $$('newPassword').define('required', true);
                                     $$('newPassword').refresh();
@@ -103,14 +104,14 @@ const departmentUsers = {
 }
 
 function showDepartmentUserForm() {
-    const departmentUserForm = {
+    const mainDepUserForm = {
+        id: 'mainDepUserTab',
         view: 'scrollview',
         scroll: 'y',
-        id: 'show_layout',
         autowidth: true,
         autoheight: true,
         body: {
-            type: 'space',
+            // type: 'space',
             rows: [
                 {
                     view: 'form',
@@ -141,6 +142,79 @@ function showDepartmentUserForm() {
                         { view: 'text', label: 'Логин', labelPosition: 'top', name: 'login', required: true, validate: webix.rules.isNotEmpty },
                         { view: 'text', id: 'newPassword', type: 'password', label: 'Новый пароль', labelPosition: 'top', name: 'newPassword', attributes: { autocomplete: 'new-password' } },
                         { view: 'checkbox', label: 'Администратор', labelPosition: 'top', name: 'admin' },
+
+                        {}
+                    ]
+                }
+            ]
+        }
+    }
+
+    const roleDepUserForm = {
+        id: 'roleDepUserTab',
+        view: 'scrollview',
+        scroll: 'y',
+        body: {
+            rows: [
+                {
+                    view: 'datatable', id: 'user_role_table',
+                    columns: [
+                        {
+                            id: 'status',
+                            name: 'status',
+                            header: '',
+                            template: '{common.checkbox()}',
+                            editor: 'checkbox',
+                            value: true
+                        },
+                        {id: 'name', header: 'Роль', adjust: true, fillspace: true},
+                    ],
+                    on: {
+                        onCheck: function (row, column, state) {
+                        },
+                    },
+                },
+            ]
+        }
+    }
+
+    const departmentUserForm = {
+        // view: 'scrollview',
+        // scroll: 'y',
+        // body: {
+        //     type: 'space',
+            rows: [
+                {
+                    // id: 'departmentUserForm',
+                    view: 'form',
+                    rows: [
+                        {
+                            view: 'segmented',
+                            id: 'departmentUserTabs',
+                            multiview: true,
+                            borderless: true,
+                            value: 'mainDepUserTab',
+                            optionWidth: 200,
+                            options: [
+                                {
+                                    id: 'mainDepUserTab',
+                                    value: 'Основное',
+                                },
+                                {
+                                    id: 'roleDepUserTab',
+                                    value: 'Роли',
+                                },
+                            ],
+                        },
+                        {
+                            // id: 'tabview',
+                            view:"multiview",
+                            animate: false,
+                            cells: [
+                                mainDepUserForm,
+                                roleDepUserForm
+                            ]
+                        },
                         {
                             cols: [
                                 {},
@@ -152,6 +226,7 @@ function showDepartmentUserForm() {
                                     click: function () {
                                         if ($$('departmentUserForm').validate()) {
                                             let params = $$('departmentUserForm').getValues();
+                                            params.userRoles = $$('user_role_table').serialize();
 
                                             webix.ajax().headers({
                                                 'Content-Type': 'application/json'
@@ -182,12 +257,12 @@ function showDepartmentUserForm() {
                                 }
                             ]
                         },
-                        {}
                     ]
                 }
             ]
-        }
+        // }
     }
+
 
     webix.ui({
         id: 'content',
@@ -204,4 +279,16 @@ function showDepartmentUsers() {
             departmentUsers
         ]
     }, $$('content'))
+}
+
+
+function fillRoleList(dtable, idDepUser) {
+    dtable.clearAll();
+    var xhr = webix.ajax().sync().get('user_roles/' + idDepUser);
+    var jsonResponse = JSON.parse(xhr.responseText);
+    dtable.parse(jsonResponse);
+}
+
+function saveRoles() {
+
 }
