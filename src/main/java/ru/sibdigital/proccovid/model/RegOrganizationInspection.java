@@ -85,6 +85,23 @@ public class RegOrganizationInspection {
         this.comment = comment;
     }
 
+
+    private Integer totalOrganization; // для отчета
+    public Integer getTotalOrganization() {
+        return totalOrganization;
+    }
+    public void setTotalOrganization(Integer totalOrganization) {
+        this.totalOrganization = totalOrganization;
+    }
+
+    private Integer totalAuthority; // для отчета
+    public Integer getTotalAuthority() {
+        return totalAuthority;
+    }
+    public void setTotalAuthority(Integer totalAuthority) {
+        this.totalAuthority = totalAuthority;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

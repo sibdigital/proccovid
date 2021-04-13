@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="inspection" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="96a35cbc-610a-4ca6-b0e9-387929233446">
+	<style name="Crosstab_CH" mode="Opaque" backcolor="#87CEEB">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CG" mode="Opaque" backcolor="#BFEDFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CT" mode="Opaque" backcolor="#0075A5">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="MY_CELL_STYLE" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{id_MEASURE}/9>=0.95]]></conditionExpression>
+			<style backcolor="#F88383"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{id_MEASURE}/9>=0.75 && $V{id_MEASURE}/9<0.95]]></conditionExpression>
+			<style forecolor="#FF9B9B"/>
+		</conditionalStyle>
+<!--		<conditionalStyle>-->
+<!--			<conditionExpression><![CDATA[$V{id_MEASURE}/$V{max_MEASURE}>=0.5 ]]></conditionExpression>-->
+<!--			<style forecolor="#FFADAD"/>-->
+<!--		</conditionalStyle>-->
+<!--		<conditionalStyle>-->
+<!--			<conditionExpression><![CDATA[$V{id_MEASURE}/$V{max_MEASURE}>=0.25]]></conditionExpression>-->
+<!--			<style forecolor="#FDC3C3"/>-->
+<!--		</conditionalStyle>-->
+<!--		<conditionalStyle>-->
+<!--			<conditionExpression><![CDATA[$V{id_MEASURE}/$V{max_MEASURE}<0.25]]></conditionExpression>-->
+<!--			<style forecolor="#FFFFFF"/>-->
+<!--		</conditionalStyle>-->
+	</style>
+	<parameter name="minDate" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="maxDate" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="minCnt" class="java.lang.Integer" isForPrompting="false"/>
+	<field name="id" class="java.lang.Long"/>
+<!--	<field name="organization" class="java.lang.String"/>-->
+<!--	<field name="authority" class="java.lang.String"/>-->
+	<field name="organization" class="ru.sibdigital.proccovid.model.ClsOrganization"/>
+	<field name="controlAuthority" class="ru.sibdigital.proccovid.model.ClsControlAuthority"/>
+	<field name="totalOrganization" class="java.lang.Integer"/>
+	<field name="totalAuthority" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="20" splitType="Stretch">
+			<frame>
+				<reportElement mode="Transparent" x="-20" y="-20" width="842" height="40" backcolor="#0075A5" uuid="d745ede9-3b9e-4d1b-9b4a-cde89188e7c2"/>
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="842" height="40" forecolor="#0075A5" backcolor="rgba(0, 117, 165, 0.0)" uuid="049e37a1-4091-4d41-829e-917e021fb2ef"/>
+					<textElement textAlignment="Center">
+						<font size="26" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Отчет по контрольно-надзорным мероприятиям]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="47" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="0" width="40" height="47" uuid="c15ec69d-b6ba-428d-8103-268a7e0778ba"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Дата с:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="50" y="0" width="100" height="47" uuid="9a42706e-dd94-4e45-9412-48a95ad1dc7a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{minDate}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="180" y="0" width="40" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Дата по:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="230" y="0" width="100" height="47" uuid="52696cca-4ea4-4dc8-8571-d4710e272954"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{maxDate}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="360" y="0" width="110" height="47" uuid="2fa12eea-df32-488e-b72f-41cad878fe4c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Минимальное кол-во:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="480" y="0" width="100" height="47" uuid="fe8f728a-b3e5-4563-bc51-cc6e12fde053"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{minCnt}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<summary>
+		<band height="332" splitType="Stretch">
+			<crosstab>
+				<reportElement mode="Opaque" x="-20" y="0" width="842" height="320" uuid="a1d5da63-b291-47db-bdea-2cd5ee46d95d">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
+					<property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
+					<property name="com.jaspersoft.studio.crosstab.style.total" value="Crosstab_CT"/>
+					<property name="com.jaspersoft.studio.crosstab.style.detail" value="Crosstab_CD"/>
+				</reportElement>
+				<crosstabDataset>
+					<dataset resetType="Report"/>
+				</crosstabDataset>
+				<rowGroup name="organization" width="150" totalPosition="End" mergeHeaderCells="true">
+					<bucket order="Descending" class="ru.sibdigital.proccovid.model.ClsOrganization">
+						<bucketExpression><![CDATA[$F{organization}]]></bucketExpression>
+						<orderByExpression><![CDATA[$V{order_measure_organization}]]></orderByExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="150" height="20" isPrintWhenDetailOverflows="true" uuid="b8bd8518-f59d-415e-be49-07db1e9d2c48"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="Times New Roman" size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{organization}.getName()]]></textFieldExpression>
+								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getName()]]></hyperlinkTooltipExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT">
+							<staticText>
+								<reportElement x="0" y="0" width="150" height="20" forecolor="#FFFFFF" uuid="993404c0-06ee-481a-bd86-b6335a79df09"/>
+								<textElement verticalAlignment="Middle">
+									<font fontName="Times New Roman" size="12"/>
+								</textElement>
+								<text><![CDATA[Итого]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="controlAuthority" height="20" totalPosition="End" mergeHeaderCells="true">
+					<bucket order="Descending" class="ru.sibdigital.proccovid.model.ClsControlAuthority">
+						<bucketExpression><![CDATA[$F{controlAuthority}]]></bucketExpression>
+						<orderByExpression><![CDATA[$V{order_measure_authority}]]></orderByExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField isBlankWhenNull="false">
+								<reportElement x="0" y="0" width="100" height="20" isPrintWhenDetailOverflows="true" uuid="8bdf1ba7-79c1-48f3-864b-84cf6ef764f8">
+									<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
+								</reportElement>
+								<textElement verticalAlignment="Middle">
+									<font fontName="Times New Roman" size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{controlAuthority}.getName()]]></textFieldExpression>
+								<hyperlinkTooltipExpression><![CDATA[$V{controlAuthority}.getName()]]></hyperlinkTooltipExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT">
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="70343f01-d6fc-468c-8630-e0abd7073037"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="Times New Roman" size="12"/>
+								</textElement>
+								<text><![CDATA[Итого]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="id_MEASURE" class="java.lang.Integer" calculation="Count">
+					<measureExpression><![CDATA[$F{id}]]></measureExpression>
+				</measure>
+<!--				<measure name="max_MEASURE" class="java.lang.Integer" calculation="Highest">-->
+<!--					<measureExpression><![CDATA[$V{id_MEASURE}]]></measureExpression>-->
+<!--				</measure>-->
+				<measure name="order_measure_organization" class="java.lang.Integer">
+					<measureExpression><![CDATA[$F{totalOrganization}]]></measureExpression>
+				</measure>
+				<measure name="order_measure_authority" class="java.lang.Integer">
+					<measureExpression><![CDATA[$F{totalAuthority}]]></measureExpression>
+				</measure>
+				<crosstabCell width="100" height="20">
+<!--					<cellContents mode="Opaque" style="Crosstab_CD">-->
+					<cellContents mode="Opaque" style="MY_CELL_STYLE">
+						<textField>
+							<reportElement x="0" y="0" width="100" height="20" uuid="a8d364f1-3d4a-4358-be78-7923326ba7d3"/>
+							<textElement textAlignment="Center" verticalAlignment="Middle">
+								<font fontName="Times New Roman" size="12"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{id_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="60" height="20" columnTotalGroup="controlAuthority">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField>
+							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="f561ca77-bcc1-4461-a28a-ca2948dc2edc"/>
+							<textElement textAlignment="Center" verticalAlignment="Middle">
+								<font fontName="Times New Roman" size="12"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{id_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="100" height="20" rowTotalGroup="organization">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField>
+							<reportElement x="0" y="0" width="100" height="20" isRemoveLineWhenBlank="true" forecolor="#FFFFFF" uuid="9b769142-c76f-45dc-9004-249ae2285e96"/>
+							<textElement textAlignment="Center" verticalAlignment="Middle">
+								<font fontName="Times New Roman" size="12"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{id_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="60" height="20" rowTotalGroup="organization" columnTotalGroup="controlAuthority">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField>
+							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="f219783c-8bd7-4b76-9a0d-cce3eacde7cc"/>
+							<textElement textAlignment="Center" verticalAlignment="Middle">
+								<font fontName="Times New Roman" size="12"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{id_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

@@ -14,7 +14,7 @@ import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.RequestTypes;
 import ru.sibdigital.proccovid.service.RequestService;
 import ru.sibdigital.proccovid.service.StatisticService;
-import ru.sibdigital.proccovid.service.reports.InspectionReport;
+import ru.sibdigital.proccovid.service.reports.InspectionReportService;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +35,7 @@ public class StatisticController {
     private RequestService requestService;
 
     @Autowired
-    private InspectionReport inspectionReport;
+    private InspectionReportService inspectionReportService;
 
     @GetMapping(value = "/statistic")
     public String getStatisticPage(Model model){
@@ -106,29 +106,29 @@ public class StatisticController {
         return "numberOfMailsSent_statistic";
     }
 
-    @RequestMapping(value = "/inspectionReport/{format}")
-    public String downloadReport(@PathVariable String format, HttpServletResponse response) throws IOException {
-        String tmpdir = System.getProperty("java.io.tmpdir");
-        String rndName = "Inspection report " + new Random().nextInt(10000);
-        String pathNameWithoutExtension = tmpdir + rndName;
-        byte[] bytes = inspectionReport.exportReport(format, pathNameWithoutExtension);
-
-        if (format.equals("pdf")) {
-            response.setContentType("application/pdf");
-//            response.setContentLength(bytes.length);
-        } else if (format.equals("html")) {
-            response.setContentType("text/html");
-//            response.setContentLength(bytes.length);
-        } else if (format.equals("xlsx")){
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-Disposition", "attachment; filename=" + pathNameWithoutExtension + ".xlsx");
-        }
-
-        ServletOutputStream out = response.getOutputStream();
-        out.write(bytes);
-        out.flush();
-        out.close();
-        return null;
-    }
+//    @RequestMapping(value = "/inspectionReport/{format}")
+//    public String downloadReport(@PathVariable String format, HttpServletResponse response) throws IOException {
+//        String tmpdir = System.getProperty("java.io.tmpdir");
+//        String rndName = "Inspection report " + new Random().nextInt(10000);
+//        String pathNameWithoutExtension = tmpdir + rndName;
+//        byte[] bytes = inspectionReportService.exportReport(format, pathNameWithoutExtension);
+//
+//        if (format.equals("pdf")) {
+//            response.setContentType("application/pdf");
+////            response.setContentLength(bytes.length);
+//        } else if (format.equals("html")) {
+//            response.setContentType("text/html");
+////            response.setContentLength(bytes.length);
+//        } else if (format.equals("xlsx")){
+//            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//            response.setHeader("Content-Disposition", "attachment; filename=" + pathNameWithoutExtension + ".xlsx");
+//        }
+//
+//        ServletOutputStream out = response.getOutputStream();
+//        out.write(bytes);
+//        out.flush();
+//        out.close();
+//        return null;
+//    }
 
 }
