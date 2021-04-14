@@ -595,4 +595,13 @@ public class AdminController {
         list.sort(Comparator.comparing(UserRolesEntity::getName));
         return list;
     }
+
+    @GetMapping("/user_roles")
+    public @ResponseBody List<UserRolesEntity> getCurrentUserRoles(){
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+        List<UserRolesEntity> list = userRolesEntityRepo.getRolesByUserId(clsUser.getId());
+        list.sort(Comparator.comparing(UserRolesEntity::getName));
+        return list;
+    }
 }
