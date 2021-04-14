@@ -18,10 +18,7 @@ import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.ClsDepartmentOkvedRepo;
-import ru.sibdigital.proccovid.repository.ClsMailingListOkvedRepo;
-import ru.sibdigital.proccovid.repository.ClsMailingListRepo;
-import ru.sibdigital.proccovid.repository.ClsNewsRepo;
+import ru.sibdigital.proccovid.repository.*;
 import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchSearchCriteria;
@@ -29,9 +26,7 @@ import ru.sibdigital.proccovid.repository.specification.RegViolationSearchSearch
 import ru.sibdigital.proccovid.service.*;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -76,6 +71,9 @@ public class AdminController {
 
     @Autowired
     private ControlAuthorityService controlAuthorityService;
+
+    @Autowired
+    private UserRolesEntityRepo userRolesEntityRepo;
 
     @Value("${spring.mail.from}")
     private String fromAddress;
@@ -564,27 +562,6 @@ public class AdminController {
         return result;
     }
 
-//    @GetMapping("/cls_organizations")
-//    public @ResponseBody Map<String, Object> getListOrganizations(@RequestParam(value = "inn", required = false) String inn,
-//                                           @RequestParam(value = "id_prescription", required = false) Long idPrescription,
-//                                           @RequestParam(value = "start", required = false) Integer start,
-//                                           @RequestParam(value = "count", required = false) Integer count) {
-//
-//        int page = start == null ? 0 : start / 25;
-//        int size = count == null ? 25 : count;
-//
-//        ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
-//        searchCriteria.setInn(inn);
-//        searchCriteria.setIdPrescription(idPrescription);
-//
-//        Page<ClsOrganization> clsOrganizationPage = organizationService.getOrganizationsByCriteria(searchCriteria, page, size);
-//
-//        Map<String, Object> result = new HashMap<>();
-//        result.put("data", clsOrganizationPage.getContent());
-//        result.put("pos", (long) page * size);
-//        result.put("total_count", clsOrganizationPage.getTotalElements());
-//        return result;
-//    }
     @GetMapping("/delete_control_authority")
     public @ResponseBody Boolean deleteControlAuthority(@RequestParam(value = "id") Long id) {
         boolean deleted = controlAuthorityService.deleteControlAuthority(id);
@@ -608,6 +585,14 @@ public class AdminController {
         List<KeyValue> list = controlAuthorityService.getControlAuthorityParentsList().stream()
                 .map(cap -> new KeyValue(cap.getClass().getSimpleName(), cap.getId(), cap.getName()))
                 .collect(Collectors.toList());
+        return list;
+    }
+
+
+    @GetMapping("/user_roles/{id_dep_user}")
+    public @ResponseBody List<UserRolesEntity> getRolesByUserId(@PathVariable("id_dep_user") Long idDepUser){
+        List<UserRolesEntity> list = userRolesEntityRepo.getRolesByUserId(idDepUser);
+        list.sort(Comparator.comparing(UserRolesEntity::getName));
         return list;
     }
 }

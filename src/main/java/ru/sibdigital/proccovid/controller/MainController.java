@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +25,7 @@ import ru.sibdigital.proccovid.service.RequestService;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,7 +56,12 @@ public class MainController {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
 
-        if (clsUser.getAdmin() != null && clsUser.getAdmin()) {
+//        if (clsUser.getAdmin() != null && clsUser.getAdmin()) {
+//            return "redirect:/admin";
+//        }
+
+        Collection<GrantedAuthority> userAuthorities = currentUser.getAuthorities();
+        if (userAuthorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             return "redirect:/admin";
         }
 

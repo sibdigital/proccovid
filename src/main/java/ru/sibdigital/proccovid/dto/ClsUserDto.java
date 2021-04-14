@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -21,4 +23,5 @@ public class ClsUserDto {
     private Boolean admin;
     private String email;
     private Long districtId;
+    private List<UserRolesEntityDto> userRoles;
 }
