@@ -2,7 +2,7 @@ WITH
     tbl as (
         SELECT *
         FROM reg_organization_inspection
-        WHERE date_of_inspection > :min_date AND date_of_inspection < :max_date
+        WHERE date_of_inspection >= :min_date AND date_of_inspection <= :max_date
     ),
     tbl_with_cnt as (
         SELECT tbl.id_organization, tbl.id_control_authority, count(*) as cnt

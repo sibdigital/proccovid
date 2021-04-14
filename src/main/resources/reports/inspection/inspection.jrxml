@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="inspection" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="96a35cbc-610a-4ca6-b0e9-387929233446">
+<!--	<property name="net.sf.jasperreports.print.keep.full.text" value="true"></property>-->
 	<style name="Crosstab_CH" mode="Opaque" backcolor="#87CEEB">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -37,34 +38,46 @@
 			<rightPen lineWidth="0.5" lineColor="#000000"/>
 		</box>
 	</style>
-	<style name="MY_CELL_STYLE" backcolor="#FFFFFF">
+	<style name="MY_CELL_STYLE" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+<!--		<conditionalStyle>-->
+<!--			<conditionExpression>-->
+<!--				<![CDATA[$V{id_MEASURE} > $V{minCnt}]]>-->
+<!--			</conditionExpression>-->
+<!--			<style mode="Opaque" isBold="true"/>-->
+<!--		</conditionalStyle>-->
 		<conditionalStyle>
-			<conditionExpression><![CDATA[$V{id_MEASURE}/9>=0.95]]></conditionExpression>
-			<style backcolor="#F88383"/>
+			<conditionExpression><![CDATA[($V{id_MEASURE} >= 0.95*$V{maxValue}) && ($V{id_MEASURE} > $V{minCnt})]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F84D4D"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[$V{id_MEASURE}/9>=0.75 && $V{id_MEASURE}/9<0.95]]></conditionExpression>
-			<style forecolor="#FF9B9B"/>
+			<conditionExpression><![CDATA[($V{id_MEASURE} >= 0.75*$V{maxValue}) && ($V{id_MEASURE} < 0.95*$V{maxValue}) && ($V{id_MEASURE} > $V{minCnt})]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F56666"/>
 		</conditionalStyle>
-<!--		<conditionalStyle>-->
-<!--			<conditionExpression><![CDATA[$V{id_MEASURE}/$V{max_MEASURE}>=0.5 ]]></conditionExpression>-->
-<!--			<style forecolor="#FFADAD"/>-->
-<!--		</conditionalStyle>-->
-<!--		<conditionalStyle>-->
-<!--			<conditionExpression><![CDATA[$V{id_MEASURE}/$V{max_MEASURE}>=0.25]]></conditionExpression>-->
-<!--			<style forecolor="#FDC3C3"/>-->
-<!--		</conditionalStyle>-->
-<!--		<conditionalStyle>-->
-<!--			<conditionExpression><![CDATA[$V{id_MEASURE}/$V{max_MEASURE}<0.25]]></conditionExpression>-->
-<!--			<style forecolor="#FFFFFF"/>-->
-<!--		</conditionalStyle>-->
+		<conditionalStyle>
+			<conditionExpression><![CDATA[($V{id_MEASURE} >= 0.5*$V{maxValue}) && ($V{id_MEASURE} < 0.75*$V{maxValue}) && ($V{id_MEASURE} > $V{minCnt})]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F37979"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[($V{id_MEASURE} >= 0.25*$V{maxValue}) && ($V{id_MEASURE} < 0.5*$V{maxValue}) && ($V{id_MEASURE} > $V{minCnt})]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F59999"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[($V{id_MEASURE} < 0.25*$V{maxValue}) && ($V{id_MEASURE} > 0) && ($V{id_MEASURE} > $V{minCnt})]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F5B8B8"/>
+		</conditionalStyle>
 	</style>
 	<parameter name="minDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="maxDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="minCnt" class="java.lang.Integer" isForPrompting="false"/>
+	<parameter name="maxValue" class="java.lang.Integer" isForPrompting="false"/>
 	<field name="id" class="java.lang.Long"/>
-<!--	<field name="organization" class="java.lang.String"/>-->
-<!--	<field name="authority" class="java.lang.String"/>-->
 	<field name="organization" class="ru.sibdigital.proccovid.model.ClsOrganization"/>
 	<field name="controlAuthority" class="ru.sibdigital.proccovid.model.ClsControlAuthority"/>
 	<field name="totalOrganization" class="java.lang.Integer"/>
@@ -89,7 +102,7 @@
 	<pageHeader>
 		<band height="47" splitType="Stretch">
 			<staticText>
-				<reportElement x="1" y="0" width="40" height="47" uuid="c15ec69d-b6ba-428d-8103-268a7e0778ba"/>
+				<reportElement x="-11" y="0" width="52" height="47" uuid="c15ec69d-b6ba-428d-8103-268a7e0778ba"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
@@ -103,7 +116,7 @@
 				<textFieldExpression><![CDATA[$P{minDate}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="180" y="0" width="40" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
+				<reportElement x="150" y="0" width="70" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
@@ -117,7 +130,7 @@
 				<textFieldExpression><![CDATA[$P{maxDate}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="360" y="0" width="110" height="47" uuid="2fa12eea-df32-488e-b72f-41cad878fe4c"/>
+				<reportElement x="330" y="0" width="140" height="47" uuid="2fa12eea-df32-488e-b72f-41cad878fe4c"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
@@ -140,7 +153,7 @@
 					<property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
 					<property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
 					<property name="com.jaspersoft.studio.crosstab.style.total" value="Crosstab_CT"/>
-					<property name="com.jaspersoft.studio.crosstab.style.detail" value="Crosstab_CD"/>
+					<property name="com.jaspersoft.studio.crosstab.style.detail" value="MY_CELL_STYLE"/>
 				</reportElement>
 				<crosstabDataset>
 					<dataset resetType="Report"/>
@@ -190,7 +203,7 @@
 								<textElement verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{controlAuthority}.getName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[($V{controlAuthority}.getShortName() == null) ? $V{controlAuthority}.getName() : $V{controlAuthority}.getShortName()]]></textFieldExpression>
 								<hyperlinkTooltipExpression><![CDATA[$V{controlAuthority}.getName()]]></hyperlinkTooltipExpression>
 							</textField>
 						</cellContents>
@@ -210,14 +223,17 @@
 				<measure name="id_MEASURE" class="java.lang.Integer" calculation="Count">
 					<measureExpression><![CDATA[$F{id}]]></measureExpression>
 				</measure>
-<!--				<measure name="max_MEASURE" class="java.lang.Integer" calculation="Highest">-->
-<!--					<measureExpression><![CDATA[$V{id_MEASURE}]]></measureExpression>-->
-<!--				</measure>-->
 				<measure name="order_measure_organization" class="java.lang.Integer">
 					<measureExpression><![CDATA[$F{totalOrganization}]]></measureExpression>
 				</measure>
 				<measure name="order_measure_authority" class="java.lang.Integer">
 					<measureExpression><![CDATA[$F{totalAuthority}]]></measureExpression>
+				</measure>
+				<measure name="minCnt" class="java.lang.Integer">
+					<measureExpression><![CDATA[$P{minCnt}]]></measureExpression>
+				</measure>
+				<measure name="maxValue" class="java.lang.Integer">
+					<measureExpression><![CDATA[$P{maxValue}]]></measureExpression>
 				</measure>
 				<crosstabCell width="100" height="20">
 <!--					<cellContents mode="Opaque" style="Crosstab_CD">-->

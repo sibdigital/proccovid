@@ -9,8 +9,11 @@ import ru.sibdigital.proccovid.model.RegOrganizationInspection;
 import ru.sibdigital.proccovid.repository.ClsOrganizationRepo;
 import ru.sibdigital.proccovid.repository.RegOrganizationInspectionRepo;
 import ru.sibdigital.proccovid.service.reports.InspectionReportService;
-import ru.sibdigital.proccovid.service.reports.InspectionReportServiceImpl;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,8 +54,12 @@ public class InspectionController {
                                                          @RequestParam(value = "maxDate") String maxDateString,
                                                          @RequestParam(value = "minCnt") Integer minCnt) throws ParseException {
 
-        Date minDate = null;
-        Date maxDate = null;
+        Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
+        Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
+        Date minDate = defaultMinDate;
+        Date maxDate = defaultMaxDate;
+
+        minCnt = (minCnt == null ? 0 :minCnt);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (!minDateString.equals("")) {
@@ -62,8 +69,76 @@ public class InspectionController {
             maxDate = dateFormat.parse(maxDateString);
         }
 
-        byte[] bytes = inspectionReportService.exportReport("html", minDate, maxDate, minCnt);
+        byte[] bytes = inspectionReportService.exportReport("html", minDate, maxDate, minCnt, defaultMinDate, defaultMaxDate);
         String template = new String(bytes);
         return template;
+    }
+
+    @RequestMapping(value = "/inspectionReport/{format}/params")
+    public String downloadReport(@PathVariable String format,
+                                 @RequestParam(value = "minDate") String minDateString,
+                                 @RequestParam(value = "maxDate") String maxDateString,
+                                 @RequestParam(value = "minCnt") Integer minCnt,
+                                 HttpServletResponse response) throws IOException, ParseException {
+
+        Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
+        Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
+        Date minDate = defaultMinDate;
+        Date maxDate = defaultMaxDate;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        if (!minDateString.equals("") && !minDateString.equals("null")) {
+            minDate = dateFormat.parse(minDateString);
+        }
+        if (!maxDateString.equals("") && !minDateString.equals("null")) {
+            maxDate = dateFormat.parse(maxDateString);
+        }
+
+        minCnt = (minCnt == null ? 0 :minCnt);
+
+        byte[] bytes = inspectionReportService.exportReport(format, minDate, maxDate, minCnt, defaultMinDate, defaultMaxDate);
+
+        if (format.equals("pdf")) {
+            response.setContentType("application/pdf");
+        } else if (format.equals("html")) {
+            response.setContentType("text/html");
+        } else if (format.equals("xlsx")){
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=inspection.xlsx");
+        }
+
+        ServletOutputStream out = response.getOutputStream();
+        out.write(bytes);
+        out.flush();
+        out.close();
+        return null;
+    }
+
+    @RequestMapping(value = "/inspectionReportTest/{format}")
+    public String downloadReportTest(@PathVariable String format,
+                                 HttpServletResponse response) throws IOException, ParseException {
+
+        Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
+        Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
+        Date minDate = defaultMinDate;
+        Date maxDate = defaultMaxDate;
+
+        Integer minCnt = 0;
+
+        byte[] bytes = inspectionReportService.exportReport(format, minDate, maxDate, minCnt, defaultMinDate, defaultMaxDate);
+
+        if (format.equals("pdf")) {
+            response.setContentType("application/pdf");
+        } else if (format.equals("html")) {
+            response.setContentType("text/html");
+        } else if (format.equals("xlsx")){
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=inspection.xlsx");
+        }
+
+        ServletOutputStream out = response.getOutputStream();
+        out.write(bytes);
+        out.flush();
+        out.close();
+        return null;
     }
 }

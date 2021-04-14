@@ -43,27 +43,57 @@ const inspectionReport = {
                             webix.ajax().get('generate_inspection_report', params).then(function (data) {
                                 if (data.text() != null) {
                                     $$('templateInspectionReportId').setHTML(data.text());
+                                    $$('templateInspectionReportId').resize();
                                 }
                             });
+                        },
+                    },
+                    {
+                        view: 'icon',
+                        icon: 'fas fa-file-excel',
+                        css: 'xlsIcon',
+                        tooltip: 'Сформировать и скачать в xlsx формате',
+                        click: function () {
+                            let minDate = convertDateToString($$('startDateInspectionReport').getValue());
+                            let maxDate = convertDateToString($$('endDateInspectionReport').getValue());
+                            let minCnt = $$('minCountInspectionReport').getValue();
+
+                            let url = 'inspectionReport/xlsx/params?minDate='+minDate+'&maxDate='+maxDate+'&minCnt='+minCnt;
+
+                            webix.ajax().response("blob").get(url, function (text, data, xhr) {
+                                webix.html.download(data, "inspectionReport.xlsx");
+                            })
                         },
                     },
                 ]
             },
             {
-                view: 'scrollview',
-                scroll: 'xy',
-                body: {
+                // view: 'scrollview',
+                // id: 'scrollTemplateId',
+                // scroll: 'xy',
+                // autowidth: true,
+                // body: {
                     rows: [
                         {
                             id: 'templateInspectionReportId',
                             view: 'template',
-                            autoheight: true,
-                            autowidth:  true,
+                            scroll: "xy"
                         }
                     ]
-                }
+                // }
             }
         ]
 
+    }
+}
+
+function convertDateToString(date){
+    if (date == null) {
+        return "";
+    } else {
+        let yyyy = ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
+        let MM = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(date);
+        let dd = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
+        return yyyy + "-" + MM + "-" + dd;
     }
 }
