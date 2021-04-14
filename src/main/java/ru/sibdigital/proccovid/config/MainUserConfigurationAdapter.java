@@ -19,7 +19,7 @@ import ru.sibdigital.proccovid.service.UserDetailsServiceImpl;
 @EnableWebSecurity()
 @Configuration
 @ComponentScan({"ru.sibdigital.proccovid.service"})
-@Order(1)
+@Order(2)
 public class MainUserConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -40,7 +40,7 @@ public class MainUserConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/outer/*");
+//        web.ignoring().antMatchers("/outer/*");
     }
 
     @Override

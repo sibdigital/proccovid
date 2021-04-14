@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title th:utext="${application_name}"></title>
+    <link type="text/css" rel="stylesheet" th:href="@{/libs/webix.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/libs/all.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/libs/materialdesignicons.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/css/user/user.css}">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}" type="text/css">
+    <script th:src="@{/libs/webix.min.js}"></script>
+    <script th:src="@{/libs/routie.min.js}"></script>
+    <script th:src="@{/libs/jquery-3.4.1.min.js}"></script>
+    <script th:src="@{/libs/popper.min.js}"></script>
+    <script th:src="@{/libs/bootstrap.min.js}"></script>
+</head>
+<body>
+<script th:inline="javascript">
+    const APPLICATION_NAME = [[${application_name}]]
+    const ID_DEPARTMENT = [[${id_department}]]
+    const ID_DISTRICT = [[${id_district}]]
+    const DEPARTMENT = [[${department_name}]]
+    const USER_NAME = [[${user_lastname + " " + user_firstname}]]
+    const LINK_PREFIX = [[${link_prefix}]]
+    const LINK_SUFFIX = [[${link_suffix}]]
+</script>
+<script>
+        webix.require([
+        "./js/user/user.js",
+        "./js/views/requests.js",
+        "./js/views/other-requests.js",
+        "./js/views/showform.js",
+        "./js/views/showform-processed.js",
+        "./js/views/showform-other.js",
+        "./js/views/request_form.js",
+        "./js/utils/filter.js",
+        "./js/utils/violationsFilter.js",
+        "./js/user/personViolations.js",
+        "./js/user/prescriptions.js",
+        "./js/user/requests.js",
+        "./js/user/violations.js",
+    ], () => {
+        console.log('Модули загружены')
+        $$('menu').remove('Requests');
+        $$('logout_label').config.label = DEPARTMENT + ' (<a href="outer/logout" title="Выйти">' + USER_NAME + '</a>)';
+        $$('logout_label').refresh();
+    })
+
+</script>
+</body>
+</html>

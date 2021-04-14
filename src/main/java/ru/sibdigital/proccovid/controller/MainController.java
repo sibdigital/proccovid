@@ -52,7 +52,7 @@ public class MainController {
     private PrescriptionService prescriptionService;
 
     @GetMapping("/")
-    public String index() {
+    public String index(HttpSession session) {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
 
@@ -60,12 +60,41 @@ public class MainController {
 //            return "redirect:/admin";
 //        }
 
+        Object lastPage = session.getAttribute("lastPage");
+        if(lastPage != null && lastPage.equals("outer")) {
+            return "redirect:/403";
+        }
+
         Collection<GrantedAuthority> userAuthorities = currentUser.getAuthorities();
         if (userAuthorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             return "redirect:/admin";
         }
 
         return "redirect:/cabinet";
+    }
+
+    @GetMapping("/403")
+    public String deniedPage(Model model) {
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "403";
+    }
+
+    @GetMapping("/outer")
+    public String outerRoot(Model model, HttpSession session) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        session.setAttribute("lastPage", "outer");
+
+        model.addAttribute("id_department", clsUser.getIdDepartment().getId());
+        model.addAttribute("department_name", clsUser.getIdDepartment().getName());
+        if (clsUser.getDistrict() != null) {
+            model.addAttribute("id_district", clsUser.getDistrict().getId());
+        }
+        model.addAttribute("user_lastname", clsUser.getLastname());
+        model.addAttribute("user_firstname", clsUser.getFirstname());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "outer/ouser";
     }
 
     @GetMapping("/cabinet")
