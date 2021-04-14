@@ -112,33 +112,4 @@ public class InspectionController {
         out.close();
         return null;
     }
-
-    @RequestMapping(value = "/inspectionReportTest/{format}")
-    public String downloadReportTest(@PathVariable String format,
-                                 HttpServletResponse response) throws IOException, ParseException {
-
-        Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
-        Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
-        Date minDate = defaultMinDate;
-        Date maxDate = defaultMaxDate;
-
-        Integer minCnt = 0;
-
-        byte[] bytes = inspectionReportService.exportReport(format, minDate, maxDate, minCnt, defaultMinDate, defaultMaxDate);
-
-        if (format.equals("pdf")) {
-            response.setContentType("application/pdf");
-        } else if (format.equals("html")) {
-            response.setContentType("text/html");
-        } else if (format.equals("xlsx")){
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-Disposition", "attachment; filename=inspection.xlsx");
-        }
-
-        ServletOutputStream out = response.getOutputStream();
-        out.write(bytes);
-        out.flush();
-        out.close();
-        return null;
-    }
 }
