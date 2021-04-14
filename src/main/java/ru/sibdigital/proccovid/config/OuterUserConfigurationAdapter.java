@@ -17,7 +17,7 @@ import ru.sibdigital.proccovid.service.UserDetailsServiceImpl;
 @EnableWebSecurity()
 @Configuration
 @ComponentScan({"ru.sibdigital.proccovid.service"})
-@Order(2)
+@Order(1)
 public class OuterUserConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -39,18 +39,20 @@ public class OuterUserConfigurationAdapter extends WebSecurityConfigurerAdapter 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .antMatcher("/outer/**")
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/libs/**", "/css/**").permitAll() //, "/templates/outer/**"
                 .antMatchers("/outer/ologin").permitAll()
-                //.antMatchers("/admin").hasRole("ADMIN")
+                .antMatchers("/admin").denyAll()
                 .antMatchers("/favicon.ico","/logo.png").permitAll()
                 .anyRequest().authenticated()
 
                 .and()
                 .formLogin()
                 .loginPage("/outer/ologin")
-                .loginProcessingUrl("/outer/perform_login")
+                .loginProcessingUrl("/outer/perform_outer_login")
+                .defaultSuccessUrl("/outer")
                 .failureUrl("/outer/ologin?error=true")
 
                 .and()
