@@ -1,3 +1,100 @@
+let mainOkvedTree = {
+    view: "tree",
+    id: "mainOkvedTreeId",
+    template: "{common.icon()} {common.checkbox()} {common.folder()} <span>#value#</span>",
+    threeState: true,
+    data: [
+        {
+            id: 'root',
+            value: 'ОКВЭДЫ',
+            // open: true,
+            data: [
+                {
+                    id: '2014',
+                    value: '2014',
+                    webix_kids: true
+                },
+                {
+                    id: '2001',
+                    value: '2001',
+                    webix_kids: true
+                }
+            ]
+        }
+    ],
+    on: {
+        onDataRequest: (parentNode) => {
+            $$('mainOkvedTreeId').parse(
+                webix.ajax().get(
+                    'okved_tree', {parent_node: parentNode}
+                ).then((data) => {
+                    data = {
+                        parent: parentNode,
+                        data: data.json().map((e) => {
+                            return {
+                                id: e.id,
+                                value: e.value,
+                                webix_kids: true
+                            }
+                        })
+                    };
+                    return data;
+                })
+            );
+            return false;
+        }
+    }
+}
+
+let additionalOkvedTree = {
+    view: "tree",
+    id: "additionalOkvedTreeId",
+    template: "{common.icon()} {common.checkbox()} {common.folder()} <span>#value#</span>",
+    threeState: true,
+    data: [
+        {
+            id: 'root',
+            value: 'ОКВЭДЫ',
+            // open: true,
+            data: [
+                {
+                    id: '2014',
+                    value: '2014',
+                    webix_kids: true
+                },
+                {
+                    id: '2001',
+                    value: '2001',
+                    webix_kids: true
+                }
+            ]
+        }
+    ],
+    on: {
+        onDataRequest: (parentNode) => {
+            $$('additionalOkvedTreeId').parse(
+                webix.ajax().get(
+                    'okved_tree', {parent_node: parentNode}
+                ).then((data) => {
+                    data = {
+                        parent: parentNode,
+                        data: data.json().map((e) => {
+                            return {
+                                id: e.id,
+                                value: e.value,
+                                webix_kids: true
+                            }
+                        })
+                    };
+                    return data;
+                })
+            );
+            return false;
+        }
+    }
+}
+
+
 const inspectionReport = {
     body: {
         type: "space",
@@ -35,16 +132,24 @@ const inspectionReport = {
                         align: 'right',
                         css: 'webix_primary',
                         click: function () {
+                            let mainOkveds = $$('mainOkvedTreeId').getChecked().toString();
+                            let additionalOkveds = $$('additionalOkvedTreeId').getChecked().toString();
+
                             let params = {
                                 minDate: $$('startDateInspectionReport').getValue(),
                                 maxDate: $$('endDateInspectionReport').getValue(),
                                 minCnt:  $$('minCountInspectionReport').getValue(),
+                                mainOkveds: mainOkveds,
+                                additionalOkveds: additionalOkveds,
                             };
                             webix.ajax().get('generate_inspection_report', params).then(function (data) {
                                 if (data.text() != null) {
                                     let tmlpt =  $$('templateInspectionReportId');
                                     tmlpt.$view.childNodes[0].setAttribute('style','width:100%');
                                     tmlpt.setHTML(data.text());
+                                    webix.message("Сформировано", 'success');
+                                } else {
+                                    webix.message("Не удалось сформировать", 'error');
                                 }
                             });
                         },
@@ -55,11 +160,13 @@ const inspectionReport = {
                         css: 'xlsIcon',
                         tooltip: 'Сформировать и скачать в xlsx формате',
                         click: function () {
+                            let mainOkveds = $$('mainOkvedTreeId').getChecked().toString();
+                            let additionalOkveds = $$('additionalOkvedTreeId').getChecked().toString();
                             let minDate = convertDateToString($$('startDateInspectionReport').getValue());
                             let maxDate = convertDateToString($$('endDateInspectionReport').getValue());
                             let minCnt = $$('minCountInspectionReport').getValue();
 
-                            let url = 'inspectionReport/xlsx/params?minDate='+minDate+'&maxDate='+maxDate+'&minCnt='+minCnt;
+                            let url = 'inspectionReport/xlsx/params?minDate='+minDate+'&maxDate='+maxDate+'&minCnt='+minCnt+'&mainOkveds='+mainOkveds +'&additionalOkveds='+additionalOkveds;
 
                             webix.ajax().response("blob").get(url, function (text, data, xhr) {
                                 webix.html.download(data, "inspectionReport.xlsx");
@@ -69,19 +176,39 @@ const inspectionReport = {
                 ]
             },
             {
-                // view: 'scrollview',
-                // id: 'scrollTemplateId',
-                // scroll: 'xy',
-                // autowidth: true,
-                // body: {
-                    rows: [
-                        {
-                            id: 'templateInspectionReportId',
-                            view: 'template',
-                            scroll: "xy"
+                view: 'accordion',
+                multi:true,
+                rows: [
+                    {
+                        header: 'Фильтр по основным ОКВЭД',
+                        collapsed:true,
+                        body: {
+                            rows: [
+                                mainOkvedTree,
+                            ]
                         }
-                    ]
-                // }
+                    }
+                ]
+            },
+            {
+                view: 'accordion',
+                multi:true,
+                rows: [
+                    {
+                        header: 'Фильтр по дополнительным ОКВЭД',
+                        collapsed:true,
+                        body: {
+                            rows: [
+                                additionalOkvedTree,
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'templateInspectionReportId',
+                view: 'template',
+                scroll: "xy"
             }
         ]
 

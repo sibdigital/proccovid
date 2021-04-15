@@ -52,7 +52,9 @@ public class InspectionController {
     @GetMapping("/generate_inspection_report")
     public @ResponseBody String generateInspectionReport(@RequestParam(value = "minDate") String minDateString,
                                                          @RequestParam(value = "maxDate") String maxDateString,
-                                                         @RequestParam(value = "minCnt") Integer minCnt) throws ParseException {
+                                                         @RequestParam(value = "minCnt") Integer minCnt,
+                                                         @RequestParam(value = "mainOkveds") List<String> mainOkvedPaths,
+                                                         @RequestParam(value = "additionalOkveds") List<String> additionalOkvedPaths) throws ParseException {
 
         Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
         Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
@@ -69,7 +71,7 @@ public class InspectionController {
             maxDate = dateFormat.parse(maxDateString);
         }
 
-        byte[] bytes = inspectionReportService.exportReport("html", minDate, maxDate, minCnt, defaultMinDate, defaultMaxDate);
+        byte[] bytes = inspectionReportService.exportReport("html", minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths, defaultMinDate, defaultMaxDate);
         String template = new String(bytes);
         return template;
     }
@@ -79,6 +81,8 @@ public class InspectionController {
                                  @RequestParam(value = "minDate") String minDateString,
                                  @RequestParam(value = "maxDate") String maxDateString,
                                  @RequestParam(value = "minCnt") Integer minCnt,
+                                 @RequestParam(value = "mainOkveds") List<String> mainOkvedPaths,
+                                 @RequestParam(value = "additionalOkveds") List<String> additionalOkvedPaths,
                                  HttpServletResponse response) throws IOException, ParseException {
 
         Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
@@ -95,7 +99,7 @@ public class InspectionController {
 
         minCnt = (minCnt == null ? 0 :minCnt);
 
-        byte[] bytes = inspectionReportService.exportReport(format, minDate, maxDate, minCnt, defaultMinDate, defaultMaxDate);
+        byte[] bytes = inspectionReportService.exportReport(format, minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths, defaultMinDate, defaultMaxDate);
 
         if (format.equals("pdf")) {
             response.setContentType("application/pdf");

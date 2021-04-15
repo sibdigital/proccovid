@@ -10,7 +10,10 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
+import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.RegOrganizationInspection;
+import ru.sibdigital.proccovid.model.RegOrganizationOkved;
+import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.repository.RegOrganizationInspectionRepo;
 
 import java.io.ByteArrayOutputStream;
@@ -21,6 +24,7 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -32,13 +36,17 @@ public class InspectionReportServiceImpl implements InspectionReportService {
     @Autowired
     RegOrganizationInspectionRepo regOrganizationInspectionRepo;
 
+    @Autowired
+    OkvedRepo okvedRepo;
+
     @PersistenceContext
     private EntityManager entityManager;
 
-    public byte[] exportReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt, Date defaultMinDate, Date defaultMaxDate) {
+    public byte[] exportReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
+                               List<String> mainOkvedPaths, List<String> additionalOkvedPaths, Date defaultMinDate, Date defaultMaxDate) {
         try {
-            List<RegOrganizationInspection> inspections = getInspectionEntitiesForReport(minDate, maxDate, minCnt);
-            Long maxValueLong = getMaxValueInspectionsByOrganAndAuthority(inspections);
+            List<RegOrganizationInspection> inspections = getInspectionEntitiesForReport(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
+            Long maxValueLong = (inspections.isEmpty() ? 0 : getMaxValueInspectionsByOrganAndAuthority(inspections));
             Integer maxValue = maxValueLong.intValue();
 
             // Load file and compile it
@@ -56,6 +64,12 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
             parameters.put("minCnt",  minCnt);
             parameters.put("maxValue", (maxValue == 0 ? 1: maxValue));
+
+            String hasOkvedFilter = "НЕТ";
+            if (mainOkvedPaths != null && !mainOkvedPaths.isEmpty() || additionalOkvedPaths != null && !additionalOkvedPaths.isEmpty()) {
+                hasOkvedFilter = "ДА";
+            }
+            parameters.put("hasOkvedFilter", hasOkvedFilter);
 
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 
@@ -87,31 +101,97 @@ public class InspectionReportServiceImpl implements InspectionReportService {
 
     }
 
-    public List<RegOrganizationInspection> getInspectionEntitiesForReport(Date minDate, Date maxDate, Integer minCnt) throws IOException {
+    public List<RegOrganizationInspection> getInspectionEntitiesForReport(Date minDate, Date maxDate, Integer minCnt, List<String> mainOkvedPaths, List<String> additionalOkvedPaths) throws IOException {
+        Query query = null;
+        List<RegOrganizationInspection> list = null;
 
-        String queryString = getQueryString();
+        if (mainOkvedPaths != null && !mainOkvedPaths.isEmpty() || additionalOkvedPaths != null && !additionalOkvedPaths.isEmpty()) {
+            query = getQueryWithOkvedFilter(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
+            list = query.getResultList();
+        } else {
+            query = getQueryWithoutOkvedFilter(minDate, maxDate, minCnt);
+            list = query.getResultList();
+        }
+
+        return list;
+    }
+
+
+    private Query getQueryWithoutOkvedFilter(Date minDate, Date maxDate, Integer minCnt) throws IOException {
+        String queryString = getQueryString("classpath:reports/inspection/inspection.sql");
         Query query = entityManager.createNativeQuery(queryString, RegOrganizationInspection.class);
         query.setParameter("min_date", minDate);
         query.setParameter("max_date", maxDate);
         query.setParameter("min_cnt", minCnt);
 
-        List<RegOrganizationInspection> list = query.getResultList();
-        return list;
+        return query;
     }
 
-    private String getQueryString() throws IOException {
-        File file = ResourceUtils.getFile("classpath:reports/inspection/inspection.sql");
+    private Query getQueryWithOkvedFilter(Date minDate, Date maxDate, Integer minCnt, List<String> mainOkvedPaths, List<String> additionalOkvedPaths) throws IOException {
+        Boolean hasFilterByMainOkveds = false;
+        Boolean hasFilterByAdditionalOkveds = false;
+
+        // Отбор организации по основному оквэду
+        Set<Long> orgIdsByMain = Collections.<Long>emptySet();
+        if (mainOkvedPaths != null && !mainOkvedPaths.isEmpty()) {
+            hasFilterByMainOkveds = true;
+            List<RegOrganizationOkved> orgIdByMainOkveds = getIdOrganizationsByOkvedsPath(mainOkvedPaths, true);
+            orgIdsByMain = orgIdByMainOkveds.stream()
+                            .map(ctr -> ctr.getRegOrganizationOkvedId().getClsOrganization().getId())
+                           .collect(Collectors.toSet());
+        }
+
+        // Отбор организации по доп оквэду
+        Set<Long> orgIdsByAdditional = Collections.<Long>emptySet();
+        if (additionalOkvedPaths != null && !additionalOkvedPaths.isEmpty()) {
+            hasFilterByAdditionalOkveds = true;
+            List<RegOrganizationOkved> orgIdByAdditionalOkveds = getIdOrganizationsByOkvedsPath(additionalOkvedPaths, false);
+            orgIdsByAdditional = orgIdByAdditionalOkveds.stream()
+                                .map(ctr -> ctr.getRegOrganizationOkvedId().getClsOrganization().getId())
+                                 .collect(Collectors.toSet());
+        }
+
+        String  queryString = getQueryString("classpath:reports/inspection/inspection_filter_org_ids.sql");
+        Query query = entityManager.createNativeQuery(queryString, RegOrganizationInspection.class);
+        query.setParameter("min_date", minDate);
+        query.setParameter("max_date", maxDate);
+        query.setParameter("min_cnt", minCnt);
+        if (hasFilterByAdditionalOkveds && hasFilterByMainOkveds) {
+            Set<Long> orgIds = new HashSet<>(orgIdsByMain);
+            orgIds.retainAll(orgIdsByAdditional); // в orgIds остается пересечение множеств
+
+            query.setParameter("org_ids", orgIds);
+        } else if (hasFilterByMainOkveds) {
+            query.setParameter("org_ids", orgIdsByMain);
+        } else if (hasFilterByAdditionalOkveds) {
+            query.setParameter("org_ids", orgIdsByAdditional);
+        }
+
+        return query;
+    }
+
+    private List<RegOrganizationOkved> getIdOrganizationsByOkvedsPath(List<String> okveds, Boolean isMain) throws IOException {
+        String queryString = getQueryString("classpath:reports/inspection/organizations_id_by_okveds_path.sql");
+        Query query = entityManager.createNativeQuery(queryString, RegOrganizationOkved.class);
+
+        query.setParameter("okved_paths", okveds);
+        query.setParameter("is_main", isMain);
+        return query.getResultList();
+    }
+
+    private String getQueryString(String path) throws IOException {
+        File file = ResourceUtils.getFile(path);
         String query = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
         return query;
     }
 
     private Long getMaxValueInspectionsByOrganAndAuthority(List<RegOrganizationInspection> rois) {
         Query query = entityManager.createQuery(
-    "select count(roi.id) as cnt " +
-            "from RegOrganizationInspection roi " +
-            "where roi in (:rois) " +
-            "group by roi.organization, roi.controlAuthority " +
-            "order by cnt desc");
+                "select count(roi.id) as cnt " +
+                        "from RegOrganizationInspection roi " +
+                        "where roi in (:rois) " +
+                        "group by roi.organization, roi.controlAuthority " +
+                        "order by cnt desc");
         query.setParameter("rois", rois);
         List<Long> list = query.getResultList();
         if (list != null) {
@@ -120,6 +200,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             return Long.getLong("1");
         }
     }
+
 }
 
 

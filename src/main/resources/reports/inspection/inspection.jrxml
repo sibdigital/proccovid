@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="inspection" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="96a35cbc-610a-4ca6-b0e9-387929233446">
-<!--	<property name="net.sf.jasperreports.print.keep.full.text" value="true"></property>-->
+	<property name="net.sf.jasperreports.print.keep.full.text" value="true"></property>
 	<style name="Crosstab_CH" mode="Opaque" backcolor="#87CEEB">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -77,6 +77,7 @@
 	<parameter name="maxDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="minCnt" class="java.lang.Integer" isForPrompting="false"/>
 	<parameter name="maxValue" class="java.lang.Integer" isForPrompting="false"/>
+	<parameter name="hasOkvedFilter" class="java.lang.String" isForPrompting="false"/>
 	<field name="id" class="java.lang.Long"/>
 	<field name="organization" class="ru.sibdigital.proccovid.model.ClsOrganization"/>
 	<field name="controlAuthority" class="ru.sibdigital.proccovid.model.ClsControlAuthority"/>
@@ -109,39 +110,53 @@
 				<text><![CDATA[Дата с:]]></text>
 			</staticText>
 			<textField textAdjust="StretchHeight">
-				<reportElement x="50" y="0" width="100" height="47" uuid="9a42706e-dd94-4e45-9412-48a95ad1dc7a"/>
+				<reportElement x="41" y="0" width="79" height="47" uuid="9a42706e-dd94-4e45-9412-48a95ad1dc7a"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{minDate}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="150" y="0" width="70" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
+				<reportElement x="130" y="0" width="60" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[Дата по:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="230" y="0" width="100" height="47" uuid="52696cca-4ea4-4dc8-8571-d4710e272954"/>
+				<reportElement x="190" y="0" width="90" height="47" uuid="52696cca-4ea4-4dc8-8571-d4710e272954"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{maxDate}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="330" y="0" width="140" height="47" uuid="2fa12eea-df32-488e-b72f-41cad878fe4c"/>
+				<reportElement x="280" y="0" width="80" height="47" uuid="2fa12eea-df32-488e-b72f-41cad878fe4c"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
-				<text><![CDATA[Минимальное кол-во:]]></text>
+				<text><![CDATA[Мин. кол-во:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="480" y="0" width="100" height="47" uuid="fe8f728a-b3e5-4563-bc51-cc6e12fde053"/>
+				<reportElement x="360" y="0" width="60" height="47" uuid="fe8f728a-b3e5-4563-bc51-cc6e12fde053"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{minCnt}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="420" y="0" width="110" height="47" uuid="72f67952-4b8c-498e-a042-af63c14b9b8c"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<text><![CDATA[Фильтр по ОКВЭД:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="530" y="0" width="50" height="47" uuid="c885e74c-9e95-4a0d-88e1-75557af5dbfc"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{hasOkvedFilter}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
