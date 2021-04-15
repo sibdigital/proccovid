@@ -42,8 +42,9 @@ const inspectionReport = {
                             };
                             webix.ajax().get('generate_inspection_report', params).then(function (data) {
                                 if (data.text() != null) {
-                                    $$('templateInspectionReportId').setHTML(data.text());
-                                    $$('templateInspectionReportId').resize();
+                                    let tmlpt =  $$('templateInspectionReportId');
+                                    tmlpt.$view.childNodes[0].setAttribute('style','width:100%');
+                                    tmlpt.setHTML(data.text());
                                 }
                             });
                         },
