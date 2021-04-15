@@ -115,6 +115,7 @@ webix.ready(function() {
                                 cols: [
                                     {
                                         view: 'label',
+                                        id: 'logout_label',
                                         label: DEPARTMENT + ' (<a href="logout" title="Выйти">' + USER_NAME + '</a>)',
                                         align: 'right'
                                     }
