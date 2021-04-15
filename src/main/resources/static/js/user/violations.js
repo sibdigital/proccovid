@@ -103,7 +103,6 @@ const violations = {
                                     on: {
                                         onChange: () => {
                                             let end_date_reg_org = $$('search_endDateRegOrg').getValue();
-                                            console.log(end_date_reg_org)
                                             end_date_reg_org !== null ? $('#picker_date').addClass('filter-data') : $('#picker_date').removeClass('filter-data');
                                         }
                                     }
@@ -152,10 +151,8 @@ const violations = {
                     borderless: true,
                     height: 55,
                     template: () => {
-                        let result = get_group_filter_btns(organization_form_data);
-                        return `<div style="position: absolute; display: flex; flex-direction: row;">
-                                    ` + result + `
-                                </div>`;
+                        let result = get_group_filter_btns(organization_form_data, reloadViolations);
+                        return result;
                     }
                 },
             ]

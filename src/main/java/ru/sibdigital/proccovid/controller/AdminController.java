@@ -562,27 +562,6 @@ public class AdminController {
         return result;
     }
 
-    //    @GetMapping("/cls_organizations")
-//    public @ResponseBody Map<String, Object> getListOrganizations(@RequestParam(value = "inn", required = false) String inn,
-//                                           @RequestParam(value = "id_prescription", required = false) Long idPrescription,
-//                                           @RequestParam(value = "start", required = false) Integer start,
-//                                           @RequestParam(value = "count", required = false) Integer count) {
-//
-//        int page = start == null ? 0 : start / 25;
-//        int size = count == null ? 25 : count;
-//
-//        ClsOrganizationSearchCriteria searchCriteria = new ClsOrganizationSearchCriteria();
-//        searchCriteria.setInn(inn);
-//        searchCriteria.setIdPrescription(idPrescription);
-//
-//        Page<ClsOrganization> clsOrganizationPage = organizationService.getOrganizationsByCriteria(searchCriteria, page, size);
-//
-//        Map<String, Object> result = new HashMap<>();
-//        result.put("data", clsOrganizationPage.getContent());
-//        result.put("pos", (long) page * size);
-//        result.put("total_count", clsOrganizationPage.getTotalElements());
-//        return result;
-//    }
     @GetMapping("/delete_control_authority")
     public @ResponseBody Boolean deleteControlAuthority(@RequestParam(value = "id") Long id) {
         boolean deleted = controlAuthorityService.deleteControlAuthority(id);

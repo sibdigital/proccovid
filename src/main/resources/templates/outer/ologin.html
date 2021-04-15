@@ -117,7 +117,7 @@
     });
     function submit(){
         //webix.message(JSON.stringify($$("log_form").getValues(), null, 2));
-        webix.send("perform_login", $$("log_form").getValues());
+        webix.send("perform_outer_login", $$("log_form").getValues());
     }
 </script>
 </body>

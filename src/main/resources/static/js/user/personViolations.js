@@ -26,8 +26,8 @@ const personViolations = {
                             maxWidth: 300,
                             on: {
                                 onChange: () => {
-                                    let inn = $$('search_lastname').getValue();
-                                    inn !== "" ? $('#search_lastname').addClass('filter-data') : $('#search_lastname').removeClass('filter-data');
+                                    let value = $$('search_lastname').getValue();
+                                    value !== "" ? $('#search_lastname').addClass('filter-data') : $('#search_lastname').removeClass('filter-data');
                                 }
                             }
                         },
@@ -42,8 +42,8 @@ const personViolations = {
                             maxWidth: 300,
                             on: {
                                 onChange: () => {
-                                    let inn = $$('search_firstname').getValue();
-                                    inn !== "" ? $('#search_firstname').addClass('filter-data') : $('#search_firstname').removeClass('filter-data');
+                                    let value = $$('search_firstname').getValue();
+                                    value !== "" ? $('#search_firstname').addClass('filter-data') : $('#search_firstname').removeClass('filter-data');
                                 }
                             }
                         },
@@ -58,8 +58,8 @@ const personViolations = {
                             maxWidth: 300,
                             on: {
                                 onChange: () => {
-                                    let inn = $$('search_patronymic').getValue();
-                                    inn !== "" ? $('#search_patronymic').addClass('filter-data') : $('#search_patronymic').removeClass('filter-data');
+                                    let value = $$('search_patronymic').getValue();
+                                    value !== "" ? $('#search_patronymic').addClass('filter-data') : $('#search_patronymic').removeClass('filter-data');
                                 }
                             }
                         },
@@ -74,8 +74,8 @@ const personViolations = {
                             maxWidth: 300,
                             on: {
                                 onChange: () => {
-                                    let inn = $$('search_passportData').getValue();
-                                    inn !== "" ? $('#search_passportData').addClass('filter-data') : $('#search_passportData').removeClass('filter-data');
+                                    let value = $$('search_passportData').getValue();
+                                    value !== "" ? $('#search_passportData').addClass('filter-data') : $('#search_passportData').removeClass('filter-data');
                                 }
                             }
                         },
@@ -94,8 +94,8 @@ const personViolations = {
                             width: 300,
                             on: {
                                 onChange: () => {
-                                    let inn = $$('search_numberFile').getValue();
-                                    inn !== "" ? $('#search_numberFile').addClass('filter-data') : $('#search_numberFile').removeClass('filter-data');
+                                    let value = $$('search_numberFile').getValue();
+                                    value !== "" ? $('#search_numberFile').addClass('filter-data') : $('#search_numberFile').removeClass('filter-data');
                                 }
                             }
                         },
@@ -111,8 +111,8 @@ const personViolations = {
                             options: 'cls_districts',
                             on: {
                                 onChange: () => {
-                                    let inn = $$('search_district').getValue();
-                                    inn !== "" ? $('#search_district').addClass('filter-data') : $('#search_district').removeClass('filter-data');
+                                    let value = $$('search_district').getValue();
+                                    value !== "" ? $('#search_district').addClass('filter-data') : $('#search_district').removeClass('filter-data');
                                 }
                             }
                         },
@@ -137,10 +137,8 @@ const personViolations = {
                     borderless: true,
                     height: 55,
                     template: () => {
-                        let result = get_group_filter_btns(person_form_data, 'person');
-                        return `<div style="position: absolute; display: flex; flex-direction: row;">
-                                    ` + result + `
-                                </div>`;
+                        let result = get_group_filter_btns(person_form_data, reloadPersonViolations);
+                        return result;
                     }
                 },
             ]

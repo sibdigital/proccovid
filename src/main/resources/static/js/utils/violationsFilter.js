@@ -13,8 +13,8 @@ $(document).on("click.bs.dropdown.data-api.webix_popup.webix_calendar",".webix_c
     (e) => { e.stopPropagation() }
 );
 
-const get_group_filter_btns = (filter_data, type) => {
-    let result_html = '';
+const get_group_filter_btns = (filter_data, reload_func) => {
+    let result_html = `<div class="filter_view">`;
     filter_data.map(panel =>
         result_html +=
             `<div id="cart" style="margin-left:12px" class="input-group" id="adv-search">
@@ -32,21 +32,26 @@ const get_group_filter_btns = (filter_data, type) => {
     )
 
     result_html += `<div class="btn-group">
-                        <button onclick=drop_filters("` + type + `") type="button" class="btn btn-default filter-func-btn" data-toggle="tooltip" data-placement="bottom" title="Сбросить фильтры">
+                        <button id="clear_filter_` + reload_func.name + `" type="button" class="btn btn-default filter-func-btn" data-toggle="tooltip" data-placement="bottom" title="Сбросить фильтры">
                             Сбросить
                             <i class="fas fa-redo fa-sm"></i>
                         </button>
-                        <button onclick=filter_data_by_type("` + type + `") type="button" class="btn btn-default filter-func-btn">
+                        <button id="filter_` + reload_func.name + `" type="button" class="btn btn-default filter-func-btn">
                             Найти
                             <i class="fas fa-filter fa-sm"></i>                               
                         </button>
-                    </div>`
+                    </div>
+                </div>`
 
+    $(document).on("click","#clear_filter_" + reload_func.name, function (){
+        clear_filter_fields(filter_data);
+        reload_func();
+    });
+
+    $(document).on("click","#filter_" + reload_func.name, function (){
+        reload_func();
+    });
     return result_html;
-}
-
-const filter_data_by_type = (type) => {
-    type === 'person' ? reloadPersonViolations() : reloadViolations();
 }
 
 const get_webix_object_by_css = (id, css) => {
@@ -54,23 +59,12 @@ const get_webix_object_by_css = (id, css) => {
     $('.form-group--' + css).append($('.' + css));
 }
 
-const drop_filters = (type) => {
-    if (type === 'person') {
-        $$("search_lastname").setValue("");
-        $$("search_firstname").setValue("");
-        $$("search_patronymic").setValue("");
-        $$("search_passportData").setValue("");
-        $$("search_numberFile").setValue("");
-        $$("search_district").setValue("");
-        reloadPersonViolations();
-    } else {
-        $$("search_district").setValue("");
-        $$("search_beginDateRegOrg").setValue("");
-        $$("search_endDateRegOrg").setValue("");
-        $$("search_numberFile").setValue("");
-        $$("search_name").setValue("");
-        $$("search_inn").setValue("");
-        $$("search_district").setValue("");
-        reloadViolations();
-    }
+const clear_filter_fields = (filter_data) => {
+    filter_data.forEach(item => {
+        if($$(item.id).getChildViews().length > 0) {
+            $$(item.id).getChildViews().forEach(item => $$(item.config.id).setValue(""));
+        } else {
+            $$(item.id).setValue("");
+        }
+    });
 }

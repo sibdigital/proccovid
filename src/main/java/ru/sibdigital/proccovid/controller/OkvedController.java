@@ -93,4 +93,35 @@ public class OkvedController {
         return result;
     }
 
+    @GetMapping("/okved_tree")
+    public @ResponseBody
+    List<Map<String,Object>> getOkvedTree(@RequestParam(value = "parent_node") String parentNode) {
+        int typeCode;
+        switch (parentNode.length()){
+            case 4:
+                typeCode = 0;
+                break;
+            case 7:
+                typeCode = 1;
+                break;
+            case 10:
+                typeCode = 2;
+                break;
+            case 12:
+                typeCode = 3;
+                break;
+            case 13:
+                typeCode = 4;
+                break;
+            case 15:
+                typeCode = 5;
+                break;
+            default:
+                typeCode = 0;
+                break;
+        }
+        List<Map<String,Object>> sections = okvedRepo.findNode(parentNode,typeCode);
+        return sections;
+    }
+
 }
