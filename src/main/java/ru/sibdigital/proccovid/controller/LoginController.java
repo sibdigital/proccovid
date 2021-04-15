@@ -27,6 +27,6 @@ public class LoginController {
     @GetMapping("/outer/ologin")
     public String loginOuter(Model model) {
         //model.addAttribute("application_name", applicationConstants.getApplicationName());
-        return "/outer/ologin";
+        return "outer/ologin";
     }
 }
