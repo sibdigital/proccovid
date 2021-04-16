@@ -2,16 +2,11 @@ package ru.sibdigital.proccovid.service.reports;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.export.HtmlExporter;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.export.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
-import ru.sibdigital.proccovid.dto.Tuple;
 import ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto;
 import ru.sibdigital.proccovid.dto.report.OrganizationShortDto;
 import ru.sibdigital.proccovid.model.report.InspectionEntityReport;
@@ -19,7 +14,6 @@ import ru.sibdigital.proccovid.model.RegOrganizationOkved;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.repository.RegOrganizationInspectionRepo;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -117,67 +111,6 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             log.error(e.getMessage());
             return null;
         }
-    }
-
-
-    public byte[] fsdf(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
-                                               List<String> mainOkvedPaths, List<String> additionalOkvedPaths, Date defaultMinDate, Date defaultMaxDate) {
-        try {
-            List<InspectionEntityReport> inspections = getInspectionEntitiesForReport(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
-            Long maxValueLong = (inspections.isEmpty() ? 0 : getMaxValueInspectionsByOrganAndAuthority(inspections));
-            Integer maxValue = maxValueLong.intValue();
-
-            // Load file and compile it
-            File file = ResourceUtils.getFile("classpath:reports/inspection/inspection.jrxml");
-
-            JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(inspections);
-
-            Map<String, Object> parameters = new HashMap<>();
-            parameters.put("net.sf.jasperreports.print.keep.full.text", true);
-            parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
-
-            DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
-            parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
-            parameters.put("minCnt",  minCnt);
-            parameters.put("maxValue", (maxValue == 0 ? 1: maxValue));
-
-            String hasOkvedFilter = "НЕТ";
-            if (mainOkvedPaths != null && !mainOkvedPaths.isEmpty() || additionalOkvedPaths != null && !additionalOkvedPaths.isEmpty()) {
-                hasOkvedFilter = "ДА";
-            }
-            parameters.put("hasOkvedFilter", hasOkvedFilter);
-
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-
-            final ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] bytes = null;
-            Exporter exporter = null;
-            boolean html = false;
-
-            if (reportFormat.equalsIgnoreCase("pdf")) {
-                exporter = new JRPdfExporter();
-            } else if (reportFormat.equalsIgnoreCase("html")) {
-                exporter = new HtmlExporter();
-                exporter.setExporterOutput(new SimpleHtmlExporterOutput(out));
-                html = true;
-            } else if (reportFormat.equalsIgnoreCase("xlsx")) {
-                exporter = new JRXlsxExporter();
-            }
-
-            if (!html) {
-                exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
-            }
-            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-            exporter.exportReport();
-
-            return out.toByteArray();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return null;
-        }
-
     }
 
     public List<InspectionEntityReport> getInspectionEntitiesForReport(Date minDate, Date maxDate, Integer minCnt, List<String> mainOkvedPaths, List<String> additionalOkvedPaths) throws IOException {
@@ -303,8 +236,9 @@ public class InspectionReportServiceImpl implements InspectionReportService {
     private Long getMaxValueInspectionsByOrganAndAuthority(List<InspectionEntityReport> rois) {
 
         if (rois != null && !rois.isEmpty()) {
-            Map<Tuple<OrganizationShortDto, ControlAuthorityShortDto>, Long> map = rois.stream()
-                    .collect(Collectors.groupingBy(ctr -> new Tuple(ctr.getOrganization(), ctr.getControlAuthority()), Collectors.counting()));
+            Map<Pair<OrganizationShortDto, ControlAuthorityShortDto>, Long> map = rois.stream()
+                    .collect(Collectors.groupingBy(ctr -> new Pair(ctr.getOrganization(), ctr.getControlAuthority()), Collectors.counting()));
+
             Long maxValue = Collections.max(map.values());
             return maxValue;
         } else  {
