@@ -11,6 +11,18 @@ function view_section(title) {
 }
 
 webix.ready(function() {
+    let rolesStr = webix.ajax().sync().get('user_roles');
+    let userRoles = JSON.parse(rolesStr.response);
+    let isAdmin = userRoles[0].status;
+    let isUser = userRoles[1].status;
+    let isViol = userRoles[2].status;
+    let menuItems = [
+        {id: "Requests", icon: "fas fa-file", value: 'Заявки', access: isUser || isAdmin},
+        // { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
+        {id: "Violations", icon: "fas fa-file-alt", value: 'Нарушения организаций', access: isViol || isAdmin},
+        {id: "PersonViolations", icon: "fas fa-file-alt", value: 'Нарушения физ. лиц', access: isViol || isAdmin},
+    ].filter(item => item.access === true)
+
     let layout = webix.ui({
         cols: [
             {
@@ -31,12 +43,7 @@ webix.ready(function() {
                         id: 'menu',
                         css: 'my_menubar',
                         layout: 'y',
-                        data: [
-                            { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
-                            // { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
-                            { id: "Violations", icon: "fas fa-file-alt", value: 'Нарушения организаций' },
-                            { id: "PersonViolations", icon: "fas fa-file-alt", value: 'Нарушения физ. лиц' },
-                        ],
+                        data: menuItems,
                         type: {
                             css: 'my_menubar_item',
                             height: 44
