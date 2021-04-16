@@ -532,6 +532,7 @@ public class RequestService {
                 .login(clsUserDto.getLogin())
                 .isAdmin(clsUserDto.getAdmin())
                 .email(clsUserDto.getEmail())
+                .status(clsUserDto.getStatus())
                 .build();
 
         if (clsUserDto.getNewPassword() != null && !clsUserDto.getNewPassword().isBlank()) {

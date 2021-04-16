@@ -34,6 +34,7 @@ public class ClsUser implements Serializable {
     private String password;
     private Boolean isAdmin;
     private String email;
+    private Integer status;
 
     @OneToOne
     @JoinColumn(name = "id_district", referencedColumnName = "id")
@@ -134,6 +135,16 @@ public class ClsUser implements Serializable {
     public void setDistrict(ClsDistrict district) {
         this.district = district;
     }
+
+    @Basic
+    @Column(name = "status")
+    public Integer getStatus() {
+        return status;
+    }
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
 
     public String getFullName() {
         String fullName = "";
