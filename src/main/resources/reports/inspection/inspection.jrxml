@@ -79,8 +79,8 @@
 	<parameter name="maxValue" class="java.lang.Integer" isForPrompting="false"/>
 	<parameter name="hasOkvedFilter" class="java.lang.String" isForPrompting="false"/>
 	<field name="id" class="java.lang.Long"/>
-	<field name="organization" class="ru.sibdigital.proccovid.model.ClsOrganization"/>
-	<field name="controlAuthority" class="ru.sibdigital.proccovid.model.ClsControlAuthority"/>
+	<field name="organization" class="ru.sibdigital.proccovid.dto.report.OrganizationShortDto"/>
+	<field name="controlAuthority" class="ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto"/>
 	<field name="totalOrganization" class="java.lang.Integer"/>
 	<field name="totalAuthority" class="java.lang.Integer"/>
 	<background>
@@ -174,7 +174,7 @@
 					<dataset resetType="Report"/>
 				</crosstabDataset>
 				<rowGroup name="organization" width="150" totalPosition="End" mergeHeaderCells="true">
-					<bucket order="Descending" class="ru.sibdigital.proccovid.model.ClsOrganization">
+					<bucket order="Descending" class="ru.sibdigital.proccovid.dto.report.OrganizationShortDto">
 						<bucketExpression><![CDATA[$F{organization}]]></bucketExpression>
 						<orderByExpression><![CDATA[$V{order_measure_organization}]]></orderByExpression>
 					</bucket>
@@ -186,7 +186,7 @@
 								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{organization}.getName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[($V{organization}.getShortName() == null) ? $V{organization}.getName() : $V{organization}.getShortName()]]></textFieldExpression>
 								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getName()]]></hyperlinkTooltipExpression>
 							</textField>
 						</cellContents>
@@ -204,7 +204,7 @@
 					</crosstabTotalRowHeader>
 				</rowGroup>
 				<columnGroup name="controlAuthority" height="20" totalPosition="End" mergeHeaderCells="true">
-					<bucket order="Descending" class="ru.sibdigital.proccovid.model.ClsControlAuthority">
+					<bucket order="Descending" class="ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto">
 						<bucketExpression><![CDATA[$F{controlAuthority}]]></bucketExpression>
 						<orderByExpression><![CDATA[$V{order_measure_authority}]]></orderByExpression>
 					</bucket>

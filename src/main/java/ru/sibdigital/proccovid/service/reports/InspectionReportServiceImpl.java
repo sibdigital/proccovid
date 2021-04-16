@@ -1,5 +1,6 @@
 package ru.sibdigital.proccovid.service.reports;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.HtmlExporter;
@@ -10,8 +11,10 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
-import ru.sibdigital.proccovid.model.Okved;
-import ru.sibdigital.proccovid.model.RegOrganizationInspection;
+import ru.sibdigital.proccovid.dto.Tuple;
+import ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto;
+import ru.sibdigital.proccovid.dto.report.OrganizationShortDto;
+import ru.sibdigital.proccovid.model.report.InspectionEntityReport;
 import ru.sibdigital.proccovid.model.RegOrganizationOkved;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.repository.RegOrganizationInspectionRepo;
@@ -31,6 +34,7 @@ import javax.persistence.Query;
 
 
 @Service
+@Slf4j
 public class InspectionReportServiceImpl implements InspectionReportService {
 
     @Autowired
@@ -45,7 +49,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
     public byte[] exportReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
                                List<String> mainOkvedPaths, List<String> additionalOkvedPaths, Date defaultMinDate, Date defaultMaxDate) {
         try {
-            List<RegOrganizationInspection> inspections = getInspectionEntitiesForReport(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
+            List<InspectionEntityReport> inspections = getInspectionEntitiesForReport(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
             Long maxValueLong = (inspections.isEmpty() ? 0 : getMaxValueInspectionsByOrganAndAuthority(inspections));
             Integer maxValue = maxValueLong.intValue();
 
@@ -96,14 +100,15 @@ public class InspectionReportServiceImpl implements InspectionReportService {
 
             return out.toByteArray();
         } catch (Exception e) {
+            log.error(e.getMessage());
             return null;
         }
 
     }
 
-    public List<RegOrganizationInspection> getInspectionEntitiesForReport(Date minDate, Date maxDate, Integer minCnt, List<String> mainOkvedPaths, List<String> additionalOkvedPaths) throws IOException {
+    public List<InspectionEntityReport> getInspectionEntitiesForReport(Date minDate, Date maxDate, Integer minCnt, List<String> mainOkvedPaths, List<String> additionalOkvedPaths) throws IOException {
         Query query = null;
-        List<RegOrganizationInspection> list = null;
+        List<InspectionEntityReport> list = null;
 
         if (mainOkvedPaths != null && !mainOkvedPaths.isEmpty() || additionalOkvedPaths != null && !additionalOkvedPaths.isEmpty()) {
             query = getQueryWithOkvedFilter(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
@@ -119,7 +124,8 @@ public class InspectionReportServiceImpl implements InspectionReportService {
 
     private Query getQueryWithoutOkvedFilter(Date minDate, Date maxDate, Integer minCnt) throws IOException {
         String queryString = getQueryString("classpath:reports/inspection/inspection.sql");
-        Query query = entityManager.createNativeQuery(queryString, RegOrganizationInspection.class);
+        Query query = entityManager.createNativeQuery(queryString, InspectionEntityReport.class);
+
         query.setParameter("min_date", minDate);
         query.setParameter("max_date", maxDate);
         query.setParameter("min_cnt", minCnt);
@@ -152,7 +158,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
         }
 
         String  queryString = getQueryString("classpath:reports/inspection/inspection_filter_org_ids.sql");
-        Query query = entityManager.createNativeQuery(queryString, RegOrganizationInspection.class);
+        Query query = entityManager.createNativeQuery(queryString, InspectionEntityReport.class);
         query.setParameter("min_date", minDate);
         query.setParameter("max_date", maxDate);
         query.setParameter("min_cnt", minCnt);
@@ -185,21 +191,19 @@ public class InspectionReportServiceImpl implements InspectionReportService {
         return query;
     }
 
-    private Long getMaxValueInspectionsByOrganAndAuthority(List<RegOrganizationInspection> rois) {
-        Query query = entityManager.createQuery(
-                "select count(roi.id) as cnt " +
-                        "from RegOrganizationInspection roi " +
-                        "where roi in (:rois) " +
-                        "group by roi.organization, roi.controlAuthority " +
-                        "order by cnt desc");
-        query.setParameter("rois", rois);
-        List<Long> list = query.getResultList();
-        if (list != null) {
-            return list.get(0);
-        } else {
-            return Long.getLong("1");
+    private Long getMaxValueInspectionsByOrganAndAuthority(List<InspectionEntityReport> rois) {
+
+        if (rois != null && !rois.isEmpty()) {
+            Map<Tuple<OrganizationShortDto, ControlAuthorityShortDto>, Long> map = rois.stream()
+                    .collect(Collectors.groupingBy(ctr -> new Tuple(ctr.getOrganization(), ctr.getControlAuthority()), Collectors.counting()));
+            Long maxValue = Collections.max(map.values());
+            return maxValue;
+        } else  {
+            return Long.valueOf(1);
         }
     }
+
+
 
 }
 
