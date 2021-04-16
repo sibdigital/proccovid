@@ -92,7 +92,7 @@
 			<frame>
 				<reportElement mode="Transparent" x="-20" y="-20" width="842" height="40" backcolor="#0075A5" uuid="d745ede9-3b9e-4d1b-9b4a-cde89188e7c2"/>
 				<textField textAdjust="StretchHeight">
-					<reportElement mode="Opaque" x="0" y="0" width="842" height="40" forecolor="#0075A5" backcolor="rgba(0, 117, 165, 0.0)" uuid="049e37a1-4091-4d41-829e-917e021fb2ef"/>
+					<reportElement mode="Opaque" x="0" y="0" width="842" height="40" forecolor="#0075A5" uuid="049e37a1-4091-4d41-829e-917e021fb2ef"/>
 					<textElement textAlignment="Center">
 						<font size="26" isBold="true"/>
 					</textElement>
