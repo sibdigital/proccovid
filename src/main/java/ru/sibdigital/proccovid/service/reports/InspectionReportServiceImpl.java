@@ -43,11 +43,85 @@ public class InspectionReportServiceImpl implements InspectionReportService {
     @Autowired
     OkvedRepo okvedRepo;
 
+    @Autowired
+    JasperReportService jasperReportService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
-    public byte[] exportReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
+    public byte[] exportInspectionReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
                                List<String> mainOkvedPaths, List<String> additionalOkvedPaths, Date defaultMinDate, Date defaultMaxDate) {
+        try {
+            List<InspectionEntityReport> inspections = getInspectionEntitiesForReport(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
+            Long maxValueLong = (inspections.isEmpty() ? 0 : getMaxValueInspectionsByOrganAndAuthority(inspections));
+            Integer maxValue = maxValueLong.intValue();
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("net.sf.jasperreports.print.keep.full.text", true);
+            parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
+
+            DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
+            parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
+            parameters.put("minCnt",  minCnt);
+            parameters.put("maxValue", (maxValue == 0 ? 1: maxValue));
+            parameters.put("reportTitle", "Отчет по контрольно-надзорным мероприятиям");
+
+            String hasOkvedFilter = "НЕТ";
+            if (mainOkvedPaths != null && !mainOkvedPaths.isEmpty() || additionalOkvedPaths != null && !additionalOkvedPaths.isEmpty()) {
+                hasOkvedFilter = "ДА";
+            }
+            parameters.put("okvedFilterDesc", "Фильтр по ОКВЭД: " + hasOkvedFilter);
+
+            return jasperReportService.exportJasperReport("classpath:reports/inspection/inspection.jrxml",
+                    inspections, parameters, reportFormat);
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+
+    }
+
+    @Override
+    public byte[] exportInspectionCountReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
+                                    Long idOrganization, Long idAuthority, Integer typeRecord, Date defaultMinDate, Date defaultMaxDate) {
+        try {
+            List<InspectionEntityReport> inspections = getInspectionEntitiesForReportCount(minDate, maxDate, minCnt, idOrganization, idAuthority, typeRecord);
+            Long maxValueLong = (inspections.isEmpty() ? 0 : getMaxValueInspectionsByOrganAndAuthority(inspections));
+            Integer maxValue = maxValueLong.intValue();
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("net.sf.jasperreports.print.keep.full.text", true);
+            parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
+
+            DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
+            parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
+            parameters.put("minCnt",  minCnt);
+            parameters.put("maxValue", (maxValue == 0 ? 1: maxValue));
+            parameters.put("okvedFilterDesc", "");
+
+            String jrxmlPath = null;
+            if (typeRecord == 1) {
+                jrxmlPath = "classpath:reports/inspection/inspection_T.jrxml";
+                parameters.put("reportTitle", "Отчет о количестве проверок по организации");
+            } else  {
+                jrxmlPath = "classpath:reports/inspection/inspection.jrxml";
+                parameters.put("reportTitle", "Отчет о количестве проверок по проверяющему органу");
+            }
+
+            return jasperReportService.exportJasperReport(jrxmlPath, inspections, parameters, reportFormat);
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+    public byte[] fsdf(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
+                                               List<String> mainOkvedPaths, List<String> additionalOkvedPaths, Date defaultMinDate, Date defaultMaxDate) {
         try {
             List<InspectionEntityReport> inspections = getInspectionEntitiesForReport(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
             Long maxValueLong = (inspections.isEmpty() ? 0 : getMaxValueInspectionsByOrganAndAuthority(inspections));
@@ -121,6 +195,22 @@ public class InspectionReportServiceImpl implements InspectionReportService {
         return list;
     }
 
+    public List<InspectionEntityReport> getInspectionEntitiesForReportCount(Date minDate, Date maxDate, Integer minCnt,
+                                                                            Long idOrganization, Long idAuthority, Integer typeRecord) throws IOException {
+        Query query = null;
+        List<InspectionEntityReport> list = null;
+
+        if (typeRecord == 1) {
+            query = getQueryWithFilterByOrgId(minDate, maxDate, minCnt, Set.of(idOrganization));
+        } else {
+            query = getQueryWithFilterByAuthorityId(minDate, maxDate, minCnt, Set.of(idAuthority));
+        }
+
+        list = query.getResultList();
+
+        return list;
+    }
+
 
     private Query getQueryWithoutOkvedFilter(Date minDate, Date maxDate, Integer minCnt) throws IOException {
         String queryString = getQueryString("classpath:reports/inspection/inspection.sql");
@@ -157,21 +247,40 @@ public class InspectionReportServiceImpl implements InspectionReportService {
                                  .collect(Collectors.toSet());
         }
 
+        Query query = null;
+        Set<Long> orgIds = new HashSet<>();
+
+        if (hasFilterByAdditionalOkveds && hasFilterByMainOkveds) {
+            orgIds = new HashSet<>(orgIdsByMain);
+            orgIds.retainAll(orgIdsByAdditional); // в orgIds остается пересечение множеств
+        } else if (hasFilterByMainOkveds) {
+            orgIds = orgIdsByMain;
+        } else if (hasFilterByAdditionalOkveds) {
+            orgIds = orgIdsByAdditional;
+        }
+
+        query = getQueryWithFilterByOrgId(minDate, maxDate, minCnt, orgIds);
+        return query;
+    }
+
+    private Query getQueryWithFilterByOrgId(Date minDate, Date maxDate, Integer minCnt, Set<Long> orgIds) throws IOException {
         String  queryString = getQueryString("classpath:reports/inspection/inspection_filter_org_ids.sql");
         Query query = entityManager.createNativeQuery(queryString, InspectionEntityReport.class);
         query.setParameter("min_date", minDate);
         query.setParameter("max_date", maxDate);
         query.setParameter("min_cnt", minCnt);
-        if (hasFilterByAdditionalOkveds && hasFilterByMainOkveds) {
-            Set<Long> orgIds = new HashSet<>(orgIdsByMain);
-            orgIds.retainAll(orgIdsByAdditional); // в orgIds остается пересечение множеств
+        query.setParameter("org_ids", orgIds);
 
-            query.setParameter("org_ids", orgIds);
-        } else if (hasFilterByMainOkveds) {
-            query.setParameter("org_ids", orgIdsByMain);
-        } else if (hasFilterByAdditionalOkveds) {
-            query.setParameter("org_ids", orgIdsByAdditional);
-        }
+        return query;
+    }
+
+    private Query getQueryWithFilterByAuthorityId(Date minDate, Date maxDate, Integer minCnt, Set<Long> authorityIds) throws IOException {
+        String  queryString = getQueryString("classpath:reports/inspection/inspection_filter_authority_ids.sql");
+        Query query = entityManager.createNativeQuery(queryString, InspectionEntityReport.class);
+        query.setParameter("min_date", minDate);
+        query.setParameter("max_date", maxDate);
+        query.setParameter("min_cnt", minCnt);
+        query.setParameter("authority_ids", authorityIds);
 
         return query;
     }

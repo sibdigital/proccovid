@@ -149,6 +149,7 @@
 				<reportElement x="420" y="0" width="200" height="47" uuid="72f67952-4b8c-498e-a042-af63c14b9b8c"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Times New Roman" size="12"/>
+					<!--					<font size="12"/>-->
 				</textElement>
 				<textFieldExpression><![CDATA[$P{okvedFilterDesc}]]></textFieldExpression>
 			</textField>
@@ -167,10 +168,10 @@
 				<crosstabDataset>
 					<dataset resetType="Report"/>
 				</crosstabDataset>
-				<rowGroup name="organization" width="150" totalPosition="End" mergeHeaderCells="true">
-					<bucket order="Descending" class="ru.sibdigital.proccovid.dto.report.OrganizationShortDto">
-						<bucketExpression><![CDATA[$F{organization}]]></bucketExpression>
-						<orderByExpression><![CDATA[$V{order_measure_organization}]]></orderByExpression>
+				<rowGroup name="controlAuthority" width="150" totalPosition="End" mergeHeaderCells="true">
+					<bucket order="Descending" class="ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto">
+						<bucketExpression><![CDATA[$F{controlAuthority}]]></bucketExpression>
+						<orderByExpression><![CDATA[$V{order_measure_authority}]]></orderByExpression>
 					</bucket>
 					<crosstabRowHeader>
 						<cellContents mode="Opaque" style="Crosstab_CH">
@@ -180,8 +181,8 @@
 								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<textFieldExpression><![CDATA[($V{organization}.getShortName() == null) ? $V{organization}.getName() : $V{organization}.getShortName()]]></textFieldExpression>
-								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getName()]]></hyperlinkTooltipExpression>
+								<textFieldExpression><![CDATA[($V{controlAuthority}.getShortName() == null) ? $V{controlAuthority}.getName() : $V{controlAuthority}.getShortName()]]></textFieldExpression>
+								<hyperlinkTooltipExpression><![CDATA[$V{controlAuthority}.getName()]]></hyperlinkTooltipExpression>
 							</textField>
 						</cellContents>
 					</crosstabRowHeader>
@@ -197,10 +198,10 @@
 						</cellContents>
 					</crosstabTotalRowHeader>
 				</rowGroup>
-				<columnGroup name="controlAuthority" height="20" totalPosition="End" mergeHeaderCells="true">
-					<bucket order="Descending" class="ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto">
-						<bucketExpression><![CDATA[$F{controlAuthority}]]></bucketExpression>
-						<orderByExpression><![CDATA[$V{order_measure_authority}]]></orderByExpression>
+				<columnGroup name="organization" height="20" totalPosition="End" mergeHeaderCells="true">
+					<bucket order="Descending" class="ru.sibdigital.proccovid.dto.report.OrganizationShortDto">
+						<bucketExpression><![CDATA[$F{organization}]]></bucketExpression>
+						<orderByExpression><![CDATA[$V{order_measure_organization}]]></orderByExpression>
 					</bucket>
 					<crosstabColumnHeader>
 						<cellContents mode="Opaque" style="Crosstab_CH">
@@ -212,8 +213,8 @@
 								<textElement verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<textFieldExpression><![CDATA[($V{controlAuthority}.getShortName() == null) ? $V{controlAuthority}.getName() : $V{controlAuthority}.getShortName()]]></textFieldExpression>
-								<hyperlinkTooltipExpression><![CDATA[$V{controlAuthority}.getName()]]></hyperlinkTooltipExpression>
+								<textFieldExpression><![CDATA[($V{organization}.getShortName() == null) ? $V{organization}.getName() : $V{organization}.getShortName()]]></textFieldExpression>
+								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getName()]]></hyperlinkTooltipExpression>
 							</textField>
 						</cellContents>
 					</crosstabColumnHeader>
@@ -256,7 +257,7 @@
 						</textField>
 					</cellContents>
 				</crosstabCell>
-				<crosstabCell width="60" height="20" columnTotalGroup="controlAuthority">
+				<crosstabCell width="60" height="20" columnTotalGroup="organization">
 					<cellContents mode="Opaque" style="Crosstab_CT">
 						<textField>
 							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="f561ca77-bcc1-4461-a28a-ca2948dc2edc"/>
@@ -267,7 +268,7 @@
 						</textField>
 					</cellContents>
 				</crosstabCell>
-				<crosstabCell width="100" height="20" rowTotalGroup="organization">
+				<crosstabCell width="100" height="20" rowTotalGroup="controlAuthority">
 					<cellContents mode="Opaque" style="Crosstab_CT">
 						<textField>
 							<reportElement x="0" y="0" width="100" height="20" isRemoveLineWhenBlank="true" forecolor="#FFFFFF" uuid="9b769142-c76f-45dc-9004-249ae2285e96"/>
@@ -278,7 +279,7 @@
 						</textField>
 					</cellContents>
 				</crosstabCell>
-				<crosstabCell width="60" height="20" rowTotalGroup="organization" columnTotalGroup="controlAuthority">
+				<crosstabCell width="60" height="20" rowTotalGroup="controlAuthority" columnTotalGroup="organization">
 					<cellContents mode="Opaque" style="Crosstab_CT">
 						<textField>
 							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="f219783c-8bd7-4b76-9a0d-cce3eacde7cc"/>

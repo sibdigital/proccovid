@@ -49,6 +49,18 @@ const statistic = {
                                 ]
                             }, $$("content"));
                         },
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='' onclick='return false'>Отчет о количестве проверок\n</a>",
+                        click: () => {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    inspectionCountReport
+                                ]
+                            }, $$("content"));
+                        },
                     }
                 ]
             }
