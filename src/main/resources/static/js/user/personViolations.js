@@ -134,7 +134,11 @@ const personViolations = {
                             fillspace: true
                         },
                         {id: "nameTypeViolation", width: 250, header: "Вид нарушения", template: "#nameTypeViolation#"},
-                        {id: "date_reg_person", width: 200, header: "Дата регистрации", template: (obj) => { return obj.dateRegPerson || ""}},
+                        {
+                            id: "date_reg_person", width: 200, header: "Дата регистрации", template: (obj) => {
+                                return obj.dateRegPerson || ""
+                            }
+                        },
                     ],
                     on: {
                         onBeforeLoad: function () {
@@ -153,7 +157,7 @@ const personViolations = {
                             let item = $$('person_violations_table').getItem(id);
 
                             setTimeout(function () {
-                                showPersonViolationForm();
+                                showPersonViolationForm(id);
 
                                 webix.ajax().get('person_violation', {id: item.id})
                                     .then(function (data) {
@@ -205,241 +209,251 @@ const personViolations = {
     ]
 }
 
-function showPersonViolationForm() {
+function showPersonViolationForm(id) {
     const personViolationForm = {
-        view: 'form',
-        id: 'personViolationForm',
-        elements: [
-            view_section('Реквизиты нарушителя'),
+        rows: [
             {
-                margin: 10,
-                cols: [
-                    {
-                        view: 'text',
-                        name: 'lastname',
-                        id: 'lastname',
-                        label: 'Фамилия',
-                        labelWidth: 85,
-                        width: 528,
-                        required: true,
-                        validate: webix.rules.isNotEmpty,
-                        invalidMessage: 'Поле не может быть пустым',
-                    },
-                    {
-                        view: 'text',
-                        name: 'firstname',
-                        id: 'firstname',
-                        label: 'Имя',
-                        labelWidth: 135,
-                        labelPosition: 'right',
-                        required: true,
-                        validate: webix.rules.isNotEmpty,
-                        invalidMessage: 'Поле не может быть пустым',
-                    },
-                    {
-                        view: 'text',
-                        name: 'patronymic',
-                        id: 'patronymic',
-                        label: 'Отчество',
-                        // required: true,
-                        // validate: webix.rules.isNumber,
-                        // invalidMessage: 'Поле не может быть пустым',
-                    },
-                ]
+                view: 'toolbar',
+                elements: [
+                    {view: 'label', css: {"padding-left": "10px"}, label: 'Просмотр нарушения (id: ' + id + ').'},
+                ],
             },
             {
-                margin: 10,
-                cols: [
+                view: 'form',
+                id: 'personViolationForm',
+                elements: [
+                    view_section('Реквизиты нарушителя'),
                     {
-                        view: 'datepicker',
-                        name: 'birthday',
-                        id: 'birthday',
-                        label: 'Дата рождения',
-                        labelWidth: 130,
-                        editable: true,
-                        width: 528,
-                        required: true,
-                        validate: webix.rules.isNotEmpty,
-                        invalidMessage: 'Поле не может быть пустым',
+                        margin: 10,
+                        cols: [
+                            {
+                                view: 'text',
+                                name: 'lastname',
+                                id: 'lastname',
+                                label: 'Фамилия',
+                                labelWidth: 85,
+                                width: 528,
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                invalidMessage: 'Поле не может быть пустым',
+                            },
+                            {
+                                view: 'text',
+                                name: 'firstname',
+                                id: 'firstname',
+                                label: 'Имя',
+                                labelWidth: 135,
+                                labelPosition: 'right',
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                invalidMessage: 'Поле не может быть пустым',
+                            },
+                            {
+                                view: 'text',
+                                name: 'patronymic',
+                                id: 'patronymic',
+                                label: 'Отчество',
+                                // required: true,
+                                // validate: webix.rules.isNumber,
+                                // invalidMessage: 'Поле не может быть пустым',
+                            },
+                        ]
+                    },
+                    {
+                        margin: 10,
+                        cols: [
+                            {
+                                view: 'datepicker',
+                                name: 'birthday',
+                                id: 'birthday',
+                                label: 'Дата рождения',
+                                labelWidth: 130,
+                                editable: true,
+                                width: 528,
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                invalidMessage: 'Поле не может быть пустым',
+                            },
+                            {
+                                view: 'text',
+                                name: 'placeBirth',
+                                id: 'placeBirth',
+                                label: 'Место рождения',
+                                labelWidth: 135,
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                invalidMessage: 'Поле не может быть пустым',
+                            },
+                        ]
+                    },
+                    {
+                        margin: 10,
+                        cols: [
+                            {
+                                view: 'textarea',
+                                name: 'registrationAddress',
+                                height: 90,
+                                id: 'registrationAddress',
+                                label: 'Адрес регистрации',
+                                labelPosition: 'top',
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                invalidMessage: 'Поле не может быть пустым',
+                            },
+                            // {
+                            //     view: 'text',
+                            //     name: 'residenceAddress',
+                            //     id: 'residenceAddress',
+                            //     label: 'Адрес проживания',
+                            //     labelPosition: 'top',
+                            //     required: true,
+                            //     validate: webix.rules.isNotEmpty,
+                            //     invalidMessage: 'Поле не может быть пустым',
+                            // },
+                            {
+                                view: 'textarea',
+                                name: 'passportData',
+                                height: 90,
+                                id: 'passportData',
+                                label: 'Паспортные данные',
+                                labelPosition: 'top',
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                invalidMessage: 'Поле не может быть пустым',
+                            },
+                        ]
                     },
                     {
                         view: 'text',
-                        name: 'placeBirth',
-                        id: 'placeBirth',
-                        label: 'Место рождения',
-                        labelWidth: 135,
-                        required: true,
-                        validate: webix.rules.isNotEmpty,
-                        invalidMessage: 'Поле не может быть пустым',
-                    },
-                ]
-            },
-            {
-                margin: 10,
-                cols: [
-                    {
-                        view: 'textarea',
-                        name: 'registrationAddress',
-                        height: 90,
-                        id: 'registrationAddress',
-                        label: 'Адрес регистрации',
-                        labelPosition: 'top',
-                        required: true,
-                        validate: webix.rules.isNotEmpty,
-                        invalidMessage: 'Поле не может быть пустым',
-                    },
-                    // {
-                    //     view: 'text',
-                    //     name: 'residenceAddress',
-                    //     id: 'residenceAddress',
-                    //     label: 'Адрес проживания',
-                    //     labelPosition: 'top',
-                    //     required: true,
-                    //     validate: webix.rules.isNotEmpty,
-                    //     invalidMessage: 'Поле не может быть пустым',
-                    // },
-                    {
-                        view: 'textarea',
-                        name: 'passportData',
-                        height: 90,
-                        id: 'passportData',
-                        label: 'Паспортные данные',
-                        labelPosition: 'top',
-                        required: true,
-                        validate: webix.rules.isNotEmpty,
-                        invalidMessage: 'Поле не может быть пустым',
-                    },
-                ]
-            },
-            {
-                view: 'text',
-                name: 'placeWork',
-                id: 'placeWork',
-                label: 'Место работы',
-                labelWidth: 105,
-                // required: true,
-                // validate: webix.rules.isNotEmpty,
-                // invalidMessage: 'Поле не может быть пустым',
-            },
-            view_section('Реквизиты нарушения'),
-            {
-                margin: 10,
-                cols: [
-                    {
-                        view: 'datepicker',
-                        name: 'dateRegPerson',
-                        id: 'dateRegPerson',
-                        label: 'Дата регистрации',
-                        editable: true,
-                        labelPosition: 'top',
+                        name: 'placeWork',
+                        id: 'placeWork',
+                        label: 'Место работы',
+                        labelWidth: 105,
                         // required: true,
                         // validate: webix.rules.isNotEmpty,
                         // invalidMessage: 'Поле не может быть пустым',
                     },
+                    view_section('Реквизиты нарушения'),
                     {
-                        view: 'richselect',
-                        id: 'idTypeViolation',
-                        name: 'idTypeViolation',
-                        label: 'Вид нарушения',
-                        labelPosition: 'top',
-                        required: true,
-                        validate: webix.rules.isNotEmpty,
-                        options: 'type_violations',
-                        invalidMessage: 'Поле не может быть пустым',
+                        margin: 10,
+                        cols: [
+                            {
+                                view: 'datepicker',
+                                name: 'dateRegPerson',
+                                id: 'dateRegPerson',
+                                label: 'Дата регистрации',
+                                editable: true,
+                                labelPosition: 'top',
+                                // required: true,
+                                // validate: webix.rules.isNotEmpty,
+                                // invalidMessage: 'Поле не может быть пустым',
+                            },
+                            {
+                                view: 'richselect',
+                                id: 'idTypeViolation',
+                                name: 'idTypeViolation',
+                                label: 'Вид нарушения',
+                                labelPosition: 'top',
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                options: 'type_violations',
+                                invalidMessage: 'Поле не может быть пустым',
+                            },
+                            {
+                                view: 'richselect',
+                                name: 'idDistrict',
+                                id: 'idDistrict',
+                                label: 'Район',
+                                labelPosition: 'top',
+                                options: 'cls_districts',
+                                required: true,
+                                validate: webix.rules.isNotEmpty
+                            },
+                        ]
                     },
                     {
-                        view: 'richselect',
-                        name: 'idDistrict',
-                        id: 'idDistrict',
-                        label: 'Район',
-                        labelPosition: 'top',
-                        options: 'cls_districts',
-                        required: true,
-                        validate: webix.rules.isNotEmpty
+                        view: 'template',
+                        type: 'section',
+                        template: 'Реквизиты судебного решения'
                     },
-                ]
-            },
-            {
-                view: 'template',
-                type: 'section',
-                template: 'Реквизиты судебного решения'
-            },
-            {
-                margin: 10,
-                cols: [
                     {
-                        view: 'text',
-                        name: 'numberFile',
-                        id: 'numberFile',
-                        label: 'Номер дела',
-                        labelPosition: 'top',
-                        invalidMessage: 'Длина номера дела превышает 100 символов',
-                        validate: function (val) {
-                            if (val) {
-                                if (val.length > 100) {
-                                    return false;
+                        margin: 10,
+                        cols: [
+                            {
+                                view: 'text',
+                                name: 'numberFile',
+                                id: 'numberFile',
+                                label: 'Номер дела',
+                                labelPosition: 'top',
+                                invalidMessage: 'Длина номера дела превышает 100 символов',
+                                validate: function (val) {
+                                    if (val) {
+                                        if (val.length > 100) {
+                                            return false;
+                                        }
+                                    }
+                                    return true;
+                                }
+                            },
+                            {
+                                view: 'datepicker',
+                                name: 'dateFile',
+                                id: 'dateFile',
+                                label: 'Дата',
+                                editable: true,
+                                labelPosition: 'top',
+                                // required: true,
+                                // validate: webix.rules.isNotEmpty,
+                                // invalidMessage: 'Поле не может быть пустым',
+                            }
+                        ]
+                    },
+                    {
+                        margin: 10,
+                        cols: [
+                            {},
+                            {
+                                view: 'button',
+                                id: 'save_button',
+                                align: 'right',
+                                css: 'webix_primary',
+                                value: 'Сохранить',
+                                maxWidth: 300,
+                                click: function () {
+                                    if ($$('personViolationForm').validate()) {
+                                        $$('save_button').disable();
+
+                                        let params = $$('personViolationForm').getValues();
+
+                                        webix.ajax().headers({'Content-Type': 'application/json'}).post('save_person_violation', JSON.stringify(params))
+                                            .then(function (data) {
+                                                if (data.text() === 'Нарушение сохранено') {
+                                                    webix.message({text: data.text(), type: 'success'});
+                                                    showPersonViolations();
+                                                } else {
+                                                    webix.message({text: data.text(), type: 'error'});
+                                                }
+                                            });
+                                    } else {
+                                        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
+                                    }
+                                }
+                            },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                css: 'webix_primary',
+                                value: 'Отмена',
+                                maxWidth: 300,
+                                click: function () {
+                                    showPersonViolations();
                                 }
                             }
-                            return true;
-                        }
-                    },
-                    {
-                        view: 'datepicker',
-                        name: 'dateFile',
-                        id: 'dateFile',
-                        label: 'Дата',
-                        editable: true,
-                        labelPosition: 'top',
-                        // required: true,
-                        // validate: webix.rules.isNotEmpty,
-                        // invalidMessage: 'Поле не может быть пустым',
+                        ]
                     }
-                ]
-            },
-            {
-                margin: 10,
-                cols: [
-                    {},
-                    {
-                        view: 'button',
-                        id: 'save_button',
-                        align: 'right',
-                        css: 'webix_primary',
-                        value: 'Сохранить',
-                        maxWidth: 300,
-                        click: function () {
-                            if ($$('personViolationForm').validate()) {
-                                $$('save_button').disable();
-
-                                let params = $$('personViolationForm').getValues();
-
-                                webix.ajax().headers({'Content-Type': 'application/json'}).post('save_person_violation', JSON.stringify(params))
-                                    .then(function (data) {
-                                        if (data.text() === 'Нарушение сохранено') {
-                                            webix.message({text: data.text(), type: 'success'});
-                                            showPersonViolations();
-                                        } else {
-                                            webix.message({text: data.text(), type: 'error'});
-                                        }
-                                    });
-                            } else {
-                                webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
-                            }
-                        }
-                    },
-                    {
-                        view: 'button',
-                        align: 'right',
-                        css: 'webix_primary',
-                        value: 'Отмена',
-                        maxWidth: 300,
-                        click: function () {
-                            showPersonViolations();
-                        }
-                    }
-                ]
+                ],
             }
-        ],
+        ]
     }
 
     webix.ui({
@@ -472,10 +486,10 @@ async function reloadPersonViolations() {
     let url = 'person_violations';
     let paramsString = '';
     let params = [
-        { name: 'fio', value: fio },
-        { name: 'nf', value: numberFile },
-        { name: 'pd', value: passportData },
-        { name: 'd', value: idDistrict }
+        {name: 'fio', value: fio},
+        {name: 'nf', value: numberFile},
+        {name: 'pd', value: passportData},
+        {name: 'd', value: idDistrict}
     ];
 
     params.forEach(e => {
@@ -486,5 +500,5 @@ async function reloadPersonViolations() {
     })
 
     await $$('person_violations_table').load(url + paramsString);
-    webix.message('Найдено нарушений: ' + $$('person_violations_table').count(), "success");
+    paramsString !== '' && webix.message('Найдено нарушений: ' + $$('person_violations_table').count(), "success");
 }
