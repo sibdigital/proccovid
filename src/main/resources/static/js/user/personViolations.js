@@ -1,7 +1,5 @@
 const person_form_data = [
-    {id: 'search_lastname', css: 'input_lastname', name: 'Фамилия'},
-    {id: 'search_firstname', css: 'input_firstname', name: 'Имя'},
-    {id: 'search_patronymic', css: 'input_patronymic', name: 'Отчество'},
+    {id: 'search_fio', css: 'input_fio', name: 'ФИО'},
     {id: 'search_passportData', css: 'input_passport_data', name: 'Паспортные данные'},
     {id: 'search_numberFile', css: 'input_deal_number_person', name: 'Номер дела'},
     {id: 'search_district', css: 'select_district', name: 'Район'},
@@ -17,49 +15,17 @@ const personViolations = {
                     cols: [
                         {
                             view: 'text',
-                            css: 'input_lastname',
-                            id: 'search_lastname',
+                            css: 'input_fio',
+                            id: 'search_fio',
                             label: 'Ввести',
                             labelPosition: 'top',
-                            placeholder: 'Фамилия',
+                            placeholder: 'ФИО',
                             hidden: true,
                             maxWidth: 300,
                             on: {
                                 onChange: () => {
-                                    let value = $$('search_lastname').getValue();
-                                    value !== "" ? $('#search_lastname').addClass('filter-data') : $('#search_lastname').removeClass('filter-data');
-                                }
-                            }
-                        },
-                        {
-                            view: 'text',
-                            css: 'input_firstname',
-                            id: 'search_firstname',
-                            label: 'Ввести',
-                            labelPosition: 'top',
-                            placeholder: 'Имя',
-                            hidden: true,
-                            maxWidth: 300,
-                            on: {
-                                onChange: () => {
-                                    let value = $$('search_firstname').getValue();
-                                    value !== "" ? $('#search_firstname').addClass('filter-data') : $('#search_firstname').removeClass('filter-data');
-                                }
-                            }
-                        },
-                        {
-                            view: 'text',
-                            css: 'input_patronymic',
-                            id: 'search_patronymic',
-                            label: 'Ввести',
-                            labelPosition: 'top',
-                            placeholder: 'Фамилия',
-                            hidden: true,
-                            maxWidth: 300,
-                            on: {
-                                onChange: () => {
-                                    let value = $$('search_patronymic').getValue();
-                                    value !== "" ? $('#search_patronymic').addClass('filter-data') : $('#search_patronymic').removeClass('filter-data');
+                                    let value = $$('search_fio').getValue();
+                                    value !== "" ? $('#search_fio').addClass('filter-data') : $('#search_fio').removeClass('filter-data');
                                 }
                             }
                         },
@@ -493,9 +459,7 @@ function showPersonViolations() {
 function reloadPersonViolations() {
     $$('person_violations_table').clearAll();
 
-    const lastname = $$('search_lastname').getValue();
-    const firstname = $$('search_firstname').getValue();
-    const patronymic = $$('search_patronymic').getValue();
+    const fio = $$('search_fio').getValue();
     const numberFile = $$('search_numberFile').getValue();
     const passportData = $$('search_passportData').getValue();
     const idDistrict = $$('search_district').getValue();
@@ -503,9 +467,7 @@ function reloadPersonViolations() {
     let url = 'person_violations';
     let paramsString = '';
     let params = [
-        { name: 'l', value: lastname },
-        { name: 'f', value: firstname },
-        { name: 'p', value: patronymic },
+        { name: 'fio', value: fio },
         { name: 'nf', value: numberFile },
         { name: 'pd', value: passportData },
         { name: 'd', value: idDistrict }
