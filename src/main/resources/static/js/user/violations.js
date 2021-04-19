@@ -84,6 +84,7 @@ const violations = {
                                     css: 'picker_date_start',
                                     id: 'search_beginDateRegOrg',
                                     label: 'С',
+                                    editable: true,
                                     labelWidth: 30,
                                     width: 250,
                                     on: {
@@ -98,6 +99,7 @@ const violations = {
                                     css: 'picker_date_end',
                                     id: 'search_endDateRegOrg',
                                     label: 'По',
+                                    editable: true,
                                     labelWidth: 30,
                                     width: 250,
                                     on: {
@@ -528,6 +530,7 @@ function showViolationForm() {
                                         name: 'dateRegOrg',
                                         id: 'dateRegOrg',
                                         label: 'Дата регистрации',
+                                        editable: true,
                                         labelPosition: 'top',
                                         // required: true,
                                         // validate: webix.rules.isNotEmpty,
@@ -661,6 +664,7 @@ function showViolationForm() {
                         name: 'dateFile',
                         id: 'dateFile',
                         label: 'Дата',
+                        editable: true,
                         labelPosition: 'top',
                         // required: true,
                         // validate: webix.rules.isNotEmpty,
