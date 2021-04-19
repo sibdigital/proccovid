@@ -244,6 +244,7 @@ function showPersonViolationForm() {
         view: 'form',
         id: 'personViolationForm',
         elements: [
+            view_section('Реквизиты нарушителя'),
             {
                 margin: 10,
                 cols: [
@@ -354,6 +355,7 @@ function showPersonViolationForm() {
                 // validate: webix.rules.isNotEmpty,
                 // invalidMessage: 'Поле не может быть пустым',
             },
+            view_section('Реквизиты нарушения'),
             {
                 margin: 10,
                 cols: [
@@ -492,7 +494,8 @@ function showPersonViolations() {
     }, $$('content'))
 }
 
-function reloadPersonViolations() {
+async function reloadPersonViolations() {
+
     $$('person_violations_table').clearAll();
 
     const params = {};
@@ -520,8 +523,9 @@ function reloadPersonViolations() {
     if (idDistrict) {
         params.d = idDistrict;
     }
-
-    $$('person_violations_table').load(function() {
+    await $$('person_violations_table').load(function() {
         return webix.ajax().get('person_violations', params);
     });
+    
+    webix.message('Найдено нарушений: ' + $$('person_violations_table').count(), "success");
 }
