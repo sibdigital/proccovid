@@ -23,6 +23,7 @@ public class RegPersonViolationSearch {
     private String lastname;
     private String firstname;
     private String patronymic;
+    private String fio;
     private String passportData;
     private String numberFile;
     private Long numberFound;
@@ -82,6 +83,12 @@ public class RegPersonViolationSearch {
     public void setPatronymic(String patronymic) {
         this.patronymic = patronymic;
     }
+
+    @Basic
+    @Column(name = "fio")
+    public  String getFio() { return fio; }
+
+    public void setFio(String fio) { this.fio = fio; }
 
     @Basic
     @Column(name = "passport_data")

@@ -1,7 +1,5 @@
 const person_form_data = [
-    {id: 'search_lastname', css: 'input_lastname', name: 'Фамилия'},
-    {id: 'search_firstname', css: 'input_firstname', name: 'Имя'},
-    {id: 'search_patronymic', css: 'input_patronymic', name: 'Отчество'},
+    {id: 'search_fio', css: 'input_fio', name: 'ФИО'},
     {id: 'search_passportData', css: 'input_passport_data', name: 'Паспортные данные'},
     {id: 'search_numberFile', css: 'input_deal_number_person', name: 'Номер дела'},
     {id: 'search_district', css: 'select_district', name: 'Район'},
@@ -17,49 +15,17 @@ const personViolations = {
                     cols: [
                         {
                             view: 'text',
-                            css: 'input_lastname',
-                            id: 'search_lastname',
+                            css: 'input_fio',
+                            id: 'search_fio',
                             label: 'Ввести',
                             labelPosition: 'top',
-                            placeholder: 'Фамилия',
+                            placeholder: 'ФИО',
                             hidden: true,
                             maxWidth: 300,
                             on: {
                                 onChange: () => {
-                                    let value = $$('search_lastname').getValue();
-                                    value !== "" ? $('#search_lastname').addClass('filter-data') : $('#search_lastname').removeClass('filter-data');
-                                }
-                            }
-                        },
-                        {
-                            view: 'text',
-                            css: 'input_firstname',
-                            id: 'search_firstname',
-                            label: 'Ввести',
-                            labelPosition: 'top',
-                            placeholder: 'Имя',
-                            hidden: true,
-                            maxWidth: 300,
-                            on: {
-                                onChange: () => {
-                                    let value = $$('search_firstname').getValue();
-                                    value !== "" ? $('#search_firstname').addClass('filter-data') : $('#search_firstname').removeClass('filter-data');
-                                }
-                            }
-                        },
-                        {
-                            view: 'text',
-                            css: 'input_patronymic',
-                            id: 'search_patronymic',
-                            label: 'Ввести',
-                            labelPosition: 'top',
-                            placeholder: 'Фамилия',
-                            hidden: true,
-                            maxWidth: 300,
-                            on: {
-                                onChange: () => {
-                                    let value = $$('search_patronymic').getValue();
-                                    value !== "" ? $('#search_patronymic').addClass('filter-data') : $('#search_patronymic').removeClass('filter-data');
+                                    let value = $$('search_fio').getValue();
+                                    value !== "" ? $('#search_fio').addClass('filter-data') : $('#search_fio').removeClass('filter-data');
                                 }
                             }
                         },
@@ -498,34 +464,27 @@ async function reloadPersonViolations() {
 
     $$('person_violations_table').clearAll();
 
-    const params = {};
-    const lastname = $$('search_lastname').getValue();
-    if (lastname != '') {
-        params.l = lastname;
-    }
-    const firstname = $$('search_firstname').getValue();
-    if (firstname != '') {
-        params.f = firstname;
-    }
-    const patronymic = $$('search_patronymic').getValue();
-    if (patronymic != '') {
-        params.p = patronymic;
-    }
+    const fio = $$('search_fio').getValue();
     const numberFile = $$('search_numberFile').getValue();
-    if (numberFile != '') {
-        params.nf = numberFile;
-    }
     const passportData = $$('search_passportData').getValue();
-    if (passportData != '') {
-        params.pd = passportData;
-    }
     const idDistrict = $$('search_district').getValue();
-    if (idDistrict) {
-        params.d = idDistrict;
-    }
-    await $$('person_violations_table').load(function() {
-        return webix.ajax().get('person_violations', params);
-    });
-    
+
+    let url = 'person_violations';
+    let paramsString = '';
+    let params = [
+        { name: 'fio', value: fio },
+        { name: 'nf', value: numberFile },
+        { name: 'pd', value: passportData },
+        { name: 'd', value: idDistrict }
+    ];
+
+    params.forEach(e => {
+        if (e.value != '') {
+            paramsString += paramsString == '' ? '?' : '&';
+            paramsString += e.name + '=' + e.value;
+        }
+    })
+
+    await $$('person_violations_table').load(url + paramsString);
     webix.message('Найдено нарушений: ' + $$('person_violations_table').count(), "success");
 }
