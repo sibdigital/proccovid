@@ -552,6 +552,18 @@ public class RequestService {
         return clsUser;
     }
 
+    public ClsUser saveUserPassword(ClsUser clsUser, String newPassword) {
+        clsUser.setPassword(passwordEncoder.encode(newPassword));
+        clsUserRepo.save(clsUser);
+        return clsUser;
+    }
+
+    public ClsUser setStatus(ClsUser clsUser, Integer statusValue) {
+        clsUser.setStatus(statusValue);
+        clsUserRepo.save(clsUser);
+        return clsUser;
+    }
+
     void saveUserRoles(ClsUserDto clsUserDto, ClsUser user) {
         Map<Long, ClsRole> roleMap = getAllRoles();
 

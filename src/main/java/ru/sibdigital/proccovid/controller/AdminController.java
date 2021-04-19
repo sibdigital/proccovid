@@ -253,16 +253,34 @@ public class AdminController {
     @PostMapping("/save_cls_user")
     public @ResponseBody String saveClsUser(@RequestBody ClsUserDto clsUserDto) {
         try {
-            ClsUser clsUser = requestService.findUserByLogin(clsUserDto.getLogin());
-            if (clsUser != null && clsUserDto.getId() != clsUser.getId()) {
+            ClsUser userByLogin = requestService.findUserByLogin(clsUserDto.getLogin());
+            if (userByLogin != null && clsUserDto.getId() != userByLogin.getId()) {
                 return "Пользователь с таким логином уже существует";
             }
-            clsUser = requestService.saveClsUser(clsUserDto);
+
+            String emailText = null;
+            if ((clsUserDto.getNewPassword() != null && !clsUserDto.getNewPassword().isBlank())
+                    || (userByLogin == null && clsUserDto.getId() == null)) {
+                emailText = "Логин и пароль от личного кабинета на портале " + applicationConstants.getApplicationName() + ":\n"
+                        + clsUserDto.getLogin() + "\n"
+                        + clsUserDto.getNewPassword();
+
+            } else if (userByLogin == null && clsUserDto.getId() != null) {
+                emailText = "Логин от личного кабинета на портале " + applicationConstants.getApplicationName() + ":\n"
+                        + clsUserDto.getLogin();
+            }
+
+            if (userByLogin != null) {
+                clsUserDto.setStatus(userByLogin.getStatus());
+            } else {
+                clsUserDto.setStatus(UserStatuses.NOT_ACTIVE.getValue());
+            }
+
+            ClsUser clsUser = requestService.saveClsUser(clsUserDto);
             // отправим логин и пароль на почту
-            String text = "Логин и пароль от личного кабинета на портале " + applicationConstants.getApplicationName() + ":\n"
-                    + clsUser.getLogin() + "\n"
-                    + clsUser.getPassword();
-            emailService.sendSimpleMessage(clsUserDto.getEmail(), applicationConstants.getApplicationName(), text, fromAddress);
+            if (emailText != null) {
+                emailService.sendSimpleMessage(clsUserDto.getEmail(), applicationConstants.getApplicationName(), emailText, fromAddress);
+            }
         } catch (MailException e) {
             log.error(e.getMessage(), e);
             return "Не удалось отправить письмо";
@@ -271,6 +289,30 @@ public class AdminController {
             return "Не удалось сохранить пользователя";
         }
         return "Пользователь сохранен";
+    }
+
+    @PostMapping("/save_user_password")
+    public @ResponseBody String saveUserPassword(@RequestParam(value = "password", required = true) String newPassword) {
+        try {
+            CurrentUser currentUser =  (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            ClsUser user = currentUser.getClsUser();
+            user = requestService.saveUserPassword(user, newPassword);
+            user = requestService.setStatus(user, UserStatuses.ACTIVE.getValue());
+
+            // отправим логин и пароль на почту
+            String emailText = "Логин и пароль от личного кабинета на портале " + applicationConstants.getApplicationName() + ":\n"
+                    + user.getLogin() + "\n"
+                    + newPassword;
+            emailService.sendSimpleMessage(user.getEmail(), applicationConstants.getApplicationName(), emailText, fromAddress);
+
+        } catch (MailException e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось отправить письмо с новым паролем";
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "Не удалось сохранить пароль";
+        }
+        return "Пароль сохранен";
     }
 
     @GetMapping("/okveds")

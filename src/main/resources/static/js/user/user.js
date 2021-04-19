@@ -138,6 +138,12 @@ webix.ready(function() {
             }
         ]
     })
+
+    let status = getUserStatus();
+    if (status === 0) {
+        webix.ui(newUserPasswordModal).show();
+    };
+
     webix.event(window, "resize", function(event){
         layout.define("width",document.body.clientWidth);
         layout.define("height",window.innerHeight);

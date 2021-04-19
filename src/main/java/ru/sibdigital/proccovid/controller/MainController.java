@@ -26,6 +26,7 @@ import ru.sibdigital.proccovid.service.RequestService;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -174,5 +175,15 @@ public class MainController {
                 .map(cp -> new KeyValue(cp.getClass().getSimpleName(), cp.getId(), cp.getName()))
                 .collect(Collectors.toList());
         return list;
+    }
+
+    @GetMapping("/get_user_status")
+    public @ResponseBody Map<String, Integer> getUserStatus() {
+        CurrentUser currentUser =  (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer status = currentUser.getClsUser().getStatus();
+        Map<String, Integer> map = new HashMap<>();
+        map.put("status", status);
+
+        return map;
     }
 }
