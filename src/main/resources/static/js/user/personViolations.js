@@ -493,33 +493,30 @@ function showPersonViolations() {
 function reloadPersonViolations() {
     $$('person_violations_table').clearAll();
 
-    const params = {};
     const lastname = $$('search_lastname').getValue();
-    if (lastname != '') {
-        params.l = lastname;
-    }
     const firstname = $$('search_firstname').getValue();
-    if (firstname != '') {
-        params.f = firstname;
-    }
     const patronymic = $$('search_patronymic').getValue();
-    if (patronymic != '') {
-        params.p = patronymic;
-    }
     const numberFile = $$('search_numberFile').getValue();
-    if (numberFile != '') {
-        params.nf = numberFile;
-    }
     const passportData = $$('search_passportData').getValue();
-    if (passportData != '') {
-        params.pd = passportData;
-    }
     const idDistrict = $$('search_district').getValue();
-    if (idDistrict) {
-        params.d = idDistrict;
-    }
 
-    $$('person_violations_table').load(function() {
-        return webix.ajax().get('person_violations', params);
-    });
+    let url = 'person_violations';
+    let paramsString = '';
+    let params = [
+        { name: 'l', value: lastname },
+        { name: 'f', value: firstname },
+        { name: 'p', value: patronymic },
+        { name: 'nf', value: numberFile },
+        { name: 'pd', value: passportData },
+        { name: 'd', value: idDistrict }
+    ];
+
+    params.forEach(e => {
+        if (e.value != '') {
+            paramsString += paramsString == '' ? '?' : '&';
+            paramsString += e.name + '=' + e.value;
+        }
+    })
+
+    $$('person_violations_table').load(url + paramsString);
 }

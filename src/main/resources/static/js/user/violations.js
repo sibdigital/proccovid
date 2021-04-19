@@ -735,35 +735,33 @@ function showViolations() {
 function reloadViolations() {
     $$('violations_table').clearAll();
 
-    const params = {};
     const inn = $$('search_inn').getValue();
-    if (inn != '') {
-        params.inn = inn;
-    }
     const nameOrg = $$('search_name').getValue();
-    if (nameOrg != '') {
-        params.name = nameOrg;
-    }
     const numberFile = $$('search_numberFile').getValue();
-    if (numberFile != '') {
-        params.nf = numberFile;
-    }
-    const format = webix.Date.dateToStr('%Y-%m-%d');
     const beginDateRegOrg = $$('search_beginDateRegOrg').getValue();
-    if (beginDateRegOrg != null) {
-        params.bdr = format(beginDateRegOrg);
-    }
     const endDateRegOrg = $$('search_endDateRegOrg').getValue();
-    if (endDateRegOrg != null) {
-        params.edr = format(endDateRegOrg);
-    }
     const idDistrict = $$('search_district').getValue();
-    if (idDistrict) {
-        params.d = idDistrict;
-    }
 
-    $$('violations_table').load(function () {
-        return webix.ajax().get('violations', params);
-    });
+    const format = webix.Date.dateToStr('%Y-%m-%d');
+
+    let url = 'violations';
+    let paramsString = '';
+    let params = [
+        { name: 'inn', value: inn },
+        { name: 'name', value: nameOrg },
+        { name: 'nf', value: numberFile },
+        { name: 'bdr', value: format(beginDateRegOrg) },
+        { name: 'edr', value: format(endDateRegOrg) },
+        { name: 'd', value: idDistrict }
+    ];
+
+    params.forEach(e => {
+        if (e.value != '') {
+            paramsString += paramsString == '' ? '?' : '&';
+            paramsString += e.name + '=' + e.value;
+        }
+    })
+
+    $$('violations_table').load(url + paramsString);
 }
 
