@@ -19,6 +19,7 @@ public class RegPersonViolationSearch {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REG_PERSON_VIOLATION_SEARCH_SEQ_GEN")
     @Column(name = "id", nullable = false)
     private Long id;
+    private Long idPersonViolation;
     private Timestamp timeCreate;
     private String lastname;
     private String firstname;
@@ -112,6 +113,12 @@ public class RegPersonViolationSearch {
     public void setNumberFound(Long numberFound) {
         this.numberFound = numberFound;
     }
+
+    @Basic
+    @Column(name = "id_person_violation")
+    public Long getIdViolation() { return idPersonViolation; }
+
+    public void setIdViolation(Long idPersonViolation) { this.idPersonViolation = idPersonViolation; }
 
     public ClsUser getUser() {
         return user;
