@@ -6,12 +6,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.RequestTypes;
 import ru.sibdigital.proccovid.service.RequestService;
 import ru.sibdigital.proccovid.service.StatisticService;
+import ru.sibdigital.proccovid.service.reports.InspectionReportService;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Random;
 
 @Log4j2
 @Controller
@@ -25,6 +34,9 @@ public class StatisticController {
 
     @Autowired
     private RequestService requestService;
+
+    @Autowired
+    private InspectionReportService inspectionReportService;
 
     @GetMapping(value = "/statistic")
     public String getStatisticPage(Model model){
@@ -94,4 +106,5 @@ public class StatisticController {
         model.addAttribute("application_name", applicationConstants.getApplicationName());
         return "numberOfMailsSent_statistic";
     }
+
 }

@@ -249,7 +249,10 @@ public class DocRequestController {
         return docRequestRepo.findById(id_request);
     }
 
-    @GetMapping("/cls_districts")
+    @RequestMapping(
+            value = {"/cls_districts","/outer/cls_districts"},
+            method = RequestMethod.GET
+    )
     public List<ClsDistrict> getListDistricts() {
         return clsDistrictRepo.findAll(Sort.by("id"));
     }

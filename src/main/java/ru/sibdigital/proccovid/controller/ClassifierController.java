@@ -2,9 +2,7 @@ package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.dto.EgripResponse;
 import ru.sibdigital.proccovid.dto.EgrulResponse;
 import ru.sibdigital.proccovid.model.RegEgrip;
@@ -21,7 +19,10 @@ public class ClassifierController {
     private EgrulService egrulService;
 
     //@CrossOrigin
-    @GetMapping("/egrul")
+    @RequestMapping(
+            value = {"/egrul","/outer/egrul"},
+            method = RequestMethod.GET
+    )
     public EgrulResponse getEgrul(@RequestParam(name = "inn") String inn) {
         EgrulResponse response = new EgrulResponse();
         RegEgrul egrul = egrulService.getEgrul(inn);
@@ -34,7 +35,10 @@ public class ClassifierController {
     }
 
     //@CrossOrigin
-    @GetMapping("/egrip")
+    @RequestMapping(
+            value = {"/egrip","/outer/egrip"},
+            method = RequestMethod.GET
+    )
     public EgripResponse getEgrip(@RequestParam(name = "inn") String inn) {
         EgripResponse response = new EgripResponse();
         List<RegEgrip> egrips = egrulService.getEgrip(inn);

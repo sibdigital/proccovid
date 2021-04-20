@@ -12,10 +12,11 @@ function view_section(title) {
 
 webix.ready(function() {
     let rolesStr = webix.ajax().sync().get('user_roles');
-    let userRoles = JSON.parse(rolesStr.response);
-    let isAdmin = userRoles[0].status;
-    let isUser = userRoles[1].status;
-    let isViol = userRoles[2].status;
+    let userRoles = JSON.parse(rolesStr?.response);
+    console.log(userRoles)
+    let isAdmin = userRoles[0]?.status;
+    let isUser = userRoles[1]?.status;
+    let isViol = userRoles[2]?.status;
     let menuItems = [
         {id: "Requests", icon: "fas fa-file", value: 'Заявки', access: isUser || isAdmin},
         // { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },

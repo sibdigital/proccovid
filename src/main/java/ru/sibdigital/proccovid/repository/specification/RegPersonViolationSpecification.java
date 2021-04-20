@@ -22,14 +22,10 @@ public class RegPersonViolationSpecification implements Specification<RegPersonV
     public Predicate toPredicate(Root<RegPersonViolation> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
 
-        if (searchCriteria.getLastname() != null && !searchCriteria.getLastname().isBlank()) {
-            predicates.add(criteriaBuilder.like(root.get("lastname"), searchCriteria.getLastname().trim().toUpperCase() + '%'));
-        }
-        if (searchCriteria.getFirstname() != null && !searchCriteria.getFirstname().isBlank()) {
-            predicates.add(criteriaBuilder.like(root.get("firstname"), searchCriteria.getFirstname().trim().toUpperCase() + '%'));
-        }
-        if (searchCriteria.getPatronymic() != null && !searchCriteria.getPatronymic().isBlank()) {
-            predicates.add(criteriaBuilder.like(root.get("lastname"), searchCriteria.getPatronymic().trim().toUpperCase() + '%'));
+        if (searchCriteria.getFio() != null && !searchCriteria.getFio().isBlank()) {
+            predicates.add(criteriaBuilder.like(criteriaBuilder.concat(
+                            criteriaBuilder.concat(root.get("lastname"), root.get("firstname")), root.get("patronymic")),'%' + searchCriteria.getFio().trim().toUpperCase().replace(" ", "%") + '%'));
+
         }
         if (searchCriteria.getPassportData() != null && !searchCriteria.getPassportData().isBlank()) {
             predicates.add(criteriaBuilder.like(root.get("passportData"), searchCriteria.getPassportData().trim() + '%'));

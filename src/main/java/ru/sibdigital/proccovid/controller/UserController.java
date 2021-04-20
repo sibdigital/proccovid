@@ -33,7 +33,10 @@ public class UserController {
     @Autowired
     private ViolationService violationService;
 
-    @GetMapping("/violations")
+    @RequestMapping(
+            value = {"/violations","/outer/violations"},
+            method = RequestMethod.GET
+    )
     public @ResponseBody Map<String, Object> getRegViolations(@RequestParam(value = "inn", required = false) String inn,
                                                               @RequestParam(value = "name", required = false) String nameOrg,
                                                               @RequestParam(value = "nf", required = false) String numberFile,
@@ -63,7 +66,10 @@ public class UserController {
         return result;
     }
 
-    @PostMapping("/save_violation")
+    @RequestMapping(
+            value = {"/save_violation","/outer/save_violation"},
+            method = RequestMethod.POST
+    )
     public @ResponseBody String saveViolation(@RequestBody ViolationDto dto) {
         try {
             CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -77,17 +83,25 @@ public class UserController {
         return "Нарушение сохранено";
     }
 
-    @GetMapping("/violation")
+    @RequestMapping(
+            value = {"/violation","/outer/violation"},
+            method = RequestMethod.POST
+    )
     public @ResponseBody ViolationDto getViolation(@RequestParam Long id) {
-        RegViolation regViolation = violationService.getRegViolation(id);
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        RegViolation regViolation = violationService.getRegViolation(id, clsUser.getId());
         ViolationDto dto = new ViolationDto(regViolation);
         return dto;
     }
 
-    @GetMapping("/person_violations")
-    public @ResponseBody Map<String, Object> getRegPersonViolations(@RequestParam(value = "l", required = false) String lastname,
-                                                                    @RequestParam(value = "f", required = false) String firstname,
-                                                                    @RequestParam(value = "p", required = false) String patronymic,
+
+    @RequestMapping(
+            value = {"/person_violations","/outer/person_violations"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody Map<String, Object> getRegPersonViolations(@RequestParam(value = "fio", required = false) String fio,
                                                                     @RequestParam(value = "pd", required = false) String passportData,
                                                                     @RequestParam(value = "nf", required = false) String numberFile,
                                                                     @RequestParam(value = "d", required = false) Long idDistrict,
@@ -99,7 +113,7 @@ public class UserController {
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
-        RegPersonViolationSearchCriteria searchCriteria = new RegPersonViolationSearchCriteria(lastname, firstname, patronymic, passportData, numberFile, idDistrict);
+        RegPersonViolationSearchCriteria searchCriteria = new RegPersonViolationSearchCriteria(fio, passportData, numberFile, idDistrict);
 
         Page<RegPersonViolation> regViolationPage = violationService.getPersonViolationsByCriteria(searchCriteria, page, size, clsUser.getId());
 
@@ -114,7 +128,10 @@ public class UserController {
         return result;
     }
 
-    @PostMapping("/save_person_violation")
+    @RequestMapping(
+            value = {"/save_person_violation","/outer/save_person_violation"},
+            method = RequestMethod.POST
+    )
     public @ResponseBody String savePersonViolation(@RequestBody PersonViolationDto dto) {
         try {
             CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -128,9 +145,15 @@ public class UserController {
         return "Нарушение сохранено";
     }
 
-    @GetMapping("/person_violation")
+    @RequestMapping(
+            value = {"/person_violation","/outer/person_violation"},
+            method = RequestMethod.GET
+    )
     public @ResponseBody PersonViolationDto getPersonViolation(@RequestParam Long id) {
-        RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id);
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id, clsUser.getId());
         PersonViolationDto dto = new PersonViolationDto(regPersonViolation);
         return dto;
     }

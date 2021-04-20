@@ -87,6 +87,7 @@ public class MainController {
 
         session.setAttribute("lastPage", "outer");
 
+        model.addAttribute("outer_url_prefix", applicationConstants.getOuterUrlPrefix());
         model.addAttribute("id_department", clsUser.getIdDepartment().getId());
         model.addAttribute("department_name", clsUser.getIdDepartment().getName());
         if (clsUser.getDistrict() != null) {
@@ -102,6 +103,8 @@ public class MainController {
     public String cabinet(Model model) {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
+
+        model.addAttribute("outer_url_prefix", applicationConstants.getOuterUrlPrefix());
         model.addAttribute("id_department", clsUser.getIdDepartment().getId());
         model.addAttribute("department_name", clsUser.getIdDepartment().getName());
         if (clsUser.getDistrict() != null) {

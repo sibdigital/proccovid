@@ -503,7 +503,10 @@ public class AdminController {
         return "Создание предписаний выполнено";
     }
 
-    @GetMapping("/type_violations")
+    @RequestMapping(
+            value = {"/type_violations","/outer/type_violations"},
+            method = RequestMethod.GET
+    )
     public @ResponseBody List<ClsTypeViolationDto> getClsTypeViolations() {
         return violationService.getClsTypeViolations().stream()
                 .map(o -> new ClsTypeViolationDto(o.getId(), o.getName(), o.getDescription())).collect(Collectors.toList());
@@ -638,7 +641,10 @@ public class AdminController {
         return list;
     }
 
-    @GetMapping("/user_roles")
+    @RequestMapping(
+            value = {"/user_roles", "/outer/user_roles"},
+            method = RequestMethod.GET
+    )
     public @ResponseBody List<UserRolesEntity> getCurrentUserRoles(){
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
