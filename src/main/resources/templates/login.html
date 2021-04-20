@@ -101,10 +101,21 @@
                                         name: "password",
                                     },
                                     {
-                                        margin: 5, cols: [
-                                            {view: "button", value: "Войти",width: 100, css: "myClass", click: submit},
-                                            //{ view:"button", value:"Cancel"}
+                                        cols: [
+                                            {
+                                                margin: 5, cols: [
+                                                    {view: "button", value: "Войти",width: 100, css: "myClass", click: submit},
+                                                    //{ view:"button", value:"Cancel"}
+                                                ]
+                                            },
+                                            {
+                                                view: 'label',
+                                                id: 'lbl',
+                                                align: 'center',
+                                                label: '<a href="recovery" style="color: #6e6e6e">Не могу войти</a>'
+                                            }
                                         ]
+
                                     },
                                     {}
                             ]

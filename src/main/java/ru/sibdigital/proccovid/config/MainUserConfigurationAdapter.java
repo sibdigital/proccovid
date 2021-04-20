@@ -49,6 +49,8 @@ public class MainUserConfigurationAdapter extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/libs/**", "/css/**").permitAll()
+                .antMatchers("/js/**").permitAll() // удалить, когда доступ нужно будет закрыть
+                .antMatchers("/recovery").permitAll()
                 .antMatchers("/login").permitAll()
                 .antMatchers("/admin").hasRole("ADMIN")
                 .antMatchers("/favicon.ico", "/logo.png").permitAll()

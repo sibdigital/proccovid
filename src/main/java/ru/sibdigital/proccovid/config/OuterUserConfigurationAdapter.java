@@ -43,7 +43,9 @@ public class OuterUserConfigurationAdapter extends WebSecurityConfigurerAdapter 
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/libs/**", "/css/**").permitAll() //, "/templates/outer/**"
+                .antMatchers("/js/**").permitAll() // удалить, когда доступ нужно будет закрыть
                 .antMatchers("/outer/ologin").permitAll()
+                .antMatchers("/outer/recovery").permitAll()
                 .antMatchers("/admin").denyAll()
                 .antMatchers("/favicon.ico","/logo.png").permitAll()
                 .anyRequest().authenticated()
