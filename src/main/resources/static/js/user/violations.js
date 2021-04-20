@@ -120,7 +120,7 @@ const violations = {
                                     labelPosition: 'top',
                                     placeholder: 'Район',
                                     maxWidth: 300,
-                                    options: OUTER_URL_PREFIX + 'cls_districts',
+                                    options: 'cls_districts',
                                     on: {
                                         onChange: () => {
                                             let district = $$('search_district').getValue();
@@ -204,7 +204,7 @@ const violations = {
                             setTimeout(function () {
                                 showViolationForm();
 
-                                webix.ajax().get(OUTER_URL_PREFIX + 'violation', {id: item.id})
+                                webix.ajax().get('violation', {id: item.id})
                                     .then(function (data) {
                                         data = data.json();
                                         $$('violationForm').parse(data);
@@ -242,7 +242,7 @@ const violations = {
                     //         this.adjustRowHeight(null, true);
                     //     },
                     // },
-                    url: OUTER_URL_PREFIX + 'violations'
+                    url: 'violations'
                 },
                 {
                     cols: [
@@ -401,7 +401,7 @@ function findOrganizations() {
         return;
     }
 
-    webix.ajax(OUTER_URL_PREFIX + type + '?inn=' + inn).then(function (data) {
+    webix.ajax(type + '?inn=' + inn).then(function (data) {
         const response = data.json();
         if (response.finded == true) {
             $$('notFoundOrganizations').hide();
@@ -539,7 +539,7 @@ function showViolationForm() {
                                         id: 'idDistrict',
                                         label: 'Район',
                                         labelPosition: 'top',
-                                        options: OUTER_URL_PREFIX + 'cls_districts',
+                                        options: 'cls_districts',
                                         required: true,
                                         validate: webix.rules.isNotEmpty
                                     },
@@ -583,7 +583,7 @@ function showViolationForm() {
                                 labelPosition: 'top',
                                 required: true,
                                 validate: webix.rules.isNotEmpty,
-                                options: OUTER_URL_PREFIX + 'type_violations',
+                                options: 'type_violations',
                                 invalidMessage: 'Поле не может быть пустым',
                             },
                         ]
@@ -685,7 +685,7 @@ function showViolationForm() {
 
                                 let params = $$('violationForm').getValues();
 
-                                webix.ajax().headers({'Content-Type': 'application/json'}).post(OUTER_URL_PREFIX + 'save_violation', JSON.stringify(params))
+                                webix.ajax().headers({'Content-Type': 'application/json'}).post('save_violation', JSON.stringify(params))
                                     .then(function (data) {
                                         if (data.text() === 'Нарушение сохранено') {
                                             webix.message({text: data.text(), type: 'success'});
@@ -763,7 +763,7 @@ function reloadViolations() {
     }
 
     $$('violations_table').load(function () {
-        return webix.ajax().get(OUTER_URL_PREFIX + 'violations', params);
+        return webix.ajax().get('violations', params);
     });
 }
 

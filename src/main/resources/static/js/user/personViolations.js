@@ -108,7 +108,7 @@ const personViolations = {
                             placeholder: 'Район',
                             maxWidth: 300,
                             hidden: true,
-                            options: OUTER_URL_PREFIX + 'cls_districts',
+                            options: 'cls_districts',
                             on: {
                                 onChange: () => {
                                     let value = $$('search_district').getValue();
@@ -189,7 +189,7 @@ const personViolations = {
                             setTimeout(function () {
                                 showPersonViolationForm();
 
-                                webix.ajax().get(OUTER_URL_PREFIX + 'person_violation', {id: item.id})
+                                webix.ajax().get('person_violation', {id: item.id})
                                     .then(function (data) {
                                         data = data.json();
                                         $$('personViolationForm').parse(data);
@@ -207,7 +207,7 @@ const personViolations = {
                             }, 100);
                         }
                     },
-                    url: OUTER_URL_PREFIX + 'person_violations'
+                    url: 'person_violations'
                 },
                 {
                     cols: [
@@ -375,7 +375,7 @@ function showPersonViolationForm() {
                         labelPosition: 'top',
                         required: true,
                         validate: webix.rules.isNotEmpty,
-                        options: OUTER_URL_PREFIX + 'type_violations',
+                        options: 'type_violations',
                         invalidMessage: 'Поле не может быть пустым',
                     },
                     {
@@ -384,7 +384,7 @@ function showPersonViolationForm() {
                         id: 'idDistrict',
                         label: 'Район',
                         labelPosition: 'top',
-                        options: OUTER_URL_PREFIX + 'cls_districts',
+                        options: 'cls_districts',
                         required: true,
                         validate: webix.rules.isNotEmpty
                     },
@@ -443,7 +443,7 @@ function showPersonViolationForm() {
 
                                 let params = $$('personViolationForm').getValues();
 
-                                webix.ajax().headers({'Content-Type': 'application/json'}).post(OUTER_URL_PREFIX + 'save_person_violation', JSON.stringify(params))
+                                webix.ajax().headers({'Content-Type': 'application/json'}).post('save_person_violation', JSON.stringify(params))
                                     .then(function (data) {
                                         if (data.text() === 'Нарушение сохранено') {
                                             webix.message({text: data.text(), type: 'success'});
@@ -520,6 +520,6 @@ function reloadPersonViolations() {
     }
 
     $$('person_violations_table').load(function() {
-        return webix.ajax().get(OUTER_URL_PREFIX + 'person_violations', params);
+        return webix.ajax().get('person_violations', params);
     });
 }
