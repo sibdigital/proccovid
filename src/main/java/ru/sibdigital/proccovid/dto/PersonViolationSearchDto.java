@@ -25,6 +25,7 @@ public class PersonViolationSearchDto {
     private String numberFile;
     private Long numberFound;
     private Long idDistrict;
+    private Long idViolation;
     private String districtName;
 
     public PersonViolationSearchDto(RegPersonViolationSearch o) {
@@ -40,6 +41,7 @@ public class PersonViolationSearchDto {
         this.setPassportData(o.getPassportData());
         this.setNumberFile(o.getNumberFile());
         this.setNumberFound(o.getNumberFound());
+        this.setIdViolation(o.getIdViolation());
         if (o.getDistrict() != null) {
             this.setIdDistrict(o.getDistrict().getId());
             this.setDistrictName(o.getDistrict().getName());

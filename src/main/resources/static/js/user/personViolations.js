@@ -149,6 +149,7 @@ const personViolations = {
                             if (!this.count()) {
                                 this.showOverlay("Отсутствуют данные")
                             }
+                            $$('person_violations_counter').setValue("Количество найденных нарушений: " + this.count())
                         },
                         onLoadError: function () {
                             this.hideOverlay();
@@ -187,8 +188,17 @@ const personViolations = {
                             height: 38,
                             size: 25,
                             group: 5,
-                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}',
+                            minWidth: 300,
+                            width: 300
                         },
+                        {
+                            view: 'label',
+                            id: 'person_violations_counter',
+                            minWidth: 300,
+                            width: 300,
+                        },
+                        {},
                         {
                             view: 'button',
                             align: 'right',
@@ -475,7 +485,6 @@ function showPersonViolations() {
 }
 
 async function reloadPersonViolations() {
-
     $$('person_violations_table').clearAll();
 
     const fio = $$('search_fio').getValue();
@@ -501,5 +510,5 @@ async function reloadPersonViolations() {
     })
 
     await $$('person_violations_table').load(url + paramsString);
-    paramsString !== '' && webix.message('Найдено нарушений: ' + $$('person_violations_table').count(), "success");
+    paramsString !== '' && $$('person_violations_counter').setValue('Количество найденных нарушений: ' + $$('person_violations_table').count())
 }

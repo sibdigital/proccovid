@@ -25,6 +25,7 @@ public class ViolationSearchDto {
     private Date endDateRegOrg;
     private String numberFile;
     private Long numberFound;
+    private Long idViolation;
     private Long idDistrict;
     private String districtName;
 
@@ -41,6 +42,7 @@ public class ViolationSearchDto {
         this.setEndDateRegOrg(o.getEndDateRegOrg());
         this.setNumberFile(o.getNumberFile());
         this.setNumberFound(o.getNumberFound());
+        this.setIdViolation(o.getIdViolation());
         if (o.getDistrict() != null) {
             this.setIdDistrict(o.getDistrict().getId());
             this.setDistrictName(o.getDistrict().getName());

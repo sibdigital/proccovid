@@ -111,7 +111,9 @@ const violationSearchQueries = {
                             {
                                 id: "numberFound",
                                 header: "Количество найденных",
-                                template: "#numberFound#",
+                                template: (obj) => {
+                                    return obj.numberFound ?? 'Просмотр'
+                                },
                                 minWidth: 200,
                                 width: 300,
                             },
@@ -153,6 +155,8 @@ const violationSearchQueries = {
                                             let date = xml_format(data.timeCreate.replace("T", " "));
                                             data.timeCreate = date;
                                             $$('violationSearchQueryForm').parse(data);
+                                            data.idViolation !== null ? $$('idViolation').setValue("Действие: осуществлен просмотр нарушения № " + data.idViolation)
+                                                : $$('idViolation').setValue("Действие: осуществлен поиск");
                                         });
                                 }, 100);
                             }
@@ -256,6 +260,7 @@ function showViolationSearchQueryForm() {
                         ]
                     },
                     {
+                        margin: 10,
                         cols: [
                             {
                                 view: 'text',
@@ -265,7 +270,11 @@ function showViolationSearchQueryForm() {
                                 label: 'По заданным параметрам поиска найдено:',
                                 labelWidth: 320,
                             },
-                            {}
+                            {
+                                view: 'label',
+                                name: 'idViolation',
+                                id: 'idViolation',
+                            },
                         ]
                     },
                     {
