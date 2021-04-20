@@ -85,7 +85,7 @@ public class UserController {
 
     @RequestMapping(
             value = {"/violation","/outer/violation"},
-            method = RequestMethod.POST
+            method = RequestMethod.GET
     )
     public @ResponseBody ViolationDto getViolation(@RequestParam Long id) {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
