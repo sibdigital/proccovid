@@ -179,6 +179,7 @@ const personViolations = {
                             if (!this.count()) {
                                 this.showOverlay("Отсутствуют данные")
                             }
+                            $$('person_violations_counter').setValue("Количество найденных нарушений: " + this.count())
                         },
                         onLoadError: function () {
                             this.hideOverlay();
@@ -217,8 +218,17 @@ const personViolations = {
                             height: 38,
                             size: 25,
                             group: 5,
-                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}',
+                            minWidth: 300,
+                            width: 300
                         },
+                        {
+                            view: 'label',
+                            id: 'person_violations_counter',
+                            minWidth: 300,
+                            width: 300,
+                        },
+                        {},
                         {
                             view: 'button',
                             align: 'right',
@@ -490,7 +500,7 @@ function showPersonViolations() {
     }, $$('content'))
 }
 
-function reloadPersonViolations() {
+async function reloadPersonViolations() {
     $$('person_violations_table').clearAll();
 
     const params = {};
@@ -519,7 +529,23 @@ function reloadPersonViolations() {
         params.d = idDistrict;
     }
 
-    $$('person_violations_table').load(function() {
-        return webix.ajax().get(OUTER_URL_PREFIX + 'person_violations', params);
-    });
+
+    let url = 'person_violations';
+    let paramsString = '';
+    let params = [
+        {name: 'fio', value: fio},
+        {name: 'nf', value: numberFile},
+        {name: 'pd', value: passportData},
+        {name: 'd', value: idDistrict}
+    ];
+
+    params.forEach(e => {
+        if (e.value != '') {
+            paramsString += paramsString == '' ? '?' : '&';
+            paramsString += e.name + '=' + e.value;
+        }
+    })
+
+    await $$('person_violations_table').load(url + paramsString);
+    paramsString !== '' && $$('person_violations_counter').setValue('Количество найденных нарушений: ' + $$('person_violations_table').count())
 }

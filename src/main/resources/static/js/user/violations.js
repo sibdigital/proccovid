@@ -194,6 +194,7 @@ const violations = {
                             if (!this.count()) {
                                 this.showOverlay("Отсутствуют данные")
                             }
+                            $$('violations_counter').setValue('Количество найденных нарушений: ' + this.count())
                         },
                         onLoadError: function () {
                             this.hideOverlay();
@@ -252,8 +253,17 @@ const violations = {
                             height: 38,
                             size: 25,
                             group: 5,
-                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}',
+                            minWidth: 300,
+                            width: 300
                         },
+                        {
+                            view: 'label',
+                            id: 'violations_counter',
+                            minWidth: 300,
+                            width: 300,
+                        },
+                        {},
                         {
                             view: 'button',
                             align: 'right',
@@ -732,7 +742,7 @@ function showViolations() {
     }, $$('content'))
 }
 
-function reloadViolations() {
+async function reloadViolations() {
     $$('violations_table').clearAll();
 
     const params = {};
@@ -762,8 +772,27 @@ function reloadViolations() {
         params.d = idDistrict;
     }
 
-    $$('violations_table').load(function () {
-        return webix.ajax().get(OUTER_URL_PREFIX + 'violations', params);
-    });
+    const format = webix.Date.dateToStr('%Y-%m-%d');
+
+    let url = 'violations';
+    let paramsString = '';
+    let params = [
+        {name: 'inn', value: inn},
+        {name: 'name', value: nameOrg},
+        {name: 'nf', value: numberFile},
+        {name: 'bdr', value: format(beginDateRegOrg)},
+        {name: 'edr', value: format(endDateRegOrg)},
+        {name: 'd', value: idDistrict}
+    ];
+
+    params.forEach(e => {
+        if (e.value != '') {
+            paramsString += paramsString == '' ? '?' : '&';
+            paramsString += e.name + '=' + e.value;
+        }
+    })
+
+    await $$('violations_table').load(url + paramsString);
+    paramsString !== '' && $$('violations_counter').setValue('Количество найденных нарушений: ' + $$('violations_table').count());
 }
 
