@@ -57,4 +57,7 @@ public class ApplicationConstants {
     @Value("${ref-agreement}")
     private String refAgreement;
 
+    @Value("${outer-url-prefix}")
+    private String outerUrlPrefix;
+
 }

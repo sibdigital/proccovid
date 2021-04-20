@@ -70,4 +70,10 @@ public interface OkvedRepo extends JpaRepository<Okved, Integer>, JpaSpecificati
     @Query(nativeQuery = true, value = "select ltree2text(path) as id, kind_name as value from okved " +
             "where ltree2text(path) like %:parentNode% and type_code = :typeCode")
     List<Map<String,Object>> findNode(String parentNode, int typeCode);
+
+
+    @Query(nativeQuery = true, value = "SELECT *\n" +
+            "FROM okved\n" +
+            "WHERE okved.path #|% (:list)::lquery[]")
+    List<Okved> getOkvedsByPath(@Param("list") List<String> list);
 }

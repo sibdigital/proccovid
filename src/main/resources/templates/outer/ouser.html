@@ -24,14 +24,13 @@
     const USER_NAME = [[${user_lastname + " " + user_firstname}]]
     const LINK_PREFIX = [[${link_prefix}]]
     const LINK_SUFFIX = [[${link_suffix}]]
+    const OUTER_URL_PREFIX = [[${outer_url_prefix}]]
 </script>
 <script>
         webix.require([
         "./js/user/user.js",
-        "./js/utils/filter.js",
         "./js/utils/violationsFilter.js",
         "./js/user/personViolations.js",
-        "./js/user/prescriptions.js",
         "./js/user/violations.js",
     ], () => {
         console.log('Модули загружены')

@@ -1,5 +1,6 @@
 
 const statistic = {
+    id: 'statisticId',
     view: 'scrollview',
     scroll: 'xy',
     body: {
@@ -36,6 +37,30 @@ const statistic = {
                     {
                         view: 'label',
                         label: "<a href='numberOfMailsSent/statistic' target='_blank'>Количество отправленных сообщений</a>"
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='' onclick='return false'>Отчет по контрольно-надзорным мероприятиям</a>",
+                        click: () => {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    inspectionReport
+                                ]
+                            }, $$("content"));
+                        },
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='' onclick='return false'>Отчет о количестве проверок\n</a>",
+                        click: () => {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    inspectionCountReport
+                                ]
+                            }, $$("content"));
+                        },
                     }
                 ]
             }
