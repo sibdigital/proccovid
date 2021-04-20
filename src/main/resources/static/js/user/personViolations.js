@@ -74,7 +74,7 @@ const personViolations = {
                             placeholder: 'Район',
                             maxWidth: 300,
                             hidden: true,
-                            options: 'cls_districts',
+                            options: OUTER_URL_PREFIX + 'cls_districts',
                             on: {
                                 onChange: () => {
                                     let value = $$('search_district').getValue();
@@ -159,7 +159,7 @@ const personViolations = {
                             setTimeout(function () {
                                 showPersonViolationForm(id);
 
-                                webix.ajax().get('person_violation', {id: item.id})
+                                webix.ajax().get(OUTER_URL_PREFIX + 'person_violation', {id: item.id})
                                     .then(function (data) {
                                         data = data.json();
                                         $$('personViolationForm').parse(data);
@@ -177,7 +177,7 @@ const personViolations = {
                             }, 100);
                         }
                     },
-                    url: 'person_violations'
+                    url: OUTER_URL_PREFIX + 'person_violations'
                 },
                 {
                     cols: [

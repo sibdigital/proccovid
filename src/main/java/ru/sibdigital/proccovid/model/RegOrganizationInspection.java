@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -84,6 +85,31 @@ public class RegOrganizationInspection {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+//
+////    @Transient
+////@Formula
+////    @Basic(fetch = FetchType.LAZY)
+//
+//    private  Integer totalOrganization; // для отчета
+//    public Integer getTotalOrganization() {
+//        return totalOrganization;
+//    }
+//    public void setTotalOrganization(Integer totalOrganization) {
+//        this.totalOrganization = totalOrganization;
+//    }
+//
+//    @Transient
+//
+////    @Basic(fetch = FetchType.LAZY)
+////@Formula
+//    private  Integer totalAuthority; // для отчета
+//    public Integer getTotalAuthority() {
+//        return totalAuthority;
+//    }
+//    public void setTotalAuthority(Integer totalAuthority) {
+//        this.totalAuthority = totalAuthority;
+//    }
 
     @Override
     public boolean equals(Object o) {

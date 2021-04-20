@@ -122,7 +122,7 @@ const violations = {
                                     labelPosition: 'top',
                                     placeholder: 'Район',
                                     maxWidth: 300,
-                                    options: 'cls_districts',
+                                    options: OUTER_URL_PREFIX + 'cls_districts',
                                     on: {
                                         onChange: () => {
                                             let district = $$('search_district').getValue();
@@ -222,7 +222,7 @@ const violations = {
                             setTimeout(function () {
                                 showViolationForm(id);
 
-                                webix.ajax().get('violation', {id: item.id})
+                                webix.ajax().get(OUTER_URL_PREFIX + 'violation', {id: item.id})
                                     .then(function (data) {
                                         data = data.json();
                                         $$('violationForm').parse(data);
@@ -260,7 +260,7 @@ const violations = {
                     //         this.adjustRowHeight(null, true);
                     //     },
                     // },
-                    url: 'violations'
+                    url: OUTER_URL_PREFIX + 'violations'
                 },
                 {
                     cols: [
@@ -419,7 +419,7 @@ function findOrganizations() {
         return;
     }
 
-    webix.ajax(type + '?inn=' + inn).then(function (data) {
+    webix.ajax(OUTER_URL_PREFIX + type + '?inn=' + inn).then(function (data) {
         const response = data.json();
         if (response.finded == true) {
             $$('notFoundOrganizations').hide();
@@ -614,7 +614,7 @@ function showViolationForm(id) {
                                 labelPosition: 'top',
                                 required: true,
                                 validate: webix.rules.isNotEmpty,
-                                options: 'type_violations',
+                                options: OUTER_URL_PREFIX + 'type_violations',
                                 invalidMessage: 'Поле не может быть пустым',
                             },
                         ]
