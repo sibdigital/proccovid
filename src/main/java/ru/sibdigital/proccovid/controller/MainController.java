@@ -180,7 +180,10 @@ public class MainController {
         return list;
     }
 
-    @GetMapping("/get_user_status")
+    @RequestMapping(
+            value = {"/get_user_status", "/outer/get_user_status"},
+            method = RequestMethod.GET
+    )
     public @ResponseBody Map<String, Integer> getUserStatus() {
         CurrentUser currentUser =  (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Integer status = currentUser.getClsUser().getStatus();
