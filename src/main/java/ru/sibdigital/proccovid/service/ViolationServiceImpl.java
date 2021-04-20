@@ -194,8 +194,29 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public RegViolation getRegViolation(Long id) {
-        return regViolationRepo.findById(id).orElse(null);
+    public RegViolation getRegViolation(Long id, Long idUser) {
+        ClsUser clsUser = null;
+        if(idUser != null){
+            clsUser = clsUserRepo.findById(idUser).orElse(null);
+        }
+        ClsDistrict clsDistrict = null;
+        RegViolation regViolation = regViolationRepo.findById(id).orElse(null);
+        if (regViolation.getDistrict().getId() != null) {
+            clsDistrict = clsDistrictRepo.findById(regViolation.getDistrict().getId()).orElse(null);
+        }
+
+        RegViolationSearch regViolationSearch = RegViolationSearch.builder()
+                    .user(clsUser)
+                    .district(clsDistrict)
+                    .timeCreate(new Timestamp(System.currentTimeMillis()))
+                    .innOrg(regViolation.getInnOrg())
+                    .nameOrg(regViolation.getNameOrg())
+                    .numberFile(regViolation.getNumberFile())
+                    .idViolation(regViolation.getId())
+                    .build();
+            regViolationSearchRepo.save(regViolationSearch);
+
+        return regViolation;
     }
 
     @Override
@@ -309,8 +330,31 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public RegPersonViolation getRegPersonViolation(Long id) {
-        return regPersonViolationRepo.findById(id).orElse(null);
+    public RegPersonViolation getRegPersonViolation(Long id, Long idUser) {
+        ClsUser clsUser = null;
+        if(idUser != null){
+            clsUser = clsUserRepo.findById(idUser).orElse(null);
+        }
+        ClsDistrict clsDistrict = null;
+        RegPersonViolation regPersonViolation = regPersonViolationRepo.findById(id).orElse(null);
+        if (regPersonViolation.getDistrict().getId() != null) {
+            clsDistrict = clsDistrictRepo.findById(regPersonViolation.getDistrict().getId()).orElse(null);
+        }
+
+        RegPersonViolationSearch regPersonViolationSearch = RegPersonViolationSearch.builder()
+                    .user(clsUser)
+                    .district(clsDistrict)
+                    .timeCreate(new Timestamp(System.currentTimeMillis()))
+                    .lastname(regPersonViolation.getLastname())
+                    .firstname(regPersonViolation.getFirstname())
+                    .patronymic(regPersonViolation.getPatronymic())
+                    .passportData(regPersonViolation.getPassportData())
+                    .numberFile(regPersonViolation.getNumberFile())
+                    .idPersonViolation(regPersonViolation.getId())
+                    .build();
+            regPersonViolationSearchRepo.save(regPersonViolationSearch);
+
+        return regPersonViolation;
     }
 
     @Override

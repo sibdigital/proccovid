@@ -88,7 +88,10 @@ public class UserController {
             method = RequestMethod.POST
     )
     public @ResponseBody ViolationDto getViolation(@RequestParam Long id) {
-        RegViolation regViolation = violationService.getRegViolation(id);
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        RegViolation regViolation = violationService.getRegViolation(id, clsUser.getId());
         ViolationDto dto = new ViolationDto(regViolation);
         return dto;
     }
@@ -147,7 +150,10 @@ public class UserController {
             method = RequestMethod.GET
     )
     public @ResponseBody PersonViolationDto getPersonViolation(@RequestParam Long id) {
-        RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id);
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id, clsUser.getId());
         PersonViolationDto dto = new PersonViolationDto(regPersonViolation);
         return dto;
     }
