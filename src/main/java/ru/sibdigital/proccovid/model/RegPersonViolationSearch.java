@@ -19,10 +19,12 @@ public class RegPersonViolationSearch {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REG_PERSON_VIOLATION_SEARCH_SEQ_GEN")
     @Column(name = "id", nullable = false)
     private Long id;
+    private Long idPersonViolation;
     private Timestamp timeCreate;
     private String lastname;
     private String firstname;
     private String patronymic;
+    private String fio;
     private String passportData;
     private String numberFile;
     private Long numberFound;
@@ -84,6 +86,12 @@ public class RegPersonViolationSearch {
     }
 
     @Basic
+    @Column(name = "fio")
+    public  String getFio() { return fio; }
+
+    public void setFio(String fio) { this.fio = fio; }
+
+    @Basic
     @Column(name = "passport_data")
     public String getPassportData() {
         return passportData;
@@ -112,6 +120,12 @@ public class RegPersonViolationSearch {
     public void setNumberFound(Long numberFound) {
         this.numberFound = numberFound;
     }
+
+    @Basic
+    @Column(name = "id_person_violation")
+    public Long getIdViolation() { return idPersonViolation; }
+
+    public void setIdViolation(Long idPersonViolation) { this.idPersonViolation = idPersonViolation; }
 
     public ClsUser getUser() {
         return user;

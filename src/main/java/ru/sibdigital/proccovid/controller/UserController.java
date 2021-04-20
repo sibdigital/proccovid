@@ -88,18 +88,20 @@ public class UserController {
             method = RequestMethod.POST
     )
     public @ResponseBody ViolationDto getViolation(@RequestParam Long id) {
-        RegViolation regViolation = violationService.getRegViolation(id);
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        RegViolation regViolation = violationService.getRegViolation(id, clsUser.getId());
         ViolationDto dto = new ViolationDto(regViolation);
         return dto;
     }
+
 
     @RequestMapping(
             value = {"/person_violations","/outer/person_violations"},
             method = RequestMethod.GET
     )
-    public @ResponseBody Map<String, Object> getRegPersonViolations(@RequestParam(value = "l", required = false) String lastname,
-                                                                    @RequestParam(value = "f", required = false) String firstname,
-                                                                    @RequestParam(value = "p", required = false) String patronymic,
+    public @ResponseBody Map<String, Object> getRegPersonViolations(@RequestParam(value = "fio", required = false) String fio,
                                                                     @RequestParam(value = "pd", required = false) String passportData,
                                                                     @RequestParam(value = "nf", required = false) String numberFile,
                                                                     @RequestParam(value = "d", required = false) Long idDistrict,
@@ -111,7 +113,7 @@ public class UserController {
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
-        RegPersonViolationSearchCriteria searchCriteria = new RegPersonViolationSearchCriteria(lastname, firstname, patronymic, passportData, numberFile, idDistrict);
+        RegPersonViolationSearchCriteria searchCriteria = new RegPersonViolationSearchCriteria(fio, passportData, numberFile, idDistrict);
 
         Page<RegPersonViolation> regViolationPage = violationService.getPersonViolationsByCriteria(searchCriteria, page, size, clsUser.getId());
 
@@ -148,7 +150,10 @@ public class UserController {
             method = RequestMethod.GET
     )
     public @ResponseBody PersonViolationDto getPersonViolation(@RequestParam Long id) {
-        RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id);
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id, clsUser.getId());
         PersonViolationDto dto = new PersonViolationDto(regPersonViolation);
         return dto;
     }

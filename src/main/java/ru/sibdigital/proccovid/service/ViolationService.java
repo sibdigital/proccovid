@@ -24,13 +24,13 @@ public interface ViolationService {
 
     RegViolation saveRegViolation(ViolationDto dto) throws Exception;
 
-    RegViolation getRegViolation(Long id);
+    RegViolation getRegViolation(Long id, Long idUser);
 
     Page<RegPersonViolation> getPersonViolationsByCriteria(RegPersonViolationSearchCriteria searchCriteria, int page, int size, Long idUser);
 
     RegPersonViolation saveRegPersonViolation(PersonViolationDto dto) throws Exception;
 
-    RegPersonViolation getRegPersonViolation(Long id);
+    RegPersonViolation getRegPersonViolation(Long id, Long idUser);
 
     Page<RegViolationSearch> getViolationSearchQueriesByCriteria(RegViolationSearchSearchCriteria searchCriteria, int page, int size);
 
