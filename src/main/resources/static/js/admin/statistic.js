@@ -45,7 +45,7 @@ const statistic = {
                             webix.ui({
                                 id: 'content',
                                 rows: [
-                                    inspectionReport
+                                    webix.copy(inspectionReport)
                                 ]
                             }, $$("content"));
                         },
@@ -57,7 +57,7 @@ const statistic = {
                             webix.ui({
                                 id: 'content',
                                 rows: [
-                                    inspectionCountReport
+                                    webix.copy(inspectionCountReport)
                                 ]
                             }, $$("content"));
                         },
