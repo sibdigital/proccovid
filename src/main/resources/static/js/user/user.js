@@ -11,7 +11,7 @@ function view_section(title) {
 }
 
 webix.ready(function() {
-    let rolesStr = webix.ajax().sync().get(OUTER_URL_PREFIX + 'user_roles');
+    let rolesStr = webix.ajax().sync().get('user_roles');
     let userRoles = JSON.parse(rolesStr?.response);
     console.log(userRoles)
     let isAdmin = userRoles[0]?.status;
@@ -139,6 +139,12 @@ webix.ready(function() {
             }
         ]
     })
+
+    let status = getUserStatus();
+    if (status === 0) {
+        webix.ui(newUserPasswordModal).show();
+    };
+
     webix.event(window, "resize", function(event){
         layout.define("width",document.body.clientWidth);
         layout.define("height",window.innerHeight);

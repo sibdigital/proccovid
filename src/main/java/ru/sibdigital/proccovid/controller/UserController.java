@@ -85,7 +85,7 @@ public class UserController {
 
     @RequestMapping(
             value = {"/violation","/outer/violation"},
-            method = RequestMethod.POST
+            method = RequestMethod.GET
     )
     public @ResponseBody ViolationDto getViolation(@RequestParam Long id) {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -96,13 +96,12 @@ public class UserController {
         return dto;
     }
 
+
     @RequestMapping(
             value = {"/person_violations","/outer/person_violations"},
             method = RequestMethod.GET
     )
-    public @ResponseBody Map<String, Object> getRegPersonViolations(@RequestParam(value = "l", required = false) String lastname,
-                                                                    @RequestParam(value = "f", required = false) String firstname,
-                                                                    @RequestParam(value = "p", required = false) String patronymic,
+    public @ResponseBody Map<String, Object> getRegPersonViolations(@RequestParam(value = "fio", required = false) String fio,
                                                                     @RequestParam(value = "pd", required = false) String passportData,
                                                                     @RequestParam(value = "nf", required = false) String numberFile,
                                                                     @RequestParam(value = "d", required = false) Long idDistrict,
@@ -114,7 +113,7 @@ public class UserController {
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
-        RegPersonViolationSearchCriteria searchCriteria = new RegPersonViolationSearchCriteria(lastname, firstname, patronymic, passportData, numberFile, idDistrict);
+        RegPersonViolationSearchCriteria searchCriteria = new RegPersonViolationSearchCriteria(fio, passportData, numberFile, idDistrict);
 
         Page<RegPersonViolation> regViolationPage = violationService.getPersonViolationsByCriteria(searchCriteria, page, size, clsUser.getId());
 

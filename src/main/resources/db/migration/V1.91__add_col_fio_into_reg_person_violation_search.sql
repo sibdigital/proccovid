@@ -1,0 +1,1 @@
+alter table reg_person_violation_search add column if not exists fio varchar(100);

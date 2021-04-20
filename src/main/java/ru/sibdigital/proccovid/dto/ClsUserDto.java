@@ -23,5 +23,6 @@ public class ClsUserDto {
     private Boolean admin;
     private String email;
     private Long districtId;
+    private Integer status;
     private List<UserRolesEntityDto> userRoles;
 }

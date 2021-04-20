@@ -532,6 +532,7 @@ public class RequestService {
                 .login(clsUserDto.getLogin())
                 .isAdmin(clsUserDto.getAdmin())
                 .email(clsUserDto.getEmail())
+                .status(clsUserDto.getStatus())
                 .build();
 
         if (clsUserDto.getNewPassword() != null && !clsUserDto.getNewPassword().isBlank()) {
@@ -548,6 +549,18 @@ public class RequestService {
         clsUserRepo.save(clsUser);
         saveUserRoles(clsUserDto, clsUser);
 
+        return clsUser;
+    }
+
+    public ClsUser saveUserPassword(ClsUser clsUser, String newPassword) {
+        clsUser.setPassword(passwordEncoder.encode(newPassword));
+        clsUserRepo.save(clsUser);
+        return clsUser;
+    }
+
+    public ClsUser setStatus(ClsUser clsUser, Integer statusValue) {
+        clsUser.setStatus(statusValue);
+        clsUserRepo.save(clsUser);
         return clsUser;
     }
 
