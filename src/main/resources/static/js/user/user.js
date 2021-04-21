@@ -114,12 +114,38 @@ webix.ready(function() {
                             },
                             {
                                 cols: [
+                                    // {
+                                    //     view: 'label',
+                                    //     id: 'logout_label',
+                                    //     label: DEPARTMENT + ' (<a href="logout" title="Выйти">' + USER_NAME + '</a>)',
+                                    //     align: 'right'
+                                    // }
                                     {
-                                        view: 'label',
-                                        id: 'logout_label',
-                                        label: DEPARTMENT + ' (<a href="logout" title="Выйти">' + USER_NAME + '</a>)',
-                                        align: 'right'
-                                    }
+                                        view: 'icon',
+                                        icon: 'mdi mdi-account-circle',
+                                        css: 'topMenuIcon',
+                                        tooltip: 'Профиль',
+                                        click: function () {
+                                            webix.ui({
+                                                id: 'content',
+                                                rows: [
+                                                    profile
+                                                ]
+                                            }, $$('content'))
+
+                                            $$("labelLK").setValue("Личный кабинет > " + "<span style='color: #1ca1c1'>" + "Профиль" + "</span>");
+                                            $$('menu').unselectAll();
+                                        },
+                                    },
+                                    {
+                                        view: 'icon',
+                                        css: 'topMenuIcon',
+                                        icon: 'mdi mdi-exit-to-app',
+                                        tooltip: 'Выход',
+                                        click: function () {
+                                            webix.send("logout");
+                                        },
+                                    },
                                 ]
                             }
                         ]
@@ -134,7 +160,7 @@ webix.ready(function() {
                                 {id: 'content',}
                             ]
                         }
-                    }
+                    },
                 ]
             }
         ]
