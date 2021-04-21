@@ -122,7 +122,7 @@ webix.ready(function() {
                                     // }
                                     {
                                         view: 'icon',
-                                        icon: 'mdi mdi-account-circle',
+                                        icon: 'fas fa-user-circle',
                                         css: 'topMenuIcon',
                                         tooltip: 'Профиль',
                                         click: function () {
@@ -140,7 +140,7 @@ webix.ready(function() {
                                     {
                                         view: 'icon',
                                         css: 'topMenuIcon',
-                                        icon: 'mdi mdi-exit-to-app',
+                                        icon: 'fas fa-sign-out-alt',
                                         tooltip: 'Выход',
                                         click: function () {
                                             webix.send("logout");

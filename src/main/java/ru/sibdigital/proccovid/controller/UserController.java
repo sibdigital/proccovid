@@ -3,7 +3,9 @@ package ru.sibdigital.proccovid.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
@@ -13,10 +15,12 @@ import ru.sibdigital.proccovid.dto.ViolationDto;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.RegPersonViolation;
 import ru.sibdigital.proccovid.model.RegViolation;
+import ru.sibdigital.proccovid.repository.ClsUserRepo;
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegViolationSearchCriteria;
 import ru.sibdigital.proccovid.service.ViolationService;
 
+import javax.servlet.http.HttpSession;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +36,12 @@ public class UserController {
 
     @Autowired
     private ViolationService violationService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ClsUserRepo clsUserRepo;
 
     @RequestMapping(
             value = {"/violations","/outer/violations"},
@@ -156,5 +166,38 @@ public class UserController {
         RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id, clsUser.getId());
         PersonViolationDto dto = new PersonViolationDto(regPersonViolation);
         return dto;
+    }
+
+    @RequestMapping(
+            value = {"/profile", "/outer/profile"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody ClsUser getProfile() {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return currentUser.getClsUser();
+    }
+
+    @PostMapping("/check_current_pass")
+    public @ResponseBody String checkCurrentPass(@RequestBody String incomingPass){
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String currentPass = currentUser.getClsUser().getPassword();
+        if(passwordEncoder.matches(incomingPass,currentPass)){
+            return "Пароли совпадают";
+        }else{
+            return "Пароли не совпадают";
+        }
+    }
+
+    @PostMapping("/edit_user_pass")
+    public @ResponseBody ResponseEntity<Object>  editUserPass(@RequestParam(value = "new_pass", required = true) String newPass){
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+        clsUser.setPassword(passwordEncoder.encode(newPass));
+        clsUserRepo.save(clsUser);
+
+        ResponseEntity<Object>  responseEntity = ResponseEntity.ok()
+                .body("{\"cause\": \"Пароль успешно обновлен\"," +
+                        "\"status\": \"server\"}");
+        return responseEntity;
     }
 }
