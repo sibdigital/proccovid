@@ -73,7 +73,7 @@ public class LoginController {
                     emailService.sendSimpleMessage(clsUser.getEmail(),
                             applicationConstants.getApplicationName() + ". Восстановление пароля",
                             "По логину " + clsUser.getLogin() + " произведена смена пароля. "+
-                                    "Ваш новый пароль от личного кабинета на портале " + applicationConstants.getApplicationName() + ":" + newPassword, fromAddress);
+                                    "Ваш новый пароль от личного кабинета на портале " + applicationConstants.getApplicationName() + ": " + newPassword, fromAddress);
                     return "Ок";
                 } catch (Exception e) {
                     return "Не удалось отправить письмо";

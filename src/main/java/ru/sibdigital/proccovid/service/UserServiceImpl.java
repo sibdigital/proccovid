@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.model.ClsUser;
+import ru.sibdigital.proccovid.model.UserStatuses;
 import ru.sibdigital.proccovid.repository.ClsUserRepo;
 import ru.sibdigital.proccovid.utils.PasswordGenerator;
 
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService {
         if (clsUser != null) {
             String newPassword = PasswordGenerator.generatePassword(8);
             clsUser.setPassword(passwordEncoder.encode(newPassword));
+            clsUser.setStatus(UserStatuses.NOT_ACTIVE.getValue());
             clsUserRepo.save(clsUser);
             return newPassword;
         }
