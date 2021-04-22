@@ -1,3 +1,5 @@
+webix.Date.startOnMonday = true;
+
 const person_form_data = [
     {id: 'search_fio', css: 'input_fio', name: 'ФИО'},
     {id: 'search_passportData', css: 'input_passport_data', name: 'Паспортные данные'},
@@ -126,6 +128,7 @@ const personViolations = {
                         {id: "fullName", minWidth: 300, header: "ФИО", template: "#fullName#", fillspace: true},
                         {id: "district", width: 200, header: "Район", template: "#nameDistrict#"},
                         {id: "deal_number", width: 200, header: "Номер дела", template: "#numberFile#"},
+                        {id: "deal_number", width: 200, header: "Дата дела", template: "#dateFile#"},
                         {
                             id: "regAddress",
                             width: 250,
@@ -159,6 +162,8 @@ const personViolations = {
 
                             setTimeout(function () {
                                 showPersonViolationForm(id);
+                                $$('btnsPanel').hide();
+                                showBtnBack(personViolations, 'person_violations_table');
 
                                 webix.ajax().get('person_violation', {id: item.id})
                                     .then(function (data) {
@@ -395,12 +400,15 @@ function showPersonViolationForm(id) {
                                 id: 'numberFile',
                                 label: 'Номер дела',
                                 labelPosition: 'top',
-                                invalidMessage: 'Длина номера дела превышает 100 символов',
+                                required: true,
+                                invalidMessage: 'Поле не может быть пустым, и длина номера не должна превышать 100 симв.',
                                 validate: function (val) {
                                     if (val) {
-                                        if (val.length > 100) {
+                                        if (val.length > 100 || val.length == 0) {
                                             return false;
                                         }
+                                    } else  {
+                                        return false;
                                     }
                                     return true;
                                 }
@@ -412,13 +420,14 @@ function showPersonViolationForm(id) {
                                 label: 'Дата',
                                 editable: true,
                                 labelPosition: 'top',
-                                // required: true,
-                                // validate: webix.rules.isNotEmpty,
-                                // invalidMessage: 'Поле не может быть пустым',
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                invalidMessage: 'Поле не может быть пустым',
                             }
                         ]
                     },
                     {
+                        id: 'btnsPanel',
                         margin: 10,
                         cols: [
                             {},
@@ -457,6 +466,7 @@ function showPersonViolationForm(id) {
                                 maxWidth: 300,
                                 click: function () {
                                     showPersonViolations();
+                                    hideBtnBack()
                                 }
                             }
                         ]

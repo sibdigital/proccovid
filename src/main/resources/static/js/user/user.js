@@ -1,6 +1,8 @@
 webix.i18n.setLocale("ru-RU");
 
-const dateFormat = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s")
+const dateFormat = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s");
+let btnBackHandler = null;
+
 
 function view_section(title) {
     return {
@@ -8,6 +10,48 @@ function view_section(title) {
         type: 'section',
         template: title
     }
+}
+
+let btnBack = {
+    id: 'btnBackMainId',
+    view: 'button',
+    label: 'Назад',
+    maxWidth: 100,
+    align: 'left',
+    type: 'icon',
+    icon: 'fas fa-arrow-left',
+    css: 'backBtnStyle',
+    hidden: true,
+    click: function () {
+
+    }
+}
+
+function hideBtnBack() {
+    $$('btnBackMainId').hide();
+}
+
+function showBtnBack(view, tableId) {
+    $$('btnBackMainId').show();
+    if (btnBackHandler != null) {
+        $$('btnBackMainId').detachEvent(btnBackHandler);
+    }
+    btnBackHandler = $$('btnBackMainId').attachEvent("onItemClick", function(id, e) {
+        if ($$(tableId) != null) {
+            $$(tableId).destructor();
+        }
+
+        webix.ui({
+            id: 'content',
+            rows: [
+                webix.copy(view)
+            ]
+        }, $$('content'));
+
+        $$('btnBackMainId').hide();
+
+        return false;
+    });
 }
 
 webix.ready(function() {
@@ -76,11 +120,11 @@ webix.ready(function() {
                                     view = personViolations;
                                     margin = {"margin-top":"10px !important","width":"100% !important"};
                                 }
+                                hideBtnBack(),
                                 this.select(id)
                                 if (view != null) {
                                     webix.ui({
                                         id: 'content',
-                                        css: margin ?? '',
                                         rows: [
                                             view
                                         ]
@@ -105,6 +149,7 @@ webix.ready(function() {
                         view: 'toolbar',
                         autoheight: true,
                         elements: [
+                            btnBack,
                             {
                                 view: 'label',
                                 id: 'labelLK',
