@@ -177,7 +177,10 @@ public class UserController {
         return currentUser.getClsUser();
     }
 
-    @PostMapping("/check_current_pass")
+    @RequestMapping(
+            value = {"/check_current_pass","/outer/check_current_pass"},
+            method = RequestMethod.POST
+    )
     public @ResponseBody String checkCurrentPass(@RequestBody String incomingPass){
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String currentPass = currentUser.getClsUser().getPassword();
@@ -188,7 +191,10 @@ public class UserController {
         }
     }
 
-    @PostMapping("/edit_user_pass")
+    @RequestMapping(
+            value = {"/edit_user_pass","/outer/edit_user_pass"},
+            method = RequestMethod.POST
+    )
     public @ResponseBody ResponseEntity<Object>  editUserPass(@RequestParam(value = "new_pass", required = true) String newPass){
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();

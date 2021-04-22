@@ -1,3 +1,11 @@
+function view_section(title) {
+    return {
+        view: 'template',
+        type: 'section',
+        template: title
+    }
+}
+
 let profileRules = {
     "new_pass":(val) => {
         if(val.length !== 0 ){
