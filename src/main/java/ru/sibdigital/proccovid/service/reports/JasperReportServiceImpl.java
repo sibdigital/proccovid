@@ -10,25 +10,36 @@ import net.sf.jasperreports.export.Exporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.*;
 
 
 @Service
 @Slf4j
+@PropertySource("classpath:reports")
 public class JasperReportServiceImpl implements JasperReportService {
+
+    @Autowired
+    ResourceLoader resourceLoader;
 
     @Override
     public  <T> byte[] exportJasperReport(String jrxmlPath, List<T> dataSourceList, Map<String, Object> parameters, String reportFormat) {
         try {
             // Load file and compile it
-            File file = ResourceUtils.getFile(jrxmlPath);
+//            File file = ResourceUtils.getFile(jrxmlPath);
+//            JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
 
-            JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+            InputStream inputStream = resourceLoader.getResource(jrxmlPath).getInputStream();
+            JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);
+
             JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dataSourceList);
 
 

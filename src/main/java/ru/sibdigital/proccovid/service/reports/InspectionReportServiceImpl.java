@@ -5,6 +5,8 @@ import net.sf.jasperreports.engine.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto;
@@ -14,8 +16,7 @@ import ru.sibdigital.proccovid.model.RegOrganizationOkved;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.repository.RegOrganizationInspectionRepo;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.text.DateFormat;
@@ -29,6 +30,7 @@ import javax.persistence.Query;
 
 @Service
 @Slf4j
+@PropertySource("classpath:reports")
 public class InspectionReportServiceImpl implements InspectionReportService {
 
     @Autowired
@@ -39,6 +41,9 @@ public class InspectionReportServiceImpl implements InspectionReportService {
 
     @Autowired
     JasperReportService jasperReportService;
+
+    @Autowired
+    ResourceLoader resourceLoader;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -53,6 +58,9 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("net.sf.jasperreports.print.keep.full.text", true);
             parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
+//            ResourceBundle bundle = ResourceBundle.getBundle("labels/russia/labels", new Locale("ru", "RU"));
+//            parameters.put("REPORT_RESOURCE_BUNDLE", bundle);
+            parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
 
             DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
@@ -88,6 +96,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("net.sf.jasperreports.print.keep.full.text", true);
             parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
+            parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
 
             DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
@@ -228,8 +237,13 @@ public class InspectionReportServiceImpl implements InspectionReportService {
     }
 
     private String getQueryString(String path) throws IOException {
-        File file = ResourceUtils.getFile(path);
-        String query = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+//        File file = ResourceUtils.getFile(path);
+//        String query = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        InputStream inputStream = resourceLoader.getResource(path).getInputStream();
+        String query = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
         return query;
     }
 
