@@ -1,3 +1,5 @@
+webix.Date.startOnMonday = true;
+
 const organization_form_data = [
     {id: 'search_inn', css: 'input_inn', name: 'ИНН'},
     {id: 'search_name', css: 'input_name', name: 'Наименование организации'},
@@ -185,6 +187,7 @@ const violations = {
                         {id: "inn", width: 150, header: "ИНН", template: "#innOrg#"},
                         {id: "district", width: 200, header: "Район", template: "#nameDistrict#"},
                         {id: "deal_number", width: 200, header: "Номер дела", template: "#numberFile#"},
+                        {id: "deal_date", width: 200, header: "Дата дела", template: "#dateFile#"},
                         {
                             id: "nameTypeViolation",
                             width: 300,
@@ -222,6 +225,7 @@ const violations = {
 
                             setTimeout(function () {
                                 showViolationForm(id);
+                                $$('btnsPanel').hide();
 
                                 webix.ajax().get('violation', {id: item.id})
                                     .then(function (data) {
@@ -681,12 +685,15 @@ function showViolationForm(id) {
                                 id: 'numberFile',
                                 label: 'Номер дела',
                                 labelPosition: 'top',
-                                invalidMessage: 'Длина номера дела превышает 100 символов',
+                                required: true,
+                                invalidMessage: 'Поле не может быть пустым и длина номера не должна превышать 100 симв.',
                                 validate: function (val) {
                                     if (val) {
-                                        if (val.length > 100) {
+                                        if (val.length > 100 || val.length == 0) {
                                             return false;
                                         }
+                                    } else  {
+                                        return false;
                                     }
                                     return true;
                                 }
@@ -698,13 +705,14 @@ function showViolationForm(id) {
                                 label: 'Дата',
                                 editable: true,
                                 labelPosition: 'top',
-                                // required: true,
-                                // validate: webix.rules.isNotEmpty,
-                                // invalidMessage: 'Поле не может быть пустым',
+                                required: true,
+                                validate: webix.rules.isNotEmpty,
+                                invalidMessage: 'Поле не может быть пустым',
                             }
                         ]
                     },
                     {
+                        id: 'btnsPanel',
                         margin: 10,
                         cols: [
                             {},
