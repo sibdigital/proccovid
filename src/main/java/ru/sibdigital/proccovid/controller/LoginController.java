@@ -51,7 +51,6 @@ public class LoginController {
             value = {"/recovery","/outer/recovery"},
             method = RequestMethod.GET
     )
-    @GetMapping("/recovery")
     public String recovery(Model model) {
         model.addAttribute("application_name", applicationConstants.getApplicationName());
 //        model.addAttribute("logo_path", "<img src = \"logo.png\">");
