@@ -163,6 +163,7 @@ const personViolations = {
                             setTimeout(function () {
                                 showPersonViolationForm(id);
                                 $$('btnsPanel').hide();
+                                showBtnBack(personViolations, 'person_violations_table');
 
                                 webix.ajax().get('person_violation', {id: item.id})
                                     .then(function (data) {
@@ -465,6 +466,7 @@ function showPersonViolationForm(id) {
                                 maxWidth: 300,
                                 click: function () {
                                     showPersonViolations();
+                                    hideBtnBack()
                                 }
                             }
                         ]
