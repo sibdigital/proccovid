@@ -124,7 +124,7 @@ webix.ready(function() {
                                         view: 'icon',
                                         icon: 'fas fa-user-circle',
                                         css: 'topMenuIcon',
-                                        tooltip: 'Профиль',
+                                        tooltip: 'Профиль (' + USER_NAME + ")",
                                         click: function () {
                                             webix.ui({
                                                 id: 'content',

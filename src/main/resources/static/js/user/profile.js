@@ -80,10 +80,12 @@ const profile = {
                         .post('check_current_pass', param).then(function (data) {
                         if (data.text() === "Пароли не совпадают") {
                             $$("save_user_pass_changes").disable();
-                            $$("invalidMessages").setValue("Введен неверный текущий пароль");
+                            $$('helpMessages').hide();
+                            $$("invalidMessages").show();
                             $$('invalidMessages2').setValue("");
                         }else{
-                            $$("invalidMessages").setValue("")
+                            $$('helpMessages').hide();
+                            $$("invalidMessages").hide();
                             $$('invalidMessages2').setValue("");
                             $$("save_user_pass_changes").enable();
                         }
@@ -94,10 +96,19 @@ const profile = {
         {
             view: 'label',
             height: 19,
-            id: 'invalidMessages',
+            id: 'helpMessages',
             borderless: true,
             autoheight: true,
-            template:"<span style='padding: 2px;text-align: center; font-size: 0.8rem; color: red'></span>"
+            template:"<span style='padding: 2px;text-align: center; font-size: 0.8rem; color: blue'>Введите пароль и нажмите Enter, после этого можно будет задать новый пароль</span>"
+        },
+        {
+            view: 'label',
+            height: 19,
+            id: 'invalidMessages',
+            hidden: true,
+            borderless: true,
+            autoheight: true,
+            template:"<span style='padding: 2px;text-align: center; font-size: 0.8rem; color: red'>Введен неверный текущий пароль</span>"
         },
         {
             cols:[
