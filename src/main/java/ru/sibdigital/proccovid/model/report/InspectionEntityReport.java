@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 public class InspectionEntityReport {
@@ -40,7 +41,6 @@ public class InspectionEntityReport {
 
     }
 
-
     @PostLoad
     private void postLoad() {
         OrganizationShortDto org = OrganizationShortDto.builder()
@@ -58,7 +58,7 @@ public class InspectionEntityReport {
                                         .build();
         this.controlAuthority = auth;
 
-        DateFormat df = new SimpleDateFormat("dd.mm.yyyy");
+        DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         this.stringDateOfInspection = df.format(dateOfInspection);
     }
 
@@ -180,5 +180,18 @@ public class InspectionEntityReport {
 
     public void setStringDateOfInspection(String stringDateOfInspection) {
         this.stringDateOfInspection = stringDateOfInspection;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InspectionEntityReport that = (InspectionEntityReport) o;
+        return Objects.equals(id, that.id) && Objects.equals(dateOfInspection, that.dateOfInspection) && Objects.equals(idOrganization, that.idOrganization) && Objects.equals(idAuthority, that.idAuthority) && Objects.equals(nameOrganization, that.nameOrganization) && Objects.equals(shortNameOrganization, that.shortNameOrganization) && Objects.equals(innOrganization, that.innOrganization) && Objects.equals(nameAuthority, that.nameAuthority) && Objects.equals(shortNameAuthority, that.shortNameAuthority) && Objects.equals(totalOrganization, that.totalOrganization) && Objects.equals(totalAuthority, that.totalAuthority) && Objects.equals(inspectionResult, that.inspectionResult) && Objects.equals(comment, that.comment) && Objects.equals(organization, that.organization) && Objects.equals(controlAuthority, that.controlAuthority) && Objects.equals(stringDateOfInspection, that.stringDateOfInspection);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, dateOfInspection, idOrganization, idAuthority, nameOrganization, shortNameOrganization, innOrganization, nameAuthority, shortNameAuthority, totalOrganization, totalAuthority, inspectionResult, comment, organization, controlAuthority, stringDateOfInspection);
     }
 }

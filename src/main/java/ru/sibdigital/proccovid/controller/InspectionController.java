@@ -130,7 +130,7 @@ public class InspectionController {
         Date minDate = defaultMinDate;
         Date maxDate = defaultMaxDate;
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         if (!minDateString.equals("")) {
             minDate = dateFormat.parse(minDateString);
         }
