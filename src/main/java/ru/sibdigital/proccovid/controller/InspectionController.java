@@ -39,7 +39,10 @@ public class InspectionController {
     @Autowired
     private ClsControlAuthorityRepo clsControlAuthorityRepo;
 
-    @GetMapping("/org_inspections")
+    @RequestMapping(
+            value = {"/org_inspections","/organization/org_inspections"},
+            method = RequestMethod.GET
+    )
     public @ResponseBody List<RegOrganizationInspection> getInspections(@RequestParam(value = "id") Long id) {
         if (id == null) {
             return null;
