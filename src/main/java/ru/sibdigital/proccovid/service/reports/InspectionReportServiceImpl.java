@@ -131,20 +131,20 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             List<InspectionEntityReport> inspections = getInspectionsForReportDetail(minDate, maxDate, idOrganization, idAuthority);
 
             Map<String, Object> parameters = new HashMap<>();
+            JRBeanCollectionDataSource inspectionJRBean = new JRBeanCollectionDataSource(inspections);
+            parameters.put("InspectionDataSource", inspectionJRBean);
+
             parameters.put("net.sf.jasperreports.print.keep.full.text", true);
             parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
             parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
 
+            parameters.put("reportTitle", "Список проверок");
             DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-//            parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
-//            parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
+            parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
+            parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
 
             String jrxmlPath = null;
-
-            JRBeanCollectionDataSource inspectionJRBean = new JRBeanCollectionDataSource(inspections);
             jrxmlPath = "classpath:reports/inspection/inspection_details.jrxml";
-            parameters.put("InspectionDataSource", inspectionJRBean);
-//            parameters.put("reportTitle", "Детализированный отчет");
 
             return jasperReportService.exportJasperReport(jrxmlPath, inspections, parameters, "html");
 

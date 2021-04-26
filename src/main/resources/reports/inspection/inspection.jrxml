@@ -244,12 +244,6 @@
 				<measure name="maxValue" class="java.lang.Integer">
 					<measureExpression><![CDATA[$P{maxValue}]]></measureExpression>
 				</measure>
-				<measure name="minDate" class="java.lang.String">
-					<measureExpression><![CDATA[$P{maxValue}]]></measureExpression>
-				</measure>
-				<measure name="maxDate" class="java.lang.String">
-					<measureExpression><![CDATA[$P{maxValue}]]></measureExpression>
-				</measure>
 				<measure name="link" class="java.lang.String">
 					<measureExpression><![CDATA["/isrb/generate_inspection_report_details?minDate="+$P{minDate} + "&maxDate=" + $P{maxDate} + "&idOrganization=" + $F{organization}.getId() + "&idAuthority=" + $F{controlAuthority}.getId()]]></measureExpression>
 				</measure>
@@ -262,9 +256,7 @@
 								<font fontName="Times New Roman" size="12"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$V{id_MEASURE}]]></textFieldExpression>
-								<hyperlinkReferenceExpression><![CDATA[$V{link}]]></hyperlinkReferenceExpression>
-<!--							<hyperlinkReferenceExpression><![CDATA["/isrb/generate_inspection_report_details"]]></hyperlinkReferenceExpression>-->
-<!--							<hyperlinkReferenceExpression><![CDATA["/generate_inspection_report_details?minDate="+$V{minDate} + "&maxDate=" + $V{maxDate} + "&idOrganization=" + $V{organization}.getId() + "&idAuthority=" + $V{controlAuthority}.getId()]]></hyperlinkReferenceExpression>-->
+							<hyperlinkReferenceExpression><![CDATA[$V{link}]]></hyperlinkReferenceExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
