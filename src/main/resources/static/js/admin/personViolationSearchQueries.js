@@ -143,7 +143,7 @@ const personViolationSearchQueries = {
                                             let date = xml_format(data.timeCreate.replace("T", " "));
                                             data.timeCreate = date;
                                             $$('personViolationSearchQueryForm').parse(data);
-                                            data.idViolation !== null ? $$('idViolation').setValue("Действие: осуществлен просмотр нарушения № " + data.idViolation)
+                                            data.idViolation !== null ? $$('idViolation').setValue("<a target='_blank' href='cabinet?id_person_violation=" + data.idViolation + "'>Действие: осуществлен просмотр нарушения № " + data.idViolation + "</a>")
                                                 : $$('idViolation').setValue("Действие: осуществлен поиск");
 
                                         });

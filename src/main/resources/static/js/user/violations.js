@@ -222,40 +222,7 @@ const violations = {
                         },
                         onItemDblClick: function (id) {
                             let item = $$('violations_table').getItem(id);
-
-                            setTimeout(function () {
-                                showViolationForm(id);
-                                $$('btnsPanel').hide();
-                                showBtnBack(violations, 'violations_table');
-
-                                webix.ajax().get('violation', {id: item.id})
-                                    .then(function (data) {
-                                        data = data.json();
-                                        $$('violationForm').parse(data);
-                                        $$('nameOrg').define('readonly', true);
-                                        $$('nameOrg').refresh();
-                                        $$('opfOrg').define('readonly', true);
-                                        $$('opfOrg').refresh();
-                                        $$('innOrg').define('readonly', true);
-                                        $$('innOrg').refresh();
-                                        if (data.ogrnOrg) {
-                                            $$('ogrnOrg').define('readonly', true);
-                                            $$('ogrnOrg').refresh();
-                                        } else {
-                                            $$('ogrnOrg').hide();
-                                        }
-                                        if (data.kppOrg) {
-                                            $$('kppOrg').define('readonly', true);
-                                            $$('kppOrg').refresh();
-                                        } else {
-                                            $$('kppOrg').hide();
-                                        }
-                                        $$('dateRegOrg').define('readonly', true);
-                                        $$('dateRegOrg').refresh();
-                                        $$('idTypeViolation').define('readonly', true);
-                                        $$('idTypeViolation').refresh();
-                                    });
-                            }, 100);
+                            getViolationForm(item.id);
                         },
                         'data->onStoreUpdated': function () {
                             this.adjustRowHeight(null, true);
@@ -303,6 +270,42 @@ const violations = {
             ]
         }
     ]
+}
+
+function getViolationForm(idViolation) {
+    setTimeout(function () {
+        showViolationForm(idViolation);
+        $$('btnsPanel').hide();
+        showBtnBack(violations, 'violations_table');
+
+        webix.ajax().get('violation', {id: idViolation})
+            .then(function (data) {
+                data = data.json();
+                $$('violationForm').parse(data);
+                $$('nameOrg').define('readonly', true);
+                $$('nameOrg').refresh();
+                $$('opfOrg').define('readonly', true);
+                $$('opfOrg').refresh();
+                $$('innOrg').define('readonly', true);
+                $$('innOrg').refresh();
+                if (data.ogrnOrg) {
+                    $$('ogrnOrg').define('readonly', true);
+                    $$('ogrnOrg').refresh();
+                } else {
+                    $$('ogrnOrg').hide();
+                }
+                if (data.kppOrg) {
+                    $$('kppOrg').define('readonly', true);
+                    $$('kppOrg').refresh();
+                } else {
+                    $$('kppOrg').hide();
+                }
+                $$('dateRegOrg').define('readonly', true);
+                $$('dateRegOrg').refresh();
+                $$('idTypeViolation').define('readonly', true);
+                $$('idTypeViolation').refresh();
+            });
+    }, 100);
 }
 
 function showOrganizationSearchForm() {
@@ -519,7 +522,7 @@ function showViolationForm(id) {
             {
                 view: 'toolbar',
                 elements: [
-                    {view: 'label', css: { "padding-left":"10px" }, label: 'Просмотр нарушения (id: ' + id + ').'},
+                    {view: 'label', css: {"padding-left": "10px"}, label: 'Просмотр нарушения (id: ' + id + ').'},
                 ],
             },
             {
@@ -693,7 +696,7 @@ function showViolationForm(id) {
                                         if (val.length > 100 || val.length == 0) {
                                             return false;
                                         }
-                                    } else  {
+                                    } else {
                                         return false;
                                     }
                                     return true;

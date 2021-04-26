@@ -159,28 +159,7 @@ const personViolations = {
                         },
                         onItemDblClick: function (id) {
                             let item = $$('person_violations_table').getItem(id);
-
-                            setTimeout(function () {
-                                showPersonViolationForm(id);
-                                $$('btnsPanel').hide();
-                                showBtnBack(personViolations, 'person_violations_table');
-
-                                webix.ajax().get('person_violation', {id: item.id})
-                                    .then(function (data) {
-                                        data = data.json();
-                                        $$('personViolationForm').parse(data);
-                                        $$('lastname').define('readonly', true);
-                                        $$('lastname').refresh();
-                                        $$('firstname').define('readonly', true);
-                                        $$('firstname').refresh();
-                                        $$('patronymic').define('readonly', true);
-                                        $$('patronymic').refresh();
-                                        $$('birthday').define('readonly', true);
-                                        $$('birthday').refresh();
-                                        $$('placeBirth').define('readonly', true);
-                                        $$('placeBirth').refresh();
-                                    });
-                            }, 100);
+                            getPersonViolationForm(item.id);
                         }
                     },
                     url: 'person_violations'
@@ -222,6 +201,30 @@ const personViolations = {
             ]
         }
     ]
+}
+
+function getPersonViolationForm(id) {
+    setTimeout(function () {
+        showPersonViolationForm(id);
+        $$('btnsPanel').hide();
+        showBtnBack(personViolations, 'person_violations_table');
+
+        webix.ajax().get('person_violation', {id: id})
+            .then(function (data) {
+                data = data.json();
+                $$('personViolationForm').parse(data);
+                $$('lastname').define('readonly', true);
+                $$('lastname').refresh();
+                $$('firstname').define('readonly', true);
+                $$('firstname').refresh();
+                $$('patronymic').define('readonly', true);
+                $$('patronymic').refresh();
+                $$('birthday').define('readonly', true);
+                $$('birthday').refresh();
+                $$('placeBirth').define('readonly', true);
+                $$('placeBirth').refresh();
+            });
+    }, 100);
 }
 
 function showPersonViolationForm(id) {
@@ -407,7 +410,7 @@ function showPersonViolationForm(id) {
                                         if (val.length > 100 || val.length == 0) {
                                             return false;
                                         }
-                                    } else  {
+                                    } else {
                                         return false;
                                     }
                                     return true;
