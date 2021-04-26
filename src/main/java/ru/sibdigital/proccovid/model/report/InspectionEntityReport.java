@@ -2,10 +2,10 @@ package ru.sibdigital.proccovid.model.report;
 
 import ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto;
 import ru.sibdigital.proccovid.dto.report.OrganizationShortDto;
-import ru.sibdigital.proccovid.model.ClsControlAuthority;
-import ru.sibdigital.proccovid.model.ClsOrganization;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -17,10 +17,14 @@ public class InspectionEntityReport {
     private Long idAuthority;
     private String nameOrganization;
     private String shortNameOrganization;
+    private String innOrganization;
     private String nameAuthority;
     private String shortNameAuthority;
     private Integer totalOrganization;
     private Integer totalAuthority;
+
+    private String inspectionResult;
+    private String comment;
 
     @Transient
     private OrganizationShortDto organization;
@@ -28,22 +32,14 @@ public class InspectionEntityReport {
     @Transient
     private ControlAuthorityShortDto controlAuthority;
 
+    @Transient
+    private String stringDateOfInspection;
+
 
     public InspectionEntityReport() {
 
     }
 
-    public InspectionEntityReport(Long id, Long idOrganization, Long idAuthority, String nameOrganization, String shortNameOrganization, String nameAuthority, String shortNameAuthority, Integer totalOrganization, Integer totalAuthority) {
-        this.id = id;
-        this.idOrganization = idOrganization;
-        this.idAuthority = idAuthority;
-        this.nameOrganization = nameOrganization;
-        this.shortNameOrganization = shortNameOrganization;
-        this.nameAuthority = nameAuthority;
-        this.shortNameAuthority = shortNameAuthority;
-        this.totalOrganization = totalOrganization;
-        this.totalAuthority = totalAuthority;
-    }
 
     @PostLoad
     private void postLoad() {
@@ -51,6 +47,7 @@ public class InspectionEntityReport {
                                     .id(this.idOrganization)
                                     .name(this.nameOrganization)
                                     .shortName(this.shortNameOrganization)
+                                    .inn(this.innOrganization)
                                     .build();
         this.organization = org;
 
@@ -60,6 +57,9 @@ public class InspectionEntityReport {
                                         .shortName(this.shortNameAuthority)
                                         .build();
         this.controlAuthority = auth;
+
+        DateFormat df = new SimpleDateFormat("dd.mm.yyyy");
+        this.stringDateOfInspection = df.format(dateOfInspection);
     }
 
     public Long getId() {
@@ -148,5 +148,37 @@ public class InspectionEntityReport {
 
     public void setDateOfInspection(Date dateOfInspection) {
         this.dateOfInspection = dateOfInspection;
+    }
+
+    public String getInnOrganization() {
+        return innOrganization;
+    }
+
+    public void setInnOrganization(String innOrganization) {
+        this.innOrganization = innOrganization;
+    }
+
+    public String getInspectionResult() {
+        return inspectionResult;
+    }
+
+    public void setInspectionResult(String inspectionResult) {
+        this.inspectionResult = inspectionResult;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getStringDateOfInspection() {
+        return stringDateOfInspection;
+    }
+
+    public void setStringDateOfInspection(String stringDateOfInspection) {
+        this.stringDateOfInspection = stringDateOfInspection;
     }
 }
