@@ -181,7 +181,7 @@
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
 								<textFieldExpression><![CDATA[($V{organization}.getShortName() == null) ? $V{organization}.getName() : $V{organization}.getShortName()]]></textFieldExpression>
-								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getName()]]></hyperlinkTooltipExpression>
+								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getInn()]]></hyperlinkTooltipExpression>
 							</textField>
 						</cellContents>
 					</crosstabRowHeader>
