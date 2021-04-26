@@ -2,23 +2,30 @@ package ru.sibdigital.proccovid.model.report;
 
 import ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto;
 import ru.sibdigital.proccovid.dto.report.OrganizationShortDto;
-import ru.sibdigital.proccovid.model.ClsControlAuthority;
-import ru.sibdigital.proccovid.model.ClsOrganization;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Objects;
 
 @Entity
 public class InspectionEntityReport {
     @Id
     private Long id;
+    private Date dateOfInspection;
     private Long idOrganization;
     private Long idAuthority;
     private String nameOrganization;
     private String shortNameOrganization;
+    private String innOrganization;
     private String nameAuthority;
     private String shortNameAuthority;
     private Integer totalOrganization;
     private Integer totalAuthority;
+
+    private String inspectionResult;
+    private String comment;
 
     @Transient
     private OrganizationShortDto organization;
@@ -26,21 +33,12 @@ public class InspectionEntityReport {
     @Transient
     private ControlAuthorityShortDto controlAuthority;
 
+    @Transient
+    private String stringDateOfInspection;
+
 
     public InspectionEntityReport() {
 
-    }
-
-    public InspectionEntityReport(Long id, Long idOrganization, Long idAuthority, String nameOrganization, String shortNameOrganization, String nameAuthority, String shortNameAuthority, Integer totalOrganization, Integer totalAuthority) {
-        this.id = id;
-        this.idOrganization = idOrganization;
-        this.idAuthority = idAuthority;
-        this.nameOrganization = nameOrganization;
-        this.shortNameOrganization = shortNameOrganization;
-        this.nameAuthority = nameAuthority;
-        this.shortNameAuthority = shortNameAuthority;
-        this.totalOrganization = totalOrganization;
-        this.totalAuthority = totalAuthority;
     }
 
     @PostLoad
@@ -49,6 +47,7 @@ public class InspectionEntityReport {
                                     .id(this.idOrganization)
                                     .name(this.nameOrganization)
                                     .shortName(this.shortNameOrganization)
+                                    .inn(this.innOrganization)
                                     .build();
         this.organization = org;
 
@@ -58,6 +57,9 @@ public class InspectionEntityReport {
                                         .shortName(this.shortNameAuthority)
                                         .build();
         this.controlAuthority = auth;
+
+        DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        this.stringDateOfInspection = df.format(dateOfInspection);
     }
 
     public Long getId() {
@@ -138,5 +140,58 @@ public class InspectionEntityReport {
 
     public void setControlAuthority(ControlAuthorityShortDto controlAuthority) {
         this.controlAuthority = controlAuthority;
+    }
+
+    public Date getDateOfInspection() {
+        return dateOfInspection;
+    }
+
+    public void setDateOfInspection(Date dateOfInspection) {
+        this.dateOfInspection = dateOfInspection;
+    }
+
+    public String getInnOrganization() {
+        return innOrganization;
+    }
+
+    public void setInnOrganization(String innOrganization) {
+        this.innOrganization = innOrganization;
+    }
+
+    public String getInspectionResult() {
+        return inspectionResult;
+    }
+
+    public void setInspectionResult(String inspectionResult) {
+        this.inspectionResult = inspectionResult;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getStringDateOfInspection() {
+        return stringDateOfInspection;
+    }
+
+    public void setStringDateOfInspection(String stringDateOfInspection) {
+        this.stringDateOfInspection = stringDateOfInspection;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InspectionEntityReport that = (InspectionEntityReport) o;
+        return Objects.equals(id, that.id) && Objects.equals(dateOfInspection, that.dateOfInspection) && Objects.equals(idOrganization, that.idOrganization) && Objects.equals(idAuthority, that.idAuthority) && Objects.equals(nameOrganization, that.nameOrganization) && Objects.equals(shortNameOrganization, that.shortNameOrganization) && Objects.equals(innOrganization, that.innOrganization) && Objects.equals(nameAuthority, that.nameAuthority) && Objects.equals(shortNameAuthority, that.shortNameAuthority) && Objects.equals(totalOrganization, that.totalOrganization) && Objects.equals(totalAuthority, that.totalAuthority) && Objects.equals(inspectionResult, that.inspectionResult) && Objects.equals(comment, that.comment) && Objects.equals(organization, that.organization) && Objects.equals(controlAuthority, that.controlAuthority) && Objects.equals(stringDateOfInspection, that.stringDateOfInspection);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, dateOfInspection, idOrganization, idAuthority, nameOrganization, shortNameOrganization, innOrganization, nameAuthority, shortNameAuthority, totalOrganization, totalAuthority, inspectionResult, comment, organization, controlAuthority, stringDateOfInspection);
     }
 }

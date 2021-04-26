@@ -214,7 +214,7 @@
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
 								<textFieldExpression><![CDATA[($V{organization}.getShortName() == null) ? $V{organization}.getName() : $V{organization}.getShortName()]]></textFieldExpression>
-								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getName()]]></hyperlinkTooltipExpression>
+								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getInn()]]></hyperlinkTooltipExpression>
 							</textField>
 						</cellContents>
 					</crosstabColumnHeader>
@@ -245,15 +245,19 @@
 				<measure name="maxValue" class="java.lang.Integer">
 					<measureExpression><![CDATA[$P{maxValue}]]></measureExpression>
 				</measure>
+				<measure name="link" class="java.lang.String">
+					<measureExpression><![CDATA["/isrb/generate_inspection_report_details?minDate="+$P{minDate} + "&maxDate=" + $P{maxDate} + "&idOrganization=" + $F{organization}.getId() + "&idAuthority=" + $F{controlAuthority}.getId()]]></measureExpression>
+				</measure>
 				<crosstabCell width="100" height="20">
 <!--					<cellContents mode="Opaque" style="Crosstab_CD">-->
 					<cellContents mode="Opaque" style="MY_CELL_STYLE">
-						<textField>
+						<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
 							<reportElement x="0" y="0" width="100" height="20" uuid="a8d364f1-3d4a-4358-be78-7923326ba7d3"/>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
 								<font fontName="Times New Roman" size="12"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$V{id_MEASURE}]]></textFieldExpression>
+							<hyperlinkReferenceExpression><![CDATA[$V{link}]]></hyperlinkReferenceExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>

@@ -30,10 +30,14 @@ WITH
     )
 SELECT
     res_tbl.id as id,
+    res_tbl.date_of_inspection as date_of_inspection,
     res_tbl.id_organization as id_organization,
     res_tbl.id_control_authority as id_authority,
+    res_tbl.comment as comment,
+    cls_inspection_result.name as inspection_result,
     cls_organization.name   as name_organization,
     cls_organization.short_name as short_name_organization,
+    cls_organization.inn as inn_organization,
     cls_control_authority.name as name_authority,
     cls_control_authority.short_name as short_name_authority,
     total_organization.total              as total_organization,
@@ -47,3 +51,5 @@ FROM res_tbl
                    ON res_tbl.id_organization = cls_organization.id
          LEFT JOIN cls_control_authority
                    ON res_tbl.id_control_authority = cls_control_authority.id
+         LEFT JOIN cls_inspection_result
+                   ON res_tbl.id_inspection_result = cls_inspection_result.id

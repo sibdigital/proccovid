@@ -120,6 +120,30 @@ public class InspectionController {
         return template;
     }
 
+    @GetMapping("/generate_inspection_report_details")
+    public @ResponseBody String generateInspectionReportDetails(@RequestParam(value = "minDate") String minDateString,
+                                                              @RequestParam(value = "maxDate") String maxDateString,
+                                                              @RequestParam(value = "idOrganization") Long idOrganization,
+                                                              @RequestParam(value = "idAuthority") Long idAuthority) throws ParseException {
+        Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
+        Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
+        Date minDate = defaultMinDate;
+        Date maxDate = defaultMaxDate;
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        if (!minDateString.equals("")) {
+            minDate = dateFormat.parse(minDateString);
+        }
+        if (!maxDateString.equals("")) {
+            maxDate = dateFormat.parse(maxDateString);
+        }
+
+        byte[] bytes = inspectionReportService.exportInspectionReportDetail( minDate, maxDate,
+                idOrganization, idAuthority, defaultMinDate, defaultMaxDate);
+        String template = new String(bytes);
+        return template;
+    }
+
     @RequestMapping(value = "/inspectionReport/{format}/params")
     public String downloadReport(@PathVariable String format,
                                  @RequestParam(value = "minDate") String minDateString,
