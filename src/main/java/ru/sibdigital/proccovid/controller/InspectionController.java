@@ -57,7 +57,7 @@ public class InspectionController {
 
     @GetMapping("/control_authorities_list_short")
     public @ResponseBody List<KeyValue> getControlAuthoritiesForRichselect() {
-        List<KeyValue> list = clsControlAuthorityRepo.findAll().stream()
+        List<KeyValue> list = clsControlAuthorityRepo.findAllByIsDeleted(false).stream()
                 .map(ctr -> new KeyValue(ctr.getClass().getSimpleName(), ctr.getId(), ctr.getName()))
                 .collect(Collectors.toList());
 

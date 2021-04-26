@@ -112,6 +112,7 @@ public class MainController {
         }
         model.addAttribute("user_lastname", clsUser.getLastname());
         model.addAttribute("user_firstname", clsUser.getFirstname());
+        model.addAttribute("authorities", currentUser.getAuthorities()); // role = ROLE_NAME
         model.addAttribute("application_name", applicationConstants.getApplicationName());
         return "user";
     }
