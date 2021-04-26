@@ -6,11 +6,13 @@ import ru.sibdigital.proccovid.model.ClsControlAuthority;
 import ru.sibdigital.proccovid.model.ClsOrganization;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 public class InspectionEntityReport {
     @Id
     private Long id;
+    private Date dateOfInspection;
     private Long idOrganization;
     private Long idAuthority;
     private String nameOrganization;
@@ -138,5 +140,13 @@ public class InspectionEntityReport {
 
     public void setControlAuthority(ControlAuthorityShortDto controlAuthority) {
         this.controlAuthority = controlAuthority;
+    }
+
+    public Date getDateOfInspection() {
+        return dateOfInspection;
+    }
+
+    public void setDateOfInspection(Date dateOfInspection) {
+        this.dateOfInspection = dateOfInspection;
     }
 }

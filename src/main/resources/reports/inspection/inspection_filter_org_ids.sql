@@ -30,6 +30,7 @@ WITH
     )
 SELECT
     res_tbl.id as id,
+    res_tbl.date_of_inspection as date_of_inspection,
     res_tbl.id_organization as id_organization,
     res_tbl.id_control_authority as id_authority,
     cls_organization.name   as name_organization,

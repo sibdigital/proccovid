@@ -2,6 +2,7 @@ package ru.sibdigital.proccovid.service.reports;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 import ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto;
 import ru.sibdigital.proccovid.dto.report.OrganizationShortDto;
+import ru.sibdigital.proccovid.model.RegOrganizationInspection;
 import ru.sibdigital.proccovid.model.report.InspectionEntityReport;
 import ru.sibdigital.proccovid.model.RegOrganizationOkved;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
@@ -122,7 +124,38 @@ public class InspectionReportServiceImpl implements InspectionReportService {
         }
     }
 
-    public List<InspectionEntityReport> getInspectionEntitiesForReport(Date minDate, Date maxDate, Integer minCnt, List<String> mainOkvedPaths, List<String> additionalOkvedPaths) throws IOException {
+    @Override
+    public byte[] exportInspectionReportDetail(Date minDate, Date maxDate, Long idOrganization, Long idAuthority,
+                                               Date defaultMinDate, Date defaultMaxDate) {
+        try {
+            List<InspectionEntityReport> inspections = getInspectionsForReportDetail(minDate, maxDate, idOrganization, idAuthority);
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("net.sf.jasperreports.print.keep.full.text", true);
+            parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
+            parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
+
+            DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+//            parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
+//            parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
+
+            String jrxmlPath = null;
+
+            JRBeanCollectionDataSource inspectionJRBean = new JRBeanCollectionDataSource(inspections);
+            jrxmlPath = "classpath:reports/inspection/inspection_details.jrxml";
+            parameters.put("InspectionDataSource", inspectionJRBean);
+//            parameters.put("reportTitle", "Детализированный отчет");
+
+            return jasperReportService.exportJasperReport(jrxmlPath, inspections, parameters, "html");
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+
+    }
+
+    private List<InspectionEntityReport> getInspectionEntitiesForReport(Date minDate, Date maxDate, Integer minCnt, List<String> mainOkvedPaths, List<String> additionalOkvedPaths) throws IOException {
         Query query = null;
         List<InspectionEntityReport> list = null;
 
@@ -137,7 +170,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
         return list;
     }
 
-    public List<InspectionEntityReport> getInspectionEntitiesForReportCount(Date minDate, Date maxDate, Integer minCnt,
+    private List<InspectionEntityReport> getInspectionEntitiesForReportCount(Date minDate, Date maxDate, Integer minCnt,
                                                                             Long idOrganization, Long idAuthority, Integer typeRecord) throws IOException {
         Query query = null;
         List<InspectionEntityReport> list = null;
@@ -153,6 +186,14 @@ public class InspectionReportServiceImpl implements InspectionReportService {
         return list;
     }
 
+
+    private List<InspectionEntityReport> getInspectionsForReportDetail(Date minDate, Date maxDate,
+                                                                                 Long idOrganization, Long idAuthority) throws IOException {
+        Query query = getQueryByOrganizationIdAndAuthorityId(minDate, maxDate, idOrganization, idAuthority);
+        List<InspectionEntityReport> list = query.getResultList();
+
+        return list;
+    }
 
     private Query getQueryWithoutOkvedFilter(Date minDate, Date maxDate, Integer minCnt) throws IOException {
         String queryString = getQueryString("classpath:reports/inspection/inspection.sql");
@@ -223,6 +264,17 @@ public class InspectionReportServiceImpl implements InspectionReportService {
         query.setParameter("max_date", maxDate);
         query.setParameter("min_cnt", minCnt);
         query.setParameter("authority_ids", authorityIds);
+
+        return query;
+    }
+
+    private Query getQueryByOrganizationIdAndAuthorityId(Date minDate, Date maxDate, Long organizationId,  Long authorityId) throws IOException {
+        String  queryString = getQueryString("classpath:reports/inspection/inspection_by_organization_and_authority.sql");
+        Query query = entityManager.createNativeQuery(queryString, InspectionEntityReport.class);
+        query.setParameter("min_date", minDate);
+        query.setParameter("max_date", maxDate);
+        query.setParameter("org_id", organizationId);
+        query.setParameter("auth_id", authorityId);
 
         return query;
     }
