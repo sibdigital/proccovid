@@ -19,6 +19,7 @@ import ru.sibdigital.proccovid.dto.egrip.EGRIP;
 import ru.sibdigital.proccovid.dto.egrul.EGRUL;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.ClsMigrationRepo;
+import ru.sibdigital.proccovid.repository.ClsOrganizationRepo;
 import ru.sibdigital.proccovid.service.EgrulService;
 import ru.sibdigital.proccovid.service.PrescriptionService;
 import ru.sibdigital.proccovid.service.RequestService;
@@ -51,6 +52,9 @@ public class MainController {
 
     @Autowired
     private PrescriptionService prescriptionService;
+
+    @Autowired
+    private ClsOrganizationRepo clsOrganizationRepo;
 
     @GetMapping("/")
     public String index(HttpSession session) {
@@ -158,6 +162,22 @@ public class MainController {
             return "request";
         }
         return "view";
+    }
+
+    @GetMapping("/organization/view")
+    public String viewDocRequest(@RequestParam("id") Long organizationId, Model model, HttpSession session) {
+        model.addAttribute("organization_id", organizationId);
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+
+        return "organization";
+    }
+
+    @GetMapping("/cls_organization/{id_organization}")
+    public @ResponseBody ClsOrganization getClsOrganization(@PathVariable("id_organization") Long organizationId){
+        ClsOrganization organization = clsOrganizationRepo.findById(organizationId).orElse(null);
+        return organization;
     }
 
     @GetMapping("/cls_type_requests")

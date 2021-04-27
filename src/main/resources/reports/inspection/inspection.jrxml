@@ -175,12 +175,13 @@
 					<crosstabRowHeader>
 						<cellContents mode="Opaque" style="Crosstab_CH">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField isBlankWhenNull="true">
+							<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
 								<reportElement x="0" y="0" width="150" height="20" isPrintWhenDetailOverflows="true" uuid="b8bd8518-f59d-415e-be49-07db1e9d2c48"/>
 								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
 								<textFieldExpression><![CDATA[($V{organization}.getShortName() == null) ? $V{organization}.getName() : $V{organization}.getShortName()]]></textFieldExpression>
+								<hyperlinkReferenceExpression><![CDATA[$V{organization_link}]]></hyperlinkReferenceExpression>
 								<hyperlinkTooltipExpression><![CDATA[$V{organization}.getInn()]]></hyperlinkTooltipExpression>
 							</textField>
 						</cellContents>
@@ -243,6 +244,9 @@
 				</measure>
 				<measure name="maxValue" class="java.lang.Integer">
 					<measureExpression><![CDATA[$P{maxValue}]]></measureExpression>
+				</measure>
+				<measure name="organization_link" class="java.lang.String">
+					<measureExpression><![CDATA["/isrb/organization/view?id=" + $F{organization}.getId()]]></measureExpression>
 				</measure>
 				<measure name="link" class="java.lang.String">
 					<measureExpression><![CDATA["/isrb/generate_inspection_report_details?minDate="+$P{minDate} + "&maxDate=" + $P{maxDate} + "&idOrganization=" + $F{organization}.getId() + "&idAuthority=" + $F{controlAuthority}.getId()]]></measureExpression>
