@@ -224,6 +224,7 @@ const violations = {
                             let item = $$('violations_table').getItem(id);
                             setTimeout(function () {
                                 showViolationForm(item.id);
+                                $$('btnsPanel').hide();
                                 showBtnBack(violations, 'violations_table');
 
                                 webix.ajax().get('violation', {id: item.id})

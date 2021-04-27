@@ -161,6 +161,7 @@ const personViolations = {
                             let item = $$('person_violations_table').getItem(id);
                             setTimeout(function () {
                                 showPersonViolationForm(item.id);
+                                $$('btnsPanel').hide();
                                 showBtnBack(personViolations, 'person_violations_table');
 
                                 webix.ajax().get('person_violation', {id: item.id})
