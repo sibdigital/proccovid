@@ -39,7 +39,10 @@ public class InspectionController {
     @Autowired
     private ClsControlAuthorityRepo clsControlAuthorityRepo;
 
-    @GetMapping("/org_inspections")
+    @RequestMapping(
+            value = {"/org_inspections","/organization/org_inspections"},
+            method = RequestMethod.GET
+    )
     public @ResponseBody List<RegOrganizationInspection> getInspections(@RequestParam(value = "id") Long id) {
         if (id == null) {
             return null;
@@ -116,6 +119,30 @@ public class InspectionController {
 
         byte[] bytes = inspectionReportService.exportInspectionCountReport("html", minDate, maxDate, minCnt,
                         idOrganization, idAuthority, Integer.valueOf(typeRecord), defaultMinDate, defaultMaxDate);
+        String template = new String(bytes);
+        return template;
+    }
+
+    @GetMapping("/generate_inspection_report_details")
+    public @ResponseBody String generateInspectionReportDetails(@RequestParam(value = "minDate") String minDateString,
+                                                              @RequestParam(value = "maxDate") String maxDateString,
+                                                              @RequestParam(value = "idOrganization") Long idOrganization,
+                                                              @RequestParam(value = "idAuthority") Long idAuthority) throws ParseException {
+        Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
+        Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
+        Date minDate = defaultMinDate;
+        Date maxDate = defaultMaxDate;
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        if (!minDateString.equals("")) {
+            minDate = dateFormat.parse(minDateString);
+        }
+        if (!maxDateString.equals("")) {
+            maxDate = dateFormat.parse(maxDateString);
+        }
+
+        byte[] bytes = inspectionReportService.exportInspectionReportDetail( minDate, maxDate,
+                idOrganization, idAuthority, defaultMinDate, defaultMaxDate);
         String template = new String(bytes);
         return template;
     }

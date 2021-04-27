@@ -13,4 +13,6 @@ public interface InspectionReportService {
 
     byte[] exportInspectionCountReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
                              Long idOrganization, Long idAuthority, Integer typeRecord, Date defaultMinDate, Date defaultMaxDate);
+
+    byte[] exportInspectionReportDetail(Date minDate, Date maxDate, Long idOrganization, Long idAuthority, Date defaultMinDate, Date defaultMaxDate);
 }

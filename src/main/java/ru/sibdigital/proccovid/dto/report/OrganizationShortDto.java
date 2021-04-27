@@ -15,6 +15,7 @@ public class OrganizationShortDto {
     private Long id;
     private String name;
     private String shortName;
+    private String inn;
 
     public Long getId() {
         return id;
@@ -40,16 +41,24 @@ public class OrganizationShortDto {
         this.shortName = shortName;
     }
 
+    public String getInn() {
+        return inn;
+    }
+
+    public void setInn(String inn) {
+        this.inn = inn;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OrganizationShortDto that = (OrganizationShortDto) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(shortName, that.shortName);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(shortName, that.shortName) && Objects.equals(inn, that.inn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, shortName);
+        return Objects.hash(id, name, shortName, inn);
     }
 }
