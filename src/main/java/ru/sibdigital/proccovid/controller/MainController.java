@@ -99,10 +99,7 @@ public class MainController {
     }
 
     @GetMapping("/cabinet")
-    public String cabinet(Model model,
-                          @RequestParam(value = "id_violation", required = false) Long idViolation,
-                          @RequestParam(value = "id_person_violation", required = false) Long idPersonViolation
-    ) {
+    public String cabinet(Model model) {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
 
@@ -114,10 +111,20 @@ public class MainController {
         model.addAttribute("user_lastname", clsUser.getLastname());
         model.addAttribute("user_firstname", clsUser.getFirstname());
         model.addAttribute("application_name", applicationConstants.getApplicationName());
-        model.addAttribute("id_violation", idViolation);
-        model.addAttribute("id_person_violation", idPersonViolation);
 
         return "user";
+    }
+
+    @GetMapping("/violation/view")
+    public String violationView(
+            Model model,
+            @RequestParam(value = "id_violation", required = false) Long idViolation,
+            @RequestParam(value = "id_person_violation", required = false) Long idPersonViolation
+    ) {
+        model.addAttribute("id_violation", idViolation);
+        model.addAttribute("id_person_violation", idPersonViolation);
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "violation";
     }
 
     @GetMapping("/requests")

@@ -222,7 +222,40 @@ const violations = {
                         },
                         onItemDblClick: function (id) {
                             let item = $$('violations_table').getItem(id);
-                            getViolationForm(item.id);
+                            setTimeout(function () {
+                                showViolationForm(item.id);
+                                showBtnBack(violations, 'violations_table');
+
+                                webix.ajax().get('violation', {id: item.id})
+                                    .then(function (data) {
+                                        data = data.json();
+                                        $$('violationForm').parse(data);
+                                        $$('nameOrg').define('readonly', true);
+                                        $$('nameOrg').refresh();
+                                        $$('opfOrg').define('readonly', true);
+                                        $$('opfOrg').refresh();
+                                        $$('innOrg').define('readonly', true);
+                                        $$('innOrg').refresh();
+                                        if (data.ogrnOrg) {
+                                            $$('ogrnOrg').define('readonly', true);
+                                            $$('ogrnOrg').refresh();
+                                        } else {
+                                            $$('ogrnOrg').hide();
+                                        }
+                                        if (data.kppOrg) {
+                                            $$('kppOrg').define('readonly', true);
+                                            $$('kppOrg').refresh();
+                                        } else {
+                                            $$('kppOrg').hide();
+                                        }
+                                        $$('dateRegOrg').define('readonly', true);
+                                        $$('dateRegOrg').refresh();
+                                        $$('idTypeViolation').define('readonly', true);
+                                        $$('idTypeViolation').refresh();
+                                    }).finally(() => {
+                                    webix.ajax().headers({'Content-Type': 'application/json'}).post('view_violation', JSON.stringify($$('violationForm').getValues()));
+                                });
+                            }, 100);
                         },
                         'data->onStoreUpdated': function () {
                             this.adjustRowHeight(null, true);
@@ -270,42 +303,6 @@ const violations = {
             ]
         }
     ]
-}
-
-function getViolationForm(idViolation) {
-    setTimeout(function () {
-        showViolationForm(idViolation);
-        $$('btnsPanel').hide();
-        showBtnBack(violations, 'violations_table');
-
-        webix.ajax().get('violation', {id: idViolation})
-            .then(function (data) {
-                data = data.json();
-                $$('violationForm').parse(data);
-                $$('nameOrg').define('readonly', true);
-                $$('nameOrg').refresh();
-                $$('opfOrg').define('readonly', true);
-                $$('opfOrg').refresh();
-                $$('innOrg').define('readonly', true);
-                $$('innOrg').refresh();
-                if (data.ogrnOrg) {
-                    $$('ogrnOrg').define('readonly', true);
-                    $$('ogrnOrg').refresh();
-                } else {
-                    $$('ogrnOrg').hide();
-                }
-                if (data.kppOrg) {
-                    $$('kppOrg').define('readonly', true);
-                    $$('kppOrg').refresh();
-                } else {
-                    $$('kppOrg').hide();
-                }
-                $$('dateRegOrg').define('readonly', true);
-                $$('dateRegOrg').refresh();
-                $$('idTypeViolation').define('readonly', true);
-                $$('idTypeViolation').refresh();
-            });
-    }, 100);
 }
 
 function showOrganizationSearchForm() {
@@ -517,254 +514,7 @@ function findOrganizations() {
 }
 
 function showViolationForm(id) {
-    const violationForm = {
-        rows: [
-            {
-                view: 'toolbar',
-                elements: [
-                    {view: 'label', css: {"padding-left": "10px"}, label: 'Просмотр нарушения (id: ' + id + ').'},
-                ],
-            },
-            {
-                view: 'form',
-                id: 'violationForm',
-                elements: [
-                    {
-                        view: 'text',
-                        id: 'idEgrul',
-                        name: 'idEgrul',
-                        hidden: true,
-                    },
-                    {
-                        view: 'text',
-                        id: 'idEgrip',
-                        name: 'idEgrip',
-                        hidden: true,
-                    },
-                    {
-                        view: 'text',
-                        id: 'idFilial',
-                        name: 'idFilial',
-                        hidden: true,
-                    },
-                    view_section('Реквизиты нарушителя'),
-                    {
-                        margin: 10,
-                        rows: [
-                            {
-                                margin: 10,
-                                cols: [
-                                    {
-                                        view: 'textarea',
-                                        name: 'nameOrg',
-                                        id: 'nameOrg',
-                                        height: 130,
-                                        label: 'Наименование организации/ИП',
-                                        labelPosition: 'top',
-                                        required: true,
-                                        validate: webix.rules.isNotEmpty,
-                                        invalidMessage: 'Поле не может быть пустым',
-                                    },
-                                    {
-                                        margin: 10,
-                                        rows: [
-                                            {
-                                                view: 'text',
-                                                name: 'opfOrg',
-                                                id: 'opfOrg',
-                                                label: 'Организационно-правовая форма',
-                                                labelPosition: 'top',
-                                                required: true,
-                                                validate: webix.rules.isNotEmpty,
-                                                invalidMessage: 'Поле не может быть пустым',
-                                            },
-                                            {
-                                                view: 'text',
-                                                name: 'innOrg',
-                                                id: 'innOrg',
-                                                label: 'ИНН',
-                                                labelPosition: 'top',
-                                                required: true,
-                                                validate: function (val) {
-                                                    if (!val || isNaN(val) || !(val.length == 10 || val.length == 12)) {
-                                                        return false;
-                                                    }
-                                                    return true;
-                                                },
-                                                invalidMessage: 'ИНН не соответствует формату',
-                                            },
-                                        ]
-                                    },
-                                ]
-                            },
-                        ]
-                    },
-                    view_section('Реквизиты нарушения'),
-                    {
-                        margin: 10,
-                        cols: [
-                            {
-                                view: 'datepicker',
-                                name: 'dateRegOrg',
-                                id: 'dateRegOrg',
-                                label: 'Дата регистрации',
-                                editable: true,
-                                labelPosition: 'top',
-                                // required: true,
-                                // validate: webix.rules.isNotEmpty,
-                                // invalidMessage: 'Поле не может быть пустым',
-                            },
-                            {
-                                view: 'richselect',
-                                name: 'idDistrict',
-                                id: 'idDistrict',
-                                label: 'Район',
-                                labelPosition: 'top',
-                                options: 'cls_districts',
-                                required: true,
-                                validate: webix.rules.isNotEmpty
-                            },
-                            {
-                                view: 'richselect',
-                                id: 'idTypeViolation',
-                                name: 'idTypeViolation',
-                                label: 'Вид нарушения',
-                                labelPosition: 'top',
-                                required: true,
-                                validate: webix.rules.isNotEmpty,
-                                options: 'type_violations',
-                                invalidMessage: 'Поле не может быть пустым',
-                            },
-                        ]
-                    },
-                    {
-                        view: 'text',
-                        name: 'ogrnOrg',
-                        id: 'ogrnOrg',
-                        label: 'ОГРН',
-                        labelPosition: 'top',
-                        // required: true,
-                        hidden: true,
-                        invalidMessage: 'ОГРН не соответствует формату',
-                        validate: function (val) {
-                            if (!val) {
-                                return false;
-                            }
-                            if (isNaN(val)) {
-                                return false;
-                            }
-                            if (val.length != 15) {
-                                return false;
-                            }
-                            return true;
-                        }
-                    },
-                    {
-                        view: 'text',
-                        name: 'kppOrg',
-                        id: 'kppOrg',
-                        label: 'КПП',
-                        hidden: true,
-                        labelPosition: 'top',
-                        invalidMessage: 'КПП не соответствует формату',
-                        validate: function (val) {
-                            if (val) {
-                                if (isNaN(val)) {
-                                    return false;
-                                }
-                                if (val.length != 9) {
-                                    return false;
-                                }
-                            }
-                            return true;
-                        }
-                    },
-                    view_section('Реквизиты судебного решения'),
-                    {
-                        margin: 10,
-                        cols: [
-                            {
-                                view: 'text',
-                                name: 'numberFile',
-                                id: 'numberFile',
-                                label: 'Номер дела',
-                                labelPosition: 'top',
-                                required: true,
-                                invalidMessage: 'Поле не может быть пустым и длина номера не должна превышать 100 симв.',
-                                validate: function (val) {
-                                    if (val) {
-                                        if (val.length > 100 || val.length == 0) {
-                                            return false;
-                                        }
-                                    } else {
-                                        return false;
-                                    }
-                                    return true;
-                                }
-                            },
-                            {
-                                view: 'datepicker',
-                                name: 'dateFile',
-                                id: 'dateFile',
-                                label: 'Дата',
-                                editable: true,
-                                labelPosition: 'top',
-                                required: true,
-                                validate: webix.rules.isNotEmpty,
-                                invalidMessage: 'Поле не может быть пустым',
-                            }
-                        ]
-                    },
-                    {
-                        id: 'btnsPanel',
-                        margin: 10,
-                        cols: [
-                            {},
-                            {
-                                view: 'button',
-                                id: 'save_button',
-                                align: 'right',
-                                css: 'webix_primary',
-                                value: 'Сохранить',
-                                maxWidth: 300,
-                                click: function () {
-                                    if ($$('violationForm').validate()) {
-                                        $$('save_button').disable();
-
-                                        let params = $$('violationForm').getValues();
-
-                                        webix.ajax().headers({'Content-Type': 'application/json'}).post('save_violation', JSON.stringify(params))
-                                            .then(function (data) {
-                                                if (data.text() === 'Нарушение сохранено') {
-                                                    webix.message({text: data.text(), type: 'success'});
-                                                    showViolations();
-                                                } else {
-                                                    webix.message({text: data.text(), type: 'error'});
-                                                }
-                                            });
-                                    } else {
-                                        webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
-                                    }
-                                }
-                            },
-                            {
-                                view: 'button',
-                                align: 'right',
-                                css: 'webix_primary',
-                                value: 'Отмена',
-                                maxWidth: 300,
-                                click: function () {
-                                    showViolations();
-                                    hideBtnBack()
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-
-    }
+    const violationForm = violations_form(id);
     webix.ui({
         id: 'content',
         rows: [

@@ -98,12 +98,20 @@ public class UserController {
             method = RequestMethod.GET
     )
     public @ResponseBody ViolationDto getViolation(@RequestParam Long id) {
+        RegViolation regViolation = violationService.getRegViolation(id);
+        ViolationDto dto = new ViolationDto(regViolation);
+        return dto;
+    }
+
+    @RequestMapping(
+            value = {"/view_violation","/outer/view_violation"},
+            method = RequestMethod.POST
+    )
+    public @ResponseBody void onViewViolation(@RequestBody ViolationDto violationDto) {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
 
-        RegViolation regViolation = violationService.getRegViolation(id, clsUser.getId());
-        ViolationDto dto = new ViolationDto(regViolation);
-        return dto;
+        violationService.viewViolation(clsUser.getId(), violationDto);
     }
 
 
@@ -160,12 +168,20 @@ public class UserController {
             method = RequestMethod.GET
     )
     public @ResponseBody PersonViolationDto getPersonViolation(@RequestParam Long id) {
+        RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id);
+        PersonViolationDto dto = new PersonViolationDto(regPersonViolation);
+        return dto;
+    }
+
+    @RequestMapping(
+            value = {"/view_person_violation","/outer/view_person_violation"},
+            method = RequestMethod.POST
+    )
+    public @ResponseBody void onViewPersonViolation(@RequestBody PersonViolationDto personViolationDto) {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
 
-        RegPersonViolation regPersonViolation = violationService.getRegPersonViolation(id, clsUser.getId());
-        PersonViolationDto dto = new PersonViolationDto(regPersonViolation);
-        return dto;
+        violationService.viewPersonViolation(clsUser.getId(), personViolationDto);
     }
 
     @RequestMapping(

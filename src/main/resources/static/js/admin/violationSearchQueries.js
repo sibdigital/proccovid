@@ -155,7 +155,7 @@ const violationSearchQueries = {
                                             let date = xml_format(data.timeCreate.replace("T", " "));
                                             data.timeCreate = date;
                                             $$('violationSearchQueryForm').parse(data);
-                                            data.idViolation !== null ? $$('idViolation').setValue("<a target='_blank' href='cabinet?id_violation=" + data.idViolation + "'>Действие: осуществлен просмотр нарушения № " + data.idViolation + "</a>")
+                                            data.idViolation !== null ? $$('idViolation').setValue("<a target='_blank' href='violation/view?id_violation=" + data.idViolation + "'>Действие: осуществлен просмотр нарушения № " + data.idViolation + "</a>")
                                                 : $$('idViolation').setValue("Действие: осуществлен поиск");
                                         });
                                 }, 100);

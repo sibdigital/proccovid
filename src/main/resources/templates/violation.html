@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title th:utext="${application_name}"></title>
+    <link rel="stylesheet" th:href="@{/libs/webix.min.css}" type="text/css">
+    <script th:src="@{/libs/webix.min.js}"></script>
+    <script th:src="@{/js/views/violations_form.js}"></script>
+</head>
+<body>
+<div id="app"></div>
+<script th:inline="javascript">
+    const ID_VIOLATION = [[${id_violation}]]
+    const ID_PERSON_VIOLATION = [[${id_person_violation}]]
+</script>
+
+<script>
+        webix.ready(() => {
+            if (ID_VIOLATION !== null) {
+                webix.ui({
+                    container: 'app',
+                    width: 1200,
+                    height: 800,
+                    css: {margin: "0 auto"},
+                    rows: [
+                        violations_form(ID_VIOLATION)
+                    ]
+                });
+
+                $$('btnsPanel').hide();
+                $$('violationForm').load('../violation?id=' + ID_VIOLATION).then((data) => {
+                    data = data.json();
+                    $$('violationForm').parse(data);
+                    $$('nameOrg').define('readonly', true);
+                    $$('nameOrg').refresh();
+                    $$('opfOrg').define('readonly', true);
+                    $$('opfOrg').refresh();
+                    $$('innOrg').define('readonly', true);
+                    $$('innOrg').refresh();
+                    if (data.ogrnOrg) {
+                        $$('ogrnOrg').define('readonly', true);
+                        $$('ogrnOrg').refresh();
+                    } else {
+                        $$('ogrnOrg').hide();
+                    }
+                    if (data.kppOrg) {
+                        $$('kppOrg').define('readonly', true);
+                        $$('kppOrg').refresh();
+                    } else {
+                        $$('kppOrg').hide();
+                    }
+                    $$('dateRegOrg').define('readonly', true);
+                    $$('dateRegOrg').refresh();
+                    $$('idTypeViolation').define('readonly', true);
+                    $$('idTypeViolation').refresh();
+                })
+            } else if (ID_PERSON_VIOLATION !== null) {
+                webix.ui({
+                    container: 'app',
+                    width: 1200,
+                    height: 800,
+                    css: {margin: "0 auto"},
+                    rows: [
+                        person_violations_form(ID_PERSON_VIOLATION)
+                    ]
+                });
+
+                $$('btnsPanel').hide();
+                $$('personViolationForm').load('../person_violation?id=' + ID_PERSON_VIOLATION).then((data) => {
+                    data = data.json();
+                    $$('personViolationForm').parse(data);
+                    $$('lastname').define('readonly', true);
+                    $$('lastname').refresh();
+                    $$('firstname').define('readonly', true);
+                    $$('firstname').refresh();
+                    $$('patronymic').define('readonly', true);
+                    $$('patronymic').refresh();
+                    $$('birthday').define('readonly', true);
+                    $$('birthday').refresh();
+                    $$('placeBirth').define('readonly', true);
+                    $$('placeBirth').refresh();
+                })
+            }
+    });
+</script>
+</body>
+</html>
