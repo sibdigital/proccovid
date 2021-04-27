@@ -16,4 +16,6 @@ public class ClsControlAuthorityDto {
     private ClsControlAuthorityParent controlAuthorityParent;
     private String name;
     private String shortName;
+    private Integer weight;
+    private Boolean deleted;
 }

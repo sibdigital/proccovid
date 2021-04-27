@@ -75,6 +75,9 @@ public class AdminController {
     @Autowired
     private UserRolesEntityRepo userRolesEntityRepo;
 
+    @Autowired
+    private RegUserRoleRepo regUserRoleRepo;
+
     @Value("${spring.mail.from}")
     private String fromAddress;
 
@@ -86,7 +89,6 @@ public class AdminController {
         model.addAttribute("department_name", clsUser.getIdDepartment().getName());
         model.addAttribute("user_lastname", clsUser.getLastname());
         model.addAttribute("user_firstname", clsUser.getFirstname());
-        model.addAttribute("authorities", currentUser.getAuthorities()); // role = ROLE_NAME
         model.addAttribute("application_name", applicationConstants.getApplicationName());
         return "admin";
     }
@@ -596,10 +598,7 @@ public class AdminController {
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
-        ClsControlAuthoritySearchCriteria searchCriteria = new ClsControlAuthoritySearchCriteria();
-        searchCriteria.setName(name);
-
-        Page<ClsControlAuthority> clsControlAuthoritiesPage = controlAuthorityService.getControlAuthoritiesBySearchCriteria(searchCriteria, page, size);
+        Page<ClsControlAuthority> clsControlAuthoritiesPage = controlAuthorityService.getControlAuthorities(page, size);
 
         Map<String, Object> result = new HashMap<>();
         result.put("data", clsControlAuthoritiesPage.getContent());
@@ -640,6 +639,20 @@ public class AdminController {
         List<UserRolesEntity> list = userRolesEntityRepo.getRolesByUserId(idDepUser);
         list.sort(Comparator.comparing(UserRolesEntity::getName));
         return list;
+    }
+
+    @RequestMapping(
+            value = {"/current_roles", "/outer/current_roles"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody List<String> getCurrentRoleCodes(){
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+        List<RegUserRole> rurs = regUserRoleRepo.findAllByUser(clsUser);
+        List<String> roleCodes = rurs.stream()
+                                .map(ctr -> ctr.getRole().getCode())
+                                .collect(Collectors.toList());
+        return roleCodes;
     }
 
     @RequestMapping(

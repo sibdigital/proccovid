@@ -35,14 +35,19 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
 
     @Override
     public Page<ClsControlAuthority> getControlAuthoritiesBySearchCriteria(ClsControlAuthoritySearchCriteria searchCriteria, int page, int size) {
-//        ClsControlAuthoritySpecification specification = new ClsControlAuthoritySpecification();
-//        specification.setSearchCriteria(searchCriteria);
-//
-//        Page<ClsControlAuthority> clsControlAuthorityPage = clsControlAuthorityRepo.findAll(specification, PageRequest.of(page, size, Sort.by("name")));
-        List<ClsControlAuthority> clsControlAuthorities = clsControlAuthorityRepo.findAllByIsDeleted(false);
-        clsControlAuthorities.sort(Comparator.comparing(ClsControlAuthority::getName));
+        ClsControlAuthoritySpecification specification = new ClsControlAuthoritySpecification();
+        specification.setSearchCriteria(searchCriteria);
+
+        Page<ClsControlAuthority> clsControlAuthorityPage = clsControlAuthorityRepo.findAll(specification, PageRequest.of(page, size, Sort.by("name")));
+        return clsControlAuthorityPage;
+    }
+
+    @Override
+    public Page<ClsControlAuthority> getControlAuthorities(int page, int size) {
+    List<ClsControlAuthority> clsControlAuthorities = clsControlAuthorityRepo.findAllByIsDeleted(false);
+        clsControlAuthorities.sort(Comparator.comparing(ClsControlAuthority::getWeight, Comparator.nullsLast(Comparator.reverseOrder())));
         Page<ClsControlAuthority> clsControlAuthorityPage = new PageImpl<>(clsControlAuthorities,
-                                                            PageRequest.of(page, size), clsControlAuthorities.size());
+                PageRequest.of(page, size), clsControlAuthorities.size());
         return clsControlAuthorityPage;
     }
 
@@ -58,6 +63,8 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
                 .controlAuthorityParent(controlAuthorityParent)
                 .name(clsControlAuthorityDto.getName())
                 .shortName(clsControlAuthorityDto.getShortName())
+                .weight(clsControlAuthorityDto.getWeight())
+                .isDeleted(clsControlAuthorityDto.getDeleted())
                 .build();
         } else {
             clsControlAuthority = clsControlAuthorityRepo.findById(clsControlAuthorityDto.getId()).orElse(null);
@@ -66,10 +73,12 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
                     .controlAuthorityParent(clsControlAuthorityDto.getControlAuthorityParent())
                     .name(clsControlAuthorityDto.getName())
                     .shortName(clsControlAuthorityDto.getShortName())
+                    .weight(clsControlAuthorityDto.getWeight())
+                    .isDeleted(clsControlAuthorityDto.getDeleted())
                     .build();
         }
         clsControlAuthorityRepo.save(clsControlAuthority);
-        System.out.println('w');
+//        System.out.println('w');
         return clsControlAuthority;
     }
 
