@@ -1,6 +1,6 @@
 WITH
     tbl as (
-        SELECT *
+        SELECT roi.*
         FROM reg_organization_inspection roi
         INNER JOIN cls_control_authority cca
             ON roi.id_control_authority = cca.id and cca.is_deleted = false
