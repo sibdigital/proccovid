@@ -19,7 +19,7 @@ WITH
                  INNER JOIN tbl_with_cnt
                             ON tbl.id_organization = tbl_with_cnt.id_organization
                                 AND tbl.id_control_authority = tbl_with_cnt.id_control_authority
-        WHERE tbl_with_cnt.cnt > :min_cnt
+        WHERE tbl_with_cnt.cnt >= :min_cnt
     ),
     total_organization as (
         SELECT id_organization, count(*) as total
