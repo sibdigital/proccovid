@@ -1,8 +1,10 @@
 WITH
     tbl as (
         SELECT *
-        FROM reg_organization_inspection
-        WHERE date_of_inspection >= :min_date AND date_of_inspection <= :max_date
+        FROM reg_organization_inspection roi
+        INNER JOIN cls_control_authority cca
+            ON roi.id_control_authority = cca.id and cca.is_deleted = false
+        WHERE roi.date_of_inspection >= :min_date AND roi.date_of_inspection <= :max_date
     ),
     tbl_with_cnt as (
         SELECT tbl.id_organization, tbl.id_control_authority, count(*) as cnt
@@ -46,9 +48,9 @@ FROM res_tbl
                    ON res_tbl.id_organization = total_organization.id_organization
          LEFT JOIN total_authority
                    ON res_tbl.id_control_authority = total_authority.id_control_authority
-        LEFT JOIN cls_organization
+         LEFT JOIN cls_organization
                    ON res_tbl.id_organization = cls_organization.id
-        LEFT JOIN cls_control_authority
+         LEFT JOIN cls_control_authority
                    ON res_tbl.id_control_authority = cls_control_authority.id
-        LEFT JOIN cls_inspection_result cir
+         LEFT JOIN cls_inspection_result cir
                    ON res_tbl.id_inspection_result = cir.id
