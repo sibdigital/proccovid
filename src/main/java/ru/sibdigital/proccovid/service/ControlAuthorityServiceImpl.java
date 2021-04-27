@@ -54,6 +54,10 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
     @Override
     public ClsControlAuthority saveControlAuthority(ClsControlAuthorityDto clsControlAuthorityDto) {
         ClsControlAuthority clsControlAuthority = null;
+        Boolean isDeleted = clsControlAuthorityDto.getDeleted();
+        if (isDeleted == null) {
+            isDeleted = false;
+        }
 
         if(clsControlAuthorityDto.getId() == null) {
             ClsControlAuthorityParent controlAuthorityParent =
@@ -64,7 +68,7 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
                 .name(clsControlAuthorityDto.getName())
                 .shortName(clsControlAuthorityDto.getShortName())
                 .weight(clsControlAuthorityDto.getWeight())
-                .isDeleted(clsControlAuthorityDto.getDeleted())
+                .isDeleted(isDeleted)
                 .build();
         } else {
             clsControlAuthority = clsControlAuthorityRepo.findById(clsControlAuthorityDto.getId()).orElse(null);
@@ -74,11 +78,10 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
                     .name(clsControlAuthorityDto.getName())
                     .shortName(clsControlAuthorityDto.getShortName())
                     .weight(clsControlAuthorityDto.getWeight())
-                    .isDeleted(clsControlAuthorityDto.getDeleted())
+                    .isDeleted(isDeleted)
                     .build();
         }
         clsControlAuthorityRepo.save(clsControlAuthority);
-//        System.out.println('w');
         return clsControlAuthority;
     }
 

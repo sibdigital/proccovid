@@ -62,7 +62,6 @@ controlAuthority = {
                                     getControlAuthorityEditForm(item);
 
                                     $$('controlAuthorityForm').parse(item);
-                                    console.log($$('controlAuthorityForm').getValues());
                                 }, 100)
                             },
                             "data->onStoreUpdated": function () {
