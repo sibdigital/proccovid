@@ -324,6 +324,7 @@ const inspectionCountReport = {
             {
                 id: 'templateInspectionReportId',
                 view: 'template',
+                css: 'jr_link',
                 scroll: "xy"
             }
         ]

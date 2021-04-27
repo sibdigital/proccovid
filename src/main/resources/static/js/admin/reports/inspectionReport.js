@@ -113,6 +113,7 @@ const inspectionReport = {
             {
                 id: 'templateInspectionReportId',
                 view: 'template',
+                css: 'jr_link',
                 scroll: "xy"
             }
         ]
