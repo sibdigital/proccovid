@@ -321,13 +321,27 @@ let organizationForm = (data) => {
                                             width: 500,
                                             minWidth: 300,
                                             fillspace: true,
-                                            template: '#controlAuthority.name#'
+                                            // template: '#controlAuthority.name#'
+                                            template: function (obj) {
+                                                if (obj.controlAuthority) {
+                                                    return obj.controlAuthority.name;
+                                                } else {
+                                                    return "";
+                                                }
+                                            },
                                         },
                                         {
                                             id: 'inspectionResult',
                                             header: 'Результат проверки',
                                             width: 200,
-                                            template: '#inspectionResult.name#'
+                                            // template: '#inspectionResult.name#'
+                                            template: function (obj) {
+                                                if (obj.inspectionResult) {
+                                                    return obj.inspectionResult.name;
+                                                } else {
+                                                    return "";
+                                                }
+                                            },
                                         },
                                         {
                                             id: 'dateOfInspection',

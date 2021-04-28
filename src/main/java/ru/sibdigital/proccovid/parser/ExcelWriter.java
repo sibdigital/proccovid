@@ -67,8 +67,12 @@ public class ExcelWriter {
         Cell cellDateOfInspection = row.createCell(2);
         Cell cellComment = row.createCell(3);
 
-        cellControlAuthorityName.setCellValue(regOrganizationInspection.getControlAuthority().getName());
-        cellInspectionResult.setCellValue(regOrganizationInspection.getInspectionResult().getName());
+//        cellControlAuthorityName.setCellValue(regOrganizationInspection.getControlAuthority().getName());
+        cellControlAuthorityName.setCellValue((regOrganizationInspection.getControlAuthority() != null) ?
+                regOrganizationInspection.getControlAuthority().getName() : "");
+//        cellInspectionResult.setCellValue(regOrganizationInspection.getInspectionResult().getName());
+        cellInspectionResult.setCellValue((regOrganizationInspection.getInspectionResult() != null) ?
+                regOrganizationInspection.getInspectionResult().getName() : "");
         cellDateOfInspection.setCellValue(regOrganizationInspection.getDateOfInspection());
         cellComment.setCellValue(regOrganizationInspection.getComment());
     }
