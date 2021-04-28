@@ -154,7 +154,7 @@ public class MainController {
     }
 
     @GetMapping("/organization/view")
-    public String viewDocRequest(@RequestParam("id") Long organizationId, Model model, HttpSession session) {
+    public String viewOrganization(@RequestParam("id") Long organizationId, Model model, HttpSession session) {
         model.addAttribute("organization_id", organizationId);
         model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
         model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());

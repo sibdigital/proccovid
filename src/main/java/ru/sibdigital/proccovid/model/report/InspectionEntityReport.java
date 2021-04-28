@@ -26,6 +26,7 @@ public class InspectionEntityReport {
 
     private String inspectionResult;
     private String comment;
+    private Boolean filesAttached;
 
     @Transient
     private OrganizationShortDto organization;
@@ -182,16 +183,24 @@ public class InspectionEntityReport {
         this.stringDateOfInspection = stringDateOfInspection;
     }
 
+    public Boolean getFilesAttached() {
+        return filesAttached;
+    }
+
+    public void setFilesAttached(Boolean filesAttached) {
+        this.filesAttached = filesAttached;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InspectionEntityReport that = (InspectionEntityReport) o;
-        return Objects.equals(id, that.id) && Objects.equals(dateOfInspection, that.dateOfInspection) && Objects.equals(idOrganization, that.idOrganization) && Objects.equals(idAuthority, that.idAuthority) && Objects.equals(nameOrganization, that.nameOrganization) && Objects.equals(shortNameOrganization, that.shortNameOrganization) && Objects.equals(innOrganization, that.innOrganization) && Objects.equals(nameAuthority, that.nameAuthority) && Objects.equals(shortNameAuthority, that.shortNameAuthority) && Objects.equals(totalOrganization, that.totalOrganization) && Objects.equals(totalAuthority, that.totalAuthority) && Objects.equals(inspectionResult, that.inspectionResult) && Objects.equals(comment, that.comment) && Objects.equals(organization, that.organization) && Objects.equals(controlAuthority, that.controlAuthority) && Objects.equals(stringDateOfInspection, that.stringDateOfInspection);
+        return Objects.equals(id, that.id) && Objects.equals(dateOfInspection, that.dateOfInspection) && Objects.equals(idOrganization, that.idOrganization) && Objects.equals(idAuthority, that.idAuthority) && Objects.equals(nameOrganization, that.nameOrganization) && Objects.equals(shortNameOrganization, that.shortNameOrganization) && Objects.equals(innOrganization, that.innOrganization) && Objects.equals(nameAuthority, that.nameAuthority) && Objects.equals(shortNameAuthority, that.shortNameAuthority) && Objects.equals(totalOrganization, that.totalOrganization) && Objects.equals(totalAuthority, that.totalAuthority) && Objects.equals(inspectionResult, that.inspectionResult) && Objects.equals(comment, that.comment) && Objects.equals(filesAttached, that.filesAttached) && Objects.equals(organization, that.organization) && Objects.equals(controlAuthority, that.controlAuthority) && Objects.equals(stringDateOfInspection, that.stringDateOfInspection);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, dateOfInspection, idOrganization, idAuthority, nameOrganization, shortNameOrganization, innOrganization, nameAuthority, shortNameAuthority, totalOrganization, totalAuthority, inspectionResult, comment, organization, controlAuthority, stringDateOfInspection);
+        return Objects.hash(id, dateOfInspection, idOrganization, idAuthority, nameOrganization, shortNameOrganization, innOrganization, nameAuthority, shortNameAuthority, totalOrganization, totalAuthority, inspectionResult, comment, filesAttached, organization, controlAuthority, stringDateOfInspection);
     }
 }

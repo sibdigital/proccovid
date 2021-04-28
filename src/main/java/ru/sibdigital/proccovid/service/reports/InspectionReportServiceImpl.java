@@ -143,8 +143,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
             parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
 
-            String jrxmlPath = null;
-            jrxmlPath = "classpath:reports/inspection/inspection_details.jrxml";
+            String jrxmlPath = "classpath:reports/inspection/inspection_details.jrxml";
 
             return jasperReportService.exportJasperReport(jrxmlPath, inspections, parameters, "html");
 

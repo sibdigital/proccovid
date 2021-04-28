@@ -44,6 +44,7 @@ public class OuterUserConfigurationAdapter extends WebSecurityConfigurerAdapter 
                 .authorizeRequests()
                 .antMatchers("/libs/**", "/css/**").permitAll() //, "/templates/outer/**"
                 .antMatchers("/js/recovery/**").permitAll()
+                .antMatchers("/imgs/**").permitAll()
                 .antMatchers("/outer/ologin").permitAll()
                 .antMatchers("/outer/recovery").permitAll()
                 .antMatchers("/admin").denyAll()
