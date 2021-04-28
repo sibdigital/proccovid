@@ -316,17 +316,18 @@ public class InspectionController {
     }
 
     private String getOuterPrefix(String currentUrl) {
-        String url = currentUrl + '/';
-        String outer = applicationConstants.getOuterUrlPrefix();
-        Boolean isOuter = false;
-        if (!outer.isBlank() && url.contains("/" + outer)) {
-                isOuter = true;
-        }
-
-        if (isOuter) {
-            return outer;
-        } else {
-            return "";
-        }
+        return "";
+//        String url = currentUrl + '/';
+//        String outer = applicationConstants.getOuterUrlPrefix();
+//        Boolean isOuter = false;
+//        if (!outer.isBlank() && url.contains("/" + outer)) {
+//                isOuter = true;
+//        }
+//
+//        if (isOuter) {
+//            return outer;
+//        } else {
+//            return "";
+//        }
     }
 }
