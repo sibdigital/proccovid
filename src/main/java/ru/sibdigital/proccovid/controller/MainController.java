@@ -218,24 +218,4 @@ public class MainController {
 
         return map;
     }
-
-    @RequestMapping(value = {"/control_authority/view", "/outer/control_authority/view",
-            "/organization/control_authority/view", "/outer/organization/control_authority/view"},
-            method = RequestMethod.GET)
-    public String viewControlAuthority(@RequestParam("id") Long authorityId, Model model, HttpSession session) {
-        model.addAttribute("control_authority_id", authorityId);
-        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
-        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
-        model.addAttribute("application_name", applicationConstants.getApplicationName());
-
-        return "controlAuthority";
-    }
-
-    @RequestMapping(value = {"/control_authority/{id_authority}", "/outer/control_authority/{id_authority}",
-            "/organization/control_authority/{id_authority}", "/outer/organization/control_authority/{id_authority}"},
-            method = RequestMethod.GET)
-    public @ResponseBody ClsControlAuthority getClsControlAuthority(@PathVariable("id_authority") Long authorityId){
-        ClsControlAuthority authority = clsControlAuthorityRepo.findById(authorityId).orElse(null);
-        return authority;
-    }
 }

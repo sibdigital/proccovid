@@ -277,7 +277,8 @@ public class InspectionController {
     }
 
     @RequestMapping(
-            value = {"/inspection/view","/outer/inspection/view"},
+            value = {"/inspection/view","/outer/inspection/view",
+                    "/organization/inspection/view","/outer/organization/inspection/view"},
             method = RequestMethod.GET
     )
     public String viewInspection(@RequestParam("id") Long inspectionId, Model model, HttpSession session) {
@@ -290,7 +291,8 @@ public class InspectionController {
     }
 
     @RequestMapping(
-            value = {"/inspection/{inspection_id}","/outer/inspection/{inspection_id}"},
+            value = {"/inspection/{inspection_id}","/outer/inspection/{inspection_id}",
+                    "/organization/inspection/{inspection_id}","/outer/organization/inspection/{inspection_id}"},
             method = RequestMethod.GET
     )
     public @ResponseBody RegOrganizationInspection getRegOrganizationInspection(@PathVariable("inspection_id") Long inspectionId){
@@ -300,7 +302,8 @@ public class InspectionController {
 
     @RequestMapping(
             value = {"/inspection_files/{id_inspection}","/outer/inspection_files/{id_inspection}",
-                    "/inspection/inspection_files/{id_inspection}","/outer/inspection/inspection_files/{id_inspection}"},
+                    "/inspection/inspection_files/{id_inspection}","/outer/inspection/inspection_files/{id_inspection}",
+                    "/organization/inspection/inspection_files/{id_inspection}","/outer/organization/inspection/inspection_files/{id_inspection}"},
             method = RequestMethod.GET
     )
     public @ResponseBody List<RegOrganizationInspectionFile> getRegOrgInspectionFiles(@PathVariable("id_inspection") Long inspectionId) {

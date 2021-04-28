@@ -392,11 +392,8 @@ let organizationForm = (data) => {
                                             this.adjustRowHeight(null, true);
                                         },
                                         onItemDblClick: function (id, e, trg) {
-                                            if (id.column == 'controlAuthorityName') {
-                                                let item = $$('revision_table').getSelectedItem();
-                                                // webix.message(item.controlAuthority.id);
-                                                window.open('control_authority/view?id=' + item.controlAuthority.id)
-                                            }
+                                            let item = $$('revision_table').getSelectedItem();
+                                            window.open('inspection/view?id=' + item.id)
                                         }
                                     },
                                     url: 'org_inspections?id=' + data.id,
