@@ -58,7 +58,7 @@ public class ClsOrganization {
     @OneToMany(mappedBy = "regOrganizationOkvedId.clsOrganization")
     private Set<RegOrganizationOkved> regOrganizationOkveds;
 
-    @JsonIgnore
+    //@JsonIgnore
     @OneToMany(mappedBy = "clsOrganization")
     private List<RegOrganizationAddressFact> regOrganizationAddressFacts;
 
