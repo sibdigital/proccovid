@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.dto.KeyValue;
+import ru.sibdigital.proccovid.model.ClsControlAuthority;
 import ru.sibdigital.proccovid.model.ClsOrganization;
 import ru.sibdigital.proccovid.model.RegOrganizationInspection;
 import ru.sibdigital.proccovid.repository.ClsControlAuthorityRepo;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -60,7 +62,8 @@ public class InspectionController {
 
     @GetMapping("/control_authorities_list_short")
     public @ResponseBody List<KeyValue> getControlAuthoritiesForRichselect() {
-        List<KeyValue> list = clsControlAuthorityRepo.findAll().stream()
+        List<KeyValue> list = clsControlAuthorityRepo.findAllByIsDeleted(false).stream()
+                .sorted(Comparator.comparing(ClsControlAuthority::getWeight, Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(ctr -> new KeyValue(ctr.getClass().getSimpleName(), ctr.getId(), ctr.getName()))
                 .collect(Collectors.toList());
 

@@ -13,6 +13,7 @@ public interface ControlAuthorityService {
 
     List<ClsControlAuthorityParent> getControlAuthorityParentsList();
     Page<ClsControlAuthority> getControlAuthoritiesBySearchCriteria(ClsControlAuthoritySearchCriteria searchCriteria, int page, int size);
+    Page<ClsControlAuthority> getControlAuthorities(int page, int size);
     ClsControlAuthority saveControlAuthority(ClsControlAuthorityDto clsControlAuthorityDto);
     boolean deleteControlAuthority(Long id);
 }

@@ -132,8 +132,8 @@ function showDepartmentUserForm() {
                             label: 'Район',
                             labelPosition: 'top',
                             options: 'cls_districts',
-                            required: true,
-                            validate: webix.rules.isNotEmpty
+                            //required: true,
+                            //validate: webix.rules.isNotEmpty
                         },
                         { view: 'text', label: 'Фамилия', labelPosition: 'top', name: 'lastname', required: true, validate: webix.rules.isNotEmpty },
                         { view: 'text', label: 'Имя', labelPosition: 'top', name: 'firstname', required: true, validate: webix.rules.isNotEmpty },

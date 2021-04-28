@@ -1,0 +1,1 @@
+alter table cls_user alter column id_district drop not null;

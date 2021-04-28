@@ -78,3 +78,27 @@
     color: #28a745;
     font-size: 1.8rem;
 }
+
+.jr_link a:link {
+    color: #000000;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.jr_link a:visited {
+    color: #000000;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.jr_link a:hover {
+    color: #454545;
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.jr_link a:active {
+    color: #454545;
+    background-color: transparent;
+    text-decoration: underline;
+}

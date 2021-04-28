@@ -22,14 +22,22 @@ controlAuthority = {
                                 width: 300,
                                 minWidth: 300,
                                 fillspace: true,
-                                template: "#name#"
+                                template: "#name#",
+                                sort: 'text',
                             },
                             {
                                 id: "shortName",
                                 header: "Сокращенное наименование",
                                 width: 350,
                                 minWidth: 250,
-                                template: "#shortName#"
+                                template: "#shortName#",
+                                sort: 'text',
+                            },
+                            {
+                                id: "weight",
+                                header: "Вес",
+                                width: 100,
+                                sort: 'int',
                             }
                         ],
                         on: {
@@ -54,7 +62,6 @@ controlAuthority = {
                                     getControlAuthorityEditForm(item);
 
                                     $$('controlAuthorityForm').parse(item);
-                                    console.log($$('controlAuthorityForm').getValues());
                                 }, 100)
                             },
                             "data->onStoreUpdated": function () {
@@ -135,6 +142,19 @@ function getControlAuthorityEditForm(item) {
                     },
                     {
                         cols: [
+                            {
+                                view: 'text',
+                                id: 'weight',
+                                name: 'weight',
+                                label: 'Вес',
+                                labelWidth: 100,
+                                validate: webix.rules.isNumber,
+                            },
+                            {gravity: 3}
+                        ]
+                    },
+                    {
+                        cols: [
                             {},
                             {
                                 view: "button",
@@ -171,24 +191,26 @@ function getControlAuthorityEditForm(item) {
                                 width: 170,
                                 css: "webix_primary",
                                 click: () => {
-                                    let ca = $$('controlAuthorityForm').getValues();
-                                    ca.controlAuthorityParent = {
-                                        id: $$('controlAuthorityParent').getValue(),
-                                        name: $$('controlAuthorityParent').getText()
+                                    if ($$('weight').validate()) {
+                                        let ca = $$('controlAuthorityForm').getValues();
+                                        ca.controlAuthorityParent = {
+                                            id: $$('controlAuthorityParent').getValue(),
+                                            name: $$('controlAuthorityParent').getText()
+                                        }
+                                        console.log(ca)
+                                        webix.ajax()
+                                            .headers({'Content-type': 'application/json'})
+                                            .post('save_control_authority', JSON.stringify(ca))
+                                            .then((answer) => {
+                                                if (answer.text() && ca.id) {
+                                                    webix.message("Контрольно-надзорный орган обновлен", "success");
+                                                } else if (answer.text()) {
+                                                    webix.message("Контрольно-надзорный орган добавлен", "success");
+                                                } else {
+                                                    webix.message("Не удалось сохранить контрольно-надзорный орган", "error");
+                                                }
+                                            })
                                     }
-                                    console.log(ca)
-                                    webix.ajax()
-                                        .headers({'Content-type': 'application/json'})
-                                        .post('save_control_authority', JSON.stringify(ca))
-                                        .then((answer) => {
-                                            if (answer.text() && ca.id) {
-                                                webix.message("Контрольно-надзорный орган обновлен", "success");
-                                            } else if(answer.text()) {
-                                                webix.message("Контрольно-надзорный орган добавлен", "success");
-                                            } else {
-                                                webix.message("Не удалось сохранить контрольно-надзорный орган", "error");
-                                            }
-                                        })
                                 }
                             }
                         ]

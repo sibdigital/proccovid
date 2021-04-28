@@ -517,10 +517,13 @@ public class RequestService {
             throw new Exception("Не указано подразделение");
         }
 
-        ClsDistrict clsDistrict = clsDistrictRepo.findById(clsUserDto.getDistrictId()).orElse(null);
-        if (clsDistrict == null) {
-            throw new Exception("Не указан район");
+        ClsDistrict clsDistrict = null;
+        if (clsUserDto.getDistrictId() != null) {
+            clsDistrict = clsDistrictRepo.findById(clsUserDto.getDistrictId()).orElse(null);
         }
+//        if (clsDistrict == null) {
+//            throw new Exception("Не указан район");
+//        }
 
         ClsUser clsUser = ClsUser.builder()
                 .id(clsUserDto.getId())

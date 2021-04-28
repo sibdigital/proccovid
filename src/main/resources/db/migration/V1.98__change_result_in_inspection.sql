@@ -1,0 +1,1 @@
+alter table reg_organization_inspection alter column id_inspection_result drop not null;

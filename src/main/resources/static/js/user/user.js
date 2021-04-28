@@ -55,17 +55,26 @@ function showBtnBack(view, tableId) {
 }
 
 webix.ready(function() {
-    let rolesStr = webix.ajax().sync().get('user_roles');
-    let userRoles = JSON.parse(rolesStr?.response);
-    console.log(userRoles)
-    let isAdmin = userRoles[0]?.status;
-    let isUser = userRoles[1]?.status;
-    let isViol = userRoles[2]?.status;
+    // let rolesStr = webix.ajax().sync().get('user_roles');
+    // let userRoles = JSON.parse(rolesStr?.response);
+    // console.log(userRoles)
+    // let isAdmin = userRoles[0]?.status;
+    // let isUser = userRoles[1]?.status;
+    // let isViol = userRoles[2]?.status;
+    let xhr = webix.ajax().sync().get("current_roles");
+    let userRoles = JSON.parse(xhr.responseText);
+    let isAdmin = userRoles.includes("ADMIN");
+    let isUser = userRoles.includes("USER");
+    let isViol = userRoles.includes("VIOLAT");
+    let isKnd = userRoles.includes("KND");
+
     let menuItems = [
         {id: "Requests", icon: "fas fa-file", value: 'Заявки', access: isUser || isAdmin},
+        { id: "Organizations",icon: "fas fa-file-alt", value: 'Организации', access: isKnd || isAdmin},
         // { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
         {id: "Violations", icon: "fas fa-file-alt", value: 'Нарушения организаций', access: isViol || isAdmin},
         {id: "PersonViolations", icon: "fas fa-file-alt", value: 'Нарушения физ. лиц', access: isViol || isAdmin},
+        {id: "InspectionReports", icon: "fas fa-chart-bar", value: 'Отчеты по проверкам', access: isKnd || isAdmin},
     ].filter(item => item.access === true)
 
     let layout = webix.ui({
@@ -113,12 +122,16 @@ webix.ready(function() {
                                     if ($$('prescriptions_table') != null) {
                                         $$('prescriptions_table').destructor();
                                     }
+                                } else if (id == 'Organizations') {
+                                    view = organizations;
                                 } else if (id == 'Violations') {
                                     view = violations;
                                     margin = {"margin-top":"10px !important"};
                                 } else if (id == 'PersonViolations') {
                                     view = personViolations;
                                     margin = {"margin-top":"10px !important","width":"100% !important"};
+                                } else if (id == 'InspectionReports') {
+                                    view = inspectionReports;
                                 }
                                 hideBtnBack(),
                                 this.select(id)

@@ -3,6 +3,7 @@ package ru.sibdigital.proccovid.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import ru.sibdigital.proccovid.repository.ClsControlAuthorityRepo;
 import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySpecification;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -41,8 +43,21 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
     }
 
     @Override
+    public Page<ClsControlAuthority> getControlAuthorities(int page, int size) {
+    List<ClsControlAuthority> clsControlAuthorities = clsControlAuthorityRepo.findAllByIsDeleted(false);
+        clsControlAuthorities.sort(Comparator.comparing(ClsControlAuthority::getWeight, Comparator.nullsLast(Comparator.reverseOrder())));
+        Page<ClsControlAuthority> clsControlAuthorityPage = new PageImpl<>(clsControlAuthorities,
+                PageRequest.of(page, size), clsControlAuthorities.size());
+        return clsControlAuthorityPage;
+    }
+
+    @Override
     public ClsControlAuthority saveControlAuthority(ClsControlAuthorityDto clsControlAuthorityDto) {
         ClsControlAuthority clsControlAuthority = null;
+        Boolean isDeleted = clsControlAuthorityDto.getDeleted();
+        if (isDeleted == null) {
+            isDeleted = false;
+        }
 
         if(clsControlAuthorityDto.getId() == null) {
             ClsControlAuthorityParent controlAuthorityParent =
@@ -52,6 +67,8 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
                 .controlAuthorityParent(controlAuthorityParent)
                 .name(clsControlAuthorityDto.getName())
                 .shortName(clsControlAuthorityDto.getShortName())
+                .weight(clsControlAuthorityDto.getWeight())
+                .isDeleted(isDeleted)
                 .build();
         } else {
             clsControlAuthority = clsControlAuthorityRepo.findById(clsControlAuthorityDto.getId()).orElse(null);
@@ -60,17 +77,24 @@ public class ControlAuthorityServiceImpl implements ControlAuthorityService{
                     .controlAuthorityParent(clsControlAuthorityDto.getControlAuthorityParent())
                     .name(clsControlAuthorityDto.getName())
                     .shortName(clsControlAuthorityDto.getShortName())
+                    .weight(clsControlAuthorityDto.getWeight())
+                    .isDeleted(isDeleted)
                     .build();
         }
         clsControlAuthorityRepo.save(clsControlAuthority);
-        System.out.println('w');
         return clsControlAuthority;
     }
 
     @Override
     public boolean deleteControlAuthority(Long id) {
         try {
-            clsControlAuthorityRepo.deleteById(id);
+//            clsControlAuthorityRepo.deleteById(id);
+            ClsControlAuthority authority = clsControlAuthorityRepo.findById(id).orElse(null);
+            if (authority != null) {
+                authority.setDeleted(true);
+                clsControlAuthorityRepo.save(authority);
+            }
+
             return true;
         } catch (Exception e) {
             log.error(e.getMessage());
