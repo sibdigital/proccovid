@@ -53,7 +53,7 @@ public class RegOrganizationInspection {
     }
 
     @ManyToOne
-    @JoinColumn(name = "id_inspection_result", nullable = false)
+    @JoinColumn(name = "id_inspection_result")
     private ClsInspectionResult inspectionResult;
 
     public ClsInspectionResult getInspectionResult() {

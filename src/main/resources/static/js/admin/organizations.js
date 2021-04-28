@@ -1,5 +1,4 @@
 const dateFormatWithoutTime = webix.Date.dateToStr("%d.%m.%Y");
-const xml_format =  webix.Date.strToDate("%Y-%m-%d %H:%i:%s.S");
 
 const organizations = {
     body: {
@@ -366,12 +365,14 @@ let organizationForm = (data) => {
                                     ],
                                     scheme: {
                                         $init: function (obj) {
+                                            var xml_format_ = webix.Date.strToDate("%Y-%m-%d %H:%i:%s.S");
                                             obj.dateOfInspection = obj.dateOfInspection.replace("T", " ");
-                                            obj.dateOfInspection = xml_format(obj.dateOfInspection);
+                                            obj.dateOfInspection = xml_format_(obj.dateOfInspection);
                                         },
                                         $update:function (obj) {
+                                            var xml_format_ = webix.Date.strToDate("%Y-%m-%d %H:%i:%s.S");
                                             obj.dateOfInspection = obj.dateOfInspection.replace("T", " ");
-                                            obj.dateOfInspection = xml_format(obj.dateOfInspection);
+                                            obj.dateOfInspection = xml_format_(obj.dateOfInspection);
                                         },
 
                                     },
