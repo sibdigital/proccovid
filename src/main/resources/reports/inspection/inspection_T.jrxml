@@ -79,6 +79,7 @@
 	<parameter name="maxValue" class="java.lang.Integer" isForPrompting="false"/>
 	<parameter name="okvedFilterDesc" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="reportTitle" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="prefix" class="java.lang.String" isForPrompting="false"/>
 	<field name="id" class="java.lang.Long"/>
 	<field name="organization" class="ru.sibdigital.proccovid.dto.report.OrganizationShortDto"/>
 	<field name="controlAuthority" class="ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto"/>
@@ -246,7 +247,7 @@
 					<measureExpression><![CDATA[$P{maxValue}]]></measureExpression>
 				</measure>
 				<measure name="link" class="java.lang.String">
-					<measureExpression><![CDATA["/isrb/generate_inspection_report_details?minDate="+$P{minDate} + "&maxDate=" + $P{maxDate} + "&idOrganization=" + $F{organization}.getId() + "&idAuthority=" + $F{controlAuthority}.getId()]]></measureExpression>
+					<measureExpression><![CDATA[$P{prefix} + "generate_inspection_report_details?minDate="+$P{minDate} + "&maxDate=" + $P{maxDate} + "&idOrganization=" + $F{organization}.getId() + "&idAuthority=" + $F{controlAuthority}.getId() + "&prefix=" +$P{prefix}]]></measureExpression>
 				</measure>
 				<crosstabCell width="100" height="20">
 <!--					<cellContents mode="Opaque" style="Crosstab_CD">-->

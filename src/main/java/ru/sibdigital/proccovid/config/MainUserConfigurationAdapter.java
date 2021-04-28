@@ -50,6 +50,7 @@ public class MainUserConfigurationAdapter extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/libs/**", "/css/**").permitAll()
                 .antMatchers("/js/recovery/**").permitAll()
+                .antMatchers("/imgs/**").permitAll()
                 .antMatchers("/recovery").permitAll()
                 .antMatchers("/login").permitAll()
                 .antMatchers("/admin").hasRole("ADMIN")

@@ -44,6 +44,7 @@ const inspectionReport = {
                                 minCnt:  $$('minCountInspectionReport').getValue(),
                                 mainOkveds: mainOkveds,
                                 additionalOkveds: additionalOkveds,
+                                currentUrl: window.document.location.href
                             };
                             webix.ajax().get('generate_inspection_report', params).then(function (data) {
                                 if (data.text() != null) {

@@ -18,6 +18,7 @@ import ru.sibdigital.proccovid.dto.KeyValue;
 import ru.sibdigital.proccovid.dto.egrip.EGRIP;
 import ru.sibdigital.proccovid.dto.egrul.EGRUL;
 import ru.sibdigital.proccovid.model.*;
+import ru.sibdigital.proccovid.repository.ClsControlAuthorityRepo;
 import ru.sibdigital.proccovid.repository.ClsMigrationRepo;
 import ru.sibdigital.proccovid.repository.ClsOrganizationRepo;
 import ru.sibdigital.proccovid.service.EgrulService;
@@ -55,6 +56,9 @@ public class MainController {
 
     @Autowired
     private ClsOrganizationRepo clsOrganizationRepo;
+
+    @Autowired
+    private ClsControlAuthorityRepo clsControlAuthorityRepo;
 
     @GetMapping("/")
     public String index(HttpSession session) {
@@ -164,8 +168,9 @@ public class MainController {
         return "view";
     }
 
-    @GetMapping("/organization/view")
-    public String viewDocRequest(@RequestParam("id") Long organizationId, Model model, HttpSession session) {
+    @RequestMapping(value = {"/organization/view", "/outer/organization/view"},
+            method = RequestMethod.GET)
+    public String viewOrganization(@RequestParam("id") Long organizationId, Model model, HttpSession session) {
         model.addAttribute("organization_id", organizationId);
         model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
         model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
@@ -174,7 +179,8 @@ public class MainController {
         return "organization";
     }
 
-    @GetMapping("/cls_organization/{id_organization}")
+    @RequestMapping(value = {"/cls_organization/{id_organization}", "/outer/cls_organization/{id_organization}"},
+            method = RequestMethod.GET)
     public @ResponseBody ClsOrganization getClsOrganization(@PathVariable("id_organization") Long organizationId){
         ClsOrganization organization = clsOrganizationRepo.findById(organizationId).orElse(null);
         return organization;

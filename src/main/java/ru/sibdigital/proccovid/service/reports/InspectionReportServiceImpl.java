@@ -51,7 +51,8 @@ public class InspectionReportServiceImpl implements InspectionReportService {
     private EntityManager entityManager;
 
     public byte[] exportInspectionReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
-                               List<String> mainOkvedPaths, List<String> additionalOkvedPaths, Date defaultMinDate, Date defaultMaxDate) {
+                               List<String> mainOkvedPaths, List<String> additionalOkvedPaths, Date defaultMinDate, Date defaultMaxDate,
+                                         String prefix) {
         try {
             List<InspectionEntityReport> inspections = getInspectionEntitiesForReport(minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths);
             Long maxValueLong = (inspections.isEmpty() ? 0 : getMaxValueInspectionsByOrganAndAuthority(inspections));
@@ -70,6 +71,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             parameters.put("minCnt",  minCnt);
             parameters.put("maxValue", (maxValue == 0 ? 1: maxValue));
             parameters.put("reportTitle", "Отчет по контрольно-надзорным мероприятиям");
+            parameters.put("prefix", prefix);
 
             String hasOkvedFilter = "НЕТ";
             if (mainOkvedPaths != null && !mainOkvedPaths.isEmpty() || additionalOkvedPaths != null && !additionalOkvedPaths.isEmpty()) {
@@ -89,7 +91,8 @@ public class InspectionReportServiceImpl implements InspectionReportService {
 
     @Override
     public byte[] exportInspectionCountReport(String reportFormat, Date minDate, Date maxDate, Integer minCnt,
-                                    Long idOrganization, Long idAuthority, Integer typeRecord, Date defaultMinDate, Date defaultMaxDate) {
+                                    Long idOrganization, Long idAuthority, Integer typeRecord, Date defaultMinDate, Date defaultMaxDate,
+                                              String prefix) {
         try {
             List<InspectionEntityReport> inspections = getInspectionEntitiesForReportCount(minDate, maxDate, minCnt, idOrganization, idAuthority, typeRecord);
             Long maxValueLong = (inspections.isEmpty() ? 0 : getMaxValueInspectionsByOrganAndAuthority(inspections));
@@ -99,6 +102,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             parameters.put("net.sf.jasperreports.print.keep.full.text", true);
             parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
             parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
+            parameters.put("prefix", prefix);
 
             DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
@@ -126,7 +130,7 @@ public class InspectionReportServiceImpl implements InspectionReportService {
 
     @Override
     public byte[] exportInspectionReportDetail(Date minDate, Date maxDate, Long idOrganization, Long idAuthority,
-                                               Date defaultMinDate, Date defaultMaxDate) {
+                                               Date defaultMinDate, Date defaultMaxDate, String prefix) {
         try {
             List<InspectionEntityReport> inspections = getInspectionsForReportDetail(minDate, maxDate, idOrganization, idAuthority);
 
@@ -142,9 +146,9 @@ public class InspectionReportServiceImpl implements InspectionReportService {
             DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
             parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
+            parameters.put("prefix", prefix);
 
-            String jrxmlPath = null;
-            jrxmlPath = "classpath:reports/inspection/inspection_details.jrxml";
+            String jrxmlPath = "classpath:reports/inspection/inspection_details.jrxml";
 
             return jasperReportService.exportJasperReport(jrxmlPath, inspections, parameters, "html");
 

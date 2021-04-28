@@ -1,3 +1,5 @@
+const dateFormatWithoutTime = webix.Date.dateToStr("%d.%m.%Y");
+
 const organizations = {
     body: {
         type: 'space',
@@ -321,27 +323,59 @@ let organizationForm = (data) => {
                                             width: 500,
                                             minWidth: 300,
                                             fillspace: true,
-                                            template: '#controlAuthority.name#'
+                                            // template: '#controlAuthority.name#'
+                                            template: function (obj) {
+                                                if (obj.controlAuthority) {
+                                                    return obj.controlAuthority.name;
+                                                } else {
+                                                    return "";
+                                                }
+                                            },
+                                            sort: 'text',
                                         },
                                         {
                                             id: 'inspectionResult',
                                             header: 'Результат проверки',
                                             width: 200,
-                                            template: '#inspectionResult.name#'
+                                            // template: '#inspectionResult.name#'
+                                            template: function (obj) {
+                                                if (obj.inspectionResult) {
+                                                    return obj.inspectionResult.name;
+                                                } else {
+                                                    return "";
+                                                }
+                                            },
+                                            sort: 'text',
                                         },
                                         {
                                             id: 'dateOfInspection',
                                             header: 'Дата проверки',
                                             width: 200,
-                                            template: '#dateOfInspection#'
+                                            name: 'dateOfInspection',
+                                            format: dateFormatWithoutTime,
+                                            sort: 'date',
                                         },
                                         {
                                             id: 'comment',
                                             header: 'Комментарий',
                                             width: 250,
-                                            template: '#comment#'
+                                            template: '#comment#',
+                                            sort: 'text',
                                         }
                                     ],
+                                    scheme: {
+                                        $init: function (obj) {
+                                            var xml_format_ = webix.Date.strToDate("%Y-%m-%d %H:%i:%s.S");
+                                            obj.dateOfInspection = obj.dateOfInspection.replace("T", " ");
+                                            obj.dateOfInspection = xml_format_(obj.dateOfInspection);
+                                        },
+                                        $update:function (obj) {
+                                            var xml_format_ = webix.Date.strToDate("%Y-%m-%d %H:%i:%s.S");
+                                            obj.dateOfInspection = obj.dateOfInspection.replace("T", " ");
+                                            obj.dateOfInspection = xml_format_(obj.dateOfInspection);
+                                        },
+
+                                    },
                                     on: {
                                         onBeforeLoad: function () {
                                             this.showOverlay("Загружаю...");
@@ -358,6 +392,10 @@ let organizationForm = (data) => {
                                         'data->onStoreUpdated': function () {
                                             this.adjustRowHeight(null, true);
                                         },
+                                        onItemDblClick: function (id, e, trg) {
+                                            let item = $$('revision_table').getSelectedItem();
+                                            window.open('inspection/view?id=' + item.id)
+                                        }
                                     },
                                     url: 'org_inspections?id=' + data.id,
                                 },

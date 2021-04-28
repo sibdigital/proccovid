@@ -11,4 +11,6 @@ import java.util.Optional;
 @Repository
 public interface RegOrganizationInspectionRepo extends JpaRepository<RegOrganizationInspection, Long> {
     Optional<List<RegOrganizationInspection>> findRegOrganizationInspectionsByOrganization(ClsOrganization organization);
+    Optional<List<RegOrganizationInspection>> findRegOrganizationInspectionsByOrganizationAndControlAuthority_IsDeleted(ClsOrganization organization, Boolean isDeleted);
+
 }

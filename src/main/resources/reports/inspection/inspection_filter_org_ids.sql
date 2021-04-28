@@ -44,7 +44,8 @@ SELECT
     cls_control_authority.name as name_authority,
     cls_control_authority.short_name as short_name_authority,
     total_organization.total              as total_organization,
-    total_authority.total                 as total_authority
+    total_authority.total                 as total_authority,
+    false                                 as files_attached
 FROM res_tbl
          LEFT JOIN total_organization
                    ON res_tbl.id_organization = total_organization.id_organization

@@ -29,6 +29,7 @@
 		</box>
 	</style>
 	<subDataset name="InspectionDataset" uuid="2914f7c6-c2d7-448b-b0c1-090970e18ed6">
+		<parameter name="prefix" class="java.lang.String"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
@@ -37,11 +38,14 @@
 		<field name="shortNameAuthority" class="java.lang.String"/>
 		<field name="inspectionResult" class="java.lang.String"/>
 		<field name="comment" class="java.lang.String"/>
+		<field name="filesAttached" class="java.lang.Boolean"/>
+		<field name="id" class="java.lang.Long"/>
 	</subDataset>
 	<parameter name="InspectionDataSource" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="minDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="maxDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="reportTitle" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="prefix" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -102,6 +106,9 @@
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="InspectionDataset" uuid="d3e1e03a-2c83-4436-9e50-79518bc3d337">
+						<datasetParameter name="prefix">
+							<datasetParameterExpression><![CDATA[$P{prefix}]]></datasetParameterExpression>
+						</datasetParameter>
 						<dataSourceExpression><![CDATA[$P{InspectionDataSource}]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="50" uuid="dca8961f-ce2d-47ac-879c-b15847d170a9">
@@ -227,6 +234,28 @@
 									<font size="12"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{comment}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="140" uuid="980fffb5-1088-47a6-b00f-b5d08b7093c9">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+						<jr:tableHeader style="Table_TH" height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="140" height="30" uuid="16679b95-2e6e-4ca1-b8b6-dd7b74267c56"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<text><![CDATA[Прикрепленные файлы]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
+								<reportElement x="0" y="0" width="140" height="30" uuid="341e7faf-9680-4941-a9a4-ac78b8f4aae0"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[Boolean.TRUE.equals($F{filesAttached}) ? "Посмотреть" : ""]]></textFieldExpression>
+								<hyperlinkReferenceExpression><![CDATA[Boolean.TRUE.equals($F{filesAttached}) ? "inspection/view?id=" + $F{id} : ""]]></hyperlinkReferenceExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
