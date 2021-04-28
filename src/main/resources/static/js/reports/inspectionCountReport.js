@@ -280,7 +280,8 @@ const inspectionCountReport = {
                                     minCnt: $$('minCountInspectionReport').getValue(),
                                     typeRecord: $$('typeReportId').getValue(),
                                     idOrganization: $$('idOrganization').getValue(),
-                                    idAuthority: $$('authorityRichselectId').getValue()
+                                    idAuthority: $$('authorityRichselectId').getValue(),
+                                    currentUrl: window.document.location.href
                                 };
                                 webix.ajax().get('generate_count_inspection_report', params).then(function (data) {
                                     if (data.text() != null) {

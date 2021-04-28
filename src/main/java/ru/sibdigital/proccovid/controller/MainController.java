@@ -153,7 +153,8 @@ public class MainController {
         return "view";
     }
 
-    @GetMapping("/organization/view")
+    @RequestMapping(value = {"/organization/view", "/outer/organization/view"},
+            method = RequestMethod.GET)
     public String viewOrganization(@RequestParam("id") Long organizationId, Model model, HttpSession session) {
         model.addAttribute("organization_id", organizationId);
         model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
@@ -163,7 +164,8 @@ public class MainController {
         return "organization";
     }
 
-    @GetMapping("/cls_organization/{id_organization}")
+    @RequestMapping(value = {"/cls_organization/{id_organization}", "/outer/cls_organization/{id_organization}"},
+            method = RequestMethod.GET)
     public @ResponseBody ClsOrganization getClsOrganization(@PathVariable("id_organization") Long organizationId){
         ClsOrganization organization = clsOrganizationRepo.findById(organizationId).orElse(null);
         return organization;

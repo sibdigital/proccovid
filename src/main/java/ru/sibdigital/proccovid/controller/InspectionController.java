@@ -93,7 +93,8 @@ public class InspectionController {
                                                          @RequestParam(value = "maxDate") String maxDateString,
                                                          @RequestParam(value = "minCnt") Integer minCnt,
                                                          @RequestParam(value = "mainOkveds") List<String> mainOkvedPaths,
-                                                         @RequestParam(value = "additionalOkveds") List<String> additionalOkvedPaths) throws ParseException {
+                                                         @RequestParam(value = "additionalOkveds") List<String> additionalOkvedPaths,
+                                                         @RequestParam(value = "currentUrl") String currentUrl) throws ParseException {
 
         Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
         Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
@@ -110,7 +111,9 @@ public class InspectionController {
             maxDate = dateFormat.parse(maxDateString);
         }
 
-        byte[] bytes = inspectionReportService.exportInspectionReport("html", minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths, defaultMinDate, defaultMaxDate);
+        String outerPrefix = getOuterPrefix(currentUrl);
+
+        byte[] bytes = inspectionReportService.exportInspectionReport("html", minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths, defaultMinDate, defaultMaxDate, outerPrefix);
         String template = new String(bytes);
         return template;
     }
@@ -124,7 +127,8 @@ public class InspectionController {
                                                          @RequestParam(value = "minCnt") Integer minCnt,
                                                          @RequestParam(value = "idOrganization") Long idOrganization,
                                                          @RequestParam(value = "idAuthority") Long idAuthority,
-                                                         @RequestParam(value = "typeRecord") String typeRecord) throws ParseException {
+                                                         @RequestParam(value = "typeRecord") String typeRecord,
+                                                         @RequestParam(value = "currentUrl") String currentUrl) throws ParseException {
 
         Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
         Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
@@ -141,8 +145,10 @@ public class InspectionController {
             maxDate = dateFormat.parse(maxDateString);
         }
 
+        String outerPrefix = getOuterPrefix(currentUrl);
+
         byte[] bytes = inspectionReportService.exportInspectionCountReport("html", minDate, maxDate, minCnt,
-                        idOrganization, idAuthority, Integer.valueOf(typeRecord), defaultMinDate, defaultMaxDate);
+                        idOrganization, idAuthority, Integer.valueOf(typeRecord), defaultMinDate, defaultMaxDate, outerPrefix);
         String template = new String(bytes);
         return template;
     }
@@ -154,7 +160,8 @@ public class InspectionController {
     public @ResponseBody String generateInspectionReportDetails(@RequestParam(value = "minDate") String minDateString,
                                                               @RequestParam(value = "maxDate") String maxDateString,
                                                               @RequestParam(value = "idOrganization") Long idOrganization,
-                                                              @RequestParam(value = "idAuthority") Long idAuthority) throws ParseException {
+                                                              @RequestParam(value = "idAuthority") Long idAuthority,
+                                                              @RequestParam(value = "prefix") String prefix) throws ParseException {
         Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
         Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
         Date minDate = defaultMinDate;
@@ -169,7 +176,7 @@ public class InspectionController {
         }
 
         byte[] bytes = inspectionReportService.exportInspectionReportDetail( minDate, maxDate,
-                idOrganization, idAuthority, defaultMinDate, defaultMaxDate);
+                idOrganization, idAuthority, defaultMinDate, defaultMaxDate, prefix);
         String template = new String(bytes);
         return template;
     }
@@ -183,6 +190,7 @@ public class InspectionController {
                                  @RequestParam(value = "minCnt") Integer minCnt,
                                  @RequestParam(value = "mainOkveds") List<String> mainOkvedPaths,
                                  @RequestParam(value = "additionalOkveds") List<String> additionalOkvedPaths,
+                                 @RequestParam(value = "currentUrl") String currentUrl,
                                  HttpServletResponse response) throws IOException, ParseException {
 
         Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
@@ -199,7 +207,9 @@ public class InspectionController {
 
         minCnt = (minCnt == null ? 0 :minCnt);
 
-        byte[] bytes = inspectionReportService.exportInspectionReport(format, minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths, defaultMinDate, defaultMaxDate);
+        String outerPrefix = getOuterPrefix(currentUrl);
+
+        byte[] bytes = inspectionReportService.exportInspectionReport(format, minDate, maxDate, minCnt, mainOkvedPaths, additionalOkvedPaths, defaultMinDate, defaultMaxDate, outerPrefix);
 
         if (format.equals("pdf")) {
             response.setContentType("application/pdf");
@@ -225,6 +235,7 @@ public class InspectionController {
                                  @RequestParam(value = "idOrganization") Long idOrganization,
                                  @RequestParam(value = "idAuthority") Long idAuthority,
                                  @RequestParam(value = "typeRecord") Integer typeRecord,
+                                 @RequestParam(value = "currentUrl") String currentUrl,
                                  HttpServletResponse response) throws IOException, ParseException {
 
         Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
@@ -241,8 +252,10 @@ public class InspectionController {
 
         minCnt = (minCnt == null ? 0 :minCnt);
 
+        String prefix = getOuterPrefix(currentUrl);
+
         byte[] bytes = inspectionReportService.exportInspectionCountReport(format, minDate, maxDate, minCnt,
-                idOrganization, idAuthority, typeRecord, defaultMinDate, defaultMaxDate);
+                idOrganization, idAuthority, typeRecord, defaultMinDate, defaultMaxDate, prefix);
         if (format.equals("pdf")) {
             response.setContentType("application/pdf");
         } else if (format.equals("html")) {
@@ -293,5 +306,20 @@ public class InspectionController {
             return list;
         } else
             return null;
+    }
+
+    private String getOuterPrefix(String currentUrl) {
+        String url = currentUrl + '/';
+        String outer = applicationConstants.getOuterUrlPrefix();
+        Boolean isOuter = false;
+        if (!outer.isBlank() && url.contains("/" + outer)) {
+                isOuter = true;
+        }
+
+        if (isOuter) {
+            return outer;
+        } else {
+            return "";
+        }
     }
 }

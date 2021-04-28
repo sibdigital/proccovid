@@ -29,6 +29,7 @@
 		</box>
 	</style>
 	<subDataset name="InspectionDataset" uuid="2914f7c6-c2d7-448b-b0c1-090970e18ed6">
+		<parameter name="prefix" class="java.lang.String"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
@@ -44,15 +45,10 @@
 	<parameter name="minDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="maxDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="reportTitle" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="prefix" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
-<!--	<variable name="fileMessage" class="java.lang.String">-->
-<!--		<variableExpression><![CDATA[Boolean.TRUE.equals($F{filesAttached}) ? "Посмотреть" : ""]]></variableExpression>-->
-<!--	</variable>-->
-<!--	<variable name="link" class="java.lang.String">-->
-<!--		<variableExpression><![CDATA["/isrb/generate_inspection_report_details?minDate="+$P{minDate} + "&maxDate=" + $P{maxDate} + "&idOrganization=" + $F{organization}.getId() + "&idAuthority=" + $F{controlAuthority}.getId()]]></variableExpression>-->
-<!--	</variable>-->
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -110,6 +106,9 @@
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="InspectionDataset" uuid="d3e1e03a-2c83-4436-9e50-79518bc3d337">
+						<datasetParameter name="prefix">
+							<datasetParameterExpression><![CDATA[$P{prefix}]]></datasetParameterExpression>
+						</datasetParameter>
 						<dataSourceExpression><![CDATA[$P{InspectionDataSource}]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="50" uuid="dca8961f-ce2d-47ac-879c-b15847d170a9">
@@ -256,7 +255,7 @@
 									<font size="12"/>
 								</textElement>
 								<textFieldExpression><![CDATA[Boolean.TRUE.equals($F{filesAttached}) ? "Посмотреть" : ""]]></textFieldExpression>
-								<hyperlinkReferenceExpression><![CDATA[Boolean.TRUE.equals($F{filesAttached}) ? "/isrb/inspection/view?id=" + $F{id} : ""]]></hyperlinkReferenceExpression>
+								<hyperlinkReferenceExpression><![CDATA[Boolean.TRUE.equals($F{filesAttached}) ? "inspection/view?id=" + $F{id} : ""]]></hyperlinkReferenceExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
