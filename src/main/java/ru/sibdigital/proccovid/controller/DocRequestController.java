@@ -250,7 +250,7 @@ public class DocRequestController {
     }
 
     @RequestMapping(
-            value = {"/cls_districts","/outer/cls_districts"},
+            value = {"/cls_districts","/outer/cls_districts","/violation/cls_districts"},
             method = RequestMethod.GET
     )
     public List<ClsDistrict> getListDistricts() {

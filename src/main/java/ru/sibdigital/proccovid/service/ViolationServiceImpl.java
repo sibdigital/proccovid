@@ -194,29 +194,32 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public RegViolation getRegViolation(Long id, Long idUser) {
+    public RegViolation getRegViolation(Long id) {
+        RegViolation regViolation = regViolationRepo.findById(id).orElse(null);
+
+        return regViolation;
+    }
+
+    @Override
+    public void viewViolation(Long id, ViolationDto violationDto){
         ClsUser clsUser = null;
-        if(idUser != null){
-            clsUser = clsUserRepo.findById(idUser).orElse(null);
+        if(id != null){
+            clsUser = clsUserRepo.findById(id).orElse(null);
         }
         ClsDistrict clsDistrict = null;
-        RegViolation regViolation = regViolationRepo.findById(id).orElse(null);
-        if (regViolation.getDistrict().getId() != null) {
-            clsDistrict = clsDistrictRepo.findById(regViolation.getDistrict().getId()).orElse(null);
+        if (violationDto.getIdDistrict() != null) {
+            clsDistrict = clsDistrictRepo.findById(violationDto.getIdDistrict()).orElse(null);
         }
-
         RegViolationSearch regViolationSearch = RegViolationSearch.builder()
                     .user(clsUser)
                     .district(clsDistrict)
                     .timeCreate(new Timestamp(System.currentTimeMillis()))
-                    .innOrg(regViolation.getInnOrg())
-                    .nameOrg(regViolation.getNameOrg())
-                    .numberFile(regViolation.getNumberFile())
-                    .idViolation(regViolation.getId())
+                    .innOrg(violationDto.getInnOrg())
+                    .nameOrg(violationDto.getNameOrg())
+                    .numberFile(violationDto.getNumberFile())
+                    .idViolation(violationDto.getId())
                     .build();
             regViolationSearchRepo.save(regViolationSearch);
-
-        return regViolation;
     }
 
     @Override
@@ -330,31 +333,34 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public RegPersonViolation getRegPersonViolation(Long id, Long idUser) {
+    public RegPersonViolation getRegPersonViolation(Long id) {
+        RegPersonViolation regPersonViolation = regPersonViolationRepo.findById(id).orElse(null);
+
+        return regPersonViolation;
+    }
+
+    @Override
+    public void viewPersonViolation(Long id, PersonViolationDto personViolationDto){
         ClsUser clsUser = null;
-        if(idUser != null){
-            clsUser = clsUserRepo.findById(idUser).orElse(null);
+        if(id != null){
+            clsUser = clsUserRepo.findById(id).orElse(null);
         }
         ClsDistrict clsDistrict = null;
-        RegPersonViolation regPersonViolation = regPersonViolationRepo.findById(id).orElse(null);
-        if (regPersonViolation.getDistrict().getId() != null) {
-            clsDistrict = clsDistrictRepo.findById(regPersonViolation.getDistrict().getId()).orElse(null);
+        if (personViolationDto.getIdDistrict() != null) {
+            clsDistrict = clsDistrictRepo.findById(personViolationDto.getIdDistrict()).orElse(null);
         }
-
         RegPersonViolationSearch regPersonViolationSearch = RegPersonViolationSearch.builder()
                     .user(clsUser)
                     .district(clsDistrict)
                     .timeCreate(new Timestamp(System.currentTimeMillis()))
-                    .lastname(regPersonViolation.getLastname())
-                    .firstname(regPersonViolation.getFirstname())
-                    .patronymic(regPersonViolation.getPatronymic())
-                    .passportData(regPersonViolation.getPassportData())
-                    .numberFile(regPersonViolation.getNumberFile())
-                    .idPersonViolation(regPersonViolation.getId())
+                    .lastname(personViolationDto.getLastname())
+                    .firstname(personViolationDto.getFirstname())
+                    .patronymic(personViolationDto.getPatronymic())
+                    .passportData(personViolationDto.getPassportData())
+                    .numberFile(personViolationDto.getNumberFile())
+                    .idPersonViolation(personViolationDto.getId())
                     .build();
             regPersonViolationSearchRepo.save(regPersonViolationSearch);
-
-        return regPersonViolation;
     }
 
     @Override

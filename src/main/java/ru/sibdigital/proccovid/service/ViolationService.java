@@ -24,13 +24,13 @@ public interface ViolationService {
 
     RegViolation saveRegViolation(ViolationDto dto) throws Exception;
 
-    RegViolation getRegViolation(Long id, Long idUser);
+    RegViolation getRegViolation(Long id);
 
     Page<RegPersonViolation> getPersonViolationsByCriteria(RegPersonViolationSearchCriteria searchCriteria, int page, int size, Long idUser);
 
     RegPersonViolation saveRegPersonViolation(PersonViolationDto dto) throws Exception;
 
-    RegPersonViolation getRegPersonViolation(Long id, Long idUser);
+    RegPersonViolation getRegPersonViolation(Long id);
 
     Page<RegViolationSearch> getViolationSearchQueriesByCriteria(RegViolationSearchSearchCriteria searchCriteria, int page, int size);
 
@@ -39,4 +39,8 @@ public interface ViolationService {
     Page<RegPersonViolationSearch> getPersonViolationSearchQueriesByCriteria(RegPersonViolationSearchSearchCriteria searchCriteria, int page, int size);
 
     RegPersonViolationSearch getRegPersonViolationSearch(Long id);
+
+    void viewViolation(Long id, ViolationDto violationDto);
+
+    void viewPersonViolation(Long id, PersonViolationDto personViolationDto);
 }

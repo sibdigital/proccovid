@@ -91,7 +91,6 @@ public class MainController {
 
         session.setAttribute("lastPage", "outer");
 
-        model.addAttribute("outer_url_prefix", applicationConstants.getOuterUrlPrefix());
         model.addAttribute("id_department", clsUser.getIdDepartment().getId());
         model.addAttribute("department_name", clsUser.getIdDepartment().getName());
         if (clsUser.getDistrict() != null) {
@@ -108,7 +107,6 @@ public class MainController {
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
 
-        model.addAttribute("outer_url_prefix", applicationConstants.getOuterUrlPrefix());
         model.addAttribute("id_department", clsUser.getIdDepartment().getId());
         model.addAttribute("department_name", clsUser.getIdDepartment().getName());
         if (clsUser.getDistrict() != null) {
@@ -117,7 +115,20 @@ public class MainController {
         model.addAttribute("user_lastname", clsUser.getLastname());
         model.addAttribute("user_firstname", clsUser.getFirstname());
         model.addAttribute("application_name", applicationConstants.getApplicationName());
+
         return "user";
+    }
+
+    @GetMapping("/violation/view")
+    public String violationView(
+            Model model,
+            @RequestParam(value = "id_violation", required = false) Long idViolation,
+            @RequestParam(value = "id_person_violation", required = false) Long idPersonViolation
+    ) {
+        model.addAttribute("id_violation", idViolation);
+        model.addAttribute("id_person_violation", idPersonViolation);
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+        return "violation";
     }
 
     @GetMapping("/requests")

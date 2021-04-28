@@ -507,7 +507,7 @@ public class AdminController {
     }
 
     @RequestMapping(
-            value = {"/type_violations","/outer/type_violations"},
+            value = {"/type_violations","/outer/type_violations", "/violation/type_violations"},
             method = RequestMethod.GET
     )
     public @ResponseBody List<ClsTypeViolationDto> getClsTypeViolations() {

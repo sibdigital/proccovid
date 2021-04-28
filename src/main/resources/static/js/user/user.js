@@ -229,6 +229,12 @@ webix.ready(function() {
         webix.ui(newUserPasswordModal).show();
     };
 
+    if (ID_VIOLATION !== null) {
+        getViolationForm(ID_VIOLATION);
+    }
+    if (ID_PERSON_VIOLATION !== null) {
+        getPersonViolationForm(ID_PERSON_VIOLATION);
+    }
     webix.event(window, "resize", function(event){
         layout.define("width",document.body.clientWidth);
         layout.define("height",window.innerHeight);
