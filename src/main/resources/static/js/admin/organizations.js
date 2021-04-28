@@ -1,3 +1,6 @@
+const dateFormatWithoutTime = webix.Date.dateToStr("%d.%m.%Y");
+const xml_format =  webix.Date.strToDate("%Y-%m-%d %H:%i:%s.S");
+
 const organizations = {
     body: {
         type: 'space',
@@ -329,6 +332,7 @@ let organizationForm = (data) => {
                                                     return "";
                                                 }
                                             },
+                                            sort: 'text',
                                         },
                                         {
                                             id: 'inspectionResult',
@@ -342,20 +346,35 @@ let organizationForm = (data) => {
                                                     return "";
                                                 }
                                             },
+                                            sort: 'text',
                                         },
                                         {
                                             id: 'dateOfInspection',
                                             header: 'Дата проверки',
                                             width: 200,
-                                            template: '#dateOfInspection#'
+                                            name: 'dateOfInspection',
+                                            format: dateFormatWithoutTime,
+                                            sort: 'date',
                                         },
                                         {
                                             id: 'comment',
                                             header: 'Комментарий',
                                             width: 250,
-                                            template: '#comment#'
+                                            template: '#comment#',
+                                            sort: 'text',
                                         }
                                     ],
+                                    scheme: {
+                                        $init: function (obj) {
+                                            obj.dateOfInspection = obj.dateOfInspection.replace("T", " ");
+                                            obj.dateOfInspection = xml_format(obj.dateOfInspection);
+                                        },
+                                        $update:function (obj) {
+                                            obj.dateOfInspection = obj.dateOfInspection.replace("T", " ");
+                                            obj.dateOfInspection = xml_format(obj.dateOfInspection);
+                                        },
+
+                                    },
                                     on: {
                                         onBeforeLoad: function () {
                                             this.showOverlay("Загружаю...");
@@ -372,6 +391,13 @@ let organizationForm = (data) => {
                                         'data->onStoreUpdated': function () {
                                             this.adjustRowHeight(null, true);
                                         },
+                                        onItemDblClick: function (id, e, trg) {
+                                            if (id.column == 'controlAuthorityName') {
+                                                let item = $$('revision_table').getSelectedItem();
+                                                // webix.message(item.controlAuthority.id);
+                                                window.open('control_authority/view?id=' + item.controlAuthority.id)
+                                            }
+                                        }
                                     },
                                     url: 'org_inspections?id=' + data.id,
                                 },

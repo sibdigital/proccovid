@@ -18,6 +18,7 @@ import ru.sibdigital.proccovid.dto.KeyValue;
 import ru.sibdigital.proccovid.dto.egrip.EGRIP;
 import ru.sibdigital.proccovid.dto.egrul.EGRUL;
 import ru.sibdigital.proccovid.model.*;
+import ru.sibdigital.proccovid.repository.ClsControlAuthorityRepo;
 import ru.sibdigital.proccovid.repository.ClsMigrationRepo;
 import ru.sibdigital.proccovid.repository.ClsOrganizationRepo;
 import ru.sibdigital.proccovid.service.EgrulService;
@@ -55,6 +56,9 @@ public class MainController {
 
     @Autowired
     private ClsOrganizationRepo clsOrganizationRepo;
+
+    @Autowired
+    private ClsControlAuthorityRepo clsControlAuthorityRepo;
 
     @GetMapping("/")
     public String index(HttpSession session) {
@@ -213,5 +217,25 @@ public class MainController {
         map.put("status", status);
 
         return map;
+    }
+
+    @RequestMapping(value = {"/control_authority/view", "/outer/control_authority/view",
+            "/organization/control_authority/view", "/outer/organization/control_authority/view"},
+            method = RequestMethod.GET)
+    public String viewControlAuthority(@RequestParam("id") Long authorityId, Model model, HttpSession session) {
+        model.addAttribute("control_authority_id", authorityId);
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+
+        return "controlAuthority";
+    }
+
+    @RequestMapping(value = {"/control_authority/{id_authority}", "/outer/control_authority/{id_authority}",
+            "/organization/control_authority/{id_authority}", "/outer/organization/control_authority/{id_authority}"},
+            method = RequestMethod.GET)
+    public @ResponseBody ClsControlAuthority getClsControlAuthority(@PathVariable("id_authority") Long authorityId){
+        ClsControlAuthority authority = clsControlAuthorityRepo.findById(authorityId).orElse(null);
+        return authority;
     }
 }
