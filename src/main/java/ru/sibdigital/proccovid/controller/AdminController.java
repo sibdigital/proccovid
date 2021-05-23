@@ -19,11 +19,16 @@ import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
-import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySearchCriteria;
+import ru.sibdigital.proccovid.repository.classifier.ClsDepartmentOkvedRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsMailingListOkvedRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsMailingListRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsNewsRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegUserRoleRepo;
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegViolationSearchSearchCriteria;
 import ru.sibdigital.proccovid.service.*;
+import ru.sibdigital.proccovid.utils.DataFormatUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -77,6 +82,9 @@ public class AdminController {
 
     @Autowired
     private RegUserRoleRepo regUserRoleRepo;
+
+    @Autowired
+    private MailingListService mailingListService;
 
     @Value("${spring.mail.from}")
     private String fromAddress;
@@ -353,20 +361,24 @@ public class AdminController {
         return list;
     }
 
-    @PostMapping("/save_cls_mailing_list")
-    public @ResponseBody String saveClsMailingList(@RequestBody ClsMailingListDto clsMailingListDto) {
+    @PostMapping(value = "/save_cls_mailing_list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody ResponseEntity saveClsMailingList(@RequestBody ClsMailingListDto clsMailingListDto) {
+        String message = "Рассылка сохранена";
+        Boolean success = false;
         try {
-            requestService.saveClsMailingList(clsMailingListDto);
+            mailingListService.saveClsMailingList(clsMailingListDto);
+            success = true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return "Не удалось сохранить рассылку";
+            message =  "Не удалось сохранить рассылку";
         }
-        return "Рассылка сохранена";
+        return DataFormatUtils.buildResponse(ResponseEntity.ok(),
+                Map.of("message", message,"success", success));
     }
 
     @GetMapping("/mailing_list_short")
     public @ResponseBody List<KeyValue> getMailingMessagesForRichselect() {
-        List<KeyValue> list = requestService.getClsMailingList().stream()
+        List<KeyValue> list = mailingListService.getClsMailingList().stream()
                 .map(ctr -> new KeyValue(ctr.getClass().getSimpleName(), ctr.getId(), ctr.getName()))
                 .collect(Collectors.toList());
         return list;

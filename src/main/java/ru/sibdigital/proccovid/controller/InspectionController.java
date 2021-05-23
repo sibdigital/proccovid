@@ -11,14 +11,13 @@ import ru.sibdigital.proccovid.model.ClsControlAuthority;
 import ru.sibdigital.proccovid.model.ClsOrganization;
 import ru.sibdigital.proccovid.model.RegOrganizationInspection;
 import ru.sibdigital.proccovid.model.RegOrganizationInspectionFile;
-import ru.sibdigital.proccovid.repository.ClsControlAuthorityRepo;
-import ru.sibdigital.proccovid.repository.ClsOrganizationRepo;
-import ru.sibdigital.proccovid.repository.RegOrganizationInspectionFileRepo;
-import ru.sibdigital.proccovid.repository.RegOrganizationInspectionRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsControlAuthorityRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegOrganizationInspectionFileRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegOrganizationInspectionRepo;
 import ru.sibdigital.proccovid.service.reports.InspectionReportService;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -27,7 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @Slf4j

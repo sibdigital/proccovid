@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.ClsMigration;
-import ru.sibdigital.proccovid.repository.ClsMigrationRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsMigrationRepo;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;

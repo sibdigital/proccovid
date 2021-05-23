@@ -3,10 +3,10 @@ package ru.sibdigital.proccovid.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.sibdigital.proccovid.repository.DocDachaPersonRepo;
-import ru.sibdigital.proccovid.repository.DocDachaRepo;
-import ru.sibdigital.proccovid.repository.DocPersonRepo;
-import ru.sibdigital.proccovid.repository.DocRequestRepo;
+import ru.sibdigital.proccovid.repository.document.DocDachaPersonRepo;
+import ru.sibdigital.proccovid.repository.document.DocDachaRepo;
+import ru.sibdigital.proccovid.repository.document.DocPersonRepo;
+import ru.sibdigital.proccovid.repository.document.DocRequestRepo;
 
 import java.util.*;
 

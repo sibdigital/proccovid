@@ -3,7 +3,7 @@ package ru.sibdigital.proccovid.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.ClsSettings;
-import ru.sibdigital.proccovid.repository.ClsSettingsRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsSettingsRepo;
 
 
 @Service

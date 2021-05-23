@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.UserStatuses;
-import ru.sibdigital.proccovid.repository.ClsUserRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsUserRepo;
 import ru.sibdigital.proccovid.utils.PasswordGenerator;
 
 @Service

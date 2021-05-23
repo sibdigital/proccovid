@@ -2,12 +2,12 @@ package ru.sibdigital.proccovid.scheduling.tasks;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.stereotype.Component;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.ClsPrincipalRepo;
-import ru.sibdigital.proccovid.repository.RegMailingHistoryRepo;
-import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsPrincipalRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegMailingHistoryRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegMailingMessageRepo;
 import ru.sibdigital.proccovid.service.EmailServiceImpl;
 
 import java.sql.Timestamp;
@@ -21,6 +21,9 @@ public class SendingMailingMessageTask implements Runnable {
 
     @Autowired
     private ClsPrincipalRepo clsPrincipalRepo;
+
+    @Autowired
+    private ClsOrganizationRepo clsOrganizationRepo;
 
     @Autowired
     private EmailServiceImpl emailService;
@@ -37,21 +40,16 @@ public class SendingMailingMessageTask implements Runnable {
 
     @Override
     public void run() {
-        List<ClsPrincipal> principals = new ArrayList<>();
+
         log.info("Старт рассылки: " + getMessage().getClsMailingList().getName());
 
         try {
             if (getMessage().getClsMailingList().getStatus() == MailingListStatuses.VALID.value()) {
-                if (getMessage().getClsMailingList().getId() == 1) { // Системная рассылка
-                    principals = clsPrincipalRepo.findAll();
-                } else {
-                    principals = clsPrincipalRepo.getClsPrincipalsByMessage_Id(getMessage().getId());
+                if (getMessage().getClsMailingList().getForPrincipal() == true){
+                    sendForPrincipals();
+                }else{
+                    sendForOrganization();
                 }
-                log.info("Записей для обработки: " + principals.size());
-                sendMessagesToPrincipals(principals);
-
-                getMessage().setStatus(MailingMessageStatuses.IS_SENT.value());
-                regMailingMessageRepo.save(getMessage());
             } else {
                 RegMailingHistory history = new RegMailingHistory();
                 history.setClsMailingList(getMessage().getClsMailingList());
@@ -68,6 +66,34 @@ public class SendingMailingMessageTask implements Runnable {
         }
     }
 
+    private void sendForPrincipals(){
+        List<ClsPrincipal> principals = new ArrayList<>();
+        if (getMessage().getClsMailingList().getId() == 1) { // Системная рассылка
+            principals = clsPrincipalRepo.findAll();
+        } else {
+            principals = clsPrincipalRepo.getClsPrincipalsByMessage_Id(getMessage().getId());
+        }
+        log.info("Записей для обработки: " + principals.size());
+        sendMessagesToPrincipals(principals);
+
+        getMessage().setStatus(MailingMessageStatuses.IS_SENT.value());
+        regMailingMessageRepo.save(getMessage());
+    }
+
+    private void sendForOrganization(){
+        List<ClsOrganization> organizations = new ArrayList<>();
+        if (getMessage().getClsMailingList().getId() == 1) { // Системная рассылка
+            organizations = clsOrganizationRepo.findAll();
+        } else {
+            organizations = clsOrganizationRepo.getClsOrganizationByMessage_Id(getMessage().getId());
+        }
+        log.info("Записей для обработки: " + organizations.size());
+        sendMessagesToOrganization(organizations);
+
+        getMessage().setStatus(MailingMessageStatuses.IS_SENT.value());
+        regMailingMessageRepo.save(getMessage());
+    }
+
     private void sendMessagesToPrincipals(List<ClsPrincipal> principals) {
         List<ClsPrincipal> granulas = new ArrayList<>();
         for (ClsPrincipal principal : principals) {
@@ -79,6 +105,21 @@ public class SendingMailingMessageTask implements Runnable {
         }
         if (granulas.isEmpty() == false) {
             emailService.sendMessage(granulas, getMessage(), new HashMap<>());
+            granulas.clear();
+        }
+    }
+
+    private void sendMessagesToOrganization(List<ClsOrganization> organizations) {
+        List<ClsOrganization> granulas = new ArrayList<>();
+        for (ClsOrganization organization : organizations) {
+            granulas.add(organization);
+            if (granulas.size() >= granula) {
+                emailService.sendMessageToOrganizations(granulas, getMessage(), new HashMap<>());
+                granulas.clear();
+            }
+        }
+        if (granulas.isEmpty() == false) {
+            emailService.sendMessageToOrganizations(granulas, getMessage(), new HashMap<>());
             granulas.clear();
         }
     }

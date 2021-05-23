@@ -22,6 +22,8 @@ public class ClsMailingList {
     private String name;
     private String description;
     private Short status;
+    private Boolean isUserVisibility;
+    private Boolean isForPrincipal;
 
     public Long getId() {
         return id;
@@ -70,6 +72,7 @@ public class ClsMailingList {
         return Objects.equals(id, that.id) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(description, that.description) &&
+                Objects.equals(isUserVisibility, that.isUserVisibility) &&
                 Objects.equals(status, that.status);
     }
 
@@ -78,4 +81,23 @@ public class ClsMailingList {
         return Objects.hash(id, name, description, status);
     }
 
+    @Basic
+    @Column(name = "is_user_visibility", nullable = false)
+    public Boolean getUserVisibility() {
+        return isUserVisibility;
+    }
+
+    public void setUserVisibility(Boolean userVisibility) {
+        isUserVisibility = userVisibility;
+    }
+
+    @Basic
+    @Column(name = "is_for_principal", nullable = false)
+    public Boolean getForPrincipal() {
+        return isForPrincipal;
+    }
+
+    public void setForPrincipal(Boolean forPrincipal) {
+        isForPrincipal = forPrincipal;
+    }
 }

@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.RegEgrip;
 import ru.sibdigital.proccovid.model.RegEgrul;
 import ru.sibdigital.proccovid.model.egr.EgrActiveStatus;
-import ru.sibdigital.proccovid.repository.RegEgripRepo;
-import ru.sibdigital.proccovid.repository.RegEgrulRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegEgripRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegEgrulRepo;
 
 import java.util.List;
 

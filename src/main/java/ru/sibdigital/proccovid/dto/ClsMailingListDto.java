@@ -19,4 +19,6 @@ public class ClsMailingListDto {
     private String description;
     private Short status;
     private List<Okved> okveds;
+    private String followerInns;
+    private Boolean isUserVisibility;
 }

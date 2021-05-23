@@ -8,12 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.dto.ClsUserDto;
 import ru.sibdigital.proccovid.model.ClsUser;
-import ru.sibdigital.proccovid.repository.ClsUserRepo;
 import ru.sibdigital.proccovid.service.EmailService;
 import ru.sibdigital.proccovid.service.UserService;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 public class LoginController {

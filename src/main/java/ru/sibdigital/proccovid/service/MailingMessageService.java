@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.dto.RegMailingMessageDto;
 import ru.sibdigital.proccovid.model.ClsMailingList;
 import ru.sibdigital.proccovid.model.RegMailingMessage;
-import ru.sibdigital.proccovid.repository.ClsMailingListRepo;
-import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsMailingListRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegMailingMessageRepo;
 import ru.sibdigital.proccovid.scheduling.ScheduleTasks;
 
 import java.text.ParseException;

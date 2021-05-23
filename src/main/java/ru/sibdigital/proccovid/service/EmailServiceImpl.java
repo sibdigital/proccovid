@@ -11,7 +11,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.RegMailingHistoryRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegMailingHistoryRepo;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -186,6 +186,22 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    private RegMailingHistory constructHistory(ClsOrganization organization, RegMailingMessage regMailingMessage, Short status){
+        RegMailingHistory history = new RegMailingHistory();
+        if (regMailingMessage != null) {
+            history.setClsMailingList(regMailingMessage.getClsMailingList());
+            history.setRegMailingMessage(regMailingMessage);
+        }
+        //history.setClsPrincipal(principal);
+        history.setTimeSend(new Timestamp(System.currentTimeMillis()));
+        history.setStatus(status);
+        //ClsOrganization organization = principal.getOrganization();
+        if (organization != null) {
+            history.setEmail(organization.getEmail());
+        }
+        return history;
+    }
+
     private RegMailingHistory constructHistory(ClsPrincipal principal, RegMailingMessage regMailingMessage, Short status){
         RegMailingHistory history = new RegMailingHistory();
         if (regMailingMessage != null) {
@@ -267,6 +283,48 @@ public class EmailServiceImpl implements EmailService {
             }
         }
     }
+
+    public void sendMessageToOrganizations(List<ClsOrganization> organizations, RegMailingMessage regMailingMessage, Map<String, String> params) {
+        Map<Integer, RegMailingHistory> histories = new HashMap<>();
+        List<MimeMessage> messages = new ArrayList<>();
+
+        for (ClsOrganization organization : organizations) {
+            if (organization != null) {
+                int code = organization.hashCode();
+                Short status = MailingStatuses.EMAIL_SENT.value();
+
+                try {
+                    InternetAddress address = new InternetAddress(organization.getEmail()); // validate
+
+                    params.put("organizationName", organization.getName() == null ? "" : organization.getName());
+                    params.put("inn", organization.getInn() == null ? "" : organization.getInn());
+                    params.put("subject", regMailingMessage.getSubject());
+
+                    MimeMessage message = prepareMimeMessage(address, regMailingMessage, params);
+                    message.setDescription(String.valueOf(code));
+                    messages.add(message);
+                } catch (AddressException e) {
+                    status = MailingStatuses.INVALID_ADDRESS.value();
+                } catch (MessagingException messagingException) {
+                    status = MailingStatuses.EMAIL_NOT_CREATED.value();
+                }
+
+                RegMailingHistory history = constructHistory(organization, regMailingMessage, status);
+                histories.put(code, history);
+            }
+        }
+        if (messages.isEmpty() == false){
+            try {
+                log.info("Обработка " + messages.size());
+                process(messages, histories);
+                regMailingHistoryRepo.saveAll(histories.values());
+            }catch (Exception e) {
+                log.info("Ошибка сохранения истории"); // если это была тестовая отправка. то нормальная ситуация
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
+
 
     private MimeMessage prepareMimeMessage(InternetAddress address, ClsTemplate clsTemplate, Map<String, String> params) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();

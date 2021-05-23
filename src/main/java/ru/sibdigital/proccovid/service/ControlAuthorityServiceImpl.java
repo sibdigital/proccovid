@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.dto.ClsControlAuthorityDto;
 import ru.sibdigital.proccovid.model.ClsControlAuthority;
 import ru.sibdigital.proccovid.model.ClsControlAuthorityParent;
-import ru.sibdigital.proccovid.repository.ClsControlAuthorityParentRepo;
-import ru.sibdigital.proccovid.repository.ClsControlAuthorityRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsControlAuthorityParentRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsControlAuthorityRepo;
 import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySpecification;
 

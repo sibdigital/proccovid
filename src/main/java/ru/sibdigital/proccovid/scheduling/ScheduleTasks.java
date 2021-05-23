@@ -3,14 +3,13 @@ package ru.sibdigital.proccovid.scheduling;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.RegMailingMessageRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegMailingMessageRepo;
 import ru.sibdigital.proccovid.scheduling.tasks.ImportEgrulEgrip;
 import ru.sibdigital.proccovid.scheduling.tasks.ImportZipFullFias;
 import ru.sibdigital.proccovid.scheduling.tasks.ImportZipUpdatesFias;

@@ -5,8 +5,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.model.RegHelp;
-import ru.sibdigital.proccovid.repository.RegHelpRepo;
-import ru.sibdigital.proccovid.service.StatisticService;
+import ru.sibdigital.proccovid.repository.regisrty.RegHelpRepo;
 
 import java.util.ArrayList;
 import java.util.HashMap;

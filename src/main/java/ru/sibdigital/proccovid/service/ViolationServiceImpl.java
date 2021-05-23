@@ -9,7 +9,10 @@ import ru.sibdigital.proccovid.dto.ClsTypeViolationDto;
 import ru.sibdigital.proccovid.dto.PersonViolationDto;
 import ru.sibdigital.proccovid.dto.ViolationDto;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.*;
+import ru.sibdigital.proccovid.repository.classifier.ClsDistrictRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsTypeViolationRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsUserRepo;
+import ru.sibdigital.proccovid.repository.regisrty.*;
 import ru.sibdigital.proccovid.repository.specification.*;
 
 import java.sql.Timestamp;

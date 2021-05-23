@@ -15,12 +15,11 @@ import ru.sibdigital.proccovid.dto.ViolationDto;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.RegPersonViolation;
 import ru.sibdigital.proccovid.model.RegViolation;
-import ru.sibdigital.proccovid.repository.ClsUserRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsUserRepo;
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegViolationSearchCriteria;
 import ru.sibdigital.proccovid.service.ViolationService;
 
-import javax.servlet.http.HttpSession;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;

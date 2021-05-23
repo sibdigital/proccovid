@@ -6,7 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.ClsRole;
 import ru.sibdigital.proccovid.model.ClsUser;
-import ru.sibdigital.proccovid.repository.RegUserRoleRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegUserRoleRepo;
 
 import java.util.List;
 import java.util.stream.Collectors;

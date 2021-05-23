@@ -9,6 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.model.egr.EgripTypes;
 import ru.sibdigital.proccovid.repository.*;
+import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsPrescriptionRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsPrincipalRepo;
+import ru.sibdigital.proccovid.repository.document.DocEmployeeRepo;
+import ru.sibdigital.proccovid.repository.document.DocRequestRepo;
+import ru.sibdigital.proccovid.repository.regisrty.*;
 
 import java.sql.Timestamp;
 import java.util.*;

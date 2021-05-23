@@ -20,9 +20,17 @@ import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.dto.*;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.*;
+import ru.sibdigital.proccovid.repository.classifier.*;
+import ru.sibdigital.proccovid.repository.document.DocAddressFactRepo;
+import ru.sibdigital.proccovid.repository.document.DocPersonRepo;
+import ru.sibdigital.proccovid.repository.document.DocRequestPrsRepo;
+import ru.sibdigital.proccovid.repository.document.DocRequestRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegDocRequestFileRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegHistoryRequestRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegOrganizationFileRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegUserRoleRepo;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSpecification;
-import ru.sibdigital.proccovid.scheduling.ScheduleTasks;
 import ru.sibdigital.proccovid.utils.DateUtils;
 
 import javax.servlet.http.HttpServletResponse;
@@ -36,8 +44,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -99,12 +105,6 @@ public class RequestService {
 
     @Autowired
     private SettingService settingService;
-
-    @Autowired
-    private ClsMailingListRepo clsMailingListRepo;
-
-    @Autowired
-    private ClsMailingListOkvedRepo clsMailingListOkvedRepo;
 
     @Autowired
     private ClsDepartmentContactRepo clsDepartmentContactRepo;
@@ -614,35 +614,7 @@ public class RequestService {
     }
 
 
-    public ClsMailingList saveClsMailingList(ClsMailingListDto clsMailingListDto) {
 
-        ClsMailingList clsMailingList = ClsMailingList.builder()
-                .id(clsMailingListDto.getId())
-                .name(clsMailingListDto.getName())
-                .description(clsMailingListDto.getDescription())
-                .status(clsMailingListDto.getStatus())
-                .build();
-
-        clsMailingListRepo.save(clsMailingList);
-
-        List<ClsMailingListOkved> list = clsMailingListOkvedRepo.findClsMailingListOkvedByClsMailingList(clsMailingList);
-        clsMailingListOkvedRepo.deleteAll(list);
-
-        List<Okved> listOkveds = clsMailingListDto.getOkveds();
-        for (Okved okved : listOkveds) {
-            ClsMailingListOkved clsMailingListOkved = new ClsMailingListOkved();
-            clsMailingListOkved.setClsMailingList(clsMailingList);
-            clsMailingListOkved.setOkved(okved);
-            clsMailingListOkvedRepo.save(clsMailingListOkved);
-        }
-
-        return clsMailingList;
-    }
-
-    public List<ClsMailingList> getClsMailingList() {
-        return StreamSupport.stream(clsMailingListRepo.findAllByOrderByIdAsc().spliterator(), false)
-                .collect(Collectors.toList());
-    }
 
     public List<ClsDepartmentContact> getAllClsDepartmentContactByDepartmentId(Long id){
         return clsDepartmentContactRepo.findAllByDepartment(id).orElse(null);

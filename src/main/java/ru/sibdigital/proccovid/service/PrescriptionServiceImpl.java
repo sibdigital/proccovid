@@ -13,7 +13,11 @@ import ru.sibdigital.proccovid.dto.ClsRestrictionTypeDto;
 import ru.sibdigital.proccovid.dto.ClsTypeRequestDto;
 import ru.sibdigital.proccovid.dto.RegPrescriptionTextDto;
 import ru.sibdigital.proccovid.model.*;
-import ru.sibdigital.proccovid.repository.*;
+import ru.sibdigital.proccovid.repository.classifier.*;
+import ru.sibdigital.proccovid.repository.document.DocRequestRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegPrescriptionTextFileRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegPrescriptionTextRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegTypeRequestRestrictionTypeRepo;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;

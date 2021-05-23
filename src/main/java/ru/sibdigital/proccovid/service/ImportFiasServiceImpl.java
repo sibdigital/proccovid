@@ -1,6 +1,5 @@
 package ru.sibdigital.proccovid.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -17,25 +16,18 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ru.sibdigital.proccovid.model.ClsMigration;
 import ru.sibdigital.proccovid.model.ModelTypes;
 import ru.sibdigital.proccovid.model.StatusLoadTypes;
-import ru.sibdigital.proccovid.repository.ClsMigrationRepo;
 import ru.sibdigital.proccovid.repository.fias.AddrObjectRepo;
 import ru.sibdigital.proccovid.utils.StaxStreamProcessor;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;

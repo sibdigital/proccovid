@@ -5,12 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.sibdigital.proccovid.model.ClsOrganization;
 import ru.sibdigital.proccovid.model.RegOrganizationInspection;
 import ru.sibdigital.proccovid.parser.ExcelWriter;
-import ru.sibdigital.proccovid.repository.ClsOrganizationRepo;
-import ru.sibdigital.proccovid.repository.RegOrganizationInspectionRepo;
+import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
+import ru.sibdigital.proccovid.repository.regisrty.RegOrganizationInspectionRepo;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
