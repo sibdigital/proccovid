@@ -39,13 +39,24 @@ const mailingFormMain = {
                         {id: "0", value:'Не действует'},
                         {id: "1", value:'Действует'}
                     ]},
-            ]},
-        {
-            view: 'checkbox',
-            label: 'Доступна пользователям',
-            labelPosition: 'left',
-            name: 'isUserVisibility',
+            ]
         },
+        { cols: [
+                {
+                    view: 'checkbox',
+                    label: 'Доступна пользователям',
+                    labelPosition: 'left',
+                    name: 'isUserVisibility',
+                },
+                {
+                    view: 'checkbox',
+                    label: 'Рассылать только пользователям',
+                    labelPosition: 'left',
+                    name: 'isForPrincipal',
+                },
+            ]
+        },
+
         { view: 'textarea', label: 'Описание', labelPosition: 'top', name: 'description', autoheight: true},
         { cols: [
                 {},

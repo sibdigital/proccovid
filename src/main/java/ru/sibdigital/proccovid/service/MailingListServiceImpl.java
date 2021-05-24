@@ -38,6 +38,7 @@ public class MailingListServiceImpl implements MailingListService{
                 .description(clsMailingListDto.getDescription())
                 .status(clsMailingListDto.getStatus())
                 .isUserVisibility(clsMailingListDto.getIsUserVisibility())
+                .isForPrincipal(clsMailingListDto.getIsForPrincipal())
                 .build();
 
         clsMailingListRepo.save(clsMailingList);

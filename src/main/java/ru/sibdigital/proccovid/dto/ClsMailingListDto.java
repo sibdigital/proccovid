@@ -21,4 +21,5 @@ public class ClsMailingListDto {
     private List<Okved> okveds;
     private String followerInns;
     private Boolean isUserVisibility;
+    private Boolean isForPrincipal;
 }
