@@ -65,18 +65,18 @@ const mailingMessages = {
                 autowidth: true,
                 autoheight: true,
                 rows: [
-                    {
-                        view: 'toolbar',
-                        id: 'mMToolbar',
-                        cols:[
-                            {},
-                            {},
-                            {},
-                            {},
-                            { view: 'button', id: 'BtnQueueUp', value: 'Поставить в очередь', align: 'right', click: queueUp},
-                            { view: 'button', id: 'BtnDeleteFromQueue', value: 'Удалить из очереди', align: 'right', click: deleteFromQueue}
-                            ]
-                    },
+                    // {
+                    //     view: 'toolbar',
+                    //     id: 'mMToolbar',
+                    //     cols:[
+                    //         {},
+                    //         {},
+                    //         {},
+                    //         {},
+                    //         { view: 'button', id: 'BtnQueueUp', value: 'Поставить в очередь', align: 'right', click: queueUp},
+                    //         { view: 'button', id: 'BtnDeleteFromQueue', value: 'Удалить из очереди', align: 'right', click: deleteFromQueue}
+                    //         ]
+                    // },
                     {
                         id: 'mailing_messages_table',
                         view: 'datatable',
@@ -139,8 +139,8 @@ const mailingMessages = {
                         cols: [
                             {},
                             {},
-                            {},
-                            {},
+                            { view: 'button', id: 'BtnQueueUp', value: 'Поставить в очередь', align: 'right', click: queueUp},
+                            { view: 'button', id: 'BtnDeleteFromQueue', value: 'Удалить из очереди', align: 'right', click: deleteFromQueue},
                             {
                                 view: 'button',
                                 css: 'webix_primary',
