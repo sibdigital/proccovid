@@ -108,6 +108,12 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
             "and co.is_deleted = :isDeleted and co.is_activated = :isActivated")
     List<ClsOrganization> getClsOrganizationByInnArray(String[] inns, boolean isDeleted, boolean isActivated);
 
+    @Query(nativeQuery = true, value = "select *\n" +
+            "from cls_organization as co\n" +
+            "inner join reg_organization_okved roo on co.id = roo.id_organization\n" +
+            "where roo.id_okved in (:uids) and co.is_deleted = :isDeleted and co.is_activated = :isActivated")
+    List<ClsOrganization> getClsOrganizationByOkvedArray(UUID[] uids, boolean isDeleted, boolean isActivated);
+
     @Query(nativeQuery = true, value = "SELECT *\n" +
             "FROM cls_organization\n" +
             "INNER JOIN (SELECT rmlf.id_organization\n" +

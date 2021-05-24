@@ -5,15 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.dto.ClsMailingListDto;
 import ru.sibdigital.proccovid.model.*;
+import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsMailingListOkvedRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsMailingListRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegMailingListFollowerRepo;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -29,6 +28,8 @@ public class MailingListServiceImpl implements MailingListService{
     private ClsOrganizationRepo clsOrganizationRepo;
     @Autowired
     private RegMailingListFollowerRepo regMailingListFollowerRepo;
+    @Autowired
+    private OkvedRepo okvedRepo;
     @Override
     public ClsMailingList saveClsMailingList(ClsMailingListDto clsMailingListDto) {
 
@@ -54,11 +55,43 @@ public class MailingListServiceImpl implements MailingListService{
             clsMailingListOkvedRepo.save(clsMailingListOkved);
         }
 
+        if (clsMailingList.getUserVisibility() == false) {
+            addFollowersOnInn(clsMailingListDto, clsMailingList);
+            addFollowersOnOkved(clsMailingListDto, clsMailingList, listOkveds);
+        }
+
+        return clsMailingList;
+    }
+
+    private List<RegMailingListFollower> addFollowersOnInn(ClsMailingListDto clsMailingListDto, ClsMailingList clsMailingList){
         String inns = clsMailingListDto.getFollowerInns();
         String[] innsArray = Arrays.stream(inns.split(";")).map(s -> s.trim()).toArray(String[]::new);
         final List<ClsOrganization> clsOrganizationByInnArray = clsOrganizationRepo.getClsOrganizationByInnArray(innsArray, false, true);
 
-        final List<RegMailingListFollower> followers = clsOrganizationByInnArray.stream()
+        final List<RegMailingListFollower> followers = toFollowers(clsMailingList, clsOrganizationByInnArray);
+        regMailingListFollowerRepo.saveAll(followers);
+
+        return followers;
+    }
+
+    private List<RegMailingListFollower> addFollowersOnOkved(ClsMailingListDto clsMailingListDto, ClsMailingList clsMailingList,
+                                                             List<Okved> listOkveds){
+        final List<Okved> okvedsAndChildren = listOkveds.stream()
+                .flatMap(o -> okvedRepo.getChildrenOkvedsByPath(o.getPath()).stream())
+                .distinct()
+                .collect(Collectors.toList());
+        final UUID[] uuids = okvedsAndChildren.stream().map(o -> o.getId()).collect(Collectors.toList()).toArray(UUID[]::new);
+
+        final List<ClsOrganization> clsOrganizationByUuidArray = clsOrganizationRepo.getClsOrganizationByOkvedArray(uuids, false, true);
+
+        final List<RegMailingListFollower> followers = toFollowers(clsMailingList, clsOrganizationByUuidArray);
+        regMailingListFollowerRepo.saveAll(followers);
+
+        return followers;
+    }
+
+    private List<RegMailingListFollower> toFollowers(ClsMailingList clsMailingList, List<ClsOrganization> clsOrganizations){
+        return  clsOrganizations.stream()
                 .map(org -> RegMailingListFollower.builder()
                         .mailingList(clsMailingList)
                         .organization(org)
@@ -66,10 +99,6 @@ public class MailingListServiceImpl implements MailingListService{
                         .activationDate(new Timestamp(System.currentTimeMillis()))
                         .build())
                 .collect(Collectors.toList());
-
-        regMailingListFollowerRepo.saveAll(followers);
-
-        return clsMailingList;
     }
 
     @Override
