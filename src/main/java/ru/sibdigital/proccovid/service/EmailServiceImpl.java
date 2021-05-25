@@ -94,6 +94,9 @@ public class EmailServiceImpl implements EmailService {
 
                 Short exception = MailingStatuses.EMAIL_SENT.value();
                 try {
+                    if (organization.getEmail() == null){
+                        throw new AddressException(organization.getId() + " email is null");
+                    }
                     InternetAddress address = new InternetAddress(organization.getEmail()); // validate
 
                     params.put("organizationName", organization.getName() == null ? "" : organization.getName());
@@ -136,6 +139,9 @@ public class EmailServiceImpl implements EmailService {
 
                 Short exception = MailingStatuses.EMAIL_SENT.value();
                 try {
+                    if (email == null){
+                        throw new AddressException( " email is null");
+                    }
                     InternetAddress address = new InternetAddress(email); // validate
 
 //                    params.put("organizationName", organization.getName() == null ? "" : organization.getName());
@@ -253,6 +259,9 @@ public class EmailServiceImpl implements EmailService {
                 Short status = MailingStatuses.EMAIL_SENT.value();
 
                 try {
+                    if (organization.getEmail() == null){
+                        throw new AddressException(organization.getId() + " email is null");
+                    }
                     InternetAddress address = new InternetAddress(organization.getEmail()); // validate
 
                     params.put("organizationName", organization.getName() == null ? "" : organization.getName());
@@ -294,6 +303,9 @@ public class EmailServiceImpl implements EmailService {
                 Short status = MailingStatuses.EMAIL_SENT.value();
 
                 try {
+                    if (organization.getEmail() == null){
+                        throw new AddressException(organization.getId() + " email is null");
+                    }
                     InternetAddress address = new InternetAddress(organization.getEmail()); // validate
 
                     params.put("organizationName", organization.getName() == null ? "" : organization.getName());
