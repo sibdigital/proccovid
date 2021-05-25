@@ -82,7 +82,11 @@ public class MailingListServiceImpl implements MailingListService{
                 .collect(Collectors.toList());
         final UUID[] uuids = okvedsAndChildren.stream().map(o -> o.getId()).collect(Collectors.toList()).toArray(UUID[]::new);
 
-        final List<ClsOrganization> clsOrganizationByUuidArray = clsOrganizationRepo.getClsOrganizationByOkvedArray(uuids, false, true);
+        final List<ClsOrganization> clsOrganizationByUuidArray = clsOrganizationRepo
+                .getClsOrganizationByOkvedArray(uuids, false, true)
+                .stream()
+                .distinct()
+                .collect(Collectors.toList());
 
         final List<RegMailingListFollower> followers = toFollowers(clsMailingList, clsOrganizationByUuidArray);
         regMailingListFollowerRepo.saveAll(followers);
@@ -98,6 +102,7 @@ public class MailingListServiceImpl implements MailingListService{
                         .principal(org.getPrincipal())
                         .activationDate(new Timestamp(System.currentTimeMillis()))
                         .build())
+                .distinct()
                 .collect(Collectors.toList());
     }
 
