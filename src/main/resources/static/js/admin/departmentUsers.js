@@ -95,6 +95,16 @@ const departmentUsers = {
                                     $$('newPassword').refresh();
                                 },
                             },
+                            {
+                                view: 'button',
+                                align: 'right',
+                                id: 'upload_department_users',
+                                value: 'Загрузить',
+                                maxWidth: 150,
+                                click: function() {
+                                    window.open('upload_department_users');
+                                }
+                            }
                         ]
                     }
                 ]

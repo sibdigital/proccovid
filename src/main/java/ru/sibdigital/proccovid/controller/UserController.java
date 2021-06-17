@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.PersonViolationDto;
@@ -18,8 +20,11 @@ import ru.sibdigital.proccovid.model.RegViolation;
 import ru.sibdigital.proccovid.repository.classifier.ClsUserRepo;
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegViolationSearchCriteria;
+import ru.sibdigital.proccovid.service.UserService;
 import ru.sibdigital.proccovid.service.ViolationService;
+import ru.sibdigital.proccovid.utils.DataFormatUtils;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +40,9 @@ public class UserController {
 
     @Autowired
     private ViolationService violationService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -221,4 +229,34 @@ public class UserController {
                         "\"status\": \"server\"}");
         return responseEntity;
     }
+
+    @GetMapping("/upload_department_users")
+    public String upload(Model model) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser.getClsUser().getAdmin())
+        {
+            return "upload_department_users";
+        }
+        return "403";
+    }
+
+    @PostMapping("/load_users_csv")
+    public @ResponseBody ResponseEntity<Object> processFile(@RequestParam(name = "file") MultipartFile multipartFile) {
+        String message = "Пользователи созданы";
+        Boolean success = false;
+        int usersCount = 0;
+        try {
+            final List<ClsUser> users = userService.loadFromCSV(multipartFile.getInputStream());
+            usersCount = users.size();
+            success = true;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            message =  "Ошибка чтения входного файла";
+        }
+
+        return DataFormatUtils.buildResponse(ResponseEntity.ok(),
+                Map.of("message", message,"success", success, "usersCount", usersCount));
+    }
+
 }
+
