@@ -302,7 +302,11 @@ public class AdminController {
         return "Пользователь сохранен";
     }
 
-    @PostMapping("/save_user_password")
+    //@PostMapping("/save_user_password")
+    @RequestMapping(
+            value = {"/save_user_password","/outer/save_user_password"},
+            method = RequestMethod.POST
+    )
     public @ResponseBody String saveUserPassword(@RequestParam(value = "password", required = true) String newPassword) {
         try {
             CurrentUser currentUser =  (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
