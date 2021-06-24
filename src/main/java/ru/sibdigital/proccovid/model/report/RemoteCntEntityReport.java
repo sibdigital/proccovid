@@ -41,13 +41,14 @@ public class RemoteCntEntityReport {
         this.stringTimeEdit = df.format(timeEdit);
 
         if (allCount != 0) {
-            Float remotePercent = remoteCnt*Float.valueOf("100")/allCount;
+            Float remotePercent = remoteCnt*Float.parseFloat("100")/allCount;
 
             DecimalFormat decimalFormat = new DecimalFormat();
             decimalFormat.setMaximumFractionDigits(2);
+            decimalFormat.setMinimumFractionDigits(2);
             this.remotePercentString = decimalFormat.format(remotePercent);
         } else {
-            this.remotePercentString = "0.00";
+            this.remotePercentString = "0,00";
         }
     }
 
