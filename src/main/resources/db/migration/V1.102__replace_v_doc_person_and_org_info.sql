@@ -1,3 +1,5 @@
+drop view v_doc_person_and_org_info
+;
 create or replace view v_doc_person_and_org_info
             (id, id_request, lastname, firstname, patronymic, status_import, time_import, inn, short_name,
              begin_registration, end_registration)
