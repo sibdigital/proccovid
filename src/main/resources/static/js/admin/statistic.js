@@ -73,6 +73,18 @@ const statistic = {
                                 ]
                             }, $$("content"));
                         },
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='' onclick='return false'>Отчет по количеству сотрудников в организации\n</a>",
+                        click: () => {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    webix.copy(cntRemoteWithOkvedsReport)
+                                ]
+                            }, $$("content"));
+                        },
                     }
                 ]
             }

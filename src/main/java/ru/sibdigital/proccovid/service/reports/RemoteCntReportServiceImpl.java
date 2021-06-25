@@ -8,6 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.report.RemoteCntEntityReport;
+import ru.sibdigital.proccovid.model.report.RemoteCntEntityWithOkvedsReport;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -69,11 +70,52 @@ public class RemoteCntReportServiceImpl implements RemoteCntReportService{
         return list;
     }
 
-
     private Query getQueryForRemoteCntReport(Date reportDate) throws IOException {
         String  queryString = getQueryString("classpath:reports/remote_cnt/remote_cnt.sql");
         Query query = entityManager.createNativeQuery(queryString, RemoteCntEntityReport.class);
         query.setParameter("report_date", reportDate);
+
+        return query;
+    }
+
+
+    @Override
+    public byte[] exportRemoteCntWithOkvedFilterReport(String reportFormat, List<String> okvedPaths) {
+        try {
+            List<RemoteCntEntityWithOkvedsReport> remoteCntEntities = getRemoteCntWithOkvedsForReport(okvedPaths);
+
+            Map<String, Object> parameters = new HashMap<>();
+            JRBeanCollectionDataSource remoteCntJRBean = new JRBeanCollectionDataSource(remoteCntEntities);
+            parameters.put("RemoteCntDataSource", remoteCntJRBean);
+
+            parameters.put("net.sf.jasperreports.print.keep.full.text", true);
+            parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
+            parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
+
+            parameters.put("reportTitle", "Отчет о количестве сотрудников в организации");
+            DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+            parameters.put("okvedPaths", okvedPaths.toString());
+
+            String jrxmlPath = "classpath:reports/remote_cnt/remote_cnt_with_okveds.jrxml";
+
+            return jasperReportService.exportJasperReport(jrxmlPath, remoteCntEntities, parameters, reportFormat);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    private List<RemoteCntEntityWithOkvedsReport> getRemoteCntWithOkvedsForReport(List<String> okvedPaths) throws IOException {
+        Query query = getQueryForRemoteCntWithOkvedReport(okvedPaths);
+        List<RemoteCntEntityWithOkvedsReport> list = query.getResultList();
+
+        return list;
+    }
+
+    private Query getQueryForRemoteCntWithOkvedReport(List<String> okvedPaths) throws IOException {
+        String  queryString = getQueryString("classpath:reports/remote_cnt/remote_cnt_with_okveds.sql");
+        Query query = entityManager.createNativeQuery(queryString, RemoteCntEntityWithOkvedsReport.class);
+        query.setParameter("okved_paths", okvedPaths);
 
         return query;
     }

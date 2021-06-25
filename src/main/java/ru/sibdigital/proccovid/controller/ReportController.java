@@ -64,4 +64,14 @@ public class ReportController {
         out.close();
         return null;
     }
+
+    @RequestMapping(
+            value = {"/generate_cnt_remote_with_okveds_report","/outer/generate_cnt_remote_with_okveds_report"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody String generateCntRemoteWithOkvedsReport(@RequestParam(value = "okvedPaths") List<String> okvedPaths) throws ParseException {
+        byte[] bytes = remoteCntReportService.exportRemoteCntWithOkvedFilterReport("html", okvedPaths);
+        String template = new String(bytes);
+        return template;
+    }
 }
