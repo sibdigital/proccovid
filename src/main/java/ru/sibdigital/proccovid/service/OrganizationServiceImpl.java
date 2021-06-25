@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import ru.sibdigital.proccovid.dto.ClsOrganizationDto;
 import ru.sibdigital.proccovid.model.ClsTypeRequestSettings;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
@@ -183,5 +184,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
         }
+    }
+
+    @Override
+    public void saveOrganization(ClsOrganizationDto clsOrganizationDto) {
+        ClsOrganization organization = clsOrganizationRepo.findById(clsOrganizationDto.getId()).orElse(null);
+        organization.setIdTypeOrganization(clsOrganizationDto.getIdTypeOrganization());
+        organization.setEmail(clsOrganizationDto.getEmail());
+        organization.setActivated(clsOrganizationDto.getActivated());
+        organization.setDeleted(clsOrganizationDto.getDeleted());
+        clsOrganizationRepo.save(organization);
     }
 }

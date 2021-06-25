@@ -683,4 +683,36 @@ public class AdminController {
         list.sort(Comparator.comparing(UserRolesEntity::getName));
         return list;
     }
+
+    @GetMapping("/organization_types")
+    public @ResponseBody List<KeyValue> getOrganizationTypesForRichselect() {
+        List<KeyValue> list = new ArrayList<>();
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.JURIDICAL.getValue()), "Юр. лицо"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.PHYSICAL.getValue()), "Физ. лицо"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.SELF_EMPLOYED.getValue()), "Самозанятый"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.FILIATION.getValue()), "Филиал"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.REPRESENTATION.getValue()), "Представительство"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.DETACHED.getValue()), "Обособленное подразделение"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.IP.getValue()), "ИП"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.KFH.getValue()), "КФХ"));
+
+        return list;
+    }
+
+    @PostMapping("/save_organization")
+    public @ResponseBody ResponseEntity<String> saveOrganization(@RequestBody ClsOrganizationDto clsOrganizationDto) {
+        try {
+            organizationService.saveOrganization(clsOrganizationDto);
+            return ResponseEntity.ok()
+                    .body("{\"cause\": \"Сохранено\"," +
+                            "\"status\": \"server\"," +
+                            "\"sname\": \"" + clsOrganizationDto.getName() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"status\": \"server\"," +
+                            "\"cause\":\"Не удалось сохранить\"}" +
+                            "\"sname\": \"" + clsOrganizationDto.getName() + "\"}");
+        }
+    }
+
 }
