@@ -61,6 +61,18 @@ const statistic = {
                                 ]
                             }, $$("content"));
                         },
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='' onclick='return false'>Отчет о количестве сотрудников на удаленке и в офисе\n</a>",
+                        click: () => {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    webix.copy(remoteCntReport)
+                                ]
+                            }, $$("content"));
+                        },
                     }
                 ]
             }

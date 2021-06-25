@@ -74,7 +74,8 @@ webix.ready(function() {
         // { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
         {id: "Violations", icon: "fas fa-file-alt", value: 'Нарушения организаций', access: isViol || isAdmin},
         {id: "PersonViolations", icon: "fas fa-file-alt", value: 'Нарушения физ. лиц', access: isViol || isAdmin},
-        {id: "InspectionReports", icon: "fas fa-chart-bar", value: 'Отчеты по проверкам', access: isKnd || isAdmin},
+        // {id: "InspectionReports", icon: "fas fa-chart-bar", value: 'Отчеты по проверкам', access: isKnd || isAdmin},
+        {id: "Reports", icon: "fas fa-chart-bar", value: 'Отчеты', access: isUser || isAdmin},
     ].filter(item => item.access === true)
 
     let layout = webix.ui({
@@ -132,6 +133,8 @@ webix.ready(function() {
                                     margin = {"margin-top":"10px !important","width":"100% !important"};
                                 } else if (id == 'InspectionReports') {
                                     view = inspectionReports;
+                                } else if (id == 'Reports') {
+                                    view = UserReports(userRoles);
                                 }
                                 hideBtnBack(),
                                 this.select(id)
