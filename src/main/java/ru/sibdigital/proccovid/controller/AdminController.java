@@ -265,8 +265,8 @@ public class AdminController {
     public @ResponseBody String saveClsUser(@RequestBody ClsUserDto clsUserDto) {
         try {
             ClsUser userByLogin = requestService.findUserByLogin(clsUserDto.getLogin());
-            if (userByLogin != null &&
-                    ((long)clsUserDto.getId()) != ((long)userByLogin.getId())) {
+            if (userByLogin != null && clsUserDto != null && clsUserDto.getId() != null && userByLogin.getId() != null
+                    && ((long)clsUserDto.getId()) != ((long)userByLogin.getId())) {
                 return "Пользователь с таким логином уже существует";
             }
 
