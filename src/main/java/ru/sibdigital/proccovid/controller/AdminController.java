@@ -265,9 +265,12 @@ public class AdminController {
     public @ResponseBody String saveClsUser(@RequestBody ClsUserDto clsUserDto) {
         try {
             ClsUser userByLogin = requestService.findUserByLogin(clsUserDto.getLogin());
-            if (userByLogin != null && clsUserDto != null && clsUserDto.getId() != null && userByLogin.getId() != null
-                    && ((long)clsUserDto.getId()) != ((long)userByLogin.getId())) {
-                return "Пользователь с таким логином уже существует";
+            if (userByLogin != null) {
+                long userLoginId = userByLogin.getId();
+                long userDtoId = clsUserDto.getId() == null ? -1L : clsUserDto.getId();
+                if (userLoginId != userDtoId){
+                    return "Пользователь с логином " + userByLogin.getLogin() + " уже существует";
+                }
             }
 
             String emailText = null;
@@ -706,12 +709,12 @@ public class AdminController {
             return ResponseEntity.ok()
                     .body("{\"cause\": \"Сохранено\"," +
                             "\"status\": \"server\"," +
-                            "\"sname\": \"" + clsOrganizationDto.getName() + "\"}");
+                            "\"sname\": \"" + "\"}"); // ТАН: не экранированы кавычки убрал пока
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"status\": \"server\"," +
                             "\"cause\":\"Не удалось сохранить\"}" +
-                            "\"sname\": \"" + clsOrganizationDto.getName() + "\"}");
+                            "\"sname\": \"" +  "\"}");
         }
     }
 
