@@ -99,6 +99,8 @@ public class MainController {
         model.addAttribute("user_lastname", clsUser.getLastname());
         model.addAttribute("user_firstname", clsUser.getFirstname());
         model.addAttribute("application_name", applicationConstants.getApplicationName());
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
         return "outer/ouser";
     }
 
@@ -115,6 +117,8 @@ public class MainController {
         model.addAttribute("user_lastname", clsUser.getLastname());
         model.addAttribute("user_firstname", clsUser.getFirstname());
         model.addAttribute("application_name", applicationConstants.getApplicationName());
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
 
         return "user";
     }
@@ -128,6 +132,8 @@ public class MainController {
         model.addAttribute("id_violation", idViolation);
         model.addAttribute("id_person_violation", idPersonViolation);
         model.addAttribute("application_name", applicationConstants.getApplicationName());
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
         return "violation";
     }
 
