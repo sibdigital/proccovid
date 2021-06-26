@@ -265,8 +265,12 @@ public class AdminController {
     public @ResponseBody String saveClsUser(@RequestBody ClsUserDto clsUserDto) {
         try {
             ClsUser userByLogin = requestService.findUserByLogin(clsUserDto.getLogin());
-            if (userByLogin != null && clsUserDto.getId() != userByLogin.getId()) {
-                return "Пользователь с таким логином уже существует";
+            if (userByLogin != null) {
+                long userLoginId = userByLogin.getId();
+                long userDtoId = clsUserDto.getId() == null ? -1L : clsUserDto.getId();
+                if (userLoginId != userDtoId){
+                    return "Пользователь с логином " + userByLogin.getLogin() + " уже существует";
+                }
             }
 
             String emailText = null;
@@ -302,7 +306,11 @@ public class AdminController {
         return "Пользователь сохранен";
     }
 
-    @PostMapping("/save_user_password")
+    //@PostMapping("/save_user_password")
+    @RequestMapping(
+            value = {"/save_user_password","/outer/save_user_password"},
+            method = RequestMethod.POST
+    )
     public @ResponseBody String saveUserPassword(@RequestParam(value = "password", required = true) String newPassword) {
         try {
             CurrentUser currentUser =  (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -678,4 +686,36 @@ public class AdminController {
         list.sort(Comparator.comparing(UserRolesEntity::getName));
         return list;
     }
+
+    @GetMapping("/organization_types")
+    public @ResponseBody List<KeyValue> getOrganizationTypesForRichselect() {
+        List<KeyValue> list = new ArrayList<>();
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.JURIDICAL.getValue()), "Юр. лицо"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.PHYSICAL.getValue()), "Физ. лицо"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.SELF_EMPLOYED.getValue()), "Самозанятый"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.FILIATION.getValue()), "Филиал"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.REPRESENTATION.getValue()), "Представительство"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.DETACHED.getValue()), "Обособленное подразделение"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.IP.getValue()), "ИП"));
+        list.add(new KeyValue("OrganizationTypes", Long.valueOf(""+OrganizationTypes.KFH.getValue()), "КФХ"));
+
+        return list;
+    }
+
+    @PostMapping("/save_organization")
+    public @ResponseBody ResponseEntity<String> saveOrganization(@RequestBody ClsOrganizationDto clsOrganizationDto) {
+        try {
+            organizationService.saveOrganization(clsOrganizationDto);
+            return ResponseEntity.ok()
+                    .body("{\"cause\": \"Сохранено\"," +
+                            "\"status\": \"server\"," +
+                            "\"sname\": \"" + "\"}"); // ТАН: не экранированы кавычки убрал пока
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"status\": \"server\"," +
+                            "\"cause\":\"Не удалось сохранить\"}" +
+                            "\"sname\": \"" +  "\"}");
+        }
+    }
+
 }

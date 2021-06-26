@@ -129,6 +129,9 @@ const organizations = {
                                         }
                                     }
                                     $$("organization_form").parse(data)
+                                    if (data.activated) {
+                                        $$('activated').setValue(1);
+                                    }
                                 }, 100);
                             },
                             'data->onStoreUpdated': function () {
@@ -162,140 +165,203 @@ let organizationForm = (data) => {
                     type: 'space',
                     rows: [
                         {
-                            rows: [
-                                {
-                                    view: "form",
-                                    id: "organization_form",
-                                    elements: [
-                                        {
-                                            view: 'text',
-                                            name: 'name',
-                                            id: 'organizationName',
-                                            label: 'Полное наименование организации/фамилия, имя, отчество индивидуального предпринимателя',
-                                            labelPosition: 'top',
-                                            readonly: true,
-                                        },
-                                        {
-                                            view: 'text',
-                                            name: 'shortName',
-                                            id: 'shortOrganizationName',
-                                            label: 'Краткое наименование организации',
-                                            labelPosition: 'top',
-                                            readonly: true,
-                                        },
-                                        {
-                                            id: "innplace",
-                                            rows: []
-                                        },
-                                        {
-                                            responsive: 'innplace',
-                                            cols: [
+                            view: "scrollview",
+                            body: {
+                                view: 'form',
+                                id: "organization_form",
+                                rows: [
+                                    {
+                                        view: 'text',
+                                        name: 'name',
+                                        id: 'organizationName',
+                                        label: 'Полное наименование организации/фамилия, имя, отчество индивидуального предпринимателя',
+                                        labelPosition: 'top',
+                                        readonly: true,
+                                    },
+                                    {
+                                        view: 'text',
+                                        name: 'shortName',
+                                        id: 'shortOrganizationName',
+                                        label: 'Краткое наименование организации',
+                                        labelPosition: 'top',
+                                        readonly: true,
+                                    },
+                                    {
+                                        id: "innplace",
+                                        rows: []
+                                    },
+                                    {
+                                        responsive: 'innplace',
+                                        cols: [
+                                            {
+                                                view: 'text',
+                                                name: 'inn',
+                                                id: "inn",
+                                                label: 'ИНН',
+                                                minWidth: 200,
+                                                labelPosition: 'top',
+                                                readonly: true,
+                                            },
+                                            {
+                                                view: 'text',
+                                                name: 'ogrn',
+                                                id: 'ogrn',
+                                                label: 'ОГРН',
+                                                minWidth: 200,
+                                                labelPosition: 'top',
+                                                readonly: true,
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        rows:
+                                            [
                                                 {
-                                                    view: 'text',
-                                                    name: 'inn',
-                                                    id: "inn",
-                                                    label: 'ИНН',
-                                                    minWidth: 200,
-                                                    labelPosition: 'top',
-                                                    readonly: true,
+                                                    height: 30,
+                                                    view: 'label',
+                                                    label: 'Основной вид осуществляемой деятельности (отрасль)',
                                                 },
                                                 {
-                                                    view: 'text',
-                                                    name: 'ogrn',
-                                                    id: 'ogrn',
-                                                    label: 'ОГРН',
-                                                    minWidth: 200,
-                                                    labelPosition: 'top',
-                                                    readonly: true,
+                                                    view: 'list',
+                                                    id: 'regOrganizationMainOkveds',
+                                                    layout: 'x',
+                                                    css: {'white-space': 'normal !important;'},
+                                                    height: 50,
+                                                    template: '#kindCode# - #kindName#',
+                                                    //url: 'reg_organization_okved', //<span class="mdi mdi-close"></span>
+                                                    type: {
+                                                        css: "chip",
+                                                        height: 'auto'
+                                                    },
                                                 },
                                             ]
-                                        },
-
-                                        {
-                                            rows:
-                                                [
-                                                    {
-                                                        height: 30,
-                                                        view: 'label',
-                                                        label: 'Основной вид осуществляемой деятельности (отрасль)',
+                                    },
+                                    {
+                                        rows:
+                                            [
+                                                {
+                                                    height: 30,
+                                                    view: 'label',
+                                                    label: 'Дополнительные виды осуществляемой деятельности',
+                                                },
+                                                {
+                                                    view: "list",
+                                                    layout: 'x',
+                                                    id: 'regOrganizationOtherOkveds',
+                                                    css: {'white-space': 'normal !important;'},
+                                                    height: 150,
+                                                    template: '#kindCode# - #kindName#',
+                                                    //url: "reg_organization_okved_add",
+                                                    type: {
+                                                        css: "chip",
+                                                        height: 'auto'
                                                     },
-                                                    {
-                                                        view: 'list',
-                                                        id: 'regOrganizationMainOkveds',
-                                                        layout: 'x',
-                                                        css: {'white-space': 'normal !important;'},
-                                                        height: 50,
-                                                        template: '#kindCode# - #kindName#',
-                                                        //url: 'reg_organization_okved', //<span class="mdi mdi-close"></span>
-                                                        type: {
-                                                            css: "chip",
-                                                            height: 'auto'
-                                                        },
-                                                    },
-                                                ]
-                                        },
-                                        {
-                                            rows:
-                                                [
-                                                    {
-                                                        height: 30,
-                                                        view: 'label',
-                                                        label: 'Дополнительные виды осуществляемой деятельности',
-                                                    },
-                                                    {
-                                                        view: "list",
-                                                        layout: 'x',
-                                                        id: 'regOrganizationOtherOkveds',
-                                                        css: {'white-space': 'normal !important;'},
-                                                        height: 150,
-                                                        template: '#kindCode# - #kindName#',
-                                                        //url: "reg_organization_okved_add",
-                                                        type: {
-                                                            css: "chip",
-                                                            height: 'auto'
-                                                        },
+                                                }
+                                            ]
+                                    },
+                                    {
+                                        view: 'textarea',
+                                        name: 'addressJur',
+                                        label: 'Юридический адрес',
+                                        labelPosition: 'top',
+                                        height: 80,
+                                        readonly: true,
+                                        required: true
+                                    },
+                                    {
+                                        cols: [
+                                            {
+                                                view: 'richselect',
+                                                id: 'idTypeOrganization',
+                                                name: 'idTypeOrganization',
+                                                width: 450,
+                                                label: 'Тип организации',
+                                                labelPosition: 'top',
+                                                css: 'smallText',
+                                                placeholder: 'Выберите тип организации',
+                                                options: 'organization_types',
+                                            },
+                                            {},
+                                        ]
+                                    },
+                                    {
+                                        id: "emailPlace",
+                                        rows: []
+                                    },
+                                    {
+                                        responsive: "emailPlace",
+                                        cols: [
+                                            {
+                                                view: 'text',
+                                                name: 'email',
+                                                minWidth: 200,
+                                                label: 'Адрес электронной почты',
+                                                labelPosition: 'top',
+                                                required: true,
+                                            },
+                                            {
+                                                view: 'text',
+                                                name: 'phone',
+                                                minWidth: 200,
+                                                label: 'Телефон',
+                                                labelPosition: 'top',
+                                                required: true,
+                                                readonly: true,
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        cols: [
+                                            { view: 'checkbox', label: 'Активирован', labelPosition: 'top', name: 'activated', id: 'activated' },
+                                            { view: 'checkbox', label: 'Удалить организацию', labelPosition: 'top', name: 'deleted', id: 'deleted' },
+                                            { view: 'checkbox', label: 'Получено согласие на обработку персональных данных', labelPosition: 'top', name: 'consentDataProcessing', readonly: true},
+                                            {}
+                                        ]
+                                    },
+                                    {
+                                        cols: [
+                                            {},
+                                            {
+                                                view: 'button',
+                                                align: 'right',
+                                                maxWidth: 200,
+                                                css: 'webix_primary',
+                                                value: 'Сохранить',
+                                                click: function () {
+                                                    if ($$('deleted').getValue() == true) {
+                                                        webix.confirm({
+                                                            title: 'Подтверждение',
+                                                            type: 'confirm-warning',
+                                                            ok: 'Да', cancel: 'Нет',
+                                                            text: 'Вы уверены что хотите удалить организацию?'
+                                                        }).then(() => {
+                                                            saveOrganization();
+                                                        })
+                                                    } else {
+                                                        saveOrganization();
                                                     }
-                                                ]
-                                        },
-                                        {
-                                            view: 'textarea',
-                                            name: 'addressJur',
-                                            label: 'Юридический адрес',
-                                            labelPosition: 'top',
-                                            height: 80,
-                                            readonly: true,
-                                            required: true
-                                        },
-                                        {
-                                            id: "emailPlace",
-                                            rows: []
-                                        },
-                                        {
-                                            responsive: "emailPlace",
-                                            cols: [
-                                                {
-                                                    view: 'text',
-                                                    name: 'email',
-                                                    minWidth: 200,
-                                                    label: 'Адрес электронной почты',
-                                                    labelPosition: 'top',
-                                                    required: true
-                                                },
-                                                {
-                                                    view: 'text',
-                                                    name: 'phone',
-                                                    minWidth: 200,
-                                                    label: 'Телефон',
-                                                    labelPosition: 'top',
-                                                    required: true
-                                                },
-                                            ]
-                                        },
-                                    ]
-                                },
-                            ]
+                                                }
+                                            },
+                                            {
+                                                view: 'button',
+                                                align: 'right',
+                                                maxWidth: 200,
+                                                css: 'webix_secondary',
+                                                value: 'Отмена',
+                                                click: function () {
+                                                    webix.ui({
+                                                        id: 'content',
+                                                        rows: [
+                                                            webix.copy(organizations)
+                                                        ]
+                                                    }, $$('content'));
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
                         },
-                        {gravity: 0.1}
                     ]
                 }
             },
@@ -442,4 +508,26 @@ function reload() {
     }
 
     $$('organizations_table').load(url + params);
+}
+
+
+function saveOrganization() {
+    let params = $$('organization_form').getValues();
+    webix.ajax().headers({
+        'Content-Type': 'application/json'
+    }).post('save_organization',
+        params).then(function (data) {
+        var response = JSON.parse(data.text());
+        if (response.cause == "Сохранено") {
+            webix.message({text: response.cause, type: 'success'});
+            webix.ui({
+                id: 'content',
+                rows: [
+                    webix.copy(organizations)
+                ]
+            }, $$('content'));
+        } else {
+            webix.message({text: response.cause, type: 'error'});
+        }
+    })
 }
