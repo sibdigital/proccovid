@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -10,6 +10,7 @@ import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.Statuses;
 import ru.sibdigital.proccovid.model.Types;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
+import ru.sibdigital.proccovid.service.OkvedService;
 import ru.sibdigital.proccovid.utils.ExcelParser;
 
 import java.util.ArrayList;

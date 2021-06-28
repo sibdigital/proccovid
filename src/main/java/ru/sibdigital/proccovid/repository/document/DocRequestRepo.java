@@ -11,6 +11,7 @@ import ru.sibdigital.proccovid.model.ClsDepartment;
 import ru.sibdigital.proccovid.model.ClsOrganization;
 import ru.sibdigital.proccovid.model.DocRequest;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -60,17 +61,17 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
     Optional<List<DocRequest>> getLastRequestByOgrn(@Param("ogrn")String ogrn);
 
     @Query(nativeQuery = true, value = "select dr.* from doc_request dr" +
-            "                           inner join ( select co.id as id_organization" +
-            "                              from cls_organization co" +
-            "                               inner join ( select co.inn as inn" +
-            "                                   from cls_organization co" +
-            "                                   inner join doc_request dr" +
-            "                                   on co.id = dr.id_organization" +
-            "                                   where dr.id = :id_request" +
-            "                               ) as t_inn" +
-            "                               on co.inn = t_inn.inn) as  t_co" +
-            "                   on dr.id_organization = t_co.id_organization" +
-            "                   order by dr.time_create desc;")
+            "          inner join ( select co.id as id_organization" +
+            "             from cls_organization co" +
+            "              inner join ( select co.inn as inn" +
+            "                  from cls_organization co" +
+            "                  inner join doc_request dr" +
+            "                  on co.id = dr.id_organization" +
+            "                  where dr.id = :id_request" +
+            "              ) as t_inn" +
+            "              on co.inn = t_inn.inn) as  t_co" +
+            "  on dr.id_organization = t_co.id_organization" +
+            "  order by dr.time_create desc;")
     Optional<List<DocRequest>> getLastRequestByInnOfRequest(@Param("id_request")Long id_request);
 
     @Query(nativeQuery = true, value = "select * " +
@@ -104,63 +105,84 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
     Optional<List<DocRequest>> getRequestsByInnAndStatusReview(String inn, Integer status);
 
 
+    @Query(nativeQuery = true, value = "SELECT " +
+            " count(distinct t.id_organization) as count_organization " +
+            "FROM reg_person_count as t " +
+            "where time_edit between :localDateBegin and :localDateEnd ")
+    public List<Map<String, Object>> getCountOrganizationOfRegPersonCount(LocalDateTime localDateBegin, LocalDateTime localDateEnd);
 
+    @Query(nativeQuery = true, value = "SELECT " +
+            " count(id) as count_organization " +
+            "FROM cls_organization " +
+            "where consent_data_processing = :consentDataProcessing  ")
+    public List<Map<String, Object>> getCountOrganizationOfConsentDataProcessing(Boolean consentDataProcessing);
+
+    @Query(nativeQuery = true, value = 
+            "select d.name, d.id, coalesce(neobr, 0) as awaiting, coalesce(utv, 0) as accepted, coalesce(otkl, 0) as declined " +
+            "from cls_department as d " +
+            " left join ( select id_department, max(neobr) as neobr, max(utv) as utv, max(otkl) as otkl " +
+            "   from (" +
+            "         select id_department, " +
+            "         sum(neobr) as neobr, " +
+            "         sum(utv)   as utv, " +
+            "         sum(otkl)  as otkl " +
+            "         from ( " +
+            "               select id_department, 0 as neobr, 1 as utv, 0 as otkl " +
+            "               from doc_request " +
+            "               where status_review = 1 and time_create between :localDateBegin and :localDateEnd " +
+            "               union all " +
+            "               select id_department, 0 as neobr, 0 as utv, 1 as otkl " +
+            "               from doc_request " +
+            "               where status_review = 2 and time_create between :localDateBegin and :localDateEnd  " +
+            "               union all " +
+            "               select id_department, 1 as neobr, 0 as utv, 0 as otkl " +
+            "               from doc_request " +
+            "               where status_review <> 2 " +
+            "               and status_review <> 1 " +
+            "               and time_create between :localDateBegin and :localDateEnd " +
+            "          ) as s" +
+            "         group by id_department" +
+            "   ) as m group by id_department" +
+            ") as ss on d.id = ss.id_department " +
+            "order by awaiting DESC, accepted DESC, declined DESC")
+    public List<Map<String, Object>> getRequestStatisticForEeachDepartment(LocalDateTime localDateBegin, LocalDateTime localDateEnd);
 
     @Query(nativeQuery = true, value = "select d.name, d.id, coalesce(neobr, 0) as awaiting, coalesce(utv, 0) as accepted, coalesce(otkl, 0) as declined from cls_department as d" +
-            "                  left join ( select id_department, max(neobr) as neobr, max(utv) as utv, max(otkl) as otkl" +
-            "                              from (" +
-            "                                       select id_department," +
-            "                                              sum(neobr) as neobr," +
-            "                                              sum(utv)   as utv," +
-            "                                              sum(otkl)  as otkl" +
-            "                                       from (" +
-            "                                                select id_department, 0 as neobr, 1 as utv, 0 as otkl" +
-            "                                                from doc_request" +
-            "                                                where status_review = 1" +
-            "                                                union all" +
-            "                                                select id_department, 0 as neobr, 0 as utv, 1 as otkl" +
-            "                                                from doc_request" +
-            "                                                where status_review = 2" +
-            "                                                union all" +
-            "                                                select id_department, 1 as neobr, 0 as utv, 0 as otkl" +
-            "                                                from doc_request" +
-            "                                                where status_review <> 2" +
-            "                                                  and status_review <> 1" +
-            "                                            ) as s" +
-            "                                       group by id_department" +
-            "                                   ) as m group by id_department" +
-            ") as ss on d.id = ss.id_department order by d.id")
-    public List<Map<String, Object>> getRequestStatisticForEeachDepartment();
-
-    @Query(nativeQuery = true, value = "select d.name, d.id, coalesce(neobr, 0) as awaiting, coalesce(utv, 0) as accepted, coalesce(otkl, 0) as declined from cls_department as d" +
-            "                  left join ( select id_department, max(neobr) as neobr, max(utv) as utv, max(otkl) as otkl" +
-            "                              from (" +
-            "                                       select id_department," +
-            "                                              sum(neobr) as neobr," +
-            "                                              sum(utv)   as utv," +
-            "                                              sum(otkl)  as otkl" +
-            "                                       from (" +
-            "                                                select id_department, 0 as neobr, 1 as utv, 0 as otkl" +
-            "                                                from doc_request" +
-            "                                                where status_review = 1 and id_type_request = :id_type_request " +
-            "                                                union all" +
-            "                                                select id_department, 0 as neobr, 0 as utv, 1 as otkl" +
-            "                                                from doc_request" +
-            "                                                where status_review = 2 and id_type_request = :id_type_request " +
-            "                                                union all" +
-            "                                                select id_department, 1 as neobr, 0 as utv, 0 as otkl" +
-            "                                                from doc_request" +
-            "                                                where status_review <> 2" +
-            "                                                  and status_review <> 1 and id_type_request = :id_type_request" +
-            "                                            ) as s" +
-            "                                       group by id_department" +
-            "                                   ) as m group by id_department" +
+            " left join ( select id_department, max(neobr) as neobr, max(utv) as utv, max(otkl) as otkl" +
+            "             from (" +
+            "                      select id_department," +
+            "                             sum(neobr) as neobr," +
+            "                             sum(utv)   as utv," +
+            "                             sum(otkl)  as otkl" +
+            "                      from (" +
+            "                               select id_department, 0 as neobr, 1 as utv, 0 as otkl" +
+            "                               from doc_request" +
+            "                               where status_review = 1 and id_type_request = :id_type_request " +
+            "                               union all" +
+            "                               select id_department, 0 as neobr, 0 as utv, 1 as otkl" +
+            "                               from doc_request" +
+            "                               where status_review = 2 and id_type_request = :id_type_request " +
+            "                               union all" +
+            "                               select id_department, 1 as neobr, 0 as utv, 0 as otkl" +
+            "                               from doc_request" +
+            "                               where status_review <> 2" +
+            "                                 and status_review <> 1 and id_type_request = :id_type_request" +
+            "                           ) as s" +
+            "                      group by id_department" +
+            "                  ) as m group by id_department" +
             ") as ss on d.id = ss.id_department order by d.id")
     public List<Map<String, Object>> getRequestStatisticForEeachDepartment(@Param("id_type_request") int id_type_request);
 
 
-    @Query(nativeQuery = true, value = "SELECT date_trunc('day',doc_request.time_create) as date, COUNT(*) AS total FROM doc_request GROUP BY date_trunc('day',doc_request.time_create) ORDER BY date_trunc('day',doc_request.time_create) DESC;")
-    public List<Map<String, Object>> getStatisticForEachDay();
+    @Query(nativeQuery = true, value = "SELECT " +
+            "date_trunc('day',doc_request.time_create) as date, " +
+            "COUNT(*) AS total " +
+            "FROM doc_request " +
+            "where time_create between :localDateBegin and :localDateEnd " +
+            "GROUP BY " +
+            "date_trunc('day',doc_request.time_create) " +
+            "ORDER BY date_trunc('day',doc_request.time_create) DESC;")
+    public List<Map<String, Object>> getStatisticForEachDay(LocalDateTime localDateBegin, LocalDateTime localDateEnd);
 
     @Query(nativeQuery = true, value = "SELECT date_trunc('day',doc_request.time_create) as date, COUNT(*) AS total " +
             " FROM doc_request" +
@@ -173,14 +195,14 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "    select co.inn,  max(dr.time_create) as time_create\n" +
             "    from doc_request as dr\n" +
             "             inner join cls_organization as co\n" +
-            "                        on dr.id_organization = co.id\n" +
+            "       on dr.id_organization = co.id\n" +
             "    group by co.inn\n" +
             "),\n" +
             "     drinn as(\n" +
             "         select co.inn,  dr.*\n" +
             "         from doc_request as dr\n" +
-            "                  inner join cls_organization as co\n" +
-            "                             on dr.id_organization = co.id\n" +
+            " inner join cls_organization as co\n" +
+            "            on dr.id_organization = co.id\n" +
             "     ),\n" +
             "sr as (\n" +
             "    select sdr.inn,\n" +
@@ -188,7 +210,7 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "       count(*) filter ( where dr.is_actualization ) as count_actual\n" +
             "    from slice_doc_request as sdr\n" +
             "         inner join drinn as dr\n" +
-            "                             on (sdr.inn, sdr.time_create) = (dr.inn, dr.time_create)\n" +
+            "            on (sdr.inn, sdr.time_create) = (dr.inn, dr.time_create)\n" +
             "    group by sdr.inn\n" +
             ")\n" +
             "select sum(sr.count_not_actual) as count_not_actual, sum(sr.count_actual) as count_actual\n" +
@@ -199,14 +221,14 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "    select co.inn,  max(dr.time_create) as time_create\n" +
             "    from doc_request as dr\n" +
             "             inner join cls_organization as co\n" +
-            "                        on dr.id_organization = co.id\n" +
+            "       on dr.id_organization = co.id\n" +
             "    group by co.inn\n" +
             "),\n" +
             "     drinn as(\n" +
             "         select co.inn,  dr.*\n" +
             "         from doc_request as dr\n" +
-            "                  inner join cls_organization as co\n" +
-            "                             on dr.id_organization = co.id\n" +
+            " inner join cls_organization as co\n" +
+            "            on dr.id_organization = co.id\n" +
             "     )\n" +
             "select cd.name,\n" +
             "       count(*) filter ( where not dr.is_actualization ) as count_not_actual,\n" +
@@ -215,9 +237,9 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "       sum(dr.person_remote_cnt) filter ( where dr.is_actualization )   as count_worker_remote\n" +
             "from slice_doc_request as sdr\n" +
             "         inner join drinn as dr\n" +
-            "                             on (sdr.inn, sdr.time_create) = (dr.inn, dr.time_create)\n" +
+            "            on (sdr.inn, sdr.time_create) = (dr.inn, dr.time_create)\n" +
             "         inner join cls_department as cd\n" +
-            "                    on (dr.id_department) = (cd.id)\n" +
+            "   on (dr.id_department) = (cd.id)\n" +
             "group by cd.name\n" +
             "\n")
     public List<Map<String, Object>> getActualRequestStatisticForEeachDepartment();
@@ -226,23 +248,23 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "    select co.inn,  max(dr.time_create) as time_create\n" +
             "    from doc_request as dr\n" +
             "             inner join cls_organization as co\n" +
-            "                        on dr.id_organization = co.id\n" +
+            "       on dr.id_organization = co.id\n" +
             "    where dr.is_actualization=true\n" +
             "    group by co.inn\n" +
             "),\n" +
             "     drinn as(\n" +
             "         select co.inn,  dr.*\n" +
             "         from doc_request as dr\n" +
-            "                  inner join cls_organization as co\n" +
-            "                             on dr.id_organization = co.id\n" +
+            " inner join cls_organization as co\n" +
+            "            on dr.id_organization = co.id\n" +
             "     ),\n" +
             "    sr as (\n" +
             "         select sdr.inn,\n" +
             "                sum(dr.person_office_cnt) as count_office,\n" +
             "                sum(dr.person_remote_cnt) as count_remote\n" +
             "         from slice_doc_request as sdr\n" +
-            "                  inner join drinn as dr\n" +
-            "                             on (sdr.inn, sdr.time_create) = (dr.inn, dr.time_create)\n" +
+            " inner join drinn as dr\n" +
+            "            on (sdr.inn, sdr.time_create) = (dr.inn, dr.time_create)\n" +
             "         group by sdr.inn\n" +
             "     )" +
             "select sum(sr.count_office) as count_office, sum(sr.count_remote) as count_remote\n" +
@@ -253,15 +275,15 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "    select co.inn,  max(dr.time_create) as time_create\n" +
             "    from doc_request as dr\n" +
             "             inner join cls_organization as co\n" +
-            "                        on dr.id_organization = co.id\n" +
+            "       on dr.id_organization = co.id\n" +
             "    where dr.is_actualization=true\n" +
             "    group by co.inn\n" +
             "),\n" +
             "     drinn as(\n" +
             "         select co.inn,  dr.*\n" +
             "         from doc_request as dr\n" +
-            "                  inner join cls_organization as co\n" +
-            "                             on dr.id_organization = co.id\n" +
+            " inner join cls_organization as co\n" +
+            "            on dr.id_organization = co.id\n" +
             "     ),\n" +
             "sr as (\n" +
             "    select co.inn,\n" +
@@ -269,9 +291,9 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "           sum(dr.person_remote_cnt) as count_remote\n" +
             "    from slice_doc_request as sdr\n" +
             "             inner join drinn as dr\n" +
-            "                             on (sdr.inn, sdr.time_create) = (dr.inn, dr.time_create)\n" +
+            "            on (sdr.inn, sdr.time_create) = (dr.inn, dr.time_create)\n" +
             "             inner join cls_organization as co\n" +
-            "                        on (dr.id_organization = co.id)\n" +
+            "       on (dr.id_organization = co.id)\n" +
             "    group by co.inn\n" +
             ")\n" +
             "select sum(sr.count_office) as count_worker_office, sum(sr.count_remote) as count_worker_remote\n" +
@@ -308,7 +330,7 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "select name, cnt\n" +
             "from cls_mailing_list\n" +
             "         inner join sdr\n" +
-            "                    on (cls_mailing_list.id) = (sdr.id_mailing)",
+            "   on (cls_mailing_list.id) = (sdr.id_mailing)",
             nativeQuery = true)
     public List<Map<String, Object>> getNumberOfMailSentForEachMailing(@PathVariable("status") Integer status,
                                                                                  @RequestParam(value = "dateStart") Date dateStart,
@@ -323,7 +345,7 @@ public interface DocRequestRepo extends JpaRepository<DocRequest, Long>, JpaSpec
             "select name, cnt\n" +
             "from cls_mailing_list\n" +
             "         inner join sdr\n" +
-            "                    on (cls_mailing_list.id) = (sdr.id_mailing);")
+            "   on (cls_mailing_list.id) = (sdr.id_mailing);")
     public List<Map<String, Object>> getNumberOfMailSentForEachMailing(@RequestParam(value = "dateStart") Date dateStart,
                                                                        @RequestParam(value = "dateEnd") Date dateEnd);
 }

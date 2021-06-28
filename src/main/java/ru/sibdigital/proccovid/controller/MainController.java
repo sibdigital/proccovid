@@ -19,7 +19,7 @@ import ru.sibdigital.proccovid.repository.classifier.ClsMigrationRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
 import ru.sibdigital.proccovid.service.EgrulService;
 import ru.sibdigital.proccovid.service.PrescriptionService;
-import ru.sibdigital.proccovid.service.RequestService;
+import ru.sibdigital.proccovid.service.impl.RequestService;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;

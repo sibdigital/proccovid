@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.repository.classifier.ClsUserRepo;
+import ru.sibdigital.proccovid.service.RoleService;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {

@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import ru.sibdigital.proccovid.repository.regisrty.RegNewsFileRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegNewsOkvedRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegNewsOrganizationRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegNewsStatusRepo;
+import ru.sibdigital.proccovid.service.NewsService;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;
@@ -29,7 +30,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class NewsServiceImpl implements NewsService{
+public class NewsServiceImpl implements NewsService {
 
     @Value("${upload.path}/news")
     String uploadingDir;

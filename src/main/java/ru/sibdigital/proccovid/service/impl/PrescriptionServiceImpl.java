@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ import ru.sibdigital.proccovid.repository.document.DocRequestRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegPrescriptionTextFileRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegPrescriptionTextRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegTypeRequestRestrictionTypeRepo;
+import ru.sibdigital.proccovid.service.PrescriptionService;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;

@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -25,6 +25,8 @@ import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCri
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSpecification;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSpecification;
+import ru.sibdigital.proccovid.service.DBActualizeService;
+import ru.sibdigital.proccovid.service.OrganizationService;
 
 import java.io.File;
 import java.nio.file.Paths;

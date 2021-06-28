@@ -7,11 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import ru.sibdigital.proccovid.dto.OkvedDto;
 import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
-import ru.sibdigital.proccovid.service.OkvedServiceImpl;
+import ru.sibdigital.proccovid.service.impl.OkvedServiceImpl;
 
 import java.util.HashMap;
 import java.util.List;

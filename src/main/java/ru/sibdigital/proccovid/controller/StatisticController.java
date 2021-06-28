@@ -2,25 +2,24 @@ package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.RequestTypes;
-import ru.sibdigital.proccovid.service.RequestService;
+import ru.sibdigital.proccovid.service.impl.RequestService;
 import ru.sibdigital.proccovid.service.StatisticService;
 import ru.sibdigital.proccovid.service.reports.InspectionReportService;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.Random;
 
 @Log4j2
 @Controller
@@ -39,10 +38,20 @@ public class StatisticController {
     private InspectionReportService inspectionReportService;
 
     @GetMapping(value = "/statistic")
-    public String getStatisticPage(Model model){
+    public String getStatisticPage(
+            @RequestParam(value = "dateBegin", required = false) @DateTimeFormat(pattern = "dd.MM.yyyy") Date dateBegin,
+            @RequestParam(value = "dateEnd", required = false) @DateTimeFormat(pattern = "dd.MM.yyyy") Date dateEnd,
+            Model model){
 
-        model.addAttribute("totalStatistic", statisticService.getTotalStatistic());
-        model.addAttribute("departmentStatistic", statisticService.getDepartmentRequestStatistic());
+        LocalDateTime localDateBegin =  dateBegin != null ?
+                dateBegin.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().toLocalDate().atStartOfDay()
+                : LocalDateTime.of(1900, 1, 1, 0, 0);
+        LocalDateTime localDateEnd =  dateEnd != null ?
+                dateEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().toLocalDate().atTime(LocalTime.MAX)
+                : LocalDateTime.of(2199, 12, 31, 23, 59);
+
+        model.addAttribute("totalStatistic", statisticService.getTotalStatistic(localDateBegin, localDateEnd));
+        model.addAttribute("departmentStatistic", statisticService.getDepartmentRequestStatistic(localDateBegin, localDateEnd));
         model.addAttribute("application_name", applicationConstants.getApplicationName());
         return "statistic";
     }

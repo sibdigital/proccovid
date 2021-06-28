@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.ClsRole;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.repository.regisrty.RegUserRoleRepo;
+import ru.sibdigital.proccovid.service.RoleService;
 
 import java.util.List;
 import java.util.stream.Collectors;
