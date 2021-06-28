@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.report.RemoteCntEntityReport;
 import ru.sibdigital.proccovid.model.report.RemoteCntEntityWithOkvedsReport;
+import ru.sibdigital.proccovid.repository.OkvedRepo;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -30,6 +32,9 @@ public class RemoteCntReportServiceImpl implements RemoteCntReportService{
 
     @Autowired
     JasperReportService jasperReportService;
+
+    @Autowired
+    OkvedRepo okvedRepo;
 
     @Autowired
     ResourceLoader resourceLoader;
@@ -106,13 +111,26 @@ public class RemoteCntReportServiceImpl implements RemoteCntReportService{
     }
 
     private List<RemoteCntEntityWithOkvedsReport> getRemoteCntWithOkvedsForReport(List<String> okvedPaths) throws IOException {
-        Query query = getQueryForRemoteCntWithOkvedReport(okvedPaths);
+        Set<String> set = okvedPaths.stream().collect(Collectors.toSet());
+        if (set.contains("2001")) {
+            set.addAll(getAllOkvedPathsByVersion("2001"));
+        }
+        if (set.contains("2014")) {
+            set.addAll(getAllOkvedPathsByVersion("2014"));
+        }
+        Query query = getQueryForRemoteCntWithOkvedReport(set);
         List<RemoteCntEntityWithOkvedsReport> list = query.getResultList();
 
         return list;
     }
 
-    private Query getQueryForRemoteCntWithOkvedReport(List<String> okvedPaths) throws IOException {
+    private Set<String> getAllOkvedPathsByVersion(String version) {
+        List<Okved> okveds = okvedRepo.findAllByVersion(version);
+        Set<String> okvedPaths = okveds.stream().map(ctr -> ctr.getPath()).collect(Collectors.toSet());
+        return okvedPaths;
+    }
+
+    private Query getQueryForRemoteCntWithOkvedReport(Set<String> okvedPaths) throws IOException {
         String  queryString = getQueryString("classpath:reports/remote_cnt/remote_cnt_with_okveds.sql");
         Query query = entityManager.createNativeQuery(queryString, RemoteCntEntityWithOkvedsReport.class);
         query.setParameter("okved_paths", okvedPaths);

@@ -90,11 +90,15 @@ WITH
                             ON aoi.id_okved = okved.id
         GROUP BY aoi.id_organization
     ) -- Получили все коды доп. оквэдов через запятую
-SELECT co.id, co.short_name as short_name_organization, co.inn as organization_inn, dec.cnt_by_doc_employee,
-       rpc.all_count, rpc.office_cnt, rpc.remote_cnt,
-       main_okveds.names as main_okveds, additional_okveds.names as additional_okveds,
-       CASE WHEN oibcoim.id_organization IS NOT NULL THEN 'Найдено в осн. ОКВЭД'
-            ELSE CASE WHEN oibcoia.id_organization IS NOT NULL THEN 'Найдено в доп. ОКВЭД'
+SELECT co.id, co.short_name as short_name_organization, co.inn as organization_inn,
+       coalesce(dec.cnt_by_doc_employee, 0) as cnt_by_doc_employee,
+       coalesce(rpc.all_count,0) as all_count,
+       coalesce(rpc.office_cnt, 0) as office_cnt,
+       coalesce(rpc.remote_cnt, 0) as remote_cnt,
+       coalesce(main_okveds.names, '') as main_okveds,
+       coalesce(additional_okveds.names, '') as additional_okveds,
+       CASE WHEN oibcoim.id_organization IS NOT NULL THEN 'основному ОКВЭД'
+            ELSE CASE WHEN oibcoia.id_organization IS NOT NULL THEN 'доп. ОКВЭД'
                       ELSE 'Ошибка'
                 END
            END as by_what_okved_type

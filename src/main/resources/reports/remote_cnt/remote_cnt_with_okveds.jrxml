@@ -73,7 +73,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Times New Roman" size="12"/>
 				</textElement>
-				<text><![CDATA[Дата:]]></text>
+				<text><![CDATA[ОКВЭД:]]></text>
 			</staticText>
 			<textField textAdjust="StretchHeight">
 				<reportElement x="41" y="0" width="139" height="47" uuid="9a42706e-dd94-4e45-9412-48a95ad1dc7a"/>
@@ -165,7 +165,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<text><![CDATA[Кол-во сотрудников]]></text>
+								<text><![CDATA[Кол-во сотрудников (по пофамильному списку)]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -186,7 +186,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<text><![CDATA[Всего работников]]></text>
+								<text><![CDATA[Всего работников (в офисе и на удаленке)]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -232,7 +232,7 @@
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
+							<textField>
 								<reportElement x="0" y="0" width="120" height="30" uuid="341e7faf-9680-4941-a9a4-ac78b8f4aae0"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
@@ -291,12 +291,15 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<text><![CDATA[Найдено по типу]]></text>
+								<text><![CDATA[Найдено по ]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
 								<reportElement x="0" y="0" width="90" height="30" uuid="03323010-c362-4e63-812c-132dfb64a52d"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="Times New Roman" size="12"/>
+								</textElement>
 								<textFieldExpression><![CDATA[$F{byWhatOkvedType}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>

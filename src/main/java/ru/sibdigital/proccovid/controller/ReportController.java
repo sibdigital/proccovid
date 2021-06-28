@@ -74,4 +74,29 @@ public class ReportController {
         String template = new String(bytes);
         return template;
     }
+
+    @RequestMapping(
+            value = {"/remoteCntReportByOkveds/{format}/params","/outer/remoteCntReportByOkveds/{format}/params"}
+    )
+    public String downloadRemoteCntReportByOkveds(@PathVariable String format,
+                                          @RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                          HttpServletResponse response) throws IOException, ParseException {
+
+        byte[] bytes = remoteCntReportService.exportRemoteCntWithOkvedFilterReport(format, okvedPaths);
+
+        if (format.equals("pdf")) {
+            response.setContentType("application/pdf");
+        } else if (format.equals("html")) {
+            response.setContentType("text/html");
+        } else if (format.equals("xlsx")){
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=remoteCount.xlsx");
+        }
+
+        ServletOutputStream out = response.getOutputStream();
+        out.write(bytes);
+        out.flush();
+        out.close();
+        return null;
+    }
 }

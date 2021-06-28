@@ -20,11 +20,13 @@ const cntRemoteWithOkvedsReport = {
             },
             {
                 cols: [
+                    {},
                     {
                         view: 'button',
                         id: 'generateCntRemoteReport',
                         value: 'Сформировать',
                         align: 'right',
+                        width: 250,
                         css: 'webix_primary',
                         click: function () {
                             let okvedPaths = $$('okvedTreeId').getChecked().toString();
@@ -50,16 +52,12 @@ const cntRemoteWithOkvedsReport = {
                         css: 'xlsIcon',
                         tooltip: 'Сформировать и скачать в xlsx формате',
                         click: function () {
-                            let mainOkveds = $$('mainOkvedTreeId').getChecked().toString();
-                            let additionalOkveds = $$('additionalOkvedTreeId').getChecked().toString();
-                            let minDate = convertDateToString($$('startDateInspectionReport').getValue());
-                            let maxDate = convertDateToString($$('endDateInspectionReport').getValue());
-                            let minCnt = $$('minCountInspectionReport').getValue();
+                            let okvedPaths = $$('okvedTreeId').getChecked().toString();
 
-                            let url = 'inspectionReport/xlsx/params?minDate='+minDate+'&maxDate='+maxDate+'&minCnt='+minCnt+'&mainOkveds='+mainOkveds +'&additionalOkveds='+additionalOkveds;
+                            let url = 'remoteCntReportByOkveds/xlsx/params?okvedPaths='+okvedPaths;
 
                             webix.ajax().response("blob").get(url, function (text, data, xhr) {
-                                webix.html.download(data, "inspectionReport.xlsx");
+                                webix.html.download(data, "employee_count_by_okved.xlsx");
                             })
                         },
                     },

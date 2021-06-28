@@ -81,4 +81,7 @@ public interface OkvedRepo extends JpaRepository<Okved, Integer>, JpaSpecificati
             "FROM okved\n" +
             "WHERE path  ~ (:ppath || '*')\\:\\:lquery")
     List<Okved> getChildrenOkvedsByPath(@Param("ppath") String path);
+
+
+    List<Okved> findAllByVersion(String version);
 }
