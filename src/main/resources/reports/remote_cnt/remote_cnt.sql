@@ -10,5 +10,5 @@ from public.reg_person_count as rpc
     where time_edit <= :report_date
     group by id_organization
 ) as slice_rpc using(id_organization, time_edit)
-         inner join public.cls_organization as co on rpc.id_organization = co.id
+         inner join public.cls_organization as co on rpc.id_organization = co.id and is_deleted = false and is_activated=true
 order by time_edit desc

@@ -104,7 +104,7 @@ SELECT co.id, co.short_name as short_name_organization, co.inn as organization_i
            END as by_what_okved_type
 FROM org_ids_by_checked_okveds oibco
          INNER JOIN cls_organization co
-                    ON oibco.id_organization = co.id
+                    ON oibco.id_organization = co.id and is_deleted = false and is_activated = true
          LEFT JOIN doc_employee_cnt dec
                    ON co.id = dec.id_organization
          LEFT JOIN reg_person_cnt rpc
