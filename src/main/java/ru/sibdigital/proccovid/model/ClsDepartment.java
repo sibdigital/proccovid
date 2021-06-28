@@ -25,6 +25,7 @@ public class ClsDepartment {
     private Integer statusImport;
     private Timestamp timeImport;
     private Boolean isDeleted;
+    private Boolean isReviewer;
     private String fullName;
 
     public Long getId() {
@@ -83,6 +84,16 @@ public class ClsDepartment {
 
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
+    }
+
+    @Basic
+    @Column(name = "is_reviewer")
+    public Boolean getReviewer() {
+        return isReviewer;
+    }
+
+    public void setReviewer(Boolean reviewer) {
+        isReviewer = reviewer;
     }
 
     public String getValue() {

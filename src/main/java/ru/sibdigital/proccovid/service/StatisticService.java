@@ -1,5 +1,6 @@
 package ru.sibdigital.proccovid.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -7,10 +8,10 @@ import java.util.Map;
 public interface StatisticService {
 
 
-    Map getTotalStatistic();
+    Map getTotalStatistic(LocalDateTime localDateBegin, LocalDateTime localDateEnd);
 
     List<Map<String, Object>> getDepartmentRequestStatistic(Integer idTypeRequest);
-    List<Map<String, Object>> getDepartmentRequestStatistic();
+    List<Map<String, Object>> getDepartmentRequestStatistic(LocalDateTime localDateBegin, LocalDateTime localDateEnd);
 
     Map<String, Object> getActualRequestStatisticForEeachOrganization();
     List<Map<String, Object>> getActualRequestStatisticForEeachDepartment();

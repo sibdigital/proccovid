@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,7 @@ import ru.sibdigital.proccovid.repository.classifier.ClsMailingListOkvedRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsMailingListRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegMailingListFollowerRepo;
+import ru.sibdigital.proccovid.service.MailingListService;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -18,7 +19,7 @@ import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
-public class MailingListServiceImpl implements MailingListService{
+public class MailingListServiceImpl implements MailingListService {
 
     @Autowired
     private ClsMailingListRepo clsMailingListRepo;

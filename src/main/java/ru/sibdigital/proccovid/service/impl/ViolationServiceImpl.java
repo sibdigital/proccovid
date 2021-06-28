@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +14,7 @@ import ru.sibdigital.proccovid.repository.classifier.ClsTypeViolationRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsUserRepo;
 import ru.sibdigital.proccovid.repository.regisrty.*;
 import ru.sibdigital.proccovid.repository.specification.*;
+import ru.sibdigital.proccovid.service.ViolationService;
 
 import java.sql.Timestamp;
 import java.util.List;

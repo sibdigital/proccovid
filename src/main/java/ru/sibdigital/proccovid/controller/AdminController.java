@@ -28,6 +28,7 @@ import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCri
 import ru.sibdigital.proccovid.repository.specification.RegPersonViolationSearchSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.RegViolationSearchSearchCriteria;
 import ru.sibdigital.proccovid.service.*;
+import ru.sibdigital.proccovid.service.impl.RequestService;
 import ru.sibdigital.proccovid.utils.DataFormatUtils;
 
 import java.sql.Timestamp;

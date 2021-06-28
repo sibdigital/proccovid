@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -17,6 +17,8 @@ import ru.sibdigital.proccovid.model.ClsMigration;
 import ru.sibdigital.proccovid.model.ModelTypes;
 import ru.sibdigital.proccovid.model.StatusLoadTypes;
 import ru.sibdigital.proccovid.repository.fias.AddrObjectRepo;
+import ru.sibdigital.proccovid.service.ImportFiasService;
+import ru.sibdigital.proccovid.service.MigrationService;
 import ru.sibdigital.proccovid.utils.StaxStreamProcessor;
 
 import javax.persistence.EntityManager;

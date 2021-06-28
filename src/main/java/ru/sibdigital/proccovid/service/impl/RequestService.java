@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -31,6 +31,8 @@ import ru.sibdigital.proccovid.repository.regisrty.RegOrganizationFileRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegUserRoleRepo;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSpecification;
+import ru.sibdigital.proccovid.service.EmailService;
+import ru.sibdigital.proccovid.service.SettingService;
 import ru.sibdigital.proccovid.utils.DateUtils;
 
 import javax.servlet.http.HttpServletResponse;
@@ -634,6 +636,11 @@ public class RequestService {
         // добавим файлы
         final String absolutePath = Paths.get(uploadingDir).toFile().getAbsolutePath();
         for (DocRequest request: requests) {
+//            //+ВРЕМЕННО ДЛЯ СРОЧНОГО ПЕЕЗДА
+//            if (request.getId() <= 32662){
+//                continue;
+//            }
+//            //-ВРЕМЕННО ДЛЯ СРОЧНОГО ПЕЕЗДА
             if (request.getAttachmentPath() == null || request.getAttachmentPath().isBlank()) {
                 actualizationFilesLogger.warn("Пустой attachmentPath. Ид заявки {}.", request.getId());
                 continue;

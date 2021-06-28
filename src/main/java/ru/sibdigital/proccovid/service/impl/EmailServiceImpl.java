@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.regisrty.RegMailingHistoryRepo;
+import ru.sibdigital.proccovid.service.EmailService;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;

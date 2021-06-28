@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,8 @@ import ru.sibdigital.proccovid.repository.classifier.ClsPrincipalRepo;
 import ru.sibdigital.proccovid.repository.document.DocEmployeeRepo;
 import ru.sibdigital.proccovid.repository.document.DocRequestRepo;
 import ru.sibdigital.proccovid.repository.regisrty.*;
+import ru.sibdigital.proccovid.service.DBActualizeService;
+import ru.sibdigital.proccovid.service.EgrulService;
 
 import java.sql.Timestamp;
 import java.util.*;
