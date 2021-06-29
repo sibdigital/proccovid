@@ -5,7 +5,7 @@ create or replace view v_doc_person_and_org_info
              begin_registration, end_registration)
 as
 SELECT pers.id,
-       pers.id_request,
+       org.id_request,
        pers.lastname,
        pers.firstname,
        pers.patronymic,
@@ -39,4 +39,4 @@ FROM (SELECT dp.id,
                         JOIN reg_doc_request_employee rdre on dr.id = rdre.id_request
                WHERE co.is_deleted = false and (dr.status_review = 1 OR dr.status_review = 4)
                  AND dr.status_pause = 0) org
-              USING (id_request, id_employee)
+              USING (id_employee)
