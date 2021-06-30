@@ -545,7 +545,8 @@ public class RequestService {
         } else {
             if (clsUserDto.getId() != null) {
                 ClsUser currentUser = clsUserRepo.findById(clsUserDto.getId()).orElse(null);
-                if (currentUser != null) {
+                if (currentUser != null && currentUser.getPassword() != null
+                    && !currentUser.getPassword().isBlank()) {
                     clsUser.setPassword(currentUser.getPassword());
                 }
             }
@@ -558,8 +559,10 @@ public class RequestService {
     }
 
     public ClsUser saveUserPassword(ClsUser clsUser, String newPassword) {
-        clsUser.setPassword(passwordEncoder.encode(newPassword));
-        clsUserRepo.save(clsUser);
+        if (newPassword != null && newPassword.isBlank() == false) {
+            clsUser.setPassword(passwordEncoder.encode(newPassword));
+            clsUserRepo.save(clsUser);
+        }
         return clsUser;
     }
 

@@ -264,12 +264,12 @@
         ]
     }
 
-    insertRow("#pokazat", "Новые заявки",totalAwaiting);
-    insertRow("#pokazat", "Утвержденные заявки", totalAccepted);
-    insertRow("#pokazat", "Отклоненные заявки", totalDeclined);
-    insertRow("#pokazat", "Всего заявок", total);
-    insertRow("#pokazat", "Активировало личный кабинет", countOrganizationOfConsentDataProcessing);
-    insertRow("#pokazat", "Подало информацию о работниках на удаленке", countOrganizationOfRegPersonCount);
+    insertRow("#pokazat", "Новые заявки",totalAwaiting, "text-center");
+    insertRow("#pokazat", "Утвержденные заявки", totalAccepted, "text-center");
+    insertRow("#pokazat", "Отклоненные заявки", totalDeclined, "text-center");
+    insertRow("#pokazat", "Всего заявок", total, "text-center font-weight-bold");
+    insertRow("#pokazat", "Активировало личный кабинет", countOrganizationOfConsentDataProcessing, "text-center");
+    insertRow("#pokazat", "Подало информацию о работниках на удаленке", countOrganizationOfRegPersonCount, "text-center");
 
     webix.ready(function() {
         webix.ui({

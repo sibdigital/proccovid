@@ -26,6 +26,6 @@ public interface RegEgripOkvedRepo extends JpaRepository<RegEgripOkved, Long> {
     @Query(value = "DELETE FROM reg_egrip_okved\n" +
             "WHERE id_egrip in (:id_egrips)",
             nativeQuery = true)
-    void deleteRegEgrulOkveds(@Param("id_egrips") List<Long> id_egrips);
+    void deleteRegEgripOkveds(@Param("id_egrips") List<Long> id_egrips);
 
 }
