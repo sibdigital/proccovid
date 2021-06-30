@@ -248,7 +248,10 @@
     }
 
     for (let i = 0; i < departmentStatistic.length; i++) {
-        insertSecondRow(departmentStatistic[i].name, departmentStatistic[i].awaiting, departmentStatistic[i].accepted, departmentStatistic[i].declined, "text-center")
+        const totalInARow = departmentStatistic[i].awaiting + departmentStatistic[i].accepted + departmentStatistic[i].declined;
+        if (totalInARow != 0) {
+            insertSecondRow(departmentStatistic[i].name, departmentStatistic[i].awaiting, departmentStatistic[i].accepted, departmentStatistic[i].declined, "text-center");
+        }
     }
 
     chartData = {
