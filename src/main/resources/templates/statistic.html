@@ -15,8 +15,11 @@
 
     <script th:src="@{/libs/popper.min.js}"></script>
     <script th:src="@{/libs/jquery-3.4.1.min.js}"></script>
+    <script th:src="@{/libs/moment-with-locales.min.js}"></script>
     <script th:src="@{/libs/bootstrap.min.js}"></script>
+    <script th:src="@{/libs/bootstrap-datetimepicker.min.js}"></script>
     <link type="text/css" rel="stylesheet" th:href="@{/libs/webix.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/css/bootstrap-datetimepicker.min.css}">
     <script th:src="@{/libs/webix.min.js}"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -34,14 +37,57 @@
             margin-right: 2px;
             font-size: 110%;
         }
+        tr {
+            line-height: 15px;
+            min-height: 15px;
+            height: 15px;
+        }
+        .table td, .table th {
+            padding: .20rem;
+        }
     </style>
 </head>
 <body>
+
 <div th:insert="~{navbar-bootstrap::frag ('Статистика.', ${application_name})}"></div>
 <div id="chart-dep">
 
 </div>
-<div class="container">
+<div class="container-fluid">
+    <div class="row my-2 justify-content-center">
+        <div class="col-8">
+            <div class="table-responsive-sm">
+                <table class="table" id="filterTable">
+                    <tbody id="filterTableBody">
+                    <tr>
+                        <td>Начало периода</td>
+                        <td><input type="text" class="form-control" id="dateBeginPicker"/></td>
+                        <td>Конец периода</td>
+                        <td><input type="text" class="form-control" id="dateEndPicker"/></td>
+                        <td><button type="button" class="btn btn-primary" id="fetchDataBtn">Обновить</button></td>
+                    <tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2 justify-content-center">
+        <div class="col-8">
+            <div class="table-responsive-sm">
+                <table class="table" id="pokazatTable">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 70%">Значение</th>
+                        <th scope="col" class="text-center" style="width: 30%">Показатель</th>
+                    </tr>
+                    </thead>
+                    <tbody id="pokazat">
+                    </tbody>
+                    <span class="text-center" style="display:none" id="noResults">Нет результатов</span>
+                </table>
+            </div>
+        </div>
+    </div>
     <div class="row my-2 justify-content-center">
         <div class="col-8">
             <div class="table-responsive-sm">
@@ -58,13 +104,10 @@
                     </tbody>
                     <span class="text-center" style="display:none" id="noResults">Нет результатов</span>
                 </table>
-
-
             </div>
         </div>
     </div>
     <div class="dropdown-divider"></div>
-
 
     <div class="row my-2 justify-content-center">
         <div class="col-8">
@@ -72,11 +115,11 @@
                 <table class="table" id="depTable">
                     <thead class="thead-dark">
                     <tr>
-                        <th scope="col" class="text-center" style="width: 45%">ИОГВ</th>
-                        <th scope="col" class="text-center" style="width: 15%">Ожидают</th>
-                        <th scope="col" class="text-center" style="width: 15%">Утверждено</th>
-                        <th scope="col" class="text-center" style="width: 15%">Отклонено</th>
-                        <th scope="col" class="text-center" style="width: 10%">Всего</th>
+                        <th scope="col" class="text-center" style="width: 68%">ИОГВ</th>
+                        <th scope="col" class="text-center" style="width: 8%">Ожидают</th>
+                        <th scope="col" class="text-center" style="width: 8%">Утверждено</th>
+                        <th scope="col" class="text-center" style="width: 8%">Отклонено</th>
+                        <th scope="col" class="text-center" style="width: 8%">Всего</th>
                     </tr>
                     </thead>
 
@@ -92,7 +135,37 @@
 </div>
 
 <script th:inline="javascript">
+
+    function initDatePicker() {
+        $('#dateBeginPicker').datetimepicker({
+            locale: 'ru',
+            format: 'DD.MM.YYYY',
+
+        });
+        $('#dateEndPicker').datetimepicker({
+            locale: 'ru',
+            format: 'DD.MM.YYYY',
+        });
+
+        $('#fetchDataBtn').bind('click', fetchData);
+    }
+
+    function fetchData() {
+        var url = window.location.href;
+        var qs = url.indexOf('?');
+        if (qs > -1){
+            url = url.substr(0, qs);
+        }
+        var dateBegin = $('#dateBeginPicker').val();
+        var dateEnd = $('#dateEndPicker').val();
+        url += "?dateBegin=" + (dateBegin != '' ? dateBegin : '') + "&dateEnd=" + (dateEnd != '' ? dateEnd : '');
+        window.location.href = url;
+    }
+
     $(document).ready(function(){
+
+        initDatePicker();
+
         $('#totalTable').after('<div id="nav" class="align-nav-items-center"></div>');
         var rowsShown = 12;
         var rowsTotal = $('#totalBody tr').length;
@@ -116,8 +189,11 @@
         });
     });
 
-    const totalStatistic = [[${totalStatistic}]]
-    const departmentStatistic = [[${departmentStatistic}]]
+    const totalStatistic = [[${totalStatistic}]];
+    const departmentStatistic = [[${departmentStatistic}]];
+
+    let countOrganizationOfConsentDataProcessing = totalStatistic.countOrganizationOfConsentDataProcessing.count_organization;
+    let countOrganizationOfRegPersonCount = totalStatistic.countOrganizationOfRegPersonCount.count_organization;
 
     let total = 0
 
@@ -128,22 +204,18 @@
         return `${mo}.${da}.${ye}`
     }
 
-    function insertRow(firstCol, secondCol, cssClass=""){
+    function insertRow(selector, firstCol, secondCol, cssClass=""){
         const html = `<tr>
             <td class="${cssClass}"> ${ firstCol } </td>
             <td class="${cssClass}"> ${ secondCol } </td>
         </tr>`;
 
-        $("#totalBody").append(html);
+        $(selector).append(html);
     }
 
-
-
-
     totalStatistic.peopleStatistic.total = totalStatistic.peopleStatistic.accepted + totalStatistic.peopleStatistic.declined + totalStatistic.peopleStatistic.awaiting;
-    insertRow("Всего людей в утвержденных заявках", totalStatistic.peopleStatistic.accepted, "text-center font-weight-bold");
-    insertRow("Всего людей в заявках", totalStatistic.peopleStatistic.total, "text-center font-weight-bold");
-
+    insertRow("#totalBody", "Всего людей в утвержденных заявках", totalStatistic.peopleStatistic.accepted, "text-center font-weight-bold");
+    insertRow("#totalBody", "Всего людей в заявках", totalStatistic.peopleStatistic.total, "text-center font-weight-bold");
 
     for (let i = 0; i < totalStatistic.forEachDayStatistic.length; i++) {
 
@@ -152,35 +224,16 @@
         if(totalStatistic.forEachDayStatistic[i].date ){
 
         }
-        insertRow("За " + formatDate(totalStatistic.forEachDayStatistic[i].date), totalStatistic.forEachDayStatistic[i].total, "text-center")
+        insertRow("#totalBody", "За " + formatDate(totalStatistic.forEachDayStatistic[i].date), totalStatistic.forEachDayStatistic[i].total, "text-center")
     }
 
-    insertRow('ВСЕГО ЗАЯВОК', total, "text-center font-weight-bold")
+    insertRow("#totalBody", 'ВСЕГО ЗАЯВОК', total, "text-center font-weight-bold")
     let totalAwaiting = 0, totalAccepted = 0, totalDeclined = 0;
     function insertSecondRow(name, awaiting, accepted, declined, cssClass=""){
         const totalInARow = awaiting + accepted + declined;
         totalAwaiting += awaiting;
         totalAccepted += accepted;
         totalDeclined += declined;
-
-        // const html = `<tr>
-        //     <td class="${cssClass}" rowspan="4"> ${ name } </td>
-        //     <td class="${cssClass}"> Необработано </td>
-        //     <td class="${cssClass}"> ${ awaiting } </td>
-        //
-        // </tr>
-        // <tr>
-        //     <td class="${cssClass}"> Утверждено </td>
-        //     <td class="${cssClass}"> ${ accepted } </td>
-        // </tr>
-        // <tr>
-        //     <td class="${cssClass}"> Отклонено </td>
-        //     <td class="${cssClass}"> ${ declined } </td>
-        // </tr>
-        // <tr>
-        //     <td class="text-center font-weight-bold"> Всего </td>
-        //     <td class="text-center font-weight-bold"> ${ totalInARow } </td>
-        // </tr>`;
 
         const html = `
             <tr>
@@ -191,9 +244,6 @@
                 <td class="text-center font-weight-bold"> ${ totalInARow } </td>
             </tr>
         `;
-
-
-
         $("#depBody").append(html);
     }
 
@@ -208,11 +258,18 @@
             { value:totalAccepted, legend:"Утвердили", color: "#a9ee36" },
         ],
         personStatistic: [
-            { value:totalStatistic.peopleStatistic.declined, legend:"Отказано", color: "#ee3639" },
-            { value:totalStatistic.peopleStatistic.awaiting, legend:"Ожидают", color: "#ee9e36" },
-            { value:totalStatistic.peopleStatistic.accepted, legend:"Утвердили", color: "#a9ee36" },
+            { value:totalStatistic.peopleStatistic.declined, legend:"Отклонено", color: "#ee3639" },
+            { value:totalStatistic.peopleStatistic.awaiting, legend:"Новые", color: "#ee9e36" },
+            { value:totalStatistic.peopleStatistic.accepted, legend:"Утверждено", color: "#a9ee36" },
         ]
     }
+
+    insertRow("#pokazat", "Новые заявки",totalAwaiting, "text-center");
+    insertRow("#pokazat", "Утвержденные заявки", totalAccepted, "text-center");
+    insertRow("#pokazat", "Отклоненные заявки", totalDeclined, "text-center");
+    insertRow("#pokazat", "Всего заявок", total, "text-center font-weight-bold");
+    insertRow("#pokazat", "Активировало личный кабинет", countOrganizationOfConsentDataProcessing, "text-center");
+    insertRow("#pokazat", "Подало информацию о работниках на удаленке", countOrganizationOfRegPersonCount, "text-center");
 
     webix.ready(function() {
         webix.ui({
@@ -239,34 +296,34 @@
                                 shadow:0,
                                 data:chartData.depStatistic
                             },
-                            {
-                                template:`<div style='width:100%;text-align:center'>Всего: ${total}</div>`,
-                                height:30
-                            },
                         ]
                     },
                     {
-                        rows:[
-                            {
-                                template:"<div style='width:100%; font-weight: bold; text-align:center'>Люди</div>",
-                                height:30
-                            },
-                            {
-                                height: 250,
-                                view: "chart",
-                                type:"pie",
-                                value:"#value#",
-                                color:"#color#",
-                                label:"#legend#",
-                                pieInnerText:"#value#",
-                                shadow:0,
-                                data:chartData.personStatistic
-                            },
-                            {
-                                template:`<div style='width:100%;text-align:center'>Всего: ${totalStatistic.peopleStatistic.total}</div>`,
-                                height:30
-                            },
-                        ]
+                        // rows:[
+                        //     {
+                        //         template:"<div style='width:100%; font-weight: bold; text-align:center'>Люди</div>",
+                        //         height:30
+                        //     },
+                        //     {
+                        //         height: 250,
+                        //         view: "chart",
+                        //         type:"pie",
+                        //         value:"#value#",
+                        //         color:"#color#",
+                        //         label:"#legend#",
+                        //         pieInnerText:"#value#",
+                        //         shadow:0,
+                        //         data:chartData.personStatistic
+                        //     },
+                        //     {
+                        //         template:`<div style='width:100%;text-align:center'>Всего: ${totalStatistic.peopleStatistic.total}</div>`,
+                        //         height:30
+                        //     },
+                        // ]
+                        // Новые: ${totalAwaiting}
+                        // Утверждено: ${totalAccepted}
+                        // Отклонено: ${totalDeclined}
+                        // Всего: ${total}
 
                     }
             ]

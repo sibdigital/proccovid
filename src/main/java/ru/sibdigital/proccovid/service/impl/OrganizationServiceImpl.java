@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import ru.sibdigital.proccovid.dto.ClsOrganizationDto;
 import ru.sibdigital.proccovid.model.ClsTypeRequestSettings;
 import ru.sibdigital.proccovid.model.*;
 import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
@@ -24,6 +25,8 @@ import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSearchCri
 import ru.sibdigital.proccovid.repository.specification.ClsOrganizationSpecification;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSpecification;
+import ru.sibdigital.proccovid.service.DBActualizeService;
+import ru.sibdigital.proccovid.service.OrganizationService;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -183,5 +186,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
         }
+    }
+
+    @Override
+    public void saveOrganization(ClsOrganizationDto clsOrganizationDto) {
+        ClsOrganization organization = clsOrganizationRepo.findById(clsOrganizationDto.getId()).orElse(null);
+        organization.setIdTypeOrganization(clsOrganizationDto.getIdTypeOrganization());
+        organization.setEmail(clsOrganizationDto.getEmail());
+        organization.setActivated(clsOrganizationDto.getActivated());
+        organization.setDeleted(clsOrganizationDto.getDeleted());
+        clsOrganizationRepo.save(organization);
     }
 }

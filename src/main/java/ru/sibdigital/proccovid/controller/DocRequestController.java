@@ -19,7 +19,7 @@ import ru.sibdigital.proccovid.repository.document.*;
 import ru.sibdigital.proccovid.repository.regisrty.RegHistoryRequestRepo;
 import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
 import ru.sibdigital.proccovid.service.EmailService;
-import ru.sibdigital.proccovid.service.RequestService;
+import ru.sibdigital.proccovid.service.impl.RequestService;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -84,11 +84,11 @@ public class DocRequestController {
     @GetMapping("/doc_requests")
     public DocRequest requests(@RequestParam String inn,@RequestParam String ogrn, Map<String, Object> model) {
         //if(inn!=null & !inn.isBlank()){
-        if(inn!=null & !inn.isEmpty()){
+        if(inn!=null && !inn.isEmpty()){
             return requestService.getLasRequestInfoByInn(inn);
         }
 
-        if( ogrn!=null & !ogrn.isEmpty()){
+        if( ogrn!=null && !ogrn.isEmpty()){
             return requestService.getLastRequestInfoByOgrn(ogrn);
         }
 
@@ -245,7 +245,7 @@ public class DocRequestController {
 
     @GetMapping("/cls_departments")
     public List<ClsDepartment> getListDepartments() {
-        return clsDepartmentRepo.findAll(Sort.by("id"));
+        return clsDepartmentRepo.findAllByIsReviewer(true, Sort.by("name"));
     }
 
     @GetMapping("/doc_requests/{id_request}")
@@ -258,7 +258,7 @@ public class DocRequestController {
             method = RequestMethod.GET
     )
     public List<ClsDistrict> getListDistricts() {
-        return clsDistrictRepo.findAll(Sort.by("id"));
+        return clsDistrictRepo.findAll(Sort.by("name"));
     }
 
     @GetMapping("/export_to_xlsx")

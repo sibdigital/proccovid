@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +14,14 @@ import ru.sibdigital.proccovid.repository.classifier.ClsControlAuthorityParentRe
 import ru.sibdigital.proccovid.repository.classifier.ClsControlAuthorityRepo;
 import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySearchCriteria;
 import ru.sibdigital.proccovid.repository.specification.ClsControlAuthoritySpecification;
+import ru.sibdigital.proccovid.service.ControlAuthorityService;
 
 import java.util.Comparator;
 import java.util.List;
 
 @Service
 @Slf4j
-public class ControlAuthorityServiceImpl implements ControlAuthorityService{
+public class ControlAuthorityServiceImpl implements ControlAuthorityService {
     @Autowired
     private ClsControlAuthorityRepo clsControlAuthorityRepo;
 

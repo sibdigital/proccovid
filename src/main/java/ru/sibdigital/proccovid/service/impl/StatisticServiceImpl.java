@@ -1,13 +1,16 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.sibdigital.proccovid.model.ReviewStatuses;
 import ru.sibdigital.proccovid.repository.document.DocDachaPersonRepo;
 import ru.sibdigital.proccovid.repository.document.DocDachaRepo;
 import ru.sibdigital.proccovid.repository.document.DocPersonRepo;
 import ru.sibdigital.proccovid.repository.document.DocRequestRepo;
+import ru.sibdigital.proccovid.service.StatisticService;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -27,17 +30,29 @@ public class StatisticServiceImpl implements StatisticService {
     DocDachaRepo docDachaRepo;
 
     @Override
-    public Map<String, Object> getTotalStatistic(){
+    public Map<String, Object> getTotalStatistic(LocalDateTime localDateBegin, LocalDateTime localDateEnd){
         Map<String, Object> statistic = new HashMap(5);
 
         Map<String, Object> peopleStatistic = new HashMap<>(3);
-        peopleStatistic.put("accepted",docPersonRepo.getTotalApprovedPeopleByReviewStatus(1));
-        peopleStatistic.put("declined",docPersonRepo.getTotalApprovedPeopleByReviewStatus(2));
-        peopleStatistic.put("awaiting",docPersonRepo.getTotalApprovedPeopleByReviewStatus(0));
+        peopleStatistic.put("accepted",docPersonRepo.getTotalApprovedPeopleByReviewStatus(
+                ReviewStatuses.CONFIRMED.getValue(), localDateBegin, localDateEnd));
+        peopleStatistic.put("declined",docPersonRepo.getTotalApprovedPeopleByReviewStatus(
+                ReviewStatuses.REJECTED.getValue(), localDateBegin, localDateEnd));
+        peopleStatistic.put("awaiting",docPersonRepo.getTotalApprovedPeopleByReviewStatus(
+                ReviewStatuses.OPENED.getValue(), localDateBegin, localDateEnd));
 
+        final List<Map<String, Object>> listPersonCount = docRequestRepo.getCountOrganizationOfRegPersonCount(localDateBegin, localDateEnd);
+        if (listPersonCount.isEmpty() ==false) {
+            statistic.put("countOrganizationOfRegPersonCount", listPersonCount.get(0));
+        }
+
+        final List<Map<String, Object>> listConsent =  docRequestRepo.getCountOrganizationOfConsentDataProcessing(true);
+        if (listConsent.isEmpty() ==false) {
+            statistic.put("countOrganizationOfConsentDataProcessing", listConsent.get(0));
+        }
 
         statistic.put("peopleStatistic", peopleStatistic);
-        statistic.put("forEachDayStatistic", docRequestRepo.getStatisticForEachDay());
+        statistic.put("forEachDayStatistic", docRequestRepo.getStatisticForEachDay(localDateBegin, localDateEnd));
         return statistic;
     }
 
@@ -57,10 +72,8 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public List<Map<String, Object>> getDepartmentRequestStatistic(){
-        List<Map<String, Object>> rawStatistic = docRequestRepo.getRequestStatisticForEeachDepartment();
-        /*statistic.put("totalPeople", docPersonRepo.getTotalPeople());
-        statistic.put("totalApprovedPeople", docPersonRepo.getTotalApprovedPeopleByReviewStatus());*/
+    public List<Map<String, Object>> getDepartmentRequestStatistic(LocalDateTime localDateBegin, LocalDateTime localDateEnd){
+        List<Map<String, Object>> rawStatistic = docRequestRepo.getRequestStatisticForEeachDepartment(localDateBegin, localDateEnd);
         return rawStatistic;
     }
 

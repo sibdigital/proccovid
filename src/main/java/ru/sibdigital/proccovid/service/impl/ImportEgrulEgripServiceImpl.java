@@ -1,4 +1,4 @@
-package ru.sibdigital.proccovid.service;
+package ru.sibdigital.proccovid.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +23,8 @@ import ru.sibdigital.proccovid.repository.egr.ReferenceBookRepo;
 import ru.sibdigital.proccovid.repository.egr.SvRecordEgrRepo;
 import ru.sibdigital.proccovid.repository.egr.SvStatusRepo;
 import ru.sibdigital.proccovid.repository.regisrty.*;
+import ru.sibdigital.proccovid.service.ImportEgrulEgripService;
+import ru.sibdigital.proccovid.service.MigrationService;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -1015,7 +1017,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         }
 
         if (!deletedNodes.isEmpty()) {
-            regEgripOkvedRepo.deleteRegEgrulOkveds(deletedNodes);
+            regEgripOkvedRepo.deleteRegEgripOkveds(deletedNodes);
             svStatusRepo.deleteSvStatusesByIdEgrips(deletedNodes);
             svRecordEgrRepo.deleteSvRecordEgrsByIdEgrips(deletedNodes);
         }

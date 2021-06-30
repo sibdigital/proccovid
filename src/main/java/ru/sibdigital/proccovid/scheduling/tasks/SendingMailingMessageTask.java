@@ -8,7 +8,7 @@ import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsPrincipalRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegMailingHistoryRepo;
 import ru.sibdigital.proccovid.repository.regisrty.RegMailingMessageRepo;
-import ru.sibdigital.proccovid.service.EmailServiceImpl;
+import ru.sibdigital.proccovid.service.impl.EmailServiceImpl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

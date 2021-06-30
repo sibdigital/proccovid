@@ -9,8 +9,8 @@ import ru.sibdigital.proccovid.model.ClsOrganization;
 import ru.sibdigital.proccovid.model.ClsPrincipal;
 import ru.sibdigital.proccovid.model.RegMailingMessage;
 import ru.sibdigital.proccovid.repository.regisrty.RegMailingMessageRepo;
-import ru.sibdigital.proccovid.service.EmailServiceImpl;
-import ru.sibdigital.proccovid.service.MailingMessageService;
+import ru.sibdigital.proccovid.service.impl.EmailServiceImpl;
+import ru.sibdigital.proccovid.service.impl.MailingMessageService;
 import ru.sibdigital.proccovid.service.StatisticService;
 
 import java.text.ParseException;
