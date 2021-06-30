@@ -2,6 +2,7 @@ package ru.sibdigital.proccovid.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -40,6 +41,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 @Service
+@Slf4j
 public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
     private final static Logger egrulLogger = LoggerFactory.getLogger("egrulLogger"); // Создание егрюл и оквэдов
@@ -104,7 +106,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             JAXBContext context = JAXBContext.newInstance(clazz);
             unmarshaller = context.createUnmarshaller();
         } catch (JAXBException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return unmarshaller;
     }
@@ -114,7 +116,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         try {
             zipFile = new ZipFile(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return zipFile;
     }
@@ -193,7 +195,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             egrulFilesLogger.info("Всего файлов " + zipFiles.size());
         } catch (Exception e) {
             egrulFilesLogger.error("Не удалось получить доступ к " + egrulPath);
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
 
         // Загрузка ПОЛНОГО zip
@@ -279,7 +281,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                         zipFile.close();
                     } catch (IOException e) {
                         migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), e.getMessage());
-                        e.printStackTrace();
+                        log.error(e.getMessage());
                     }
                 }
             } else {
@@ -309,13 +311,16 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
 
             result = true;
         } catch (IOException e) {
-            egrulFilesLogger.error("Не удалось прочитать xml-файл из zip-файла");
+            egrulFilesLogger.error("Не удалось прочитать xml-файл из zip-файла " + zipEntry.getName()+ ", " + file.getName());
             migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
-            e.printStackTrace();
+            log.error(file.getName() + ", " + zipEntry.getName() + ": " + e.getMessage());
         } catch (JAXBException e) {
-            egrulFilesLogger.error("Не удалось демаршализовать xml-файл из zip-файла");
+            egrulFilesLogger.error("Не удалось демаршализовать xml-файл из zip-файла " + zipEntry.getName()+ ", " + file.getName());
             migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось демаршализовать xml-файл из zip-файла");
-            e.printStackTrace();
+            log.error(file.getName() + ", " + zipEntry.getName() + ": " + e.getMessage());
+        } catch (Exception e) {
+            egrulFilesLogger.error(file.getName() + ", " + zipEntry.getName() + ": " + e.getMessage());
+            log.error(file.getName() + ", " + zipEntry.getName() + ": " + e.getMessage());
         }
         return result;
     }
@@ -352,7 +357,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 свЮЛ.setСвПодразд(null);
             } catch (JsonProcessingException e) {
                 egrulLogger.error("Не удалось преобразовать данные филиала к JSON для ОГРН " + свЮЛ.getОГРН());
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
 
             try {
@@ -360,7 +365,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 свЮЛ.setСвПодразд(null);
             } catch (JsonProcessingException e) {
                 egrulLogger.error("Не удалось преобразовать данные филиала к JSON для ОГРН " + свЮЛ.getОГРН());
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
 
             try {
@@ -370,7 +375,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 newRegEgrul.setData(mapper.writeValueAsString(свЮЛ));
             } catch (JsonProcessingException e) {
                 egrulLogger.error("Не удалось преобразовать данные к JSON для ОГРН " + свЮЛ.getОГРН());
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
 
             EgrulContainer ec = new EgrulContainer(newRegEgrul);
@@ -677,7 +682,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 RegEgrul earl = earlier.get(r.getIogrn());
                 if (earl !=null) {
                     // Производить замену, только если СвЮЛ.ДатаВып больше date_actual записи таблицы
-                    if (r.getDateActual().after(earl.getDateActual())) {
+                    if ((r.getDateActual() != null) && (earl.getDateActual() == null || r.getDateActual().after(earl.getDateActual()))) {
                         updatedData.add(ec);
                         r.setId(earl.getId());
                         deletedNodes.add(earl.getId());
@@ -875,7 +880,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                     new RegexFileFilter("^(.*?)"), DirectoryFileFilter.DIRECTORY);
         } catch (Exception e) {
             egripFilesLogger.error("Не удалось получить доступ к " + egripPath);
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
 
         // Загрузка ПОЛНОГО zip
@@ -949,7 +954,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                         zipFile.close();
                     } catch (IOException e) {
                         migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), e.getMessage());
-                        e.printStackTrace();
+                        log.error(e.getMessage());
                     }
                 }
             } else {
@@ -979,13 +984,16 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
             saveEgrips(list);
 
         }  catch (IOException e) {
-            egripFilesLogger.error("Не удалось прочитать xml-файл из zip-файла");
+            egripFilesLogger.error("Не удалось прочитать xml-файл из zip-файла " + zipEntry.getName() + ", " + file.getName());
             migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось прочитать xml-файл из zip-файла");
-            e.printStackTrace();
+            log.error(file.getName() + ", " + zipEntry.getName() + ": " + e.getMessage());
         } catch (JAXBException e) {
-            egripFilesLogger.error("Не удалось демаршализовать xml-файл из zip-файла");
+            egripFilesLogger.error("Не удалось демаршализовать xml-файл из zip-файла " + zipEntry.getName() + ", " + file.getName());
             migrationService.changeMigrationStatus(migration, StatusLoadTypes.COMPLETED_WITH_ERRORS.getValue(), "Не удалось демаршализовать xml-файл из zip-файла");
-            e.printStackTrace();
+            log.error(file.getName() + ", " + zipEntry.getName() + ": " + e.getMessage());
+        } catch (Exception e) {
+            egripFilesLogger.error(file.getName() + ", " + zipEntry.getName() + ": " + e.getMessage());
+            log.error(file.getName() + ", " + zipEntry.getName() + ": " + e.getMessage());
         }
 
     }
@@ -1001,7 +1009,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 RegEgrip r = ec.getRegEgrip();
                 RegEgrip earl = earlier.get(r.getIogrn());
                 if (earl != null) {
-                    if (r.getDateActual().after(earl.getDateActual())) {
+                    if ((r.getDateActual() != null) && (earl.getDateActual() == null || r.getDateActual().after(earl.getDateActual()))) {
                         updatedData.add(ec);
                         r.setId(earl.getId());
                         deletedNodes.add(earl.getId());
@@ -1126,7 +1134,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 svRecords = parseSvRecords(свИП, newRegEgrip);
             } catch (JsonProcessingException e) {
                 egrulLogger.error("Не удалось преобразовать данные филиала к JSON для ОГРН " + свИП.getОГРНИП());
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
 
             try {
@@ -1136,7 +1144,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
                 newRegEgrip.setData(mapper.writeValueAsString(свИП));
             } catch (JsonProcessingException e) {
                 egripLogger.error("Не удалось преобразовать данные к JSON для ИНН " + свИП.getИННФЛ());
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
 
             newRegEgrip.setIdMigration(migration.getId());
