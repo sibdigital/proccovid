@@ -221,12 +221,17 @@ public class UserController {
     public @ResponseBody ResponseEntity<Object>  editUserPass(@RequestParam(value = "new_pass", required = true) String newPass){
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
-        clsUser.setPassword(passwordEncoder.encode(newPass));
-        clsUserRepo.save(clsUser);
+        ResponseEntity<Object> responseEntity;
+        if (newPass != null && newPass.isBlank() == false) {
+            clsUser.setPassword(passwordEncoder.encode(newPass));
+            clsUserRepo.save(clsUser);
 
-        ResponseEntity<Object>  responseEntity = ResponseEntity.ok()
-                .body("{\"cause\": \"Пароль успешно обновлен\"," +
-                        "\"status\": \"server\"}");
+            responseEntity = DataFormatUtils.buildResponse(ResponseEntity.ok(),
+                    Map.of("cause", "Пароль успешно обновлен","status", "server"));
+        }else{
+            responseEntity = DataFormatUtils.buildResponse(ResponseEntity.ok(),
+                    Map.of("cause", "Невозможно установить пустой пароль","status", "server"));
+        }
         return responseEntity;
     }
 

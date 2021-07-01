@@ -1017,7 +1017,7 @@ public class ImportEgrulEgripServiceImpl implements ImportEgrulEgripService {
         }
 
         if (!deletedNodes.isEmpty()) {
-            regEgripOkvedRepo.deleteRegEgrulOkveds(deletedNodes);
+            regEgripOkvedRepo.deleteRegEgripOkveds(deletedNodes);
             svStatusRepo.deleteSvStatusesByIdEgrips(deletedNodes);
             svRecordEgrRepo.deleteSvRecordEgrsByIdEgrips(deletedNodes);
         }
