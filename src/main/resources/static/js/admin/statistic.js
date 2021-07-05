@@ -85,6 +85,40 @@ const statistic = {
                                 ]
                             }, $$("content"));
                         },
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='' onclick='return false'>Статистика по количеству организаций в районах\n</a>",
+                        click: () => {
+                            let data = new FormData();
+                            data.append("grant_type", "password");
+                            data.append("scope", "read");
+                            data.append("username", "admin");
+                            data.append("password", "admin");
+
+                            let xhr = new XMLHttpRequest();
+                            xhr.withCredentials = true;
+                            xhr.open("POST", "http://188.72.76.57:8180/oauth/token");
+                            xhr.setRequestHeader("Authorization", "Basic cG9sYXJpc19jbGllbnQ6cG9sYXJpcw==");
+                            xhr.send(data);
+
+                            xhr.onload = function () {
+                                if (xhr.readyState === xhr.DONE) {
+                                    if (xhr.status === 200) {
+                                        let responseJSON = JSON.parse(xhr.response);
+                                        webix.ui({
+                                            id: 'content',
+                                            rows: [
+                                                webix.copy(metatronMapDashboard)
+                                            ]
+                                        }, $$("content"));
+                                        openMetatron(responseJSON.access_token,responseJSON.refresh_token,'bearer','admin',
+                                            'http://188.72.76.57:8180/app/v2/embedded/dashboard/83453411-721c-4063-9813-d066104c71c9');
+
+                                    }
+                                }
+                            };
+                        }
                     }
                 ]
             }
