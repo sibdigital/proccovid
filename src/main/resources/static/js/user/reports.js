@@ -102,6 +102,19 @@ function UserReports(userRoles) {
                                     ]
                                 }, $$("content"));
                             },
+                        },
+                        {
+                            view: 'label',
+                            hidden: !(isUser || isAdmin),
+                            label: "<a href='' onclick='return false'>Отчет по количествам в разрезе ОКВЭД\n</a>",
+                            click: () => {
+                                webix.ui({
+                                    id: 'content',
+                                    rows: [
+                                        webix.copy(organizationCountByOkvedReport)
+                                    ]
+                                }, $$("content"));
+                            },
                         }
                     ]
                 }

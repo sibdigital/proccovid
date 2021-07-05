@@ -4,15 +4,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ru.sibdigital.proccovid.dto.KeyValue;
+import ru.sibdigital.proccovid.model.OrganizationTypes;
+import ru.sibdigital.proccovid.model.ReviewStatuses;
 import ru.sibdigital.proccovid.service.reports.RemoteCntReportService;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @Slf4j
@@ -99,4 +105,60 @@ public class ReportController {
         out.close();
         return null;
     }
+
+    @RequestMapping(
+            value = {"/generate_org_count_by_okved_report","/outer/generate_org_count_by_okved_report"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody String generateOrgCountByOkvedReport(@RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                                              @RequestParam(value = "requestTimeCreate") String timeCreateString,
+                                                              @RequestParam(value = "statusValue") Long statusValue) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date timeCreate = dateFormat.parse(timeCreateString);
+        byte[] bytes = remoteCntReportService.exportOrgCountByOkvedReport("html", okvedPaths, timeCreate, statusValue);
+        String template = new String(bytes);
+        return template;
+    }
+
+    @RequestMapping(
+            value = {"/org_count_by_okved_report/{format}/params","/outer/org_count_by_okved_report/{format}/params"}
+    )
+    public String downloadOrgCountByOkvedReport(@PathVariable String format,
+                                                @RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                                @RequestParam(value = "requestTimeCreate") String timeCreateString,
+                                                @RequestParam(value = "statusValue") Long statusValue,
+                                                  HttpServletResponse response) throws IOException, ParseException {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        Date timeCreate = dateFormat.parse(timeCreateString);
+        byte[] bytes = remoteCntReportService.exportOrgCountByOkvedReport(format, okvedPaths, timeCreate, statusValue);
+
+        if (format.equals("pdf")) {
+            response.setContentType("application/pdf");
+        } else if (format.equals("html")) {
+            response.setContentType("text/html");
+        } else if (format.equals("xlsx")){
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=organizationCountByOkveds.xlsx");
+        }
+
+        ServletOutputStream out = response.getOutputStream();
+        out.write(bytes);
+        out.flush();
+        out.close();
+        return null;
+    }
+
+    @GetMapping("/review_statuses")
+    public @ResponseBody List<KeyValue> getRequestReviewStatuses() {
+        Map<Long, String> statusMap = remoteCntReportService.getReviewStatusMap();
+        List<KeyValue> list = new ArrayList<>();
+
+        for(Map.Entry<Long, String> item : statusMap.entrySet()){
+            list.add(new KeyValue("ReviewStatuses", item.getKey(), item.getValue()));
+        }
+
+        return list;
+    }
+
 }
