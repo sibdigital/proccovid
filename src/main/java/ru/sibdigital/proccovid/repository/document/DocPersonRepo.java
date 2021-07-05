@@ -17,17 +17,15 @@ public interface DocPersonRepo extends JpaRepository<DocPerson, Long> {
     @Query(nativeQuery = true, value = "select count(*) from ( select distinct lastname, firstname, patronymic from doc_person where is_deleted = false) as s")
     Long getTotalPeople();
 
-    @Query(nativeQuery = true, value = "SELECT count(*) " +
-            "FROM ( SELECT DISTINCT firstname, lastname, patronymic " +
-            "   FROM doc_person " +
-            "   WHERE is_deleted = false " +
-            "   and id_request IN (" +
-            "       SELECT id " +
-            "       FROM doc_request " +
-            "       WHERE status_review = :status " +
-            "        and time_create between :localDateBegin and :localDateEnd " +
-            "   )" +
-            ") AS s;")
+    @Query(nativeQuery = true, value =
+            " SELECT count(distinct t.id_employee)\n" +
+            " FROM public.reg_doc_request_employee t\n" +
+            " inner join public.doc_request as dr on t.id_request = dr.id\n" +
+            " inner join public.doc_employee as de on t.id_employee = de.id\n" +
+            " where dr.status_review = :status dr.status_pause = 0 and dr.status_activity = 1\n" +
+            " and de.is_deleted = false\n" +
+            " and time_create between :localDateBegin and :localDateEnd"
+    )
     Long getTotalApprovedPeopleByReviewStatus(@Param("status") int status, LocalDateTime localDateBegin, LocalDateTime localDateEnd);
 
     @Query(nativeQuery = true, value = "SELECT count(*) FROM ( SELECT DISTINCT firstname, lastname, patronymic F" +
