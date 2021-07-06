@@ -18,7 +18,7 @@ function UserReports(userRoles) {
                     rows: [
                         {
                             view: 'label',
-                            hidden: !isAdmin,
+                            hidden: !(isUser || isAdmin),
                             label: "<a href='statistic' target='_blank'>Статистика по заявкам</a>"
                         },
                         {
