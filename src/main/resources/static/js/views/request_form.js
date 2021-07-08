@@ -25,8 +25,10 @@ function showRequestForm(id) {
                 ]
             },
             width: 1200,
+            // height: window.innerHeight - 80,
             height: 840,
             position: 'center',
+            fullscreen: true,
             item: data,
             modal: true,
             body: {
