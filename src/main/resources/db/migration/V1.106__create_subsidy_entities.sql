@@ -1,6 +1,21 @@
 create schema if not exists subs
 ;
 
+create table cls_file_type -- справочник типов документов/файлов,
+-- которые прикладываекются к завявке: приказы, доверенности, ведомости и тд
+(
+    id serial not null
+        constraint cls_file_type_pkey
+            primary key,
+    is_deleted boolean default false,
+    time_create timestamp default CURRENT_TIMESTAMP not null,
+    name text,
+    short_name text,
+    code varchar(15)
+)
+;
+
+
 create table subs.cls_subsidy -- справочник субсидий по аналогии с cls_type_request
 (
     id serial not null
@@ -45,7 +60,8 @@ create table subs.tp_subsidy_okved -- табличная часть для сп�
         constraint fk_cls_subsidy_okved_okved
             references okved,
     time_create timestamp default CURRENT_TIMESTAMP not null,
-    id_type_organization integer
+    id_type_organization integer,
+    is_require_signature_verification boolean default true --обязательна проверка эл. подписи для этого типа подателей заявок
 )
 ;
 
@@ -67,6 +83,25 @@ create table subs.tp_subsidy_file -- файлы субсидии
     file_extension varchar(16),
     hash text,
     file_size integer
+);
+
+create table subs.tp_required_subsidy_file -- ТРЕБУЕМЫЕ для подачи субсии файлы
+-- используется для того, чтобы сформировать список файлоы,
+-- которые необходимо прикрпеить к субсиидии в tp_request_subsidy_file
+(
+    id serial not null
+        constraint tp_required_subsidy_file_pkey
+            primary key,
+    id_subsidy integer not null
+        constraint fk_tp_required_subsidy_file_cls_subsidy
+            references subs.cls_subsidy,
+    id_file_type integer not null
+        constraint fk_tp_required_subsidy_file_cls_file_type
+            references cls_file_type,
+    is_deleted boolean default false,
+    is_required boolean default false, --обязателен или нет для прикрепления
+    time_create timestamp default CURRENT_TIMESTAMP not null,
+    comment text
 );
 
 create table subs.cls_subsidy_request_status -- справочник статусов субсидий
@@ -148,6 +183,9 @@ create table subs.tp_request_subsidy_file --файлы заявки
     id_processed_user integer -- пользователь ИОГВ, давший ответ
         constraint fk_tp_request_subsidy_file_processed_user_id_fk
             references cls_user,
+    id_file_type integer not null
+        constraint fk_tp_required_subsidy_file_cls_file_type
+            references cls_file_type, --тип файла согласно требуемым для подачи файлам
     is_deleted boolean,
     time_create timestamp default CURRENT_TIMESTAMP not null,
     attachment_path text,
@@ -161,6 +199,32 @@ create table subs.tp_request_subsidy_file --файлы заявки
         constraint fk_subsidy_request_file
             references subs.tp_request_subsidy_file
 );
+
+create table subs.reg_verification_signature_file --таблица с результатаами проверки эл. подписи файлов
+(
+    id serial not null
+        constraint reg_verification_signature_file_pkey
+            primary key,
+    id_request integer not null
+        constraint fk_doc_request_subsidy
+            references subs.doc_request_subsidy,
+    id_request_subsidy_file integer not null -- ссылка на проверяемый файд
+        constraint reg_verification_signature_file_tp_request_subsidy_file
+            references subs.tp_request_subsidy_file,
+    id_request_subsidy_signature_file integer not null --ссылка на подпись проверяемого файла
+        constraint reg_verification_signature_file_tp_request_subsidy_signature_file
+            references subs.tp_request_subsidy_file,
+    time_create timestamp default CURRENT_TIMESTAMP not null,
+    time_begin_verification timestamp, -- время начала проверки подписи
+    time_end_verification timestamp,-- время завершения проверки подписи
+    verify_status integer default 0, -- 0 - проверка не проводилась
+    -- 1 - проверка прошла успешно
+    -- 2 - подпись не соответствует файлу
+    -- 3  в сертификате или цепочке сертификатов есть ошибки
+    -- 4 в подписи есть ошибки
+    verify_result text
+)
+;
 
 create index idx_tp_request_subsidy_file
 	on subs.tp_request_subsidy_file (id_request)
