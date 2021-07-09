@@ -190,6 +190,7 @@ create table subs.tp_request_subsidy_file --файлы заявки
     time_create timestamp default CURRENT_TIMESTAMP not null,
     attachment_path text,
     file_name text,
+    view_file_name text,
     original_file_name text,
     file_extension varchar(16),
     hash text,
