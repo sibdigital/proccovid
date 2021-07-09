@@ -30,6 +30,7 @@ public class TpRequestSubsidyFile {
     private Timestamp timeCreate;
     private String attachmentPath;
     private String fileName;
+    private String viewFileName;
     private String originalFileName;
     private String fileExtension;
     private String hash;
@@ -223,4 +224,13 @@ public class TpRequestSubsidyFile {
         this.fileType = clsFileTypeByIdFileType;
     }
 
+    @Basic
+    @Column(name = "view_file_name", nullable = true)
+    public String getViewFileName() {
+        return viewFileName;
+    }
+
+    public void setViewFileName(String viewFileName) {
+        this.viewFileName = viewFileName;
+    }
 }
