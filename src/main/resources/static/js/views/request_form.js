@@ -148,8 +148,9 @@ function showRequestForm(id) {
                 ]
             },
             width: 1200,
-            height: 540,
+            // height: window.innerHeight - 80,
             position: 'center',
+            fullscreen: true,
             item: data,
             modal: true,
             body: requestFormBoby
