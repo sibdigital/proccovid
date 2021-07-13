@@ -19,20 +19,9 @@ public class TpSubsidyOkved {
     @Id
     @Column(name = "id", nullable = false)
     @SequenceGenerator(name = "tp_subsidy_okved_id_seq", sequenceName = "tp_subsidy_okved_id_seq",
-            allocationSize = 1, schema = "subs"
-    )
+            allocationSize = 1, schema = "subs")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tp_subsidy_okved_id_seq")
     private Long id;
-    private Boolean isDeleted;
-    private Timestamp timeCreate;
-    private Integer idTypeOrganization;
-
-    private ClsSubsidy subsidy;
-
-    private Okved okved;
-
-    @Id
-    @Column(name = "id")
     public Long getId() {
         return id;
     }
@@ -40,6 +29,10 @@ public class TpSubsidyOkved {
     public void setId(Long id) {
         this.id = id;
     }
+
+    private Boolean isDeleted;
+    private Timestamp timeCreate;
+    private Integer idTypeOrganization;
 
     @Basic
     @Column(name = "is_deleted")
@@ -71,6 +64,29 @@ public class TpSubsidyOkved {
         this.idTypeOrganization = idTypeOrganization;
     }
 
+    @ManyToOne
+    @JoinColumn(name = "id_subsidy", referencedColumnName = "id", nullable = false)
+    private ClsSubsidy subsidy;
+    public ClsSubsidy getSubsidy() {
+        return subsidy;
+    }
+
+    public void setSubsidy(ClsSubsidy subsidy) {
+        this.subsidy = subsidy;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "id_okved", referencedColumnName = "id", nullable = false)
+    private Okved okved;
+    public Okved getOkved() {
+        return okved;
+    }
+
+    public void setOkved(Okved okved) {
+        this.okved = okved;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -82,25 +98,5 @@ public class TpSubsidyOkved {
     @Override
     public int hashCode() {
         return Objects.hash(id, isDeleted, timeCreate, idTypeOrganization);
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "id_subsidy", referencedColumnName = "id", nullable = false)
-    public ClsSubsidy getSubsidy() {
-        return subsidy;
-    }
-
-    public void setSubsidy(ClsSubsidy subsidy) {
-        this.subsidy = subsidy;
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "id_okved", referencedColumnName = "id", nullable = false)
-    public Okved getOkved() {
-        return okved;
-    }
-
-    public void setOkved(Okved okved) {
-        this.okved = okved;
     }
 }
