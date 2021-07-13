@@ -15,6 +15,7 @@ import ru.sibdigital.proccovid.utils.ExcelParser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -152,5 +153,11 @@ public class OkvedServiceImpl implements OkvedService {
 
     public Okved findOkvedByPathCode(String path) {
         return okvedRepo.findByPath(path);
+    }
+
+    public Set<String> getAllOkvedPathsByVersion(String version) {
+        List<Okved> okveds = okvedRepo.findAllByVersion(version);
+        Set<String> okvedPaths = okveds.stream().map(ctr -> ctr.getPath()).collect(Collectors.toSet());
+        return okvedPaths;
     }
 }

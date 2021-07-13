@@ -6,6 +6,7 @@ import ru.sibdigital.proccovid.dto.OkvedDto;
 import ru.sibdigital.proccovid.model.Okved;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface OkvedService {
@@ -24,4 +25,5 @@ public interface OkvedService {
 
     String deleteOkved(UUID id);
 
+    Set<String> getAllOkvedPathsByVersion(String version);
 }

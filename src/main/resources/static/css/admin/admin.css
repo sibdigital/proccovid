@@ -102,3 +102,54 @@
     background-color: transparent;
     text-decoration: underline;
 }
+
+
+.button_red .webix_button {
+    background-color: #F4F5F9;
+    color: #ff0000;
+    /*border: 1px solid #ff0000;*/
+    /*border-bottom: 1px solid #ff0000;*/
+}
+.button_red .webix_button:hover {
+    background-color: #e7e9f2;
+}
+.button_red .webix_button:focus {
+    background-color: #e7e9f2;
+}
+.button_red .webix_button:active {
+    background-color: #e7e9f2;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.button_red .webix_button .webix_icon,
+.button_red .webix_button .webix_img_btn_text,
+.button_red .webix_button .webix_icon_btn {
+    color: #ff0000;
+}
+.button_red .webix_pressed .webix_button {
+    background-color: #e7e9f2;
+}
+
+.button_blue .webix_button {
+    background-color: #F4F5F9;
+    color: #1CA1C1;
+    /*border: 1px solid #ff0000;*/
+    /*border-bottom: 1px solid #ff0000;*/
+}
+.button_blue .webix_button:hover {
+    background-color: #e7e9f2;
+}
+.button_blue .webix_button:focus {
+    background-color: #e7e9f2;
+}
+.button_blue .webix_button:active {
+    background-color: #e7e9f2;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.button_blue .webix_button .webix_icon,
+.button_blue .webix_button .webix_img_btn_text,
+.button_blue .webix_button .webix_icon_btn {
+    color: #1CA1C1;
+}
+.button_blue .webix_pressed .webix_button {
+    background-color: #e7e9f2;
+}

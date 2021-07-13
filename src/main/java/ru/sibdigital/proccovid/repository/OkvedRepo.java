@@ -13,6 +13,7 @@ import ru.sibdigital.proccovid.model.Okved;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -67,8 +68,8 @@ public interface OkvedRepo extends JpaRepository<Okved, Integer>, JpaSpecificati
     @Query(nativeQuery = true, value = "select * from okved where kind_code = :kind_code and version = :version")
     Okved findByKindCodeAndVersion(String kind_code, String version);
 
-    @Query(nativeQuery = true, value = "select ltree2text(path) as id, kind_name as value from okved " +
-            "where ltree2text(path) like %:parentNode% and type_code = :typeCode")
+    @Query(nativeQuery = true, value = "select ltree2text(path) as id, coalesce(kind_code || ' ', '') || kind_name as value from okved " +
+            "where ltree2text(path) like %:parentNode% and type_code = :typeCode order by coalesce(kind_code, section_code)")
     List<Map<String,Object>> findNode(String parentNode, int typeCode);
 
 
@@ -84,4 +85,17 @@ public interface OkvedRepo extends JpaRepository<Okved, Integer>, JpaSpecificati
 
 
     List<Okved> findAllByVersion(String version);
+
+    @Query(nativeQuery = true, value = "    WITH\n" +
+            "    chosen_okveds AS (\n" +
+            "        SELECT *, length(ltree2text(okved.path)) as path_len\n" +
+            "        FROM okved\n" +
+            "        WHERE CAST(okved.path AS text) in (:okved_paths)\n" +
+            "    )\n" +
+            "    SELECT okved.*\n" +
+            "    FROM chosen_okveds\n" +
+            "             LEFT JOIN okved\n" +
+            "                       ON index(okved.path, chosen_okveds.path, 0) = 0\n" +
+            "    GROUP BY okved.id")
+    List<Okved> getChildrenOkvedsByParentPaths(@Param("okved_paths") Set<String> okvedPaths);
 }

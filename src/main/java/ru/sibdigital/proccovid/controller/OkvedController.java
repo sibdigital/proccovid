@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sibdigital.proccovid.dto.OkvedDto;
 import ru.sibdigital.proccovid.model.Okved;
+import ru.sibdigital.proccovid.model.RegOrganizationOkved;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 import ru.sibdigital.proccovid.service.impl.OkvedServiceImpl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class OkvedController {
@@ -122,5 +122,24 @@ public class OkvedController {
         List<Map<String,Object>> sections = okvedRepo.findNode(parentNode,typeCode);
         return sections;
     }
+
+    @GetMapping("/get_children_okveds_by_parents")
+    public @ResponseBody
+    List<Okved> getAllChildrenByParents(@RequestParam(value = "okveds") List<String> okvedPaths) {
+        Set<String> set = okvedPaths.stream().collect(Collectors.toSet());
+        if (set.contains("2001")) {
+            set.addAll(okvedServiceImpl.getAllOkvedPathsByVersion("2001"));
+        }
+        if (set.contains("2014")) {
+            set.addAll(okvedServiceImpl.getAllOkvedPathsByVersion("2014"));
+        }
+        if (okvedPaths != null && !okvedPaths.isEmpty()) {
+            List<Okved> okveds = okvedRepo.getChildrenOkvedsByParentPaths(set);
+            return okveds;
+        } else {
+            return new ArrayList<Okved>();
+        }
+    }
+
 
 }
