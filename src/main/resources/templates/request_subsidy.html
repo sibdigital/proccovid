@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head>
+  <meta charset="UTF-8">
+  <title th:utext="${application_name}"></title>
+  <style>
+    .webix_list_item {
+      font-size: 0.75em;
+    }
+  </style>
+  <link rel="stylesheet" th:href="@{/libs/webix.min.css}" type="text/css">
+  <script th:src="@{/libs/webix.min.js}"></script>
+  <script th:src="@{/js/views/request_subsidy_form_view.js}"></script>
+  <style>body {margin: 0}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script th:inline="javascript">
+  const ID = [[${doc_request_subsidy_id}]];
+  const LINK_PREFIX = [[${link_prefix}]]
+  const LINK_SUFFIX = [[${link_suffix}]]
+</script>
+</body>
+</html>

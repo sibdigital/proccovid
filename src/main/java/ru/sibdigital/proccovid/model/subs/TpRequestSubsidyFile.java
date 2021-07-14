@@ -1,5 +1,6 @@
 package ru.sibdigital.proccovid.model.subs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -54,6 +55,7 @@ public class TpRequestSubsidyFile {
     @JoinColumn(name = "id_processed_user", referencedColumnName = "id")
     @Access(AccessType.FIELD)
     private ClsUser processedUser;
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_subsidy_request_file", referencedColumnName = "id")
     @Access(AccessType.FIELD)

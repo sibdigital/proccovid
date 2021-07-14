@@ -2,6 +2,7 @@ package ru.sibdigital.proccovid.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -10,8 +11,10 @@ import ru.sibdigital.proccovid.dto.subs.ClsSubsidyDto;
 import ru.sibdigital.proccovid.model.ClsDepartment;
 import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.subs.ClsSubsidy;
+import ru.sibdigital.proccovid.model.subs.DocRequestSubsidy;
 import ru.sibdigital.proccovid.model.subs.TpSubsidyOkved;
 import ru.sibdigital.proccovid.repository.classifier.ClsDepartmentRepo;
+import ru.sibdigital.proccovid.repository.specification.DocRequestSubsidySearchCriteria;
 import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRepo;
 import ru.sibdigital.proccovid.repository.subs.TpSubsidyOkvedRepo;
 import ru.sibdigital.proccovid.service.subs.SubsidyService;
@@ -19,21 +22,83 @@ import ru.sibdigital.proccovid.service.subs.SubsidyService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+@RestController
 @Slf4j
-@Controller
 public class SubsidyController {
     //для работы с ClsSubsidy, TpRequiredSubsidyFile TpSubsidyFile TpSubsidyOkved  ClsSubsidyRequestStatus
+
+    @Autowired
+    private SubsidyService subsidyService;
+
     @Autowired
     ClsSubsidyRepo clsSubsidyRepo;
 
     @Autowired
     ClsDepartmentRepo clsDepartmentRepo;
 
-    @Autowired
-    SubsidyService subsidyService;
 
     @Autowired
     TpSubsidyOkvedRepo tpSubsidyOkvedRepo;
+
+    @GetMapping("/list_subsidy/{id_department}")
+    public Map<String, Object> listRequest(@PathVariable("id_department") Long idDepartment,
+                                           @RequestParam(value = "status", required = false) String status,
+                                           @RequestParam(value = "id_type_request", required = false) Integer idTypeRequest,
+                                           @RequestParam(value = "id_district", required = false) Integer idDistrict,
+                                           @RequestParam(value = "is_actualization", required = false) Boolean isActualization,
+                                           @RequestParam(value = "inn", required = false) String innOrName,
+                                           @RequestParam(value = "start", required = false) Integer start,
+                                           @RequestParam(value = "count", required = false) Integer count,
+                                           @RequestParam(value = "bst", required = false) Timestamp beginSearchTime,
+                                           @RequestParam(value = "est", required = false) Timestamp endSearchTime
+    ) {
+
+        int page = start == null ? 0 : start / 25;
+        int size = count == null ? 25 : count;
+
+        DocRequestSubsidySearchCriteria searchCriteria = new DocRequestSubsidySearchCriteria();
+        searchCriteria.setIdDepartment(idDepartment);
+        searchCriteria.setStatusReview(status);
+        searchCriteria.setIdTypeRequest(idTypeRequest);
+        searchCriteria.setIdDistrict(idDistrict);
+        searchCriteria.setActualization(isActualization);
+        searchCriteria.setInnOrName(innOrName);
+        searchCriteria.setBeginSearchTime(beginSearchTime);
+        searchCriteria.setEndSearchTime(endSearchTime);
+
+        Page<DocRequestSubsidy> docRequestSubsidyPage = subsidyService.getRequestsByCriteria(searchCriteria, page, size);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", docRequestSubsidyPage.getContent());
+        result.put("pos", (long) page * size);
+        result.put("total_count", docRequestSubsidyPage.getTotalElements());
+        return result;
+    }
+
+
+    @GetMapping("cls_subsidy_request_status_short")
+    public @ResponseBody List<KeyValue> getClsSubsidyRequestStatusShort() {
+        AtomicLong index = new AtomicLong(0);
+        return subsidyService.getClsSubsidyRequestStatusShort().stream()
+                .map( csrss -> new KeyValue(csrss.getClass().getSimpleName(), index.getAndIncrement(), csrss))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("cls_subsidy_short")
+    public @ResponseBody List<KeyValue> getClsSubsidyShort() {
+        AtomicLong index = new AtomicLong(0);
+        return subsidyService.getClsSubsidyShort().stream()
+                .map(clsSubsidy -> new KeyValue(clsSubsidy.getClass().getSimpleName(), clsSubsidy.getId(), clsSubsidy.getName()))
+                .collect(Collectors.toList());
+    }
+
 
     @GetMapping("/subsidies")
     public @ResponseBody

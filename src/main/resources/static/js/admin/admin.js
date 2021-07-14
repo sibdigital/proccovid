@@ -236,6 +236,7 @@ webix.ready(function() {
                             { id: "Organizations",icon: "fas fa-file-alt", value: 'Организации' },
                             { id: "ControlAuthority", icon: "fas fa-file-alt", value: "Контрольно-надзорные органы" },
                             { id: "Requests", icon: "fas fa-file", value: 'Заявки' },
+                            { id: "SubsidiesSupport", icon: "fas fa-chart-bar", value: 'Меры поддержки' },
                             { id: "TypeRequests", icon: "fas fa-file-alt", value: 'Виды деятельности' },
                             // { id: "RestrictionTypes", icon: "fas fa-file-alt", value: 'Типы ограничений' },
                             { id: "Prescriptions", icon: "fas fa-file-alt", value: 'Предписания' },
@@ -279,6 +280,10 @@ webix.ready(function() {
                                     }
                                     case 'Requests': {
                                         view = adminRequests;
+                                        break;
+                                    }
+                                    case 'SubsidiesSupport': {
+                                        view = subsidiesSupport;
                                         break;
                                     }
                                     case 'Prescriptions': {

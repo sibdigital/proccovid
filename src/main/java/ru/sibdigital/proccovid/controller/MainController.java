@@ -14,6 +14,7 @@ import ru.sibdigital.proccovid.config.ApplicationConstants;
 import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.KeyValue;
 import ru.sibdigital.proccovid.model.*;
+import ru.sibdigital.proccovid.model.subs.DocRequestSubsidy;
 import ru.sibdigital.proccovid.repository.classifier.ClsControlAuthorityRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsMigrationRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsOrganizationRepo;
@@ -168,6 +169,16 @@ public class MainController {
             return "request";
         }
         return "view";
+    }
+
+    @GetMapping("/request_subsidy/view")
+    public String viewDocRequestSubsidy(@RequestParam("id") DocRequestSubsidy docRequestSubsidy, Model model, HttpSession session) {
+        model.addAttribute("doc_request_subsidy_id", docRequestSubsidy.getId());
+        model.addAttribute("link_prefix", applicationConstants.getLinkPrefix());
+        model.addAttribute("link_suffix", applicationConstants.getLinkSuffix());
+        model.addAttribute("application_name", applicationConstants.getApplicationName());
+
+        return "request_subsidy";
     }
 
     @RequestMapping(value = {"/organization/view", "/outer/organization/view"},

@@ -13,7 +13,7 @@ $(document).on("click.bs.dropdown.data-api.webix_popup.webix_calendar",".webix_c
     (e) => { e.stopPropagation() }
 );
 
-const get_group_filter_btns = (filter_data, reload_func) => {
+const get_group_filter_btns = (filter_data, reload_func, clear_filter_func = null) => {
     let result_html = `<div class="filter_view">`;
     filter_data.map(panel =>
         result_html +=
@@ -45,7 +45,11 @@ const get_group_filter_btns = (filter_data, reload_func) => {
 
     $(document).on("click","#clear_filter_" + reload_func.name, function (){
         clear_filter_fields(filter_data);
-        reload_func();
+        if (clear_filter_func) {
+            clear_filter_func();
+        } else {
+            reload_func();
+        }
     });
 
     $(document).on("click","#filter_" + reload_func.name, function (){
