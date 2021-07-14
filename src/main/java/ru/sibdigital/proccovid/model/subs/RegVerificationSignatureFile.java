@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "reg_verification_signature_file", schema = "subs")
+@Table(name = "reg_verification_signature_file", schema = "subs", catalog = "cov_prod_copy2")
 public class RegVerificationSignatureFile {
     //cov_prod_copy2.subs.reg_verification_signature_file_id_seq
     @Id
@@ -29,6 +29,9 @@ public class RegVerificationSignatureFile {
     @ManyToOne
     @JoinColumn(name = "id_request_subsidy_signature_file", referencedColumnName = "id", nullable = false)
     private TpRequestSubsidyFile requestSubsidySubsidySignatureFile;
+    @Basic
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 
     public Long getId() {
         return id;
@@ -49,7 +52,7 @@ public class RegVerificationSignatureFile {
     }
 
     @Basic
-    @Column(name = "time_begin_verification")
+    @Column(name = "time_begin_verification", nullable = true)
     public Timestamp getTimeBeginVerification() {
         return timeBeginVerification;
     }
@@ -59,7 +62,7 @@ public class RegVerificationSignatureFile {
     }
 
     @Basic
-    @Column(name = "time_end_verification")
+    @Column(name = "time_end_verification", nullable = true)
     public Timestamp getTimeEndVerification() {
         return timeEndVerification;
     }
@@ -124,4 +127,13 @@ public class RegVerificationSignatureFile {
     public void setRequestSubsidySubsidySignatureFile(TpRequestSubsidyFile requestSubsidySubsidySignatureFile) {
         this.requestSubsidySubsidySignatureFile = requestSubsidySubsidySignatureFile;
     }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
+
 }
