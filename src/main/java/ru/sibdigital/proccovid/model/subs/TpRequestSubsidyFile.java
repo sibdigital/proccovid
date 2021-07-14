@@ -62,12 +62,12 @@ public class TpRequestSubsidyFile {
     @JoinColumn(name = "id_file_type", referencedColumnName = "id", nullable = false)
     @Access(AccessType.FIELD)
     private ClsFileType fileType;
-    @Where(clause = "not is_deleted")
-    @OneToMany(mappedBy = "requestSubsidyFile")
-    private Collection<RegVerificationSignatureFile> verificationSignatureFiles;
-    @Where(clause = "not is_deleted")
-    @OneToMany(mappedBy = "requestSubsidySubsidySignatureFile")
-    private Collection<RegVerificationSignatureFile> verificationSignatureFilesSignatureFiles;
+//    @Where(clause = "not is_deleted")
+//    @OneToMany(mappedBy = "requestSubsidyFile")
+//    private Collection<RegVerificationSignatureFile> verificationSignatureFiles;
+//    @Where(clause = "not is_deleted")
+//    @OneToMany(mappedBy = "requestSubsidySubsidySignatureFile")
+//    private Collection<RegVerificationSignatureFile> verificationSignatureFilesSignatureFiles;
 
     @Id
     @Column(name = "id", nullable = false)
@@ -242,19 +242,19 @@ public class TpRequestSubsidyFile {
         this.viewFileName = viewFileName;
     }
 
-    public Collection<RegVerificationSignatureFile> getVerificationSignatureFiles() {
-        return verificationSignatureFiles;
-    }
-
-    public void setVerificationSignatureFiles(Collection<RegVerificationSignatureFile> verificationSignatureFiles) {
-        this.verificationSignatureFiles = verificationSignatureFiles;
-    }
-
-    public Collection<RegVerificationSignatureFile> getVerificationSignatureFilesSignatureFiles() {
-        return verificationSignatureFilesSignatureFiles;
-    }
-
-    public void setVerificationSignatureFilesSignatureFiles(Collection<RegVerificationSignatureFile> verificationSignatureFilesSignatureFiles) {
-        this.verificationSignatureFilesSignatureFiles = verificationSignatureFilesSignatureFiles;
-    }
+//    public Collection<RegVerificationSignatureFile> getVerificationSignatureFiles() {
+//        return verificationSignatureFiles;
+//    }
+//
+//    public void setVerificationSignatureFiles(Collection<RegVerificationSignatureFile> verificationSignatureFiles) {
+//        this.verificationSignatureFiles = verificationSignatureFiles;
+//    }
+//
+//    public Collection<RegVerificationSignatureFile> getVerificationSignatureFilesSignatureFiles() {
+//        return verificationSignatureFilesSignatureFiles;
+//    }
+//
+//    public void setVerificationSignatureFilesSignatureFiles(Collection<RegVerificationSignatureFile> verificationSignatureFilesSignatureFiles) {
+//        this.verificationSignatureFilesSignatureFiles = verificationSignatureFilesSignatureFiles;
+//    }
 }
