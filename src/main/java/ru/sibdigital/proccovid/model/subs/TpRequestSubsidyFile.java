@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Entity
-@Table(name = "tp_request_subsidy_file", schema = "subs", catalog = "cov_prod_copy2")
+@Table(name = "tp_request_subsidy_file", schema = "subs")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)

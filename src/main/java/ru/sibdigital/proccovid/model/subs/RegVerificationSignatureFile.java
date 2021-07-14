@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "reg_verification_signature_file", schema = "subs", catalog = "cov_prod_copy2")
+@Table(name = "reg_verification_signature_file", schema = "subs")
 public class RegVerificationSignatureFile {
     //cov_prod_copy2.subs.reg_verification_signature_file_id_seq
     @Id
