@@ -34,7 +34,15 @@ public class DocRequestSubsidySpecification implements Specification<DocRequestS
         if (searchCriteria.getInnOrName() != null) {
             predicates.add(criteriaBuilder.or(
                     criteriaBuilder.like(criteriaBuilder.trim(root.get("organization").get("inn")), '%' + searchCriteria.getInnOrName() + '%')));
-//                    criteriaBuilder.like(criteriaBuilder.lower(root.get("organization").get("name")), '%' + searchCriteria.getInnOrName() + '%')));
+        }
+
+        if (searchCriteria.getSubsidyId() != null) {
+            predicates.add(criteriaBuilder.equal(root.get("subsidy").get("id"), searchCriteria.getSubsidyId()));
+        }
+
+        if (searchCriteria.getSubsidyRequestStatusShortName() != null) {
+            predicates.add(criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.trim(root.get("subsidyRequestStatus").get("shortName")), '%' + searchCriteria.getSubsidyRequestStatusShortName() + '%')));
         }
 
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

@@ -101,6 +101,7 @@ const subsidiesSupport = {
                                         options: 'cls_subsidy_short',
                                         on: {
                                             onChange() {
+                                                console.dir({ elem: $$("subsidy_type").getList().getItem($$("subsidy_type").getValue()) });
                                             }
                                         }
                                     },
@@ -113,6 +114,7 @@ const subsidiesSupport = {
                                         options: 'cls_subsidy_request_status_short',
                                         on: {
                                             onChange() {
+                                                console.dir({ elem: $$("subsidy_request_status").getList().getItem($$("subsidy_request_status").getValue()) });
                                             }
                                         }
                                     },
@@ -122,7 +124,6 @@ const subsidiesSupport = {
                                         width: 450,
                                         maxWidth: 450,
                                         minWidth: 100,
-                                        tooltip: 'после ввода значения нажмите "Найти"',
                                         placeholder: "Поиск по ИНН и названию",
                                     },
                                     {
@@ -189,19 +190,36 @@ const subsidiesSupport = {
                         datafetch: 25,
                         columns: [
                             {
-                                id: "orgName",
-                                header: "Организация/ИП",
-                                template: "#organization.name#",
-                                adjust: true
+                                id: "subsidy",
+                                header: "Мера поддержки",
+                                template: "#subsidy.name#",
+                                adjust: true,
+                                tooltip: false,
+                                minWidth: 300,
+                                fillspace: true,
                             },
-                            {id: "inn", header: "ИНН", template: "#organization.inn#", adjust: true},
-                            {id: "ogrn", header: "ОГРН", template: "#organization.ogrn#", adjust: true},
-                            {id: "subsidy", header: "Субсидия", template: "#subsidy.shortName#", adjust: true},
-                            {id: "timeSend", header: "Дата подачи", template: '#timeSend#', adjust: true, format: webix.Date.dateToStr("%d.%m.%Y %H:%i:%s") },
+                            { id: "status", header: "Статус", template: "#subsidyRequestStatus.shortName#", adjust: true, minWidth: 250 },
+                            { id: "department", header: "Рассматривает", template: "#department.name#", adjust: true, minWidth: 200 },
+                            { id: "time_Create", header: "Дата создания", adjust: true, minWidth: 200 },
+                            { id: "time_Send", header: "Дата подачи", adjust: true, minWidth: 200 },
+                            { id: "time_Review", header: "Дата рассмотрения", adjust: true, minWidth: 200 },
                         ],
                         scheme: {
                             $init: function (obj) {
-                                obj.time_Create = obj.timeCreate.replace("T", " ") //dateUtil.toDateFormat(obj.timeCreate);
+                                const newDateFormat = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s");
+                                if (obj.timeCreate != null) {
+                                    obj.time_Create = newDateFormat(new Date(obj.timeCreate));
+                                }
+
+                                if (obj.timeReview != null) {
+                                    obj.time_Review = newDateFormat(new Date(obj.timeReview));
+                                }
+
+                                if (obj.timeSend != null) {
+                                    obj.time_Send = newDateFormat(new Date(obj.timeSend));
+                                }
+
+                                $$('subsidies_table').refresh();
                             },
                         },
                         on: {
@@ -210,15 +228,9 @@ const subsidiesSupport = {
                             },
                             onAfterLoad: function () {
                                 this.hideOverlay();
-                                const listData = [];
                                 if (!this.count()) {
                                     this.showOverlay("Отсутствуют данные")
-                                } else {
-                                    // for (let i = 0; i < this.count(); i++) {
-                                    //     listData.push(this.getItem());
-                                    // }
                                 }
-                                console.dir({ listDataTable: this.serialize() });
                             },
                             onLoadError: function () {
                                 this.hideOverlay();
@@ -230,7 +242,7 @@ const subsidiesSupport = {
                                 window.open('request_subsidy/view?id=' + data.id);
                             }
                         },
-                        url: 'list_subsidy/1'
+                        url: 'list_request_subsidy'
                     },
                     {
                         view: 'pager',
@@ -273,9 +285,19 @@ function reloadSubsidiesSearchQueries() {
         params.inn = inn;
     }
 
-    const subsidy_type = $$('subsidy_type').getValue();
-    const subsidy_request_status = $$('subsidy_request_status').getValue();
-    console.dir({ subsidy_request_status, subsidy_type });
+    const subsidy_type_id = $$('subsidy_type').getValue();
+
+    if (subsidy_type_id) {
+        params.subsidy_type_id = subsidy_type_id;
+    }
+
+    const subsidy_request_status_short_name = $$("subsidy_request_status").getValue() ? $$("subsidy_request_status").getList().getItem($$("subsidy_request_status").getValue()).value : null;
+    if (subsidy_request_status_short_name) {
+        params.subsidy_request_status_short_name = subsidy_request_status_short_name;
+    }
+
+
+    console.dir({ subsidy_request_status_short_name, subsidy_type_id });
 
     $$('subsidies_table').load(function () {
         return webix.ajax().get('list_subsidy/1', params);

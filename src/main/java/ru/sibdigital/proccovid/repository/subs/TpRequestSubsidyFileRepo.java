@@ -21,7 +21,8 @@ public interface TpRequestSubsidyFileRepo extends JpaRepository<TpRequestSubsidy
                     "    select *\n" +
                     "    from subs.tp_request_subsidy_file\n" +
                     "    where id_request = :id_request_subsidy\n" +
-                    "      and is_signature = false\n" +
+                    "      and is_signature = false" +
+                    "      and is_deleted = false\n" +
                     ")\n" +
                     "select idFiles.id, idFiles.id_request, idFiles.id_organization, idFiles.id_department, idFiles.id_processed_user, idFiles.id_file_type, idFiles.is_deleted, idFiles.time_create, idFiles.attachment_path, idFiles.file_name, idFiles.view_file_name, idFiles.original_file_name, idFiles.file_extension, idFiles.hash, idFiles.file_size, trsf.is_signature, idFiles.id_subsidy_request_file\n" +
                     "from idFiles\n" +

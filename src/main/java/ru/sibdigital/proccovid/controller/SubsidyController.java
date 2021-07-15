@@ -4,18 +4,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ru.sibdigital.proccovid.config.CurrentUser;
 import ru.sibdigital.proccovid.dto.KeyValue;
 import ru.sibdigital.proccovid.dto.subs.ClsSubsidyDto;
 import ru.sibdigital.proccovid.model.ClsDepartment;
+import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.subs.ClsSubsidy;
+import ru.sibdigital.proccovid.model.subs.ClsSubsidyRequestStatus;
 import ru.sibdigital.proccovid.model.subs.DocRequestSubsidy;
 import ru.sibdigital.proccovid.model.subs.TpSubsidyOkved;
 import ru.sibdigital.proccovid.repository.classifier.ClsDepartmentRepo;
 import ru.sibdigital.proccovid.repository.specification.DocRequestSubsidySearchCriteria;
 import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRepo;
+import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRequestStatusRepo;
 import ru.sibdigital.proccovid.repository.subs.TpSubsidyOkvedRepo;
 import ru.sibdigital.proccovid.service.subs.SubsidyService;
 
@@ -43,16 +48,12 @@ public class SubsidyController {
     @Autowired
     ClsDepartmentRepo clsDepartmentRepo;
 
-
     @Autowired
     TpSubsidyOkvedRepo tpSubsidyOkvedRepo;
 
-    @GetMapping("/list_subsidy/{id_department}")
-    public Map<String, Object> listRequest(@PathVariable("id_department") Long idDepartment,
-                                           @RequestParam(value = "status", required = false) String status,
-                                           @RequestParam(value = "id_type_request", required = false) Integer idTypeRequest,
-                                           @RequestParam(value = "id_district", required = false) Integer idDistrict,
-                                           @RequestParam(value = "is_actualization", required = false) Boolean isActualization,
+    @GetMapping("/list_request_subsidy")
+    public Map<String, Object> listRequest(@RequestParam(value = "subsidy_request_status_short_name", required = false) String status,
+                                           @RequestParam(value = "subsidy_type_id", required = false) Long subsidyTypeId,
                                            @RequestParam(value = "inn", required = false) String innOrName,
                                            @RequestParam(value = "start", required = false) Integer start,
                                            @RequestParam(value = "count", required = false) Integer count,
@@ -63,12 +64,13 @@ public class SubsidyController {
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
         DocRequestSubsidySearchCriteria searchCriteria = new DocRequestSubsidySearchCriteria();
-        searchCriteria.setIdDepartment(idDepartment);
-        searchCriteria.setStatusReview(status);
-        searchCriteria.setIdTypeRequest(idTypeRequest);
-        searchCriteria.setIdDistrict(idDistrict);
-        searchCriteria.setActualization(isActualization);
+        searchCriteria.setIdDepartment(clsUser.getIdDepartment().getId());
+        searchCriteria.setSubsidyRequestStatusShortName(status);
+        searchCriteria.setSubsidyId(subsidyTypeId);
         searchCriteria.setInnOrName(innOrName);
         searchCriteria.setBeginSearchTime(beginSearchTime);
         searchCriteria.setEndSearchTime(endSearchTime);
@@ -85,7 +87,7 @@ public class SubsidyController {
 
     @GetMapping("cls_subsidy_request_status_short")
     public @ResponseBody List<KeyValue> getClsSubsidyRequestStatusShort() {
-        AtomicLong index = new AtomicLong(0);
+        AtomicLong index = new AtomicLong(1);
         return subsidyService.getClsSubsidyRequestStatusShort().stream()
                 .map( csrss -> new KeyValue(csrss.getClass().getSimpleName(), index.getAndIncrement(), csrss))
                 .collect(Collectors.toList());
