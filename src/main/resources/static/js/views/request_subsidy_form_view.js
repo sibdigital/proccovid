@@ -331,6 +331,7 @@ webix.ready(function () {
                                                 {
                                                     rows: [
                                                         {
+                                                            id: 'subsidyRequestStatus',
                                                             view: 'text',
                                                             label: 'Статус заявки',
                                                             labelPosition: 'top',
@@ -372,11 +373,13 @@ function changeRequestSubsidyStatus(approve, id_request_subsidy) {
         resolutionComment: $$('resolutionComment').getValue(),
     };
 
-    console.log(params);
-
-
     webix.ajax()
         .headers({ 'Content-Type': 'application/json' })
         .post(`../change_request_subsidy_status/${ id_request_subsidy }/${ approve }`, params)
-        .then((data) => {});
+        .then((data) => {
+            const parseData = data.json();
+            if ((typeof parseData.success === 'string' && parseData.success === 'true') || (typeof parseData.success === 'boolean' && parseData.success)) {
+                $$('subsidyRequestStatus').setValue(parseData.status);
+            }
+        });
 }

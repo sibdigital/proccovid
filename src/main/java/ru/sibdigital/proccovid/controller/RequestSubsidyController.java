@@ -74,18 +74,17 @@ public class RequestSubsidyController {
 
     @PostMapping(value = "change_request_subsidy_status/{id_request_subsidy}/{approve}", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    ResponseEntity<String> changeRequestSubsidyStatus(@PathVariable("id_request_subsidy") Long id,
+    ResponseEntity<Map<String, String>> changeRequestSubsidyStatus(@PathVariable("id_request_subsidy") Long id,
                                                       @PathVariable("approve") Boolean approve,
                                                       @RequestBody DocRequestSubsidy newDocRequestSubsidy,
-//                                                      @RequestParam(value = "approve", required = false) Boolean approve,
-                                                      @RequestParam(value = "resolutionComment", required = false) String resolutionComment,
                                                       HttpSession session
     ){
         DocRequestSubsidy docRequestSubsidy = docRequestSubsidyRepo.findById(id).orElse(null);
+        Map<String, String> response = new HashMap<>();
 
         if (docRequestSubsidy == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not updated");
-        } else if (newDocRequestSubsidy.getResolutionComment() != null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of( "success", "false"));
+        } else if (newDocRequestSubsidy.getResolutionComment() != null && !newDocRequestSubsidy.getResolutionComment().equals(docRequestSubsidy.getResolutionComment())) {
             docRequestSubsidy.setResolutionComment(newDocRequestSubsidy.getResolutionComment());
             docRequestSubsidyRepo.save(docRequestSubsidy);
         }
@@ -95,16 +94,16 @@ public class RequestSubsidyController {
             ClsSubsidyRequestStatus clsSubsidyRequestStatus = clsSubsidyRequestStatusRepo.findById(docRequestSubsidy.getSubsidyRequestStatus().getId()).orElse(null);
 
             if (clsApproveSubsidyRequestStatus == null || clsSubsidyRequestStatus == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not updated");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of( "success", "false"));
             }
 
             clsSubsidyRequestStatus.setCode(clsApproveSubsidyRequestStatus.getCode());
             clsSubsidyRequestStatus.setName(clsApproveSubsidyRequestStatus.getName());
             clsSubsidyRequestStatus.setShortName(clsApproveSubsidyRequestStatus.getShortName());
             clsSubsidyRequestStatusRepo.save(clsSubsidyRequestStatus);
-            return ResponseEntity.ok().body("updated");
+            return ResponseEntity.ok().body(Map.of( "success", "true", "status", clsApproveSubsidyRequestStatus.getName()));
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not updated");
+        return ResponseEntity.ok().body(Map.of( "success", "false"));
     }
 
 }
