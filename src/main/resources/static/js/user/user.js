@@ -67,6 +67,7 @@ webix.ready(function() {
     let isUser = userRoles.includes("USER");
     let isViol = userRoles.includes("VIOLAT");
     let isKnd = userRoles.includes("KND");
+    let isSubsidySupport = userRoles.includes('SUBSIDY_SUPPORT');
 
     let menuItems = [
         {id: "Requests", icon: "fas fa-file", value: 'Заявки', access: isUser || isAdmin},
@@ -76,6 +77,7 @@ webix.ready(function() {
         {id: "PersonViolations", icon: "fas fa-file-alt", value: 'Нарушения физ. лиц', access: isViol || isAdmin},
         // {id: "InspectionReports", icon: "fas fa-chart-bar", value: 'Отчеты по проверкам', access: isKnd || isAdmin},
         {id: "Reports", icon: "fas fa-chart-bar", value: 'Отчеты', access: isUser || isAdmin},
+        { id: "SubsidiesSupport", icon: "fas fa-chart-bar", value: 'Меры поддержки', access: isSubsidySupport || isAdmin },
     ].filter(item => item.access === true)
 
     let layout = webix.ui({
@@ -135,6 +137,8 @@ webix.ready(function() {
                                     view = inspectionReports;
                                 } else if (id == 'Reports') {
                                     view = UserReports(userRoles);
+                                } else if (id === 'SubsidiesSupport') {
+                                    view = subsidiesSupport;
                                 }
                                 hideBtnBack(),
                                 this.select(id)
