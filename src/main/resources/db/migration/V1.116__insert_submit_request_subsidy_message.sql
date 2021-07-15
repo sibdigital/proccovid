@@ -1,0 +1,1 @@
+INSERT INTO public.cls_settings (status, key, value, string_value) VALUES (1, 'submit_request_subsidy_message', null, 'Ваша заявка принята.');
