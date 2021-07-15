@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.model.subs.*;
 import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRequestStatusRepo;
 import ru.sibdigital.proccovid.repository.subs.DocRequestSubsidyRepo;
+import ru.sibdigital.proccovid.repository.subs.RegVerificationSignatureFileRepo;
 import ru.sibdigital.proccovid.repository.subs.TpRequestSubsidyFileRepo;
 
 import javax.servlet.http.HttpSession;
@@ -25,6 +26,9 @@ public class RequestSubsidyController {
 
     @Autowired
     ClsSubsidyRequestStatusRepo clsSubsidyRequestStatusRepo;
+
+    @Autowired
+    RegVerificationSignatureFileRepo regVerificationSignatureFileRepo;
 
     @GetMapping("/doc_requests_subsidy/{id_request_subsidy}")
     public DocRequestSubsidy getDocRequestSubsidy(@PathVariable("id_request_subsidy") Long id_request_subsidy, HttpSession session) throws IllegalAccessException, InstantiationException {
@@ -106,4 +110,8 @@ public class RequestSubsidyController {
         return ResponseEntity.ok().body(Map.of( "success", "false"));
     }
 
+    @GetMapping("verification_request_subsidy_signature_file/{id_verification_request_subsidy_signature_file}")
+    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(@PathVariable("id_verification_request_subsidy_signature_file") Long id_verification_request_subsidy_signature_file, HttpSession session) {
+        return regVerificationSignatureFileRepo.findById(id_verification_request_subsidy_signature_file).orElse(null);
+    }
 }

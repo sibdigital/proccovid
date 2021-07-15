@@ -153,3 +153,12 @@
 .button_blue .webix_pressed .webix_button {
     background-color: #e7e9f2;
 }
+
+
+.verification_request_subsidy_file_signature_status_button {
+    background: transparent;
+}
+
+.verification_request_subsidy_file_signature_status_button:hover {
+    background-color: #f4f5f9;
+}

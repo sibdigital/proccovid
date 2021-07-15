@@ -300,6 +300,6 @@ function reloadSubsidiesSearchQueries() {
     console.dir({ subsidy_request_status_short_name, subsidy_type_id });
 
     $$('subsidies_table').load(function () {
-        return webix.ajax().get('list_subsidy/1', params);
+        return webix.ajax().get('list_request_subsidy', params);
     });
 }

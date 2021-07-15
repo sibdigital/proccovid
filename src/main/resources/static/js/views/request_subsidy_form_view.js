@@ -9,18 +9,24 @@ function view_section(title) {
     }
 }
 
+function getVerifyStatusStringByIntStatus(verifyStatus) {
+    let status = '';
+    switch (verifyStatus) {
+        case 1: status = "проверка прошла успешно"; break;
+        case 2: status = "подпись не соответствует файлу"; break;
+        case 3: status = "в сертификате или цепочке сертификатов есть ошибки"; break;
+        case 4: status = "в подписи есть ошибки"; break;
+        default: status = "проверка не проводилась"; break;
+    }
+    return status;
+}
+
 function getFilesListByTypeView(docRequestSubsidyId) {
     webix.ajax(`../request_subsidy_files_verification/${ docRequestSubsidyId }`).then(function (filesVerification) {
         filesVerification = filesVerification.json();
 
         filesVerification.map((file) => {
-            switch (file.verify_status) {
-               case 1: file.verify_status = "проверка прошла успешно"; break;
-               case 2: file.verify_status = "подпись не соответствует файлу"; break;
-               case 3: file.verify_status = "в сертификате или цепочке сертификатов есть ошибки"; break;
-               case 4: file.verify_status = "в подписи есть ошибки"; break;
-               default: file.verify_status = "проверка не проводилась"; break;
-            }
+            file.verify_status = getVerifyStatusStringByIntStatus(file.verify_status);
             return file;
         });
 
@@ -52,7 +58,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                 pager: `Pager/${key}`,
                                 autoheight: true,
                                 header: `id = ${key}`,
-                                select: 'row',
+                                // select: 'row',
                                 resizeColumn: true,
                                 readonly: true,
                                 data: filesArray,
@@ -89,8 +95,9 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                         id: 'verificationStatus',
                                         header: 'Статус проверки подписи',
                                         adjust: true,
-                                        sort: 'string',
-                                        template: '#verificationStatus.verify_status#',
+                                        template: (request) => {
+                                            return `<button class="verification_request_subsidy_file_signature_status_button" onclick=getVerificationStatus(${ request.verificationStatus.id_request_subsidy_file })>${ request.verificationStatus.verify_status }</button>`
+                                        },
                                     },
                                 ],
                                 on: {
@@ -292,6 +299,7 @@ webix.ready(function () {
                                     }
                                 },
                                 {
+                                    id: 'filesTab',
                                     header: 'Файлы',
                                     body: {
                                         view: 'scrollview',
@@ -303,6 +311,9 @@ webix.ready(function () {
                                                 // view_section('Файлы'),
                                                 {
                                                     id: 'filesListViewByType',
+                                                },
+                                                {
+                                                    id: 'verificationFileInfoView',
                                                 }
                                             ]
                                         }
@@ -382,4 +393,77 @@ function changeRequestSubsidyStatus(approve, id_request_subsidy) {
                 $$('subsidyRequestStatus').setValue(parseData.status);
             }
         });
+}
+
+function getVerificationStatus(verificationStatusId) {
+    const verificationData = webix.ajax().sync().get('../verification_request_subsidy_signature_file/' + verificationStatusId);
+    const jsonResponse = JSON.parse(verificationData.responseText);
+
+    if (!jsonResponse || ! verificationData) {
+        return;
+    }
+
+    $$('filesListViewByType').hide();
+
+    const newDateFormat = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s");
+    if (jsonResponse.timeCreate != null) {
+        jsonResponse.timeCreate = newDateFormat(new Date(jsonResponse.timeCreate));
+    }
+
+    if (jsonResponse.timeBeginVerification != null) {
+        jsonResponse.timeBeginVerification = newDateFormat(new Date(jsonResponse.timeBeginVerification));
+    }
+
+    if (jsonResponse.timeEndVerification != null) {
+        jsonResponse.timeEndVerification = newDateFormat(new Date(jsonResponse.timeEndVerification));
+    }
+
+    if (jsonResponse.verifyStatus != null) {
+        jsonResponse.verifyStatus = getVerifyStatusStringByIntStatus(jsonResponse.verifyStatus);
+    }
+
+    webix.ui({
+        id: 'verificationFileInfoView',
+        rows: [
+            {
+                view: 'scrollview',
+                scroll: 'y',
+                id: 'show_layout',
+                autowidth: true,
+                autoheight: true,
+                body: {
+                    rows: [
+                        {
+                            view: 'form',
+                            id: 'subsidyFormId',
+                            autoheight: true,
+                            rows: [
+                                {view: 'text', value: jsonResponse.verifyResult, label: 'Статус верификации', labelPosition: 'top', name: 'verifyResult', readonly: true,},
+                                {view: 'text', value: jsonResponse.verifyStatus, label: 'Результат верификации', labelPosition: 'top', name: 'verifyResult', readonly: true,},
+                                {view: 'text', value: jsonResponse.timeCreate, label: 'Дата создания', labelPosition: 'top', name: 'timeCreate', readonly: true,},
+                                {view: 'text', value: jsonResponse.timeBeginVerification, label: 'Дата начала верификации', labelPosition: 'top', name: 'timeBeginVerification', readonly: true,},
+                                {view: 'text', value: jsonResponse.timeEndVerification, label: 'Дата окончания верификации', labelPosition: 'top', name: 'timeEndVerification', readonly: true,},
+                                {
+                                    cols: [
+                                        {},
+                                        {
+                                            view: 'button',
+                                            align: 'right',
+                                            maxWidth: 200,
+                                            css: 'webix_secondary',
+                                            value: 'Назад',
+                                            click: () => {
+                                                $$('verificationFileInfoView').hide();
+                                                $$('filesListViewByType').show();
+                                            }
+                                        },
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }, $$('verificationFileInfoView'))
 }
