@@ -1,3 +1,5 @@
+create schema if not exists hist
+;
 create table cls_action_type -- справочник типов действий
 (
     id serial not null
@@ -10,7 +12,7 @@ create table cls_action_type -- справочник типов действий
     code varchar(15)
 )
 ;
-create table reg_action_history -- история действий
+create table hist.reg_action_history -- история действий
 (
     id serial not null
         constraint reg_action_history_pkey
