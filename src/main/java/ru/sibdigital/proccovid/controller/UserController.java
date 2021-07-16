@@ -218,10 +218,10 @@ public class UserController {
             value = {"/edit_user_pass","/outer/edit_user_pass"},
             method = RequestMethod.POST
     )
-    public @ResponseBody ResponseEntity<Object>  editUserPass(@RequestParam(value = "new_pass", required = true) String newPass){
+    public @ResponseBody ResponseEntity<String>  editUserPass(@RequestParam(value = "new_pass", required = true) String newPass){
         CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ClsUser clsUser = currentUser.getClsUser();
-        ResponseEntity<Object> responseEntity;
+        ResponseEntity<String> responseEntity;
         if (newPass != null && newPass.isBlank() == false) {
             clsUser.setPassword(passwordEncoder.encode(newPass));
             clsUserRepo.save(clsUser);
@@ -246,7 +246,7 @@ public class UserController {
     }
 
     @PostMapping("/load_users_csv")
-    public @ResponseBody ResponseEntity<Object> processFile(@RequestParam(name = "file") MultipartFile multipartFile) {
+    public @ResponseBody ResponseEntity<String> processFile(@RequestParam(name = "file") MultipartFile multipartFile) {
         String message = "Пользователи созданы";
         Boolean success = false;
         int usersCount = 0;

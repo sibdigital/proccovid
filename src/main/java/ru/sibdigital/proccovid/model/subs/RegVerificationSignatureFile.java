@@ -1,11 +1,19 @@
 package ru.sibdigital.proccovid.model.subs;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import ru.sibdigital.proccovid.model.*;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
 @Table(name = "reg_verification_signature_file", schema = "subs")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class RegVerificationSignatureFile {
     //cov_prod_copy2.subs.reg_verification_signature_file_id_seq
     @Id
@@ -20,6 +28,7 @@ public class RegVerificationSignatureFile {
     private Timestamp timeEndVerification;
     private Integer verifyStatus;
     private String verifyResult;
+    private Boolean isDeleted;
     @ManyToOne
     @JoinColumn(name = "id_request", referencedColumnName = "id", nullable = false)
     private DocRequestSubsidy requestSubsidy;
@@ -29,9 +38,13 @@ public class RegVerificationSignatureFile {
     @ManyToOne
     @JoinColumn(name = "id_request_subsidy_signature_file", referencedColumnName = "id", nullable = false)
     private TpRequestSubsidyFile requestSubsidySubsidySignatureFile;
-    @Basic
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @ManyToOne
+    @JoinColumn(name = "id_principal", referencedColumnName = "id", nullable = false)
+    private ClsPrincipal principal;
+    @ManyToOne
+    @JoinColumn(name = "id_user", referencedColumnName = "id", nullable = false)
+    private ClsUser user;
+
 
     public Long getId() {
         return id;
@@ -52,7 +65,7 @@ public class RegVerificationSignatureFile {
     }
 
     @Basic
-    @Column(name = "time_begin_verification", nullable = true)
+    @Column(name = "time_begin_verification")
     public Timestamp getTimeBeginVerification() {
         return timeBeginVerification;
     }
@@ -62,7 +75,7 @@ public class RegVerificationSignatureFile {
     }
 
     @Basic
-    @Column(name = "time_end_verification", nullable = true)
+    @Column(name = "time_end_verification")
     public Timestamp getTimeEndVerification() {
         return timeEndVerification;
     }
@@ -90,6 +103,12 @@ public class RegVerificationSignatureFile {
     public void setVerifyResult(String verifyResult) {
         this.verifyResult = verifyResult;
     }
+
+    @Basic
+    @Column(name = "is_deleted")
+    public Boolean getIsDeleted() {return isDeleted;}
+
+    public void setIsDeleted(Boolean deleted) {isDeleted = deleted;}
 
     @Override
     public boolean equals(Object o) {
@@ -128,12 +147,19 @@ public class RegVerificationSignatureFile {
         this.requestSubsidySubsidySignatureFile = requestSubsidySubsidySignatureFile;
     }
 
-    public Boolean getDeleted() {
-        return isDeleted;
+    public ClsPrincipal getPrincipal() {
+        return principal;
     }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
+    public void setPrincipal(ClsPrincipal principal) {
+        this.principal = principal;
     }
 
+    public ClsUser getUser() {
+        return user;
+    }
+
+    public void setUser(ClsUser user) {
+        this.user = user;
+    }
 }

@@ -12,6 +12,7 @@ import ru.sibdigital.proccovid.model.subs.TpRequestSubsidyFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface TpRequestSubsidyFileRepo extends JpaRepository<TpRequestSubsidyFile, Long>, JpaSpecificationExecutor<TpRequestSubsidyFile> {
@@ -49,4 +50,12 @@ public interface TpRequestSubsidyFileRepo extends JpaRepository<TpRequestSubsidy
             nativeQuery = true
     )
     public List<Map<String, String>> getSignatureVerificationTpRequestSubsidyFile(Long id_request_subsidy);
+
+    @Query(value = "select t " +
+            "from TpRequestSubsidyFile as t " +
+            "where t.requestSubsidyFile is not null and t.isDeleted = false " +
+            "and t.requestSubsidy.id = :idRequest"
+    )
+    List<TpRequestSubsidyFile> getSignatureFilesByIdRequest(Long idRequest);
+
 }
