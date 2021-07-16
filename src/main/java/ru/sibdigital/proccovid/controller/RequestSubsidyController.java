@@ -4,12 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import ru.sibdigital.proccovid.config.CurrentUser;
+import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.subs.*;
 import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRequestStatusRepo;
 import ru.sibdigital.proccovid.repository.subs.DocRequestSubsidyRepo;
 import ru.sibdigital.proccovid.repository.subs.RegVerificationSignatureFileRepo;
 import ru.sibdigital.proccovid.repository.subs.TpRequestSubsidyFileRepo;
+import ru.sibdigital.proccovid.service.subs.RequestSubsidyServiceImpl;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -29,6 +33,9 @@ public class RequestSubsidyController {
 
     @Autowired
     RegVerificationSignatureFileRepo regVerificationSignatureFileRepo;
+
+    @Autowired
+    RequestSubsidyServiceImpl requestSubsidyService;
 
     @GetMapping("/doc_requests_subsidy/{id_request_subsidy}")
     public DocRequestSubsidy getDocRequestSubsidy(@PathVariable("id_request_subsidy") Long id_request_subsidy, HttpSession session) throws IllegalAccessException, InstantiationException {
@@ -110,8 +117,28 @@ public class RequestSubsidyController {
         return ResponseEntity.ok().body(Map.of( "success", "false"));
     }
 
-    @GetMapping("verification_request_subsidy_signature_file/{id_verification_request_subsidy_signature_file}")
-    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(@PathVariable("id_verification_request_subsidy_signature_file") Long id_verification_request_subsidy_signature_file, HttpSession session) {
-        return regVerificationSignatureFileRepo.findById(id_verification_request_subsidy_signature_file).orElse(null);
+    @GetMapping("find_verification_request_subsidy_signature_file/{idRequestSubsidyFile}")
+    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(@PathVariable("idRequestSubsidyFile") Long idRequestSubsidyFile, HttpSession session) {
+        RegVerificationSignatureFile regVerificationSignatureFile = regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFile(idRequestSubsidyFile).orElse(null);
+        return regVerificationSignatureFile;
+    }
+
+    @GetMapping("verification_request_subsidy_signature_files/{idRequestSubsidy}")
+    public List<RegVerificationSignatureFile> verificationRequestSubsidySignatureFiles(
+            @PathVariable("idRequestSubsidy") Long idRequestSubsidy,
+            HttpSession session
+    ) {
+        DocRequestSubsidy docRequestSubsidy = docRequestSubsidyRepo.findById(idRequestSubsidy).orElse(null);
+
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        if (docRequestSubsidy == null || clsUser == null) {
+            return null;
+        }
+
+        List<RegVerificationSignatureFile> regVerificationSignatureFiles = requestSubsidyService.verifyRequestFiles(docRequestSubsidy, clsUser);
+
+        return regVerificationSignatureFiles;
     }
 }

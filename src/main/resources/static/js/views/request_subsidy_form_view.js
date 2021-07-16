@@ -144,18 +144,22 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                     id: 'viewFileName',
                                     header: 'Название файла',
                                     adjust: true,
+                                    minWidth: 650,
                                     fillspace: true,
                                 },
                                 {
                                     id: 'signature',
                                     header: 'Подпись',
                                     adjust: true,
-                                    fillspace: true,
+                                    maxWidth: 250,
+                                    // fillspace: true,
                                 },
                                 {
                                     id: 'verificationStatus',
                                     header: 'Статус проверки подписи',
+                                    maxWidth: 300,
                                     adjust: true,
+                                    // fillspace: true,
                                 },
                             ],
                             on: {
@@ -308,7 +312,21 @@ webix.ready(function () {
                                         autoheight: true,
                                         body: {
                                             rows: [
-                                                // view_section('Файлы'),
+                                                {
+                                                    id: 'verifyFilesButton',
+                                                    rows: [
+                                                        view_section('Проверка подписей'),
+                                                        {
+                                                            view: 'button',
+                                                            value: 'Проверить подписи',
+                                                            click: () => {
+                                                                webix.ajax('../verification_request_subsidy_signature_files/' + ID).then(function (data) {
+                                                                    console.log('verification_request_subsidy_signature_file start');
+                                                                });
+                                                            },
+                                                        },
+                                                    ]
+                                                },
                                                 {
                                                     id: 'filesListViewByType',
                                                 },
@@ -379,6 +397,13 @@ webix.ready(function () {
     })
 })
 
+async function checkVerificationStatus(params) {
+    await webix.ajax().get('http://localhost:8080/isrb/check_request_subsidy_files_signatures', params).then((response) => {
+        let responseJson = response.json();
+        console.dir({ responseJson });
+    });
+}
+
 function changeRequestSubsidyStatus(approve, id_request_subsidy) {
     const params = {
         resolutionComment: $$('resolutionComment').getValue(),
@@ -396,7 +421,7 @@ function changeRequestSubsidyStatus(approve, id_request_subsidy) {
 }
 
 function getVerificationStatus(verificationStatusId) {
-    const verificationData = webix.ajax().sync().get('../verification_request_subsidy_signature_file/' + verificationStatusId);
+    const verificationData = webix.ajax().sync().get('../find_verification_request_subsidy_signature_file/' + verificationStatusId);
     const jsonResponse = JSON.parse(verificationData.responseText);
 
     if (!jsonResponse || ! verificationData) {
@@ -404,6 +429,7 @@ function getVerificationStatus(verificationStatusId) {
     }
 
     $$('filesListViewByType').hide();
+    $$('verifyFilesButton').hide();
 
     const newDateFormat = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s");
     if (jsonResponse.timeCreate != null) {
@@ -425,6 +451,7 @@ function getVerificationStatus(verificationStatusId) {
     webix.ui({
         id: 'verificationFileInfoView',
         rows: [
+            view_section('Электронная подпись файла'),
             {
                 view: 'scrollview',
                 scroll: 'y',
@@ -438,14 +465,23 @@ function getVerificationStatus(verificationStatusId) {
                             id: 'subsidyFormId',
                             autoheight: true,
                             rows: [
-                                {view: 'text', value: jsonResponse.verifyResult, label: 'Статус верификации', labelPosition: 'top', name: 'verifyResult', readonly: true,},
-                                {view: 'text', value: jsonResponse.verifyStatus, label: 'Результат верификации', labelPosition: 'top', name: 'verifyResult', readonly: true,},
+                                {view: 'text', value: jsonResponse.verifyStatus, label: 'Статус верификации', labelPosition: 'top', name: 'verifyStatus', readonly: true,},
+                                {view: 'text', value: jsonResponse.verifyResult, label: 'Результат верификации', labelPosition: 'top', name: 'verifyResult', readonly: true,},
                                 {view: 'text', value: jsonResponse.timeCreate, label: 'Дата создания', labelPosition: 'top', name: 'timeCreate', readonly: true,},
                                 {view: 'text', value: jsonResponse.timeBeginVerification, label: 'Дата начала верификации', labelPosition: 'top', name: 'timeBeginVerification', readonly: true,},
                                 {view: 'text', value: jsonResponse.timeEndVerification, label: 'Дата окончания верификации', labelPosition: 'top', name: 'timeEndVerification', readonly: true,},
                                 {
                                     cols: [
                                         {},
+                                        // {
+                                        //     view: 'button',
+                                        //     maxWidth: 200,
+                                        //     css: 'webix_primary',
+                                        //     value: 'Проверка подписи',
+                                        //     click: () => {
+                                        //         console.log('check');
+                                        //     },
+                                        // },
                                         {
                                             view: 'button',
                                             align: 'right',
@@ -455,6 +491,7 @@ function getVerificationStatus(verificationStatusId) {
                                             click: () => {
                                                 $$('verificationFileInfoView').hide();
                                                 $$('filesListViewByType').show();
+                                                $$('verifyFilesButton').show();
                                             }
                                         },
                                     ]

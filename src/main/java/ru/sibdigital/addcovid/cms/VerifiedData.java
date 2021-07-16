@@ -144,4 +144,37 @@ public class VerifiedData {
     public void setSignatureIdentificator(String signatureIdentificator) {
         this.signatureIdentificator = signatureIdentificator;
     }
+
+
+    public String getSignaturePath() {
+        return signaturePath;
+    }
+
+    public void setSignaturePath(String signaturePath) {
+        this.signaturePath = signaturePath;
+    }
+
+    public String getDataPath() {
+        return dataPath;
+    }
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
+    }
+
+    public void setSignature(byte[] signature) {
+        this.signature = signature;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
+    public boolean isPrepared() {
+        return prepared;
+    }
+
+    public void setPrepared(boolean prepared) {
+        this.prepared = prepared;
+    }
 }

@@ -157,6 +157,7 @@
 
 .verification_request_subsidy_file_signature_status_button {
     background: transparent;
+    cursor: pointer;
 }
 
 .verification_request_subsidy_file_signature_status_button:hover {

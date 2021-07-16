@@ -2,7 +2,13 @@ package ru.sibdigital.proccovid.service.subs;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import ru.sibdigital.addcovid.cms.VerifiedData;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.subs.DocRequestSubsidy;
@@ -11,10 +17,9 @@ import ru.sibdigital.proccovid.model.subs.TpRequestSubsidyFile;
 import ru.sibdigital.proccovid.repository.subs.RegVerificationSignatureFileRepo;
 import ru.sibdigital.proccovid.repository.subs.TpRequestSubsidyFileRepo;
 
+import java.net.URI;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Log4j2
 @Service
@@ -26,6 +31,9 @@ public class RequestSubsidyServiceImpl implements RequestSubsidyService {
 
     @Autowired
     RegVerificationSignatureFileRepo regVerificationSignatureFileRepo;
+
+    @Value("${addcovid.baseurl}")
+    private String addCovidBaseUrl;
 
     @Override
     public List<Map<String, String>> getSignatureVerificationTpRequestSubsidyFile(Long tpRequestSubsidyFileId) {
@@ -49,11 +57,11 @@ public class RequestSubsidyServiceImpl implements RequestSubsidyService {
                     docFile.getRequestSubsidy().getId()
             );
 
-            List<RegVerificationSignatureFile> previsious = regVerificationSignatureFileRepo
+            List<RegVerificationSignatureFile> previous = regVerificationSignatureFileRepo
                     .getTpRequestSubsidyFilesPrevisiousVerified(user.getId(),
                             signatureFile.getRequestSubsidy().getId(),
                             signatureFile.getId(), docFile.getId());
-            if(previsious.isEmpty()){
+            if (previous.isEmpty()) {
                 RegVerificationSignatureFile regVerificationSignatureFile = RegVerificationSignatureFile.builder()
                         .requestSubsidy(docFile.getRequestSubsidy())
                         .requestSubsidyFile(docFile)
@@ -63,17 +71,29 @@ public class RequestSubsidyServiceImpl implements RequestSubsidyService {
                         .verifyStatus(0)
                         .user(user)
                         .build();
-                previsious.add(regVerificationSignatureFile);
-            }else{
-                previsious.stream().forEach(p -> {
+                previous.add(regVerificationSignatureFile);
+            } else {
+                previous.stream().forEach(p -> {
                     p.setTimeCreate(new Timestamp(System.currentTimeMillis()));
                     p.setVerifyStatus(0);
                     p.setVerifyResult("");
                 });
             }
-            regVerificationSignatureFileRepo.saveAll(previsious);
+//            regVerificationSignatureFileRepo.saveAll(previous);
             verifiedDataList.add(verifiedData);
 
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<List<VerifiedData>> newRequest = new HttpEntity<>(verifiedDataList, headers);
+
+            String url = String.format("%s/verify/subsidy/list", addCovidBaseUrl);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    url, newRequest, String.class);
+
+            response.getStatusCode();
         }
         return list;
     }
