@@ -104,6 +104,27 @@ const subsidyForm = {
                                 icon: "fas fa-trash",
                                 css: "button_red",
                                 click: () => {
+                                    webix.confirm('Вы действительно хотите удалить субсидию?')
+                                        .then(
+                                            function () {
+                                                let params = $$('subsidyFormId').getValues();
+                                                webix.ajax()
+                                                    .headers({'Content-type': 'application/json'})
+                                                    .post('delete_subsidy', JSON.stringify(params))
+                                                    .then((answer) => {
+                                                        if (answer.json()) {
+                                                            webix.message("Субсидия удалена", "success");
+                                                            webix.ui({
+                                                                id: 'content',
+                                                                rows: [
+                                                                    subsidies
+                                                                ]
+                                                            }, $$('content'))
+                                                        } else {
+                                                            webix.message("Не удалось удалить субсидию", "error");
+                                                        }
+                                                    })
+                                            });
                                 }
                             },
                             {},

@@ -143,4 +143,15 @@ public class SubsidyController {
         }
         return true;
     }
+
+    @PostMapping("/delete_subsidy")
+    public @ResponseBody Boolean deleteClsSubsidy(@RequestBody ClsSubsidyDto dto) {
+        try {
+            subsidyService.deleteSubsidy(dto);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
+        return true;
+    }
 }

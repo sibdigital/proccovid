@@ -103,6 +103,13 @@ public class SubsidyServiceImpl implements SubsidyService {
     }
 
     @Override
+    public void deleteSubsidy(ClsSubsidyDto subsidyDto) {
+        ClsSubsidy subsidy = clsSubsidyRepo.findById(subsidyDto.getId()).orElse(null);
+        subsidy.setDeleted(true);
+        clsSubsidyRepo.save(subsidy);
+    }
+
+    @Override
     public Page<DocRequestSubsidy> getRequestsByCriteria(DocRequestSubsidySearchCriteria criteria, int page, int size) {
         DocRequestSubsidySpecification specification = new DocRequestSubsidySpecification();
         specification.setSearchCriteria(criteria);

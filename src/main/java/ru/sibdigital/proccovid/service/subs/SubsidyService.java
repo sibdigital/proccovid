@@ -17,6 +17,8 @@ public interface SubsidyService {
     //для работы с ClsSubsidy, TpRequiredSubsidyFile TpSubsidyFile TpSubsidyOkved  ClsSubsidyRequestStatus
     void saveSubsidy(ClsSubsidyDto subsidyDto);
 
+    void deleteSubsidy(ClsSubsidyDto subsidyDto);
+
     Page<DocRequestSubsidy> getRequestsByCriteria(DocRequestSubsidySearchCriteria criteria, int page, int size);
 
     List<String> getClsSubsidyRequestStatusShort();
