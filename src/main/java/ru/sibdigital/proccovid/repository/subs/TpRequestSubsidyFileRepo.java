@@ -53,7 +53,7 @@ public interface TpRequestSubsidyFileRepo extends JpaRepository<TpRequestSubsidy
 
     @Query(value = "select t " +
             "from TpRequestSubsidyFile as t " +
-            "where t.requestSubsidyFile is not null and t.isDeleted = false " +
+            "where t.requestSubsidyFile is not null and t.deleted = false " +
             "and t.requestSubsidy.id = :idRequest"
     )
     List<TpRequestSubsidyFile> getSignatureFilesByIdRequest(Long idRequest);
