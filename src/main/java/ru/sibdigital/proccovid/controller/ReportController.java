@@ -8,6 +8,7 @@ import ru.sibdigital.proccovid.dto.KeyValue;
 import ru.sibdigital.proccovid.model.OrganizationTypes;
 import ru.sibdigital.proccovid.model.ReviewStatuses;
 import ru.sibdigital.proccovid.service.reports.RemoteCntReportService;
+import ru.sibdigital.proccovid.service.reports.RequestSubsidyReportService;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +27,9 @@ public class ReportController {
 
     @Autowired
     RemoteCntReportService remoteCntReportService;
+
+    @Autowired
+    RequestSubsidyReportService requestSubsidyReportService;
 
     @RequestMapping(
             value = {"/generate_remote_cnt_report","/outer/generate_remote_cnt_report"},
@@ -161,4 +165,20 @@ public class ReportController {
         return list;
     }
 
+
+
+    @RequestMapping(
+            value = {"/generate_request_subsidy_cnt_by_okveds_report","/outer/generate_request_subsidy_cnt_by_okveds_report"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody String generateRequestSubsidyCntByOkvedsReport(@RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                                              @RequestParam(value = "startDateSend") String startDateSendString,
+                                                              @RequestParam(value = "endDateSend") String endDateSendString) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date startDateSend = dateFormat.parse(startDateSendString);
+        Date endDateSend = dateFormat.parse(endDateSendString);
+        byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReport("html", startDateSend, endDateSend, okvedPaths);
+        String template = new String(bytes);
+        return template;
+    }
 }

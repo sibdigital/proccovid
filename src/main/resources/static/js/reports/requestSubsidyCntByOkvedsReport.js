@@ -1,4 +1,4 @@
-const cntRemoteWithOkvedsReport = {
+const requestSubsidyCntByOkvedsReport = {
     body: {
         type: "space",
         autowidth: true,
@@ -34,7 +34,7 @@ const cntRemoteWithOkvedsReport = {
                             let params = {
                                 okvedPaths: okvedPaths,
                             };
-                            webix.ajax().get('generate_request_subsidy_cnt_by_okveds_report', params).then(function (data) {
+                            webix.ajax().get('generate_cnt_remote_with_okveds_report', params).then(function (data) {
                                 if (data.text() != null) {
                                     let tmlpt =  $$('templateReportId');
                                     tmlpt.$view.childNodes[0].setAttribute('style','width:100%');
