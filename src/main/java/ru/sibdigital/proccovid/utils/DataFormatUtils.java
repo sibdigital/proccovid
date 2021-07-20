@@ -1,5 +1,6 @@
 package ru.sibdigital.proccovid.utils;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -20,5 +21,13 @@ public class DataFormatUtils {
 
     public static ResponseEntity<String> buildResponse(ResponseEntity.BodyBuilder builder, String property, Object value){
         return buildResponse(builder, Map.of(property, value));
+    }
+
+    public static ResponseEntity<String> buildInternalServerErrorResponse(Map<Object, Object> entries){
+        return buildResponse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR), entries);
+    }
+
+    public static ResponseEntity<String> buildOkResponse(Map<Object, Object> entries){
+        return buildResponse(ResponseEntity.ok(), entries);
     }
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Where;
 import ru.sibdigital.proccovid.model.ClsDepartment;
 import ru.sibdigital.proccovid.model.ClsFileType;
 import ru.sibdigital.proccovid.model.ClsOrganization;
@@ -12,7 +11,6 @@ import ru.sibdigital.proccovid.model.ClsUser;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -176,12 +174,12 @@ public class TpRequestSubsidyFile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TpRequestSubsidyFile that = (TpRequestSubsidyFile) o;
-        return id == that.id && Objects.equals(isDeleted, that.isDeleted) && Objects.equals(timeCreate, that.timeCreate) && Objects.equals(attachmentPath, that.attachmentPath) && Objects.equals(fileName, that.fileName) && Objects.equals(originalFileName, that.originalFileName) && Objects.equals(fileExtension, that.fileExtension) && Objects.equals(hash, that.hash) && Objects.equals(fileSize, that.fileSize) && Objects.equals(isSignature, that.isSignature);
+        return id == that.id && Objects.equals(getDeleted(), that.getDeleted()) && Objects.equals(timeCreate, that.timeCreate) && Objects.equals(attachmentPath, that.attachmentPath) && Objects.equals(fileName, that.fileName) && Objects.equals(originalFileName, that.originalFileName) && Objects.equals(fileExtension, that.fileExtension) && Objects.equals(hash, that.hash) && Objects.equals(fileSize, that.fileSize) && Objects.equals(isSignature, that.isSignature);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, isDeleted, timeCreate, attachmentPath, fileName, originalFileName, fileExtension, hash, fileSize, isSignature);
+        return Objects.hash(id, getDeleted(), timeCreate, attachmentPath, fileName, originalFileName, fileExtension, hash, fileSize, isSignature);
     }
 
     public DocRequestSubsidy getRequestSubsidy() {

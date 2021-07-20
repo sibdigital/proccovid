@@ -96,15 +96,20 @@ public class SendingMailingMessageTask implements Runnable {
 
     private void sendMessagesToPrincipals(List<ClsPrincipal> principals) {
         List<ClsPrincipal> granulas = new ArrayList<>();
+        int granulaSum = 0;
         for (ClsPrincipal principal : principals) {
             granulas.add(principal);
             if (granulas.size() >= granula) {
                 emailService.sendMessage(granulas, getMessage(), new HashMap<>());
+                granulaSum += granulas.size();
+                log.info("Обработано: " + granulaSum + " из " + principals.size());
                 granulas.clear();
             }
         }
         if (granulas.isEmpty() == false) {
             emailService.sendMessage(granulas, getMessage(), new HashMap<>());
+            granulaSum += granulas.size();
+            log.info("Обработано: " + granulaSum + " из " + principals.size());
             granulas.clear();
         }
     }
