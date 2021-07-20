@@ -174,6 +174,9 @@
 				<measure name="order_measure_status" class="java.lang.Long">
 					<measureExpression><![CDATA[$F{statusRequestSubsidy}.getId()]]></measureExpression>
 				</measure>
+				<measure name="link" class="java.lang.String">
+					<measureExpression><![CDATA["generate_request_subsidy_cnt_by_okveds_report_details?okvedPaths="+$P{okvedFilterDesc} + "&startDateReport=" + $P{minDate} + "&endDateReport=" + $P{maxDate} + "&okvedId=" + $F{okved}.getId() + "&statusId=" + $F{statusRequestSubsidy}.getId()]]></measureExpression>
+				</measure>
 				<crosstabCell width="100" height="20">
 					<cellContents mode="Opaque">
 						<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
@@ -182,6 +185,7 @@
 								<font fontName="Times New Roman" size="12"/>
 							</textElement>
 							<textFieldExpression><![CDATA[$V{id_MEASURE}]]></textFieldExpression>
+							<hyperlinkReferenceExpression><![CDATA[$V{link}]]></hyperlinkReferenceExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>

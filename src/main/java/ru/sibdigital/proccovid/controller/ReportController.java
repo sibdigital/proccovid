@@ -5,21 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.dto.KeyValue;
-import ru.sibdigital.proccovid.model.OrganizationTypes;
-import ru.sibdigital.proccovid.model.ReviewStatuses;
 import ru.sibdigital.proccovid.service.reports.RemoteCntReportService;
 import ru.sibdigital.proccovid.service.reports.RequestSubsidyReportService;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @Slf4j
@@ -210,5 +204,22 @@ public class ReportController {
         out.flush();
         out.close();
         return null;
+    }
+
+    @RequestMapping(
+            value = {"/generate_request_subsidy_cnt_by_okveds_report_details","/outer/generate_request_subsidy_cnt_by_okveds_report_details"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody String generateRequestSubsidyCntByOkvedsReportDetails(@RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                                                               @RequestParam(value = "startDateReport") String startDateSendString,
+                                                                               @RequestParam(value = "endDateReport") String endDateSendString,
+                                                                               @RequestParam(value = "okvedId") UUID okvedId,
+                                                                               @RequestParam(value = "statusId") Long statusId) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date startDateSend = dateFormat.parse(startDateSendString);
+        Date endDateSend = dateFormat.parse(endDateSendString);
+        byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReportDetail("html", startDateSend, endDateSend, okvedPaths, okvedId, statusId);
+        String template = new String(bytes);
+        return template;
     }
 }

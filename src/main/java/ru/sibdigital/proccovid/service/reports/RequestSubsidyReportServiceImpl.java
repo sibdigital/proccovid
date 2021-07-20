@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.Okved;
-import ru.sibdigital.proccovid.model.report.RemoteCntEntityWithOkvedsReport;
 import ru.sibdigital.proccovid.model.report.RequestSubsidyCntByOkvedsEntityReport;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 
@@ -62,7 +61,8 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
             parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
 
             parameters.put("reportTitle", "Отчет о количестве заявок на получение субсидии в разрезе ОКВЭД");
-            parameters.put("okvedFilterDesc", okveds.toString());
+            parameters.put("okvedFilterDesc", okveds.toString().replace("[", "").replace("]", ""));
+            parameters.put("okvedPaths", okveds);
             parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
             parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
 
@@ -89,7 +89,6 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
         return list;
     }
 
-
     private Query getQueryForRequestSubsidyCntByOkvedsReport(Set<String> okvedPaths, Date minDate, Date maxDate) throws IOException {
         String  queryString = getQueryString("classpath:reports/request_subsidy/request_subsidy_cnt_by_okveds.sql");
         Query query = entityManager.createNativeQuery(queryString, RequestSubsidyCntByOkvedsEntityReport.class);
@@ -113,5 +112,70 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
         List<Okved> okveds = okvedRepo.findAllByVersion(version);
         Set<String> okvedPaths = okveds.stream().map(ctr -> ctr.getPath()).collect(Collectors.toSet());
         return okvedPaths;
+    }
+
+    @Override
+    public byte[] exportRequestSubsidiesByOkvedsReportDetail(String reportFormat, Date minDate, Date maxDate, List<String> okveds, UUID okvedId, Long statusId) {
+        try {
+            Date defaultMinDate = new Date(Long.valueOf("943891200000")); // 2000 год
+            Date defaultMaxDate = new Date(Long.valueOf("4099651200000")); // 2100 год
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            if (minDate == null) {
+                minDate = defaultMinDate;
+            }
+            if (maxDate == null) {
+                maxDate = defaultMaxDate;
+            }
+            List<RequestSubsidyCntByOkvedsEntityReport> rscboEntities = getRequestSubsidyCntByOkvedsForReportDetails(okveds, minDate, maxDate, okvedId, statusId);
+            Okved okved = okvedRepo.findOkvedById(okvedId);
+
+            Map<String, Object> parameters = new HashMap<>();
+
+            JRBeanCollectionDataSource jRBean = new JRBeanCollectionDataSource(rscboEntities);
+            parameters.put("DataSource", jRBean);
+
+            parameters.put("net.sf.jasperreports.print.keep.full.text", true);
+            parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
+            parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
+
+            parameters.put("reportTitle", "Отчет о количестве заявок на получение субсидии в разрезе ОКВЭД (детализация)");
+            parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
+            parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
+            parameters.put("okvedName", okved.getKindCode() + " " + okved.getKindName());
+
+            String jrxmlPath = "classpath:reports/request_subsidy/request_subsidy_cnt_by_okveds_details.jrxml";
+
+            return jasperReportService.exportJasperReport(jrxmlPath, rscboEntities, parameters, reportFormat);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    private List<RequestSubsidyCntByOkvedsEntityReport> getRequestSubsidyCntByOkvedsForReportDetails(List<String> okvedPaths, Date minDate, Date maxDate, UUID okvedId, Long statusId) throws IOException {
+        Set<String> set = okvedPaths.stream().collect(Collectors.toSet());
+        if (set.contains("2001")) {
+            set.addAll(getAllOkvedPathsByVersion("2001"));
+        }
+        if (set.contains("2014")) {
+            set.addAll(getAllOkvedPathsByVersion("2014"));
+        }
+        Query query = getQueryForRequestSubsidyCntByOkvedsReportDetails(set, minDate, maxDate, okvedId, statusId);
+        List<RequestSubsidyCntByOkvedsEntityReport> list = query.getResultList();
+
+        return list;
+    }
+
+    private Query getQueryForRequestSubsidyCntByOkvedsReportDetails(Set<String> okvedPaths, Date minDate, Date maxDate, UUID okvedId, Long statusId) throws IOException {
+        String  queryString = getQueryString("classpath:reports/request_subsidy/request_subsidy_cnt_by_okveds_details.sql");
+        Query query = entityManager.createNativeQuery(queryString, RequestSubsidyCntByOkvedsEntityReport.class);
+        query.setParameter("okved_paths", okvedPaths);
+        query.setParameter("min_date", minDate);
+        query.setParameter("max_date", maxDate);
+        query.setParameter("id_okved", okvedId);
+        query.setParameter("id_status", statusId);
+
+        return query;
     }
 }
