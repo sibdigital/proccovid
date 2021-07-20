@@ -29,7 +29,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
         filesVerification.map((file) => {
             file.verify_status = getVerifyStatusStringByIntStatus(file.verify_status);
             if (file.id_user) {
-                file.verificationOwner = 'Пользователём';
+                file.verificationOwner = 'Пользователем';
             } else if (file.id_principal) {
                 file.verificationOwner = 'Организацией';
             } else {
