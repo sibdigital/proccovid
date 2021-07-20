@@ -50,9 +50,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                     result[file.fileType.id] = result[file.fileType.id] || [];
 
                     const fileVerificationStatus = filesVerification.filter((fileVerification) => fileVerification.id_request_subsidy_file === file.id);
-                    console.dir({ fileVerificationStatus });
                     fileVerificationStatus.forEach((fileVer, index) => {
-                        console.dir({ fileVer });
                         result[file.fileType.id].push({
                             ...file,
                             id: `${ file.id }/${ index }`,
@@ -75,7 +73,6 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                 console.dir({ byFileType });
 
                 for (const [key, filesArray] of Object.entries(byFileType)) {
-                    console.dir({ filesArray });
                     views.push({
                         rows: [
                             view_section(filesTypes[key]),
@@ -136,6 +133,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                         header: 'Статус проверки подписи',
                                         adjust: true,
                                         template: (request) => {
+                                            // console.dir({ request });
                                             const id_request_subsidy_file = request.verificationStatus.id_request_subsidy_file;
                                             const id_user = request.verificationStatus.id_user ?? -1;
                                             const id_principal = request.verificationStatus.id_principal ?? -1;
@@ -491,22 +489,22 @@ webix.ready(function () {
     })
 })
 
-function check_request_subsidy_files_signatures() {
-    let params = {
-        id_request: ID,
-    }
-    webix.ajax().get(`../check_request_subsidy_files_signatures`, params).then((response) => {
-        let responseJson = response.json();
-        if (responseJson.status === "ok") {
-            verify_progress(params.id_request, "До начала проверки подписей не менее "); //show progress on start event
-            let timerId = setInterval(() => {
-                verify_progress(params.id_request, responseJson.cause, timerId);
-            }, 4000)
-        } else {
-            webix.message(responseJson.cause, responseJson.status, 4000);
-        }
-    });
-}
+// function check_request_subsidy_files_signatures() {
+//     let params = {
+//         id_request: ID,
+//     }
+//     webix.ajax().get(`../check_request_subsidy_files_signatures`, params).then((response) => {
+//         let responseJson = response.json();
+//         if (responseJson.status === "ok") {
+//             verify_progress(params.id_request, "До начала проверки подписей не менее "); //show progress on start event
+//             let timerId = setInterval(() => {
+//                 verify_progress(params.id_request, responseJson.cause, timerId);
+//             }, 4000)
+//         } else {
+//             webix.message(responseJson.cause, responseJson.status, 4000);
+//         }
+//     });
+// }
 
 //ProgressBar event
 function verify_progress(id, queueTime, timerId = null) {
@@ -537,11 +535,13 @@ function verify_progress(id, queueTime, timerId = null) {
                             "Проверено: " + verified + "/" + numberOfFiles +
                             "</span>";
                         progress === 1 ? webix.message("Началась проверка подписей", "", 2000) : null;
-                        // let dataViews = $$('required_subsidy_files_templates').getChildViews()
-                        // dataViews.forEach((dataView) => {
-                        //     let dataViewId = dataView.qf[1].id;
-                        //     updateDataview(dataViewId.slice(0, -9), $$(dataViewId).config.formData.fileTypeId)
-                        // })
+                        let dataViews = $$('filesListViewByType').getChildViews();
+                        console.dir({ dataInProgressBar: data });
+                        dataViews.forEach((dataView) => {
+                            console.dir({ dataView: dataView.qf ?? '' });
+                            // let dataViewId = dataView.qf[1].id;
+                            // updateDataview(dataViewId.slice(0, -9), $$(dataViewId).config.formData.fileTypeId)
+                        })
                     } else {
                         document.getElementById("progress_bar_text").innerHTML =
                             "<span style='position: absolute; margin-top: 8px; left: 10px; z-index: 100; font-weight: 500'>" +
