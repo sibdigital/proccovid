@@ -317,14 +317,32 @@ webix.ready(function () {
                                                     rows: [
                                                         view_section('Проверка подписей'),
                                                         {
-                                                            view: 'button',
-                                                            value: 'Проверить подписи',
-                                                            click: () => {
-                                                                webix.ajax('../verification_request_subsidy_signature_files/' + ID).then(function (data) {
-                                                                    console.log('verification_request_subsidy_signature_file start');
-                                                                });
-                                                            },
-                                                        },
+                                                            cols: [
+                                                                {
+                                                                    view: 'button',
+                                                                    value: 'Проверить подписи',
+                                                                    click: () => {
+                                                                        if (!ID) {
+                                                                            return;
+                                                                        }
+                                                                        webix.ajax('../verification_request_subsidy_signature_files/' + ID);
+                                                                        check_request_subsidy_files_signatures();
+                                                                    }
+                                                                },
+                                                                {
+                                                                    id: 'check',
+                                                                    rows: [
+                                                                        {
+                                                                            id: 'progress_bar',
+                                                                            padding: 10,
+                                                                            borderless: true,
+                                                                            hidden: false,
+                                                                            template: "<div id='progress_bar_text'></div>"
+                                                                        },
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
                                                     ]
                                                 },
                                                 {
@@ -370,12 +388,28 @@ webix.ready(function () {
                                                             cols: [
                                                                 {
                                                                     view: 'button',
+                                                                    id: 'refuseButton',
                                                                     value: 'Отклонить',
+                                                                    on: {
+                                                                        onAfterRender: () => {
+                                                                            if (data.subsidyRequestStatus.code !== 'SUBMIT' && data.subsidyRequestStatus.code !== 'NEW') {
+                                                                                $$('refuseButton').disable();
+                                                                            }
+                                                                        }
+                                                                    },
                                                                     click: () => changeRequestSubsidyStatus(false, data.id),
                                                                 },
                                                                 {
                                                                     view: 'button',
+                                                                    id: 'approveButton',
                                                                     value: 'Утвердить',
+                                                                    on: {
+                                                                        onAfterRender: () => {
+                                                                            if (data.subsidyRequestStatus.code !== 'SUBMIT' && data.subsidyRequestStatus.code !== 'NEW') {
+                                                                                $$('approveButton').disable();
+                                                                            }
+                                                                        }
+                                                                    },
                                                                     click: () => changeRequestSubsidyStatus(true, data.id),
                                                                 }
                                                             ]
@@ -397,11 +431,74 @@ webix.ready(function () {
     })
 })
 
-async function checkVerificationStatus(params) {
-    await webix.ajax().get('http://localhost:8080/isrb/check_request_subsidy_files_signatures', params).then((response) => {
+function check_request_subsidy_files_signatures() {
+    let params = {
+        id_request: ID,
+    }
+    webix.ajax().get(`../check_request_subsidy_files_signatures`, params).then((response) => {
         let responseJson = response.json();
-        console.dir({ responseJson });
+        if (responseJson.status === "ok") {
+            verify_progress(params.id_request, responseJson.cause); //show progress on start event
+            let timerId = setInterval(() => {
+                verify_progress(params.id_request, responseJson.cause, timerId);
+            }, 4000)
+        } else {
+            webix.message(responseJson.cause, responseJson.status, 4000);
+        }
     });
+}
+
+//ProgressBar event
+function verify_progress(id, queueTime, timerId = null) {
+    let progressBar = $$("progress_bar");
+    if (id != null && progressBar !== undefined) {
+        webix.extend(progressBar, webix.ProgressBar);
+        webix.ajax()
+            .headers({ 'Content-Type': 'application/json' })
+            .get(`../check_signature_files_verify_progress`, { id_request: id })
+            .then(async(response) => {
+                let data = response.json();
+                if (data.notFound) {
+                    if (timerId == null) {
+                        progressBar.hideProgress();
+                        document.getElementById("progress_bar_text").innerHTML = "";
+                    }
+                    clearInterval(timerId)
+                } else {
+                    let verified = data.verified;
+                    let numberOfFiles = data.numberOfFiles;
+                    let progress = verified / numberOfFiles;
+
+                    await progressBar.showProgress({type: "top", position: progress === 0 ? 0.001 : progress})
+
+                    if (progress !== 0) {
+                        document.getElementById("progress_bar_text").innerHTML =
+                            "<span style='position: absolute; margin-top: 8px; left: 10px; z-index: 100; font-weight: 500'>" +
+                            "Проверено: " + verified + "/" + numberOfFiles +
+                            "</span>";
+                        progress === 1 ? webix.message("Началась проверка подписей", "", 2000) : null;
+                        let dataViews = $$('required_subsidy_files_templates').getChildViews()
+                        dataViews.forEach((dataView) => {
+                            let dataViewId = dataView.qf[1].id;
+                            updateDataview(dataViewId.slice(0, -9), $$(dataViewId).config.formData.fileTypeId)
+                        })
+                    } else {
+                        document.getElementById("progress_bar_text").innerHTML =
+                            "<span style='position: absolute; margin-top: 8px; left: 10px; z-index: 100; font-weight: 500'>" +
+                            "Проверено: " + verified + "/" + numberOfFiles + " (" + queueTime + ")" +
+                            "</span>";
+                    }
+
+                    if (numberOfFiles === verified) {
+                        clearInterval(timerId);
+                        webix.message("Проверка подписей завершена", "success", 10000);
+                    }
+
+                }
+            })
+    } else {
+        clearInterval(timerId);
+    }
 }
 
 function changeRequestSubsidyStatus(approve, id_request_subsidy) {
@@ -416,6 +513,8 @@ function changeRequestSubsidyStatus(approve, id_request_subsidy) {
             const parseData = data.json();
             if ((typeof parseData.success === 'string' && parseData.success === 'true') || (typeof parseData.success === 'boolean' && parseData.success)) {
                 $$('subsidyRequestStatus').setValue(parseData.status);
+                $$('refuseButton').disable();
+                $$('approveButton').disable();
             }
         });
 }
