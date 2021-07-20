@@ -22,7 +22,6 @@ function getVerifyStatusStringByIntStatus(verifyStatus) {
 }
 
 
-
 function getFilesListByTypeView(docRequestSubsidyId) {
     webix.ajax(`../request_subsidy_files_verification/${ docRequestSubsidyId }`).then(function (filesVerification) {
         filesVerification = filesVerification.json();
@@ -489,23 +488,6 @@ webix.ready(function () {
     })
 })
 
-// function check_request_subsidy_files_signatures() {
-//     let params = {
-//         id_request: ID,
-//     }
-//     webix.ajax().get(`../check_request_subsidy_files_signatures`, params).then((response) => {
-//         let responseJson = response.json();
-//         if (responseJson.status === "ok") {
-//             verify_progress(params.id_request, "До начала проверки подписей не менее "); //show progress on start event
-//             let timerId = setInterval(() => {
-//                 verify_progress(params.id_request, responseJson.cause, timerId);
-//             }, 4000)
-//         } else {
-//             webix.message(responseJson.cause, responseJson.status, 4000);
-//         }
-//     });
-// }
-
 //ProgressBar event
 function verify_progress(id, queueTime, timerId = null) {
     let progressBar = $$("progress_bar");
@@ -553,6 +535,7 @@ function verify_progress(id, queueTime, timerId = null) {
                     if (numberOfFiles === verified) {
                         clearInterval(timerId);
                         webix.message("Проверка подписей завершена", "success", 5000);
+                        getFilesListByTypeView(ID);
                     }
 
                 }
