@@ -24,6 +24,7 @@ public class DocRequestSubsidySpecification implements Specification<DocRequestS
         List<Predicate> predicates = new ArrayList<>();
 
         predicates.add(criteriaBuilder.notEqual(root.get("subsidyRequestStatus").get("code"), "NEW"));
+        predicates.add(criteriaBuilder.equal(root.get("isDeleted"), false));
 
         if (searchCriteria.getBeginSearchTime() != null && searchCriteria.getEndSearchTime() != null) {
             predicates.add(criteriaBuilder.between(root.get("timeSend").as(Timestamp.class), searchCriteria.getBeginSearchTime(), searchCriteria.getEndSearchTime()));

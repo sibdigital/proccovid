@@ -21,12 +21,21 @@ function getVerifyStatusStringByIntStatus(verifyStatus) {
     return status;
 }
 
+
+
 function getFilesListByTypeView(docRequestSubsidyId) {
     webix.ajax(`../request_subsidy_files_verification/${ docRequestSubsidyId }`).then(function (filesVerification) {
         filesVerification = filesVerification.json();
 
         filesVerification.map((file) => {
             file.verify_status = getVerifyStatusStringByIntStatus(file.verify_status);
+            if (file.id_user) {
+                file.verificationOwner = 'Пользователём';
+            } else if (file.id_principal) {
+                file.verificationOwner = 'Организацией';
+            } else {
+                file.verificationOwner = 'Проверка не проводилась';
+            }
             return file;
         });
 
@@ -37,9 +46,26 @@ function getFilesListByTypeView(docRequestSubsidyId) {
             if (data.length > 0) {
                 const filesTypes = {};
                 const byFileType = data.reduce(function (result, file) {
-                    const fileVerificationStatus = filesVerification.find((fileVerification) => fileVerification.id_request_subsidy_file === file.id);
+                    // const fileVerificationStatus = filesVerification.find((fileVerification) => fileVerification.id_request_subsidy_file === file.id);
                     result[file.fileType.id] = result[file.fileType.id] || [];
-                    result[file.fileType.id].push({ ...file, verificationStatus: fileVerificationStatus ?? { verify_status: 'отсутствует подпись' } });
+
+                    const fileVerificationStatus = filesVerification.filter((fileVerification) => fileVerification.id_request_subsidy_file === file.id);
+                    console.dir({ fileVerificationStatus });
+                    fileVerificationStatus.forEach((fileVer, index) => {
+                        console.dir({ fileVer });
+                        result[file.fileType.id].push({
+                            ...file,
+                            id: `${ file.id }/${ index }`,
+                            verificationStatus: fileVer
+                        });
+                    });
+
+                    if (fileVerificationStatus.length === 0) {
+                        result[file.fileType.id].push({
+                            ...file,
+                            verificationStatus: fileVerificationStatus ?? {verify_status: 'Проверка не проводилась'}
+                        });
+                    }
 
                     filesTypes[file.fileType.id] = file.fileType.name;
 
@@ -49,6 +75,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                 console.dir({ byFileType });
 
                 for (const [key, filesArray] of Object.entries(byFileType)) {
+                    console.dir({ filesArray });
                     views.push({
                         rows: [
                             view_section(filesTypes[key]),
@@ -69,6 +96,12 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                         adjust: true,
                                         fillspace: true,
                                         sort: 'string',
+                                        template: (request) => {
+                                            return `<div class='download_docs'>
+                                                        <a style='text-decoration: none; color: #1ca1c1' href="${ LINK_PREFIX }${ request.fileName }${ LINK_SUFFIX }" download>${ request.viewFileName }</a>
+                                                        <span style='padding-left: 10px; color: #389a0d; font-weight: 400'></span>
+                                                    </div>`
+                                        }
                                     },
                                     {
                                         id: 'signature',
@@ -92,11 +125,21 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                         sort: 'string',
                                     },
                                     {
+                                        id: 'verificationOwner',
+                                        header: 'Проверено',
+                                        adjust: true,
+                                        sort: 'string',
+                                        template: '#verificationStatus.verificationOwner#',
+                                    },
+                                    {
                                         id: 'verificationStatus',
                                         header: 'Статус проверки подписи',
                                         adjust: true,
                                         template: (request) => {
-                                            return `<button class="verification_request_subsidy_file_signature_status_button" onclick=getVerificationStatus(${ request.verificationStatus.id_request_subsidy_file })>${ request.verificationStatus.verify_status }</button>`
+                                            const id_request_subsidy_file = request.verificationStatus.id_request_subsidy_file;
+                                            const id_user = request.verificationStatus.id_user ?? -1;
+                                            const id_principal = request.verificationStatus.id_principal ?? -1;
+                                            return `<button class="verification_request_subsidy_file_signature_status_button" onclick=getVerificationStatus(${ [id_request_subsidy_file, id_user, id_principal].join(',') })>${ request.verificationStatus.verify_status }</button>`
                                         },
                                     },
                                 ],
@@ -317,16 +360,33 @@ webix.ready(function () {
                                                     rows: [
                                                         view_section('Проверка подписей'),
                                                         {
+                                                            margin: 10,
+                                                            padding: 10,
+                                                            borderless: true,
                                                             cols: [
                                                                 {
                                                                     view: 'button',
                                                                     value: 'Проверить подписи',
+                                                                    width: 170,
+                                                                    css: "webix_primary custom-btn-border",
                                                                     click: () => {
+                                                                        // let progressBar = $$("progress_bar");
+                                                                        // webix.extend(progressBar, webix.ProgressBar);
+                                                                        // let progress = 1 / 2;
+                                                                        // progressBar.showProgress({type: "top", position: progress === 0 ? 0.001 : progress})
+                                                                        // document.getElementById("progress_bar_text").innerHTML =
+                                                                        //     "<span style='position: absolute; margin-top: 8px; left: 10px; z-index: 100; font-weight: 500'>" +
+                                                                        //     "Проверено: " + 1 + "/" + 2 +
+                                                                        //     "</span>";
                                                                         if (!ID) {
+                                                                            webix.message("Не найдена заявка", "error", 4000);
                                                                             return;
                                                                         }
                                                                         webix.ajax('../verification_request_subsidy_signature_files/' + ID);
-                                                                        check_request_subsidy_files_signatures();
+                                                                        verify_progress(ID, "До начала проверки подписей не менее "); //show progress on start event
+                                                                        let timerId = setInterval(() => {
+                                                                            verify_progress(ID, "До начала проверки подписей не менее ", timerId);
+                                                                        }, 4000)
                                                                     }
                                                                 },
                                                                 {
@@ -438,7 +498,7 @@ function check_request_subsidy_files_signatures() {
     webix.ajax().get(`../check_request_subsidy_files_signatures`, params).then((response) => {
         let responseJson = response.json();
         if (responseJson.status === "ok") {
-            verify_progress(params.id_request, responseJson.cause); //show progress on start event
+            verify_progress(params.id_request, "До начала проверки подписей не менее "); //show progress on start event
             let timerId = setInterval(() => {
                 verify_progress(params.id_request, responseJson.cause, timerId);
             }, 4000)
@@ -477,11 +537,11 @@ function verify_progress(id, queueTime, timerId = null) {
                             "Проверено: " + verified + "/" + numberOfFiles +
                             "</span>";
                         progress === 1 ? webix.message("Началась проверка подписей", "", 2000) : null;
-                        let dataViews = $$('required_subsidy_files_templates').getChildViews()
-                        dataViews.forEach((dataView) => {
-                            let dataViewId = dataView.qf[1].id;
-                            updateDataview(dataViewId.slice(0, -9), $$(dataViewId).config.formData.fileTypeId)
-                        })
+                        // let dataViews = $$('required_subsidy_files_templates').getChildViews()
+                        // dataViews.forEach((dataView) => {
+                        //     let dataViewId = dataView.qf[1].id;
+                        //     updateDataview(dataViewId.slice(0, -9), $$(dataViewId).config.formData.fileTypeId)
+                        // })
                     } else {
                         document.getElementById("progress_bar_text").innerHTML =
                             "<span style='position: absolute; margin-top: 8px; left: 10px; z-index: 100; font-weight: 500'>" +
@@ -489,9 +549,10 @@ function verify_progress(id, queueTime, timerId = null) {
                             "</span>";
                     }
 
+                    console.dir({ verified, numberOfFiles, progress });
                     if (numberOfFiles === verified) {
                         clearInterval(timerId);
-                        webix.message("Проверка подписей завершена", "success", 10000);
+                        webix.message("Проверка подписей завершена", "success", 5000);
                     }
 
                 }
@@ -519,8 +580,10 @@ function changeRequestSubsidyStatus(approve, id_request_subsidy) {
         });
 }
 
-function getVerificationStatus(verificationStatusId) {
-    const verificationData = webix.ajax().sync().get('../find_verification_request_subsidy_signature_file/' + verificationStatusId);
+function getVerificationStatus(verificationStatusId, idUser, idPrincipal) {
+    const verificationData = webix.ajax().sync()
+        .get('../find_verification_request_subsidy_signature_file/' + verificationStatusId, { idUser: idUser === -1 ? null : idUser, idPrincipal: idPrincipal === -1 ? null : idPrincipal });
+
     const jsonResponse = JSON.parse(verificationData.responseText);
 
     if (!jsonResponse || ! verificationData) {
@@ -547,6 +610,12 @@ function getVerificationStatus(verificationStatusId) {
         jsonResponse.verifyStatus = getVerifyStatusStringByIntStatus(jsonResponse.verifyStatus);
     }
 
+    if (jsonResponse.user != null) {
+        jsonResponse.owner = jsonResponse.user.fullName;
+    } else if (jsonResponse.principal != null) {
+        jsonResponse.owner = jsonResponse.principal.organization.name;
+    }
+
     webix.ui({
         id: 'verificationFileInfoView',
         rows: [
@@ -564,8 +633,22 @@ function getVerificationStatus(verificationStatusId) {
                             id: 'subsidyFormId',
                             autoheight: true,
                             rows: [
+                                {view: 'text', value: jsonResponse.owner, label: 'Проверено:', labelPosition: 'top', name: 'verifyOwner', readonly: true,},
                                 {view: 'text', value: jsonResponse.verifyStatus, label: 'Статус верификации', labelPosition: 'top', name: 'verifyStatus', readonly: true,},
-                                {view: 'text', value: jsonResponse.verifyResult, label: 'Результат верификации', labelPosition: 'top', name: 'verifyResult', readonly: true,},
+                                {
+                                    view: 'label',
+                                    label: 'Результат верификации',
+                                    height: 22,
+                                },
+                                {
+                                    view: 'template',
+                                    name: 'verifyResult',
+                                    autoheight: true,
+                                    readonly: true,
+                                    template: () => {
+                                        return `<div id="verify_result_template">${ jsonResponse.verifyResult }</div>`;
+                                    }
+                                },
                                 {view: 'text', value: jsonResponse.timeCreate, label: 'Дата создания', labelPosition: 'top', name: 'timeCreate', readonly: true,},
                                 {view: 'text', value: jsonResponse.timeBeginVerification, label: 'Дата начала верификации', labelPosition: 'top', name: 'timeBeginVerification', readonly: true,},
                                 {view: 'text', value: jsonResponse.timeEndVerification, label: 'Дата окончания верификации', labelPosition: 'top', name: 'timeEndVerification', readonly: true,},

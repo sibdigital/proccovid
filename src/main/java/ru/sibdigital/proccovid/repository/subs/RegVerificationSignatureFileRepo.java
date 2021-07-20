@@ -29,8 +29,24 @@ public interface RegVerificationSignatureFileRepo extends JpaRepository<RegVerif
     @Query(
             value = "select *\n" +
                     "from subs.reg_verification_signature_file\n" +
-                    "where id_request_subsidy_file = :idRequestSubsidyFile",
+                    "where id_request_subsidy_file = :idRequestSubsidyFile " +
+                    "and id_user = :idUser ",
             nativeQuery = true
     )
-    public Optional<RegVerificationSignatureFile> findRegVerificationSignatureFileByIdRequestSubsidyFile(@Param("idRequestSubsidyFile") Long idRequestSubsidyFile);
+    public Optional<RegVerificationSignatureFile> findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(
+            @Param("idRequestSubsidyFile") Long idRequestSubsidyFile,
+            @Param("idUser") Long idUser
+    );
+
+    @Query(
+            value = "select *\n" +
+                    "from subs.reg_verification_signature_file\n" +
+                    "where id_request_subsidy_file = :idRequestSubsidyFile " +
+                    "and id_principal = :idPrincipal",
+            nativeQuery = true
+    )
+    public Optional<RegVerificationSignatureFile> findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(
+            @Param("idRequestSubsidyFile") Long idRequestSubsidyFile,
+            @Param("idPrincipal") Long idPrincipal
+    );
 }

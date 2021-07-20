@@ -1,5 +1,6 @@
 package ru.sibdigital.proccovid.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import java.util.*;
 
 @RestController
+@Slf4j
 public class RequestSubsidyController {
     //для работы с DocRequestSubsidy, RegVerificationSignatureFile, TpRequestSubsidyFile
 
@@ -100,27 +102,42 @@ public class RequestSubsidyController {
             docRequestSubsidyRepo.save(docRequestSubsidy);
         }
 
-        if (approve) {
-            ClsSubsidyRequestStatus clsApproveSubsidyRequestStatus = clsSubsidyRequestStatusRepo.getClsSubsidyRequestStatusByStatus("APPROVE");
-            ClsSubsidyRequestStatus clsSubsidyRequestStatus = clsSubsidyRequestStatusRepo.findById(docRequestSubsidy.getSubsidyRequestStatus().getId()).orElse(null);
+        String code = approve ? "APPROVE" : "REJECT";
+        ClsSubsidyRequestStatus clsApproveSubsidyRequestStatus = clsSubsidyRequestStatusRepo.getClsSubsidyRequestStatusByStatus(code);
+        ClsSubsidyRequestStatus clsSubsidyRequestStatus = clsSubsidyRequestStatusRepo.findById(docRequestSubsidy.getSubsidyRequestStatus().getId()).orElse(null);
 
-            if (clsApproveSubsidyRequestStatus == null || clsSubsidyRequestStatus == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of( "success", "false"));
-            }
+        if (clsApproveSubsidyRequestStatus == null || clsSubsidyRequestStatus == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of( "success", "false", "message", "Не найден запрос"));
+        }
 
+        try {
             clsSubsidyRequestStatus.setCode(clsApproveSubsidyRequestStatus.getCode());
             clsSubsidyRequestStatus.setName(clsApproveSubsidyRequestStatus.getName());
             clsSubsidyRequestStatus.setShortName(clsApproveSubsidyRequestStatus.getShortName());
             clsSubsidyRequestStatusRepo.save(clsSubsidyRequestStatus);
-            return ResponseEntity.ok().body(Map.of( "success", "true", "status", clsApproveSubsidyRequestStatus.getName()));
+            return ResponseEntity.ok().body(Map.of("success", "true", "status", clsApproveSubsidyRequestStatus.getName()));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.ok().body(Map.of( "success", "false", "message", e.getMessage()));
         }
-        return ResponseEntity.ok().body(Map.of( "success", "false"));
     }
 
     @GetMapping("find_verification_request_subsidy_signature_file/{idRequestSubsidyFile}")
-    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(@PathVariable("idRequestSubsidyFile") Long idRequestSubsidyFile, HttpSession session) {
-        RegVerificationSignatureFile regVerificationSignatureFile = regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFile(idRequestSubsidyFile).orElse(null);
-        return regVerificationSignatureFile;
+    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(
+            @PathVariable("idRequestSubsidyFile") Long idRequestSubsidyFile,
+            @RequestParam("idUser") Long idUser,
+            @RequestParam("idPrincipal") Long idPrincipal,
+            HttpSession session) {
+        if (idUser != null) {
+            RegVerificationSignatureFile regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(idRequestSubsidyFile, idUser).orElse(null);
+            return regVerificationSignatureFile;
+        } else if (idPrincipal != null) {
+            RegVerificationSignatureFile regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(idRequestSubsidyFile, idPrincipal).orElse(null);
+            return regVerificationSignatureFile;
+        }
+        return new RegVerificationSignatureFile();
     }
 
     @GetMapping("verification_request_subsidy_signature_files/{idRequestSubsidy}")
@@ -140,5 +157,25 @@ public class RequestSubsidyController {
         List<RegVerificationSignatureFile> regVerificationSignatureFiles = requestSubsidyService.verifyRequestFiles(docRequestSubsidy, clsUser);
 
         return regVerificationSignatureFiles;
+    }
+
+    @GetMapping("check_signature_files_verify_progress")
+    public HashMap<String, Object> checkSignatureFilesVerifyProgress(
+            @RequestParam("id_request") Long idRequest
+    ) {
+
+        HashMap<String, Object> result = requestSubsidyService.checkSignatureFilesVerifyProgress(idRequest, 8095L);
+
+        return result;
+    }
+
+    @GetMapping("check_request_subsidy_files_signatures")
+    public ResponseEntity<String> checkProgress(
+            @RequestParam("id_request") Long idRequest
+    ) {
+
+        ResponseEntity<String> responseEntity = requestSubsidyService.checkProgress(idRequest, 8095L);
+
+        return responseEntity;
     }
 }
