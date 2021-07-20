@@ -8,6 +8,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.report.RemoteCntEntityWithOkvedsReport;
+import ru.sibdigital.proccovid.model.report.RequestSubsidyCntByOkvedsEntityReport;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
 
 import javax.persistence.EntityManager;
@@ -52,31 +53,29 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
             if (maxDate == null) {
                 maxDate = defaultMaxDate;
             }
-            List<RemoteCntEntityWithOkvedsReport> remoteCntEntities = getRequestSubsidyCntByOkvedsForReport(okveds, minDate, maxDate);
+            List<RequestSubsidyCntByOkvedsEntityReport> rscboEntities = getRequestSubsidyCntByOkvedsForReport(okveds, minDate, maxDate);
 
             Map<String, Object> parameters = new HashMap<>();
-            JRBeanCollectionDataSource remoteCntJRBean = new JRBeanCollectionDataSource(remoteCntEntities);
-            parameters.put("RemoteCntDataSource", remoteCntJRBean);
 
             parameters.put("net.sf.jasperreports.print.keep.full.text", true);
             parameters.put(JRParameter.IS_IGNORE_PAGINATION, true);
             parameters.put(JRParameter.REPORT_LOCALE, new Locale("ru", "RU"));
 
-            parameters.put("reportTitle", "Отчет о количестве субсидий в разрезе ОКВЭД");
-            parameters.put("okvedPaths", okveds.toString());
+            parameters.put("reportTitle", "Отчет о количестве заявок на получение субсидии в разрезе ОКВЭД");
+            parameters.put("okvedFilterDesc", okveds.toString());
             parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
-            parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
+            parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
 
             String jrxmlPath = "classpath:reports/request_subsidy/request_subsidy_cnt_by_okveds.jrxml";
 
-            return jasperReportService.exportJasperReport(jrxmlPath, remoteCntEntities, parameters, reportFormat);
+            return jasperReportService.exportJasperReport(jrxmlPath, rscboEntities, parameters, reportFormat);
         } catch (Exception e) {
             log.error(e.getMessage());
             return null;
         }
     }
 
-    private List<RemoteCntEntityWithOkvedsReport> getRequestSubsidyCntByOkvedsForReport(List<String> okvedPaths, Date minDate, Date maxDate) throws IOException {
+    private List<RequestSubsidyCntByOkvedsEntityReport> getRequestSubsidyCntByOkvedsForReport(List<String> okvedPaths, Date minDate, Date maxDate) throws IOException {
         Set<String> set = okvedPaths.stream().collect(Collectors.toSet());
         if (set.contains("2001")) {
             set.addAll(getAllOkvedPathsByVersion("2001"));
@@ -85,7 +84,7 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
             set.addAll(getAllOkvedPathsByVersion("2014"));
         }
         Query query = getQueryForRequestSubsidyCntByOkvedsReport(set, minDate, maxDate);
-        List<RemoteCntEntityWithOkvedsReport> list = query.getResultList();
+        List<RequestSubsidyCntByOkvedsEntityReport> list = query.getResultList();
 
         return list;
     }
@@ -93,11 +92,10 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
 
     private Query getQueryForRequestSubsidyCntByOkvedsReport(Set<String> okvedPaths, Date minDate, Date maxDate) throws IOException {
         String  queryString = getQueryString("classpath:reports/request_subsidy/request_subsidy_cnt_by_okveds.sql");
-        Query query = entityManager.createNativeQuery(queryString, RemoteCntEntityWithOkvedsReport.class);
+        Query query = entityManager.createNativeQuery(queryString, RequestSubsidyCntByOkvedsEntityReport.class);
         query.setParameter("okved_paths", okvedPaths);
         query.setParameter("min_date", minDate);
         query.setParameter("max_date", maxDate);
-
 
         return query;
     }

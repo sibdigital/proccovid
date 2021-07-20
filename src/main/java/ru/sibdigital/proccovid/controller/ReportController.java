@@ -172,13 +172,43 @@ public class ReportController {
             method = RequestMethod.GET
     )
     public @ResponseBody String generateRequestSubsidyCntByOkvedsReport(@RequestParam(value = "okvedPaths") List<String> okvedPaths,
-                                                              @RequestParam(value = "startDateSend") String startDateSendString,
-                                                              @RequestParam(value = "endDateSend") String endDateSendString) throws ParseException {
+                                                              @RequestParam(value = "startDateReport") String startDateSendString,
+                                                              @RequestParam(value = "endDateReport") String endDateSendString) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date startDateSend = dateFormat.parse(startDateSendString);
         Date endDateSend = dateFormat.parse(endDateSendString);
         byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReport("html", startDateSend, endDateSend, okvedPaths);
         String template = new String(bytes);
         return template;
+    }
+
+    @RequestMapping(
+            value = {"/request_subsidy_cnt_by_okveds/{format}/params","/outer/request_subsidy_cnt_by_okveds/{format}/params"}
+    )
+    public String downloadRequestSubsidyCntByOkveds(@PathVariable String format,
+                                                @RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                                @RequestParam(value = "startDateReport") String startDateSendString,
+                                                @RequestParam(value = "endDateReport") String endDateSendString,
+                                                HttpServletResponse response) throws IOException, ParseException {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        Date startDateSend = dateFormat.parse(startDateSendString);
+        Date endDateSend = dateFormat.parse(endDateSendString);
+        byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReport(format,  startDateSend, endDateSend, okvedPaths);
+
+        if (format.equals("pdf")) {
+            response.setContentType("application/pdf");
+        } else if (format.equals("html")) {
+            response.setContentType("text/html");
+        } else if (format.equals("xlsx")){
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=organizationCountByOkveds.xlsx");
+        }
+
+        ServletOutputStream out = response.getOutputStream();
+        out.write(bytes);
+        out.flush();
+        out.close();
+        return null;
     }
 }

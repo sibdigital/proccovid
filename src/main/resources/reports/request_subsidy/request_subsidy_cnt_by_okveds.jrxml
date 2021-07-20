@@ -32,16 +32,11 @@
 	<style name="Crosstab_CD" mode="Opaque" backcolor="#FFFFFF"/>
 	<parameter name="minDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="maxDate" class="java.lang.String" isForPrompting="false"/>
-	<parameter name="minCnt" class="java.lang.Integer" isForPrompting="false"/>
-	<parameter name="maxValue" class="java.lang.Integer" isForPrompting="false"/>
 	<parameter name="okvedFilterDesc" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="reportTitle" class="java.lang.String" isForPrompting="false"/>
-	<parameter name="prefix" class="java.lang.String" isForPrompting="false"/>
 	<field name="id" class="java.lang.Long"/>
-	<field name="organization" class="ru.sibdigital.proccovid.dto.report.OrganizationShortDto"/>
-	<field name="controlAuthority" class="ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto"/>
-	<field name="totalOrganization" class="java.lang.Integer"/>
-	<field name="totalAuthority" class="java.lang.Integer"/>
+	<field name="okved" class="ru.sibdigital.proccovid.dto.report.OkvedShortDto"/>
+	<field name="statusRequestSubsidy" class="ru.sibdigital.proccovid.dto.report.SubsidyRequestStatusShortDto"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -62,35 +57,35 @@
 	<pageHeader>
 		<band height="47" splitType="Stretch">
 			<staticText>
-				<reportElement x="-11" y="0" width="52" height="47" uuid="c15ec69d-b6ba-428d-8103-268a7e0778ba"/>
+				<reportElement x="-11" y="0" width="101" height="47" uuid="c15ec69d-b6ba-428d-8103-268a7e0778ba"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[Дата подачи с:]]></text>
 			</staticText>
 			<textField textAdjust="StretchHeight">
-				<reportElement x="41" y="0" width="79" height="47" uuid="9a42706e-dd94-4e45-9412-48a95ad1dc7a"/>
+				<reportElement x="90" y="0" width="160" height="47" uuid="9a42706e-dd94-4e45-9412-48a95ad1dc7a"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{minDate}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="130" y="0" width="60" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
+				<reportElement x="260" y="0" width="60" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[Дата по:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="190" y="0" width="90" height="47" uuid="52696cca-4ea4-4dc8-8571-d4710e272954"/>
+				<reportElement x="320" y="0" width="160" height="47" uuid="52696cca-4ea4-4dc8-8571-d4710e272954"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{maxDate}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="420" y="0" width="200" height="47" uuid="72f67952-4b8c-498e-a042-af63c14b9b8c"/>
+				<reportElement x="490" y="0" width="130" height="47" uuid="72f67952-4b8c-498e-a042-af63c14b9b8c"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Times New Roman" size="12"/>
 				</textElement>
@@ -106,31 +101,31 @@
 					<property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
 					<property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
 					<property name="com.jaspersoft.studio.crosstab.style.total" value="Crosstab_CT"/>
-					<property name="com.jaspersoft.studio.crosstab.style.detail" value="MY_CELL_STYLE"/>
 				</reportElement>
 				<crosstabDataset>
 					<dataset resetType="Report"/>
 				</crosstabDataset>
-				<rowGroup name="organization" width="150" totalPosition="End" mergeHeaderCells="true">
-					<bucket order="Descending" class="ru.sibdigital.proccovid.dto.report.OrganizationShortDto">
+				<rowGroup name="okved" width="360" totalPosition="End" mergeHeaderCells="true">
+					<bucket class="ru.sibdigital.proccovid.dto.report.OkvedShortDto">
 						<bucketExpression><![CDATA[$F{okved}]]></bucketExpression>
+						<orderByExpression><![CDATA[$V{order_measure_okved}]]></orderByExpression>
 					</bucket>
 					<crosstabRowHeader>
 						<cellContents mode="Opaque" style="Crosstab_CH">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
-								<reportElement x="0" y="0" width="150" height="20" isPrintWhenDetailOverflows="true" uuid="b8bd8518-f59d-415e-be49-07db1e9d2c48"/>
+								<reportElement x="0" y="0" width="360" height="20" isPrintWhenDetailOverflows="true" uuid="b8bd8518-f59d-415e-be49-07db1e9d2c48"/>
 								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<textFieldExpression><![CDATA[($V{okved}.getKindCode() + " " + $V{okved}.getKindName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$V{okved}.getKindCode() + " " + $V{okved}.getKindName()]]></textFieldExpression>
 							</textField>
 						</cellContents>
 					</crosstabRowHeader>
 					<crosstabTotalRowHeader>
 						<cellContents mode="Opaque" style="Crosstab_CT">
 							<staticText>
-								<reportElement x="0" y="0" width="150" height="20" forecolor="#FFFFFF" uuid="993404c0-06ee-481a-bd86-b6335a79df09"/>
+								<reportElement x="0" y="0" width="360" height="20" forecolor="#FFFFFF" uuid="993404c0-06ee-481a-bd86-b6335a79df09"/>
 								<textElement verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
@@ -139,9 +134,10 @@
 						</cellContents>
 					</crosstabTotalRowHeader>
 				</rowGroup>
-				<columnGroup name="controlAuthority" height="20" totalPosition="End" mergeHeaderCells="true">
-					<bucket order="Descending" class="ru.sibdigital.proccovid.dto.report.ControlAuthorityShortDto">
-						<bucketExpression><![CDATA[$F{subsidyRequestStatus}]]></bucketExpression>
+				<columnGroup name="statusRequestSubsidy" height="20" totalPosition="End" mergeHeaderCells="true">
+					<bucket class="ru.sibdigital.proccovid.dto.report.SubsidyRequestStatusShortDto">
+						<bucketExpression><![CDATA[$F{statusRequestSubsidy}]]></bucketExpression>
+						<orderByExpression><![CDATA[$V{order_measure_status}]]></orderByExpression>
 					</bucket>
 					<crosstabColumnHeader>
 						<cellContents mode="Opaque" style="Crosstab_CH">
@@ -153,7 +149,7 @@
 								<textElement verticalAlignment="Middle">
 									<font fontName="Times New Roman" size="12"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{subsidyRequestStatus}.getShortName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$V{statusRequestSubsidy}.getShortName()]]></textFieldExpression>
 							</textField>
 						</cellContents>
 					</crosstabColumnHeader>
@@ -172,8 +168,14 @@
 				<measure name="id_MEASURE" class="java.lang.Integer" calculation="Count">
 					<measureExpression><![CDATA[$F{id}]]></measureExpression>
 				</measure>
+				<measure name="order_measure_okved" class="java.lang.String">
+					<measureExpression><![CDATA[$F{okved}.getKindCode() + " " + $F{okved}.getKindCode()]]></measureExpression>
+				</measure>
+				<measure name="order_measure_status" class="java.lang.Long">
+					<measureExpression><![CDATA[$F{statusRequestSubsidy}.getId()]]></measureExpression>
+				</measure>
 				<crosstabCell width="100" height="20">
-					<cellContents mode="Opaque" style="MY_CELL_STYLE">
+					<cellContents mode="Opaque">
 						<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
 							<reportElement x="0" y="0" width="100" height="20" uuid="a8d364f1-3d4a-4358-be78-7923326ba7d3"/>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -183,7 +185,7 @@
 						</textField>
 					</cellContents>
 				</crosstabCell>
-				<crosstabCell width="60" height="20" columnTotalGroup="controlAuthority">
+				<crosstabCell width="60" height="20" columnTotalGroup="statusRequestSubsidy">
 					<cellContents mode="Opaque" style="Crosstab_CT">
 						<textField>
 							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="f561ca77-bcc1-4461-a28a-ca2948dc2edc"/>
@@ -194,7 +196,7 @@
 						</textField>
 					</cellContents>
 				</crosstabCell>
-				<crosstabCell width="100" height="20" rowTotalGroup="organization">
+				<crosstabCell width="100" height="20" rowTotalGroup="okved">
 					<cellContents mode="Opaque" style="Crosstab_CT">
 						<textField>
 							<reportElement x="0" y="0" width="100" height="20" isRemoveLineWhenBlank="true" forecolor="#FFFFFF" uuid="9b769142-c76f-45dc-9004-249ae2285e96"/>
@@ -205,7 +207,7 @@
 						</textField>
 					</cellContents>
 				</crosstabCell>
-				<crosstabCell width="60" height="20" rowTotalGroup="organization" columnTotalGroup="controlAuthority">
+				<crosstabCell width="60" height="20" rowTotalGroup="okved" columnTotalGroup="statusRequestSubsidy">
 					<cellContents mode="Opaque" style="Crosstab_CT">
 						<textField>
 							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="f219783c-8bd7-4b76-9a0d-cce3eacde7cc"/>

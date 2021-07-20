@@ -4,6 +4,25 @@ const requestSubsidyCntByOkvedsReport = {
         autowidth: true,
         rows: [
             {
+                cols: [
+                    {
+                        view: 'datepicker',
+                        id: 'startDateReport',
+                        label: 'Дата с:',
+                        labelWidth: 70,
+                        timepicker: false,
+                    },
+                    {
+                        view: 'datepicker',
+                        id: 'endDateReport',
+                        label: 'по:',
+                        labelWidth: 30,
+                        timepicker: false,
+                    },
+                    {}
+                ]
+            },
+            {
                 view: 'accordion',
                 multi:true,
                 rows: [
@@ -23,7 +42,7 @@ const requestSubsidyCntByOkvedsReport = {
                     {},
                     {
                         view: 'button',
-                        id: 'generateCntRemoteReport',
+                        id: 'generateReport',
                         value: 'Сформировать',
                         align: 'right',
                         width: 250,
@@ -33,8 +52,10 @@ const requestSubsidyCntByOkvedsReport = {
 
                             let params = {
                                 okvedPaths: okvedPaths,
+                                startDateReport: $$('startDateReport').getValue(),
+                                endDateReport: $$('endDateReport').getValue(),
                             };
-                            webix.ajax().get('generate_cnt_remote_with_okveds_report', params).then(function (data) {
+                            webix.ajax().get('generate_request_subsidy_cnt_by_okveds_report', params).then(function (data) {
                                 if (data.text() != null) {
                                     let tmlpt =  $$('templateReportId');
                                     tmlpt.$view.childNodes[0].setAttribute('style','width:100%');
@@ -53,11 +74,18 @@ const requestSubsidyCntByOkvedsReport = {
                         tooltip: 'Сформировать и скачать в xlsx формате',
                         click: function () {
                             let okvedPaths = $$('okvedTreeId').getChecked().toString();
+                            let startDateReport = webix.i18n.fullDateFormatStr($$('startDateReport').getValue());
+                            let endDateReport = webix.i18n.fullDateFormatStr($$('endDateReport').getValue());
 
-                            let url = 'remoteCntReportByOkveds/xlsx/params?okvedPaths='+okvedPaths;
-
+                            let url = 'request_subsidy_cnt_by_okveds/xlsx/params?okvedPaths='+okvedPaths;
+                            if (startDateReport != "") {
+                                url = url + "&startDateReport=" + startDateReport
+                            }
+                            if (endDateReport != "") {
+                                url = url + "&endDateReport=" + endDateReport
+                            }
                             webix.ajax().response("blob").get(url, function (text, data, xhr) {
-                                webix.html.download(data, "employee_count_by_okved.xlsx");
+                                webix.html.download(data, "request_subsidy_count_by_okved.xlsx");
                             })
                         },
                     },

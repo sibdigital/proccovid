@@ -43,7 +43,7 @@ WITH
         GROUP BY id_organization
     ), -- Объединили все найденные организации по ОКВЭД
     status_doc_request AS (
-        SELECT sds.id_organization, sds.id, sds.id_subsidy_request_status
+        SELECT sds.id_organization, sds.id, sds.id_subsidy_request_status, sds.time_send, sds.time_create
         FROM subs.doc_request_subsidy sds
                  INNER JOIN org_ids_by_checked_okveds oibco
                             ON sds.id_organization = oibco.id_organization AND sds.is_deleted = false AND sds.status_activity = 1 AND time_send >= :min_date AND time_send <= :max_date AND sds.id_subsidy_request_status != 1
@@ -56,6 +56,7 @@ WITH
     ),
     tbl AS (
         SELECT status_doc_request.id_organization, status_doc_request.id as id_doc_request, status_doc_request.id_subsidy_request_status as id_request_status,
+               status_doc_request.time_send as time_send, status_doc_request.time_create as time_create,
         (
             SELECT aoo.id_okved FROM all_org_okveds AS aoo
             WHERE (aoo.is_main, aoo.id_organization) = (true, status_doc_request.id_organization)
@@ -69,20 +70,17 @@ WITH
         FROM status_doc_request
     ),
     main_tbl AS (
-        SELECT id_organization, id_doc_request, id_request_status,
+        SELECT id_organization, id_doc_request, id_request_status, time_send, time_create,
             coalesce(main_okved, add_okved) AS id_okved
         FROM tbl
         WHERE coalesce(main_okved, add_okved) IS NOT NULL
-    ),
-    final_table_with_okveds AS (
-        SELECT cco.id as id_okved,
-            cco.kind_code,
-            cco.kind_name,
-            count(mt.id_doc_request) as count_doc_request
-        FROM child_checked_okveds cco
-            LEFT JOIN main_tbl as mt on cco.id = mt.id_okved
-        GROUP BY cco.id, cco.kind_code, cco.kind_name
     )
-SELECT id_okved, kind_code, kind_name, coalesce(count_doc_request, 0) as count_doc_request
-FROM final_table_with_okveds
-ORDER BY kind_code, kind_name;
+SELECT mt.id_okved as id_okved,
+       cco.kind_code, cco.kind_name,
+       mt.id_organization, mt.id_doc_request, mt.id_doc_request as id, mt.id_request_status, mt.time_send, mt.time_create,
+       co.name as organization_name, co.short_name as organization_short_name, co.inn as organization_inn,
+       scrs.code as code_status, scrs.name as name_status, scrs.short_name as short_name_status
+FROM  main_tbl mt
+    LEFT JOIN child_checked_okveds cco  on cco.id = mt.id_okved
+    LEFT JOIN cls_organization co on mt.id_organization = co.id
+    LEFT JOIN subs.cls_subsidy_request_status scrs on mt.id_request_status = scrs.id
