@@ -42,7 +42,7 @@ public interface TpRequestSubsidyFileRepo extends JpaRepository<TpRequestSubsidy
                     "      and is_signature = false\n" +
                     "      and is_deleted = false\n" +
                     ")\n" +
-                    "select rvsf.id, rvsf.id_request_subsidy_file, rvsf.verify_status, rvsf.verify_result, rvsf.id_user, rvsf.id_principal\n" +
+                    "select rvsf.id, rvsf.time_end_verification as time_verification, rvsf.id_request_subsidy_file, rvsf.verify_status, rvsf.verify_result, rvsf.id_user, rvsf.id_principal, trsf.file_name as signature_file_name\n" +
                     "from idFiles\n" +
                     "         inner join  subs.tp_request_subsidy_file as trsf\n" +
                     "                     on (idFiles.id) = (trsf.id_subsidy_request_file) and trsf.is_signature = true\n" +

@@ -123,21 +123,31 @@ public class RequestSubsidyController {
     }
 
     @GetMapping("find_verification_request_subsidy_signature_file/{idRequestSubsidyFile}")
-    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(
+    public List<RegVerificationSignatureFile> getVerificationRequestSubsidySignatureFile(
             @PathVariable("idRequestSubsidyFile") Long idRequestSubsidyFile,
             @RequestParam("idUser") Long idUser,
             @RequestParam("idPrincipal") Long idPrincipal,
+            @RequestParam("id") Long idVerificationSignatureFile,
             HttpSession session) {
-        if (idUser != null) {
-            RegVerificationSignatureFile regVerificationSignatureFile =
-                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(idRequestSubsidyFile, idUser).orElse(null);
-            return regVerificationSignatureFile;
-        } else if (idPrincipal != null) {
-            RegVerificationSignatureFile regVerificationSignatureFile =
-                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(idRequestSubsidyFile, idPrincipal).orElse(null);
+//        if (idVerificationSignatureFile != null) {
+//            RegVerificationSignatureFile regVerificationSignatureFile = regVerificationSignatureFileRepo.findById(idVerificationSignatureFile).orElse(null);
+//            return regVerificationSignatureFile;
+//        }
+        if (idPrincipal != null && idUser != null) {
+            List<RegVerificationSignatureFile> regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUserAndIdPrincipal(idRequestSubsidyFile, idUser, idPrincipal);
             return regVerificationSignatureFile;
         }
-        return new RegVerificationSignatureFile();
+        else if (idUser != null) {
+            List<RegVerificationSignatureFile> regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(idRequestSubsidyFile, idUser);
+            return regVerificationSignatureFile;
+        } else if (idPrincipal != null) {
+            List<RegVerificationSignatureFile> regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(idRequestSubsidyFile, idPrincipal);
+            return regVerificationSignatureFile;
+        }
+        return new ArrayList<>();
     }
 
     @GetMapping("verification_request_subsidy_signature_files/{idRequestSubsidy}")
