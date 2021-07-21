@@ -169,8 +169,8 @@ public class ReportController {
                                                               @RequestParam(value = "startDateReport") String startDateSendString,
                                                               @RequestParam(value = "endDateReport") String endDateSendString) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date startDateSend = dateFormat.parse(startDateSendString);
-        Date endDateSend = dateFormat.parse(endDateSendString);
+        Date startDateSend = (!startDateSendString.equals("")) ? dateFormat.parse(startDateSendString) : null;
+        Date endDateSend = (!endDateSendString.equals("")) ? dateFormat.parse(endDateSendString) : null;
         byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReport("html", startDateSend, endDateSend, okvedPaths);
         String template = new String(bytes);
         return template;
@@ -186,8 +186,8 @@ public class ReportController {
                                                 HttpServletResponse response) throws IOException, ParseException {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-        Date startDateSend = dateFormat.parse(startDateSendString);
-        Date endDateSend = dateFormat.parse(endDateSendString);
+        Date startDateSend = (!startDateSendString.equals("")) ? dateFormat.parse(startDateSendString) : null;
+        Date endDateSend = (!endDateSendString.equals("")) ? dateFormat.parse(endDateSendString) : null;
         byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReport(format,  startDateSend, endDateSend, okvedPaths);
 
         if (format.equals("pdf")) {
@@ -216,8 +216,8 @@ public class ReportController {
                                                                                @RequestParam(value = "okvedId") UUID okvedId,
                                                                                @RequestParam(value = "statusId") Long statusId) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date startDateSend = dateFormat.parse(startDateSendString);
-        Date endDateSend = dateFormat.parse(endDateSendString);
+        Date startDateSend = (!startDateSendString.equals("")) ? dateFormat.parse(startDateSendString) : null;
+        Date endDateSend = (!endDateSendString.equals("")) ? dateFormat.parse(endDateSendString) : null;
         byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReportDetail("html", startDateSend, endDateSend, okvedPaths, okvedId, statusId);
         String template = new String(bytes);
         return template;

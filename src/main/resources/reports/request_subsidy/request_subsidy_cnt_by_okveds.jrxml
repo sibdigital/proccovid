@@ -180,7 +180,7 @@
 				<crosstabCell width="100" height="20">
 					<cellContents mode="Opaque">
 						<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
-							<reportElement x="0" y="0" width="100" height="20" uuid="a8d364f1-3d4a-4358-be78-7923326ba7d3"/>
+							<reportElement x="0" y="0" width="100" height="20" uuid="a8d364f1-3d4a-4358-be78-7923326ba7d3" forecolor="#0075A5"/>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
 								<font fontName="Times New Roman" size="12"/>
 							</textElement>

@@ -90,3 +90,4 @@ FROM  filtered_tbl ft
     LEFT JOIN child_checked_okveds cco  on cco.id = ft.id_okved
     LEFT JOIN cls_organization co on ft.id_organization = co.id
     LEFT JOIN subs.cls_subsidy_request_status scrs on ft.id_request_status = scrs.id
+ORDER BY ft.time_send

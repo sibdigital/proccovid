@@ -8,7 +8,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.report.RequestSubsidyCntByOkvedsEntityReport;
+import ru.sibdigital.proccovid.model.subs.ClsSubsidyRequestStatus;
 import ru.sibdigital.proccovid.repository.OkvedRepo;
+import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRequestStatusRepo;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +33,9 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
 
     @Autowired
     OkvedRepo okvedRepo;
+
+    @Autowired
+    ClsSubsidyRequestStatusRepo clsSubsidyRequestStatusRepo;
 
     @Autowired
     ResourceLoader resourceLoader;
@@ -129,6 +133,7 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
             }
             List<RequestSubsidyCntByOkvedsEntityReport> rscboEntities = getRequestSubsidyCntByOkvedsForReportDetails(okveds, minDate, maxDate, okvedId, statusId);
             Okved okved = okvedRepo.findOkvedById(okvedId);
+            ClsSubsidyRequestStatus status = clsSubsidyRequestStatusRepo.findById(statusId).orElse(null);
 
             Map<String, Object> parameters = new HashMap<>();
 
@@ -143,6 +148,7 @@ public class RequestSubsidyReportServiceImpl implements RequestSubsidyReportServ
             parameters.put("minDate", (minDate == defaultMinDate ? "" : dateFormat.format(minDate)));
             parameters.put("maxDate", (maxDate == defaultMaxDate ? "" : dateFormat.format(maxDate)));
             parameters.put("okvedName", okved.getKindCode() + " " + okved.getKindName());
+            parameters.put("statusName", status.getShortName());
 
             String jrxmlPath = "classpath:reports/request_subsidy/request_subsidy_cnt_by_okveds_details.jrxml";
 

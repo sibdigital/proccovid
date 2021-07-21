@@ -39,6 +39,7 @@
 	<parameter name="minDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="maxDate" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="okvedName" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="statusName" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="reportTitle" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[]]>
@@ -77,39 +78,53 @@
 				<textFieldExpression><![CDATA[$P{minDate}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="190" y="0" width="70" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
+				<reportElement x="190" y="0" width="60" height="47" uuid="5ca0e3eb-8e71-4fbc-9cf2-1ffa15185209"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[Дата по:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="270" y="0" width="150" height="47" uuid="52696cca-4ea4-4dc8-8571-d4710e272954"/>
+				<reportElement x="250" y="0" width="130" height="47" uuid="52696cca-4ea4-4dc8-8571-d4710e272954"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{maxDate}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="450" y="0" width="50" height="47" uuid="a6052745-ff3c-430d-986e-309471d2a096"/>
+				<reportElement x="400" y="0" width="50" height="47" uuid="a6052745-ff3c-430d-986e-309471d2a096"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<text><![CDATA[ОКВЭД:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="510" y="0" width="200" height="47" uuid="95538718-cef4-4fe9-ad1a-f49378c8452f"/>
+				<reportElement x="460" y="0" width="230" height="47" uuid="95538718-cef4-4fe9-ad1a-f49378c8452f"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{okvedName}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement x="710" y="0" width="50" height="47" uuid="a6052745-ff3c-430d-986e-309471d2a096"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Статус:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="760" y="0" width="200" height="47" uuid="95538718-cef4-4fe9-ad1a-f49378c8452f"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{statusName}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="256" splitType="Stretch">
+		<band height="200" splitType="Stretch">
 			<componentElement>
-				<reportElement x="-20" y="0" width="595" height="200" uuid="7786bb05-503a-4b6a-991a-a7bcf3abad07">
+				<reportElement x="-20" y="0" width="980" height="200" uuid="7786bb05-503a-4b6a-991a-a7bcf3abad07">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
@@ -137,6 +152,28 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
+					<jr:column width="170" uuid="980fffb5-1088-47a6-b00f-b5d08b7093c9">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="170" height="30" uuid="16679b95-2e6e-4ca1-b8b6-dd7b74267c56"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<text><![CDATA[Заявка]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
+								<reportElement x="0" y="0" width="170" height="30" forecolor="#0075A5" uuid="341e7faf-9680-4941-a9a4-ac78b8f4aae0"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA["ID " + $F{requestSubsidy}.getId()]]></textFieldExpression>
+								<hyperlinkReferenceExpression><![CDATA["request_subsidy/view?id=" + $F{requestSubsidy}.getId()]]></hyperlinkReferenceExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
 					<jr:column width="130" uuid="dca8961f-ce2d-47ac-879c-b15847d170a9">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
@@ -158,11 +195,11 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="280" uuid="980fffb5-1088-47a6-b00f-b5d08b7093c9">
+					<jr:column width="340" uuid="980fffb5-1088-47a6-b00f-b5d08b7093c9">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="280" height="30" uuid="16679b95-2e6e-4ca1-b8b6-dd7b74267c56"/>
+								<reportElement x="0" y="0" width="340" height="30" uuid="16679b95-2e6e-4ca1-b8b6-dd7b74267c56"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
 								</textElement>
@@ -171,11 +208,32 @@
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
-								<reportElement x="0" y="0" width="280" height="30" uuid="341e7faf-9680-4941-a9a4-ac78b8f4aae0"/>
+								<reportElement x="0" y="0" width="340" height="30" uuid="341e7faf-9680-4941-a9a4-ac78b8f4aae0"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{requestSubsidy}.getOrganization().getShortName()]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="140" uuid="980fffb5-1088-47a6-b00f-b5d08b7093c9">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="140" height="30" uuid="16679b95-2e6e-4ca1-b8b6-dd7b74267c56"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<text><![CDATA[ИНН]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="140" height="30" uuid="341e7faf-9680-4941-a9a4-ac78b8f4aae0"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{requestSubsidy}.getOrganization().getInn()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -197,28 +255,6 @@
 									<font size="12"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{requestSubsidy}.getStatus().getShortName()]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="140" uuid="980fffb5-1088-47a6-b00f-b5d08b7093c9">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="140" height="30" uuid="16679b95-2e6e-4ca1-b8b6-dd7b74267c56"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="12"/>
-								</textElement>
-								<text><![CDATA[Ссылка на заявку]]></text>
-							</staticText>
-						</jr:tableHeader>
-						<jr:detailCell style="Table_TD" height="30">
-							<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
-								<reportElement x="0" y="0" width="140" height="30" uuid="341e7faf-9680-4941-a9a4-ac78b8f4aae0" forecolor="#0075A5"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="12"/>
-								</textElement>
-								<textFieldExpression><![CDATA["Посмотреть"]]></textFieldExpression>
-								<hyperlinkReferenceExpression><![CDATA["request_subsidy/view?id=" + $F{requestSubsidy}.getId()]]></hyperlinkReferenceExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
