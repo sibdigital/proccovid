@@ -57,11 +57,17 @@ public class MailingListServiceImpl implements MailingListService {
         }
 
         if (clsMailingList.getUserVisibility() == false) {
+            clearFollowers(clsMailingList);
             addFollowersOnInn(clsMailingListDto, clsMailingList);
             addFollowersOnOkved(clsMailingListDto, clsMailingList, listOkveds);
         }
 
         return clsMailingList;
+    }
+
+    private void clearFollowers(ClsMailingList clsMailingList){
+        List<RegMailingListFollower> oldFollowers = regMailingListFollowerRepo.findAllByMailingList(clsMailingList);
+        regMailingListFollowerRepo.deleteAll(oldFollowers);
     }
 
     private List<RegMailingListFollower> addFollowersOnInn(ClsMailingListDto clsMailingListDto, ClsMailingList clsMailingList){
@@ -77,11 +83,12 @@ public class MailingListServiceImpl implements MailingListService {
 
     private List<RegMailingListFollower> addFollowersOnOkved(ClsMailingListDto clsMailingListDto, ClsMailingList clsMailingList,
                                                              List<Okved> listOkveds){
-        final List<Okved> okvedsAndChildren = listOkveds.stream()
-                .flatMap(o -> okvedRepo.getChildrenOkvedsByPath(o.getPath()).stream())
-                .distinct()
-                .collect(Collectors.toList());
-        final UUID[] uuids = okvedsAndChildren.stream().map(o -> o.getId()).collect(Collectors.toList()).toArray(UUID[]::new);
+//        final List<Okved> okvedsAndChildren = listOkveds.stream()
+//                .flatMap(o -> okvedRepo.getChildrenOkvedsByPath(o.getPath()).stream())
+//                .distinct()
+//                .collect(Collectors.toList());
+//        final UUID[] uuids = okvedsAndChildren.stream().map(o -> o.getId()).collect(Collectors.toList()).toArray(UUID[]::new);
+        final UUID[] uuids = listOkveds.stream().map(ctr -> ctr.getId()).collect(Collectors.toList()).toArray(UUID[]::new);
 
         final List<ClsOrganization> clsOrganizationByUuidArray = clsOrganizationRepo
                 .getClsOrganizationByOkvedArray(uuids, false, true)
