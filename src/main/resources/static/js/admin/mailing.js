@@ -92,6 +92,8 @@ const mailingFormMain = {
                     value: 'Сохранить',
                     click: function () {
                         if ($$('mailingForm').validate()) {
+                            $$('mailingFormId').disable();
+                            webix.message({text: "Идет сохранение рассылки", type: 'success'});
                             let params = $$('mailingForm').getValues();
 
                             let okveds = $$('okved_table').serialize();
@@ -115,10 +117,12 @@ const mailingFormMain = {
                                     // $$('mailing_table').clearAll();
                                     // $$('mailing_table').load('cls_mailing_list');
                                 } else {
+                                    $$('mailingFormId').enable();
                                     webix.message({text: response.message, type: 'error'});
                                 }
                             })
                         } else {
+                            $$('mailingFormId').enable();
                             webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
                         }
                     }
