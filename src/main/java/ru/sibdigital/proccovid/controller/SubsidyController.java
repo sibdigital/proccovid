@@ -12,14 +12,12 @@ import ru.sibdigital.proccovid.dto.subs.ClsSubsidyDto;
 import ru.sibdigital.proccovid.dto.subs.ClsSubsidyWithRequiredFilesDto;
 import ru.sibdigital.proccovid.dto.subs.TpRequiredSubsidyFileDto;
 import ru.sibdigital.proccovid.model.ClsDepartment;
-import ru.sibdigital.proccovid.model.ClsFileType;
 import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.subs.ClsSubsidy;
 import ru.sibdigital.proccovid.model.subs.DocRequestSubsidy;
 import ru.sibdigital.proccovid.model.subs.TpRequiredSubsidyFile;
 import ru.sibdigital.proccovid.model.subs.TpSubsidyOkved;
-import ru.sibdigital.proccovid.repository.ClsFileTypeRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsDepartmentRepo;
 import ru.sibdigital.proccovid.repository.specification.DocRequestSubsidySearchCriteria;
 import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRepo;
@@ -54,9 +52,6 @@ public class SubsidyController {
 
     @Autowired
     TpRequiredSubsidyFileRepo tpRequiredSubsidyFileRepo;
-
-    @Autowired
-    ClsFileTypeRepo clsFileTypeRepo;
 
     @GetMapping("/list_request_subsidy")
     public Map<String, Object> listRequest(@RequestParam(value = "subsidy_request_status_short_name", required = false) String status,
@@ -158,26 +153,5 @@ public class SubsidyController {
     public @ResponseBody List<TpRequiredSubsidyFile> getRequiredSubsidyFiles(@PathVariable("id_subsidy") Long idSubsidy){
         List<TpRequiredSubsidyFile> requiredSubsidyFiles = tpRequiredSubsidyFileRepo.findAllByIdSubsidy(idSubsidy);
         return requiredSubsidyFiles;
-    }
-
-    @PostMapping("/cls_file_types")
-    public @ResponseBody List<ClsFileType> getClsFileTypes(@RequestBody ClsSubsidyWithRequiredFilesDto subsidyWithRequiredFilesDto) {
-        List<ClsFileType> fileTypes;
-        TpRequiredSubsidyFileDto[] requiredSubsidyFileDtos = subsidyWithRequiredFilesDto.getTpRequiredSubsidyFiles();
-        Long[] fileTypesId = new Long[requiredSubsidyFileDtos.length - 1];
-
-        for(int i = 0; i < requiredSubsidyFileDtos.length - 1; i++) {
-            if (requiredSubsidyFileDtos[i].getClsFileType() != null) {
-                fileTypesId[i] = requiredSubsidyFileDtos[i].getClsFileType().getId();
-            }
-        }
-
-        if(fileTypesId.length != 0) {
-            fileTypes = subsidyService.getAllWithoutExists(fileTypesId);
-        } else {
-            fileTypes = clsFileTypeRepo.findAllByIsDeleted(false);
-        }
-
-        return fileTypes;
     }
 }
