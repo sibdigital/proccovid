@@ -90,8 +90,6 @@ public class SubsidyController {
         result.put("total_count", docRequestSubsidyPage.getTotalElements());
         return result;
     }
-
-
     @GetMapping("cls_subsidy_request_status_short")
     public @ResponseBody List<KeyValue> getClsSubsidyRequestStatusShort() {
         AtomicLong index = new AtomicLong(1);

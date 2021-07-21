@@ -1,20 +1,26 @@
 package ru.sibdigital.proccovid.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import ru.sibdigital.proccovid.config.CurrentUser;
+import ru.sibdigital.proccovid.model.ClsUser;
 import ru.sibdigital.proccovid.model.subs.*;
 import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRequestStatusRepo;
 import ru.sibdigital.proccovid.repository.subs.DocRequestSubsidyRepo;
 import ru.sibdigital.proccovid.repository.subs.RegVerificationSignatureFileRepo;
 import ru.sibdigital.proccovid.repository.subs.TpRequestSubsidyFileRepo;
+import ru.sibdigital.proccovid.service.subs.RequestSubsidyServiceImpl;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
 @RestController
+@Slf4j
 public class RequestSubsidyController {
     //для работы с DocRequestSubsidy, RegVerificationSignatureFile, TpRequestSubsidyFile
 
@@ -29,6 +35,9 @@ public class RequestSubsidyController {
 
     @Autowired
     RegVerificationSignatureFileRepo regVerificationSignatureFileRepo;
+
+    @Autowired
+    RequestSubsidyServiceImpl requestSubsidyService;
 
     @GetMapping("/doc_requests_subsidy/{id_request_subsidy}")
     public DocRequestSubsidy getDocRequestSubsidy(@PathVariable("id_request_subsidy") Long id_request_subsidy, HttpSession session) throws IllegalAccessException, InstantiationException {
@@ -93,25 +102,80 @@ public class RequestSubsidyController {
             docRequestSubsidyRepo.save(docRequestSubsidy);
         }
 
-        if (approve) {
-            ClsSubsidyRequestStatus clsApproveSubsidyRequestStatus = clsSubsidyRequestStatusRepo.getClsSubsidyRequestStatusByStatus("APPROVE");
-            ClsSubsidyRequestStatus clsSubsidyRequestStatus = clsSubsidyRequestStatusRepo.findById(docRequestSubsidy.getSubsidyRequestStatus().getId()).orElse(null);
+        String code = approve ? "APPROVE" : "REJECT";
+        ClsSubsidyRequestStatus clsApproveSubsidyRequestStatus = clsSubsidyRequestStatusRepo.getClsSubsidyRequestStatusByStatus(code);
+        ClsSubsidyRequestStatus clsSubsidyRequestStatus = clsSubsidyRequestStatusRepo.findById(docRequestSubsidy.getSubsidyRequestStatus().getId()).orElse(null);
 
-            if (clsApproveSubsidyRequestStatus == null || clsSubsidyRequestStatus == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of( "success", "false"));
-            }
+        if (clsApproveSubsidyRequestStatus == null || clsSubsidyRequestStatus == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of( "success", "false", "message", "Не найден запрос"));
+        }
 
+        try {
             clsSubsidyRequestStatus.setCode(clsApproveSubsidyRequestStatus.getCode());
             clsSubsidyRequestStatus.setName(clsApproveSubsidyRequestStatus.getName());
             clsSubsidyRequestStatus.setShortName(clsApproveSubsidyRequestStatus.getShortName());
             clsSubsidyRequestStatusRepo.save(clsSubsidyRequestStatus);
-            return ResponseEntity.ok().body(Map.of( "success", "true", "status", clsApproveSubsidyRequestStatus.getName()));
+            return ResponseEntity.ok().body(Map.of("success", "true", "status", clsApproveSubsidyRequestStatus.getName()));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.ok().body(Map.of( "success", "false", "message", e.getMessage()));
         }
-        return ResponseEntity.ok().body(Map.of( "success", "false"));
     }
 
-    @GetMapping("verification_request_subsidy_signature_file/{id_verification_request_subsidy_signature_file}")
-    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(@PathVariable("id_verification_request_subsidy_signature_file") Long id_verification_request_subsidy_signature_file, HttpSession session) {
-        return regVerificationSignatureFileRepo.findById(id_verification_request_subsidy_signature_file).orElse(null);
+    @GetMapping("find_verification_request_subsidy_signature_file/{idRequestSubsidyFile}")
+    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(
+            @PathVariable("idRequestSubsidyFile") Long idRequestSubsidyFile,
+            @RequestParam("idUser") Long idUser,
+            @RequestParam("idPrincipal") Long idPrincipal,
+            HttpSession session) {
+        if (idUser != null) {
+            RegVerificationSignatureFile regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(idRequestSubsidyFile, idUser).orElse(null);
+            return regVerificationSignatureFile;
+        } else if (idPrincipal != null) {
+            RegVerificationSignatureFile regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(idRequestSubsidyFile, idPrincipal).orElse(null);
+            return regVerificationSignatureFile;
+        }
+        return new RegVerificationSignatureFile();
+    }
+
+    @GetMapping("verification_request_subsidy_signature_files/{idRequestSubsidy}")
+    public List<RegVerificationSignatureFile> verificationRequestSubsidySignatureFiles(
+            @PathVariable("idRequestSubsidy") Long idRequestSubsidy,
+            HttpSession session
+    ) {
+        DocRequestSubsidy docRequestSubsidy = docRequestSubsidyRepo.findById(idRequestSubsidy).orElse(null);
+
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
+        if (docRequestSubsidy == null || clsUser == null) {
+            return null;
+        }
+
+        List<RegVerificationSignatureFile> regVerificationSignatureFiles = requestSubsidyService.verifyRequestFiles(docRequestSubsidy, clsUser);
+
+        return regVerificationSignatureFiles;
+    }
+
+    @GetMapping("check_signature_files_verify_progress")
+    public HashMap<String, Object> checkSignatureFilesVerifyProgress(
+            @RequestParam("id_request") Long idRequest
+    ) {
+
+        HashMap<String, Object> result = requestSubsidyService.checkSignatureFilesVerifyProgress(idRequest, 8095L);
+
+        return result;
+    }
+
+    @GetMapping("check_request_subsidy_files_signatures")
+    public ResponseEntity<String> checkProgress(
+            @RequestParam("id_request") Long idRequest
+    ) {
+
+        ResponseEntity<String> responseEntity = requestSubsidyService.checkProgress(idRequest, 8095L);
+
+        return responseEntity;
     }
 }

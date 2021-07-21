@@ -14,6 +14,7 @@ import java.util.Map;
 public interface ClsSubsidyRequestStatusRepo extends JpaRepository<ClsSubsidyRequestStatus, Long> {
 
     @Query(value = "select short_name from subs.cls_subsidy_request_status\n" +
+            "where code != 'NEW'\n" +
             "group by short_name\n" +
             "order by short_name;\n",
             nativeQuery = true)
