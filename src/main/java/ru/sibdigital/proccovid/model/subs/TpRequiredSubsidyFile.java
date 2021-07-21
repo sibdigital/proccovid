@@ -3,6 +3,8 @@ package ru.sibdigital.proccovid.model.subs;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import ru.sibdigital.proccovid.model.ClsDepartment;
+import ru.sibdigital.proccovid.model.ClsFileType;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -26,6 +28,15 @@ public class TpRequiredSubsidyFile {
     private Boolean isRequired;
     private Timestamp timeCreate;
     private String comment;
+    private int weight;
+
+    @OneToOne
+    @JoinColumn(name = "id_file_type", referencedColumnName = "id")
+    private ClsFileType clsFileType;
+
+    @OneToOne
+    @JoinColumn(name = "id_subsidy", referencedColumnName = "id")
+    private ClsSubsidy clsSubsidy;
 
     public Long getId() {
         return id;
@@ -74,6 +85,20 @@ public class TpRequiredSubsidyFile {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+    @Basic
+    @Column(name = "weight")
+    public int getWeight() { return weight; }
+
+    public void setWeight(int weight) { this.weight = weight; }
+
+    public ClsFileType getClsFileType() { return clsFileType; }
+
+    public void setClsFileType(ClsFileType clsFileType) { this.clsFileType = clsFileType; }
+
+    public ClsSubsidy getClsSubsidy() { return clsSubsidy; }
+
+    public void setClsSubsidy(ClsSubsidy clsSubsidy) { this.clsSubsidy = clsSubsidy; }
 
     @Override
     public boolean equals(Object o) {

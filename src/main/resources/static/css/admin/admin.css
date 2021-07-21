@@ -162,3 +162,29 @@
 .verification_request_subsidy_file_signature_status_button:hover {
     background-color: #f4f5f9;
 }
+
+.save_btn .webix_button {
+    background: #3bb914;
+}
+
+.save_btn .webix_button:hover {
+    background: #28a900;
+}
+
+.save_btn .webix_button:focus {
+    background: #28a900;
+}
+
+.required {
+    background-color: rgba(21, 206, 0, 0.42);
+}
+
+.not-required {
+    background-color: rgb(255, 255, 255);
+}
+
+.custom-checkbox > .webix_table_checkbox {
+    width: 16px;
+    height: 16px;
+    margin-top: -1px;
+}

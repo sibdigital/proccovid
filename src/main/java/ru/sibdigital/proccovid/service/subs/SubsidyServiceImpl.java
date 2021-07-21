@@ -2,39 +2,27 @@ package ru.sibdigital.proccovid.service.subs;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.sibdigital.proccovid.dto.subs.ClsSubsidyDto;
+import ru.sibdigital.proccovid.dto.subs.TpRequiredSubsidyFileDto;
 import ru.sibdigital.proccovid.model.ClsDepartment;
+import ru.sibdigital.proccovid.model.ClsFileType;
 import ru.sibdigital.proccovid.model.Okved;
 import ru.sibdigital.proccovid.model.subs.ClsSubsidy;
+import ru.sibdigital.proccovid.model.subs.DocRequestSubsidy;
+import ru.sibdigital.proccovid.model.subs.TpRequiredSubsidyFile;
 import ru.sibdigital.proccovid.model.subs.TpSubsidyOkved;
+import ru.sibdigital.proccovid.repository.ClsFileTypeRepo;
 import ru.sibdigital.proccovid.repository.classifier.ClsDepartmentRepo;
-import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRepo;
-import ru.sibdigital.proccovid.repository.subs.TpSubsidyOkvedRepo;
+import ru.sibdigital.proccovid.repository.specification.DocRequestSubsidySearchCriteria;
+import ru.sibdigital.proccovid.repository.specification.DocRequestSubsidySpecification;
+import ru.sibdigital.proccovid.repository.subs.*;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.stream.Collectors;
-import ru.sibdigital.proccovid.dto.KeyValue;
-import ru.sibdigital.proccovid.model.DocRequestPrs;
-import ru.sibdigital.proccovid.model.subs.ClsSubsidy;
-import ru.sibdigital.proccovid.model.subs.ClsSubsidyRequestStatus;
-import ru.sibdigital.proccovid.model.subs.DocRequestSubsidy;
-import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSearchCriteria;
-import ru.sibdigital.proccovid.repository.specification.DocRequestPrsSpecification;
-import ru.sibdigital.proccovid.repository.specification.DocRequestSubsidySearchCriteria;
-import ru.sibdigital.proccovid.repository.specification.DocRequestSubsidySpecification;
-import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRepo;
-import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRequestStatusRepo;
-import ru.sibdigital.proccovid.repository.subs.DocRequestSubsidyRepo;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -56,9 +44,15 @@ public class SubsidyServiceImpl implements SubsidyService {
     @Autowired
     ClsSubsidyRequestStatusRepo clsSubsidyRequestStatusRepo;
 
+    @Autowired
+    TpRequiredSubsidyFileRepo tpRequiredSubsidyFileRepo;
+
+    @Autowired
+    ClsFileTypeRepo clsFileTypeRepo;
+
 
     @Override
-    public void saveSubsidy(ClsSubsidyDto subsidyDto) {
+    public ClsSubsidy saveSubsidy(ClsSubsidyDto subsidyDto) {
         ClsSubsidy subsidy;
         ClsDepartment department = null;
         if (subsidyDto.getDepartmentId() != null) {
@@ -100,6 +94,7 @@ public class SubsidyServiceImpl implements SubsidyService {
                                                     .build())
                                     .collect(Collectors.toList());
         tpSubsidyOkvedRepo.saveAll(list);
+        return subsidy;
     }
 
     @Override
@@ -121,4 +116,63 @@ public class SubsidyServiceImpl implements SubsidyService {
         return StreamSupport.stream(clsSubsidyRepo.findAll(Sort.by(Sort.Direction.DESC, "id")).spliterator(), false)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void saveRequiredSubsidyFile(List<TpRequiredSubsidyFileDto> requiredSubsidyFilesDto, ClsSubsidy clsSubsidy) {
+        List<TpRequiredSubsidyFileDto> filteredReqFileDtos = requiredSubsidyFilesDto.stream()
+                .filter(fileDto -> fileDto.getClsFileType() != null)
+                .collect(Collectors.toList());
+
+        filteredReqFileDtos.
+                forEach(reqFileDto -> {
+                    TpRequiredSubsidyFile fileWithTypeId = tpRequiredSubsidyFileRepo.findByIdSubsidyAndIdFileType(clsSubsidy.getId(), reqFileDto.getClsFileType().getId());
+                    TpRequiredSubsidyFile requiredSubsidyFile;
+                    if (fileWithTypeId == null) {
+                        requiredSubsidyFile = TpRequiredSubsidyFile.builder()
+                                .isDeleted(false)
+                                .isRequired(reqFileDto.getRequired())
+                                .timeCreate(new Timestamp(System.currentTimeMillis()))
+                                .comment(reqFileDto.getComment())
+                                .weight(reqFileDto.getWeight())
+                                .clsFileType(reqFileDto.getClsFileType())
+                                .clsSubsidy(clsSubsidy)
+                                .build();
+                    } else {
+                        requiredSubsidyFile = TpRequiredSubsidyFile.builder()
+                                .id(fileWithTypeId.getId())
+                                .isDeleted(fileWithTypeId.getDeleted())
+                                .isRequired(reqFileDto.getRequired())
+                                .timeCreate(fileWithTypeId.getTimeCreate())
+                                .comment(reqFileDto.getComment())
+                                .weight(reqFileDto.getWeight())
+                                .clsFileType(reqFileDto.getClsFileType())
+                                .clsSubsidy(fileWithTypeId.getClsSubsidy())
+                                .build();
+                    }
+                    tpRequiredSubsidyFileRepo.save(requiredSubsidyFile);
+                });
+
+        setDeletedReqFiles(clsSubsidy, filteredReqFileDtos);
+    }
+
+    public void setDeletedReqFiles(ClsSubsidy subsidy, List<TpRequiredSubsidyFileDto> filteredReqSubFilesDto) {
+        List<TpRequiredSubsidyFile> allReqFiles = tpRequiredSubsidyFileRepo.findAllByIdSubsidy(subsidy.getId());
+        // set is deleted if not exists
+        allReqFiles.stream()
+                .filter(e -> !filteredReqSubFilesDto.stream()
+                        .map(b -> b.getClsFileType().getId())
+                        .collect(Collectors.toList())
+                        .contains(e.getClsFileType().getId())
+                ).collect(Collectors.toList())
+                .forEach(c -> {
+                    c.setDeleted(true);
+                    tpRequiredSubsidyFileRepo.save(c);
+                });
+    }
+
+    @Override
+    public List<ClsFileType> getAllWithoutExists(Long[] ids) {
+        return clsFileTypeRepo.getAllWithoutExists(ids);
+    }
+
 }
