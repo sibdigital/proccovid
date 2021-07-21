@@ -246,6 +246,7 @@ webix.ready(function() {
                             { id: "Principals", icon: "fas fa-user", value: 'Пользователи' },
                             { id: "Templates", icon: "fas fa-comment-alt", value: 'Шаблоны сообщений' },
                             { id: "Statistic", icon: "fas fa-chart-bar", value: 'Статистика' },
+                            { id: "FileTypes", icon: "fas fa-file-invoice", value: 'Типы файлов' },
                             { id: "Subsidies", icon: "fas fa-file-invoice", value: 'Субсидии' },
                             { id: "Okveds", icon: "fas fa-folder", value: 'ОКВЭДы' },
                             { id: "Mailing", icon: "fas fa-paper-plane", value: 'Типы рассылок'},
@@ -308,6 +309,10 @@ webix.ready(function() {
                                     }
                                     case 'Subsidies': {
                                         view = subsidies;
+                                        break;
+                                    }
+                                    case 'FileTypes': {
+                                        view = fileTypes;
                                         break;
                                     }
                                     case 'Okveds': {
