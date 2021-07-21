@@ -4,6 +4,7 @@ function UserReports(userRoles) {
     let isUser = userRoles.includes("USER");
     let isViol = userRoles.includes("VIOLAT");
     let isKnd = userRoles.includes("KND");
+    let isSubsidySupport = userRoles.includes("SUBSIDY_SUPPORT");
 
     return {
         id: 'statisticId',
@@ -112,6 +113,19 @@ function UserReports(userRoles) {
                                     id: 'content',
                                     rows: [
                                         webix.copy(organizationCountByOkvedReport)
+                                    ]
+                                }, $$("content"));
+                            },
+                        },
+                        {
+                            view: 'label',
+                            hidden: !(isSubsidySupport || isAdmin),
+                            label: "<a href='' onclick='return false'>Отчет по количеству заявок на субсидию в разрезе ОКВЭД\n</a>",
+                            click: () => {
+                                webix.ui({
+                                    id: 'content',
+                                    rows: [
+                                        webix.copy(requestSubsidyCntByOkvedsReport)
                                     ]
                                 }, $$("content"));
                             },

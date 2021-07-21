@@ -97,6 +97,18 @@ const statistic = {
                                 ]
                             }, $$("content"));
                         },
+                    },
+                    {
+                        view: 'label',
+                        label: "<a href='' onclick='return false'>Отчет по количеству заявок на субсидию в разрезе ОКВЭД\n</a>",
+                        click: () => {
+                            webix.ui({
+                                id: 'content',
+                                rows: [
+                                    webix.copy(requestSubsidyCntByOkvedsReport)
+                                ]
+                            }, $$("content"));
+                        },
                     }
                 ]
             }
