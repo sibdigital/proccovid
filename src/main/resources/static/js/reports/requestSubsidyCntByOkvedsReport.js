@@ -4,6 +4,7 @@ const requestSubsidyCntByOkvedsReport = {
         autowidth: true,
         cols: [
             {
+                id: 'mainId',
                 rows: [
                     {
                         cols: [
@@ -11,8 +12,9 @@ const requestSubsidyCntByOkvedsReport = {
                                 view: 'datepicker',
                                 id: 'startDateReport',
                                 label: 'Дата с:',
-                                labelWidth: 70,
+                                labelWidth: 60,
                                 timepicker: false,
+                                maxWidth: 250,
                             },
                             {
                                 view: 'datepicker',
@@ -20,14 +22,15 @@ const requestSubsidyCntByOkvedsReport = {
                                 label: 'по:',
                                 labelWidth: 30,
                                 timepicker: false,
+                                maxWidth: 250,
                             },
-                            {},
+                            {gravity: 0.01},
                             {
                                 view: 'button',
                                 id: 'generateReport',
                                 value: 'Сформировать',
                                 align: 'right',
-                                width: 250,
+                                maxWidth: 200,
                                 css: 'webix_primary',
                                 click: function () {
                                     let okvedPaths = $$('okvedTreeId').getChecked().toString();
@@ -40,8 +43,8 @@ const requestSubsidyCntByOkvedsReport = {
                                         };
                                         webix.ajax().get('generate_request_subsidy_cnt_by_okveds_report', params).then(function (data) {
                                             if (data.text() != null) {
-                                                let tmlpt =  $$('templateReportId');
-                                                tmlpt.$view.childNodes[0].setAttribute('style','width:100%');
+                                                let tmlpt = $$('templateReportId');
+                                                tmlpt.$view.childNodes[0].setAttribute('style', 'width:100%');
                                                 tmlpt.setHTML(data.text());
                                                 webix.message("Сформировано", 'success');
                                             } else {
@@ -91,20 +94,24 @@ const requestSubsidyCntByOkvedsReport = {
                 ]
             },
             {
-                // view: 'accordion',
-                // multi:true,
-                // cols: [
-                //     {
                 header: 'Фильтр по ОКВЭД',
-                collapsed:true,
+                collapsed: false,
                 body: {
                     rows: [
                         tree('okvedTreeId'),
-                    ]
-                }
-                // }
-                // ]
+                    ],
+                },
+                on: {
+                    onItemClick: function () {
+                        $$('mainId').resize();
+                        // $$('templateReportId').resize();
+                        let tmlpt =  $$('templateReportId');
+                        tmlpt.$view.childNodes[0].setAttribute('style','width:100%');
+                        tmlpt.resize();
+                    }
+                },
             },
+
         ]
     }
 }
