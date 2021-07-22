@@ -18,7 +18,7 @@ public class ClsFileType {
     @Id
     @Column(name = "id", nullable = false)
     @SequenceGenerator(name = "cls_file_type_id_seq", sequenceName = "cls_file_type_id_seq",
-            allocationSize = 1, schema = "subs"
+            allocationSize = 1, schema = "public"
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cls_file_type_id_seq")
     private Long id;

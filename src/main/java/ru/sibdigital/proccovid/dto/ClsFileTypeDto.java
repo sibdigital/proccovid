@@ -16,6 +16,6 @@ public class ClsFileTypeDto {
     private String name;
     private String shortName;
     private Boolean isDeleted;
-    private Timestamp createTime;
+    private Timestamp timeCreate;
     private String code;
 }

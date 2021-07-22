@@ -4,15 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.dto.ClsFileTypeDto;
 import ru.sibdigital.proccovid.model.ClsFileType;
 import ru.sibdigital.proccovid.repository.ClsFileTypeRepo;
 import ru.sibdigital.proccovid.utils.DataFormatUtils;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +27,14 @@ public class FileTypeController {
     }
 
     @PostMapping("/save_file_type")
-    public ResponseEntity<String> saveFileType(@RequestParam("fileType") ClsFileTypeDto fileTypeDto) {
+    public ResponseEntity<String> saveFileType(@RequestBody ClsFileTypeDto fileTypeDto) {
         try {
             ClsFileType fileType = ClsFileType.builder()
+                    .id(fileTypeDto.getId())
                     .name(fileTypeDto.getName())
                     .shortName(fileTypeDto.getShortName())
                     .isDeleted(false)
+                    .timeCreate(new Timestamp(System.currentTimeMillis()))
                     .code(fileTypeDto.getCode())
                     .build();
             fileTypeRepo.save(fileType);
@@ -45,5 +45,26 @@ public class FileTypeController {
         }
         return DataFormatUtils.buildOkResponse(Map.of(
                 "status","success", "response",fileTypeDto,"message","Файл успешно добавлен"));
+    }
+
+    @PostMapping("/del_file_type")
+    public ResponseEntity<String> delFileType(@RequestBody ClsFileTypeDto fileTypeDto) {
+        try {
+            ClsFileType fileType = ClsFileType.builder()
+                    .id(fileTypeDto.getId())
+                    .name(fileTypeDto.getName())
+                    .shortName(fileTypeDto.getShortName())
+                    .isDeleted(true)
+                    .timeCreate(fileTypeDto.getTimeCreate())
+                    .code(fileTypeDto.getCode())
+                    .build();
+            fileTypeRepo.save(fileType);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return DataFormatUtils.buildInternalServerErrorResponse(Map.of(
+                    "status","error","message","Не удалось удалить файл"));
+        }
+        return DataFormatUtils.buildOkResponse(Map.of(
+                "status","success", "response",fileTypeDto,"message","Файл успешно удален"));
     }
 }
