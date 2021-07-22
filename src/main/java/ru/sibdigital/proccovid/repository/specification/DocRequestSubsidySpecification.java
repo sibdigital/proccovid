@@ -23,8 +23,11 @@ public class DocRequestSubsidySpecification implements Specification<DocRequestS
     public Predicate toPredicate(Root<DocRequestSubsidy> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
 
-        predicates.add(criteriaBuilder.notEqual(root.get("subsidyRequestStatus").get("code"), "NEW"));
         predicates.add(criteriaBuilder.equal(root.get("isDeleted"), false));
+
+        if (!searchCriteria.getIsCurrentUserAdmin()) {
+            predicates.add(criteriaBuilder.notEqual(root.get("subsidyRequestStatus").get("code"), "NEW"));
+        }
 
         if (searchCriteria.getBeginSearchTime() != null && searchCriteria.getEndSearchTime() != null) {
             predicates.add(criteriaBuilder.between(root.get("timeSend").as(Timestamp.class), searchCriteria.getBeginSearchTime(), searchCriteria.getEndSearchTime()));

@@ -24,6 +24,7 @@ import ru.sibdigital.proccovid.repository.subs.ClsSubsidyRequestStatusRepo;
 import ru.sibdigital.proccovid.repository.subs.TpSubsidyOkvedRepo;
 import ru.sibdigital.proccovid.service.subs.SubsidyService;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +61,6 @@ public class SubsidyController {
                                            @RequestParam(value = "bst", required = false) Timestamp beginSearchTime,
                                            @RequestParam(value = "est", required = false) Timestamp endSearchTime
     ) {
-
         int page = start == null ? 0 : start / 25;
         int size = count == null ? 25 : count;
 
@@ -74,6 +74,7 @@ public class SubsidyController {
         searchCriteria.setInnOrName(innOrName);
         searchCriteria.setBeginSearchTime(beginSearchTime);
         searchCriteria.setEndSearchTime(endSearchTime);
+        searchCriteria.setIsCurrentUserAdmin(clsUser.getAdmin());
 
         Page<DocRequestSubsidy> docRequestSubsidyPage = subsidyService.getRequestsByCriteria(searchCriteria, page, size);
 
@@ -85,10 +86,19 @@ public class SubsidyController {
     }
     @GetMapping("cls_subsidy_request_status_short")
     public @ResponseBody List<KeyValue> getClsSubsidyRequestStatusShort() {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
+
         AtomicLong index = new AtomicLong(1);
-        return subsidyService.getClsSubsidyRequestStatusShort().stream()
+        List<KeyValue> subsidyRequestStatusShort = subsidyService.getClsSubsidyRequestStatusShort().stream()
                 .map( csrss -> new KeyValue(csrss.getClass().getSimpleName(), index.getAndIncrement(), csrss))
                 .collect(Collectors.toList());
+
+        if (clsUser.getAdmin()) {
+            subsidyRequestStatusShort.add(new KeyValue(String.class.getSimpleName(), index.getAndIncrement(), "Новая"));
+        }
+
+        return subsidyRequestStatusShort;
     }
 
     @GetMapping("cls_subsidy_short")
