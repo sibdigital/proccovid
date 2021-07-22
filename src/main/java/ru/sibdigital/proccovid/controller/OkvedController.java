@@ -141,5 +141,11 @@ public class OkvedController {
         }
     }
 
+    @GetMapping("/okved_tree_by_parent_id")
+    public @ResponseBody
+    List<Map<String,Object>> getOkvedTreeByParentId(@RequestParam(value = "parent_node") String parentNode) {
+        List<Map<String,Object>> sections = okvedRepo.findNodeByParentId(parentNode);
+        return sections;
+    }
 
 }

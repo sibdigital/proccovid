@@ -72,6 +72,15 @@ public interface OkvedRepo extends JpaRepository<Okved, Integer>, JpaSpecificati
             "where ltree2text(path) like %:parentNode% and type_code = :typeCode order by coalesce(kind_code, section_code)")
     List<Map<String,Object>> findNode(String parentNode, int typeCode);
 
+    @Query(nativeQuery = true, value = "SELECT ltree2text(okved.path) as id, coalesce(okved.kind_code || ' ', '') || okved.kind_name as value \n" +
+            "FROM okved\n" +
+            "    INNER JOIN (\n" +
+            "        SELECT * FROM okved WHERE ltree2text(path) = :parentNode\n" +
+            "    ) as parent_okved\n" +
+            "ON okved.id_parent = parent_okved.id\n" +
+            "ORDER BY coalesce(okved.kind_code, okved.section_code)")
+    List<Map<String,Object>> findNodeByParentId(String parentNode);
+
 
     @Query(nativeQuery = true, value = "SELECT *\n" +
             "FROM okved\n" +

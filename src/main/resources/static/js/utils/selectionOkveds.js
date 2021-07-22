@@ -89,7 +89,8 @@ function okvedSelector(id_okved_selector, id_okved_selector_table, id_main_okved
                             }
                         ]
                     },
-                    tree('okvedTreeId'),
+                    // tree('okvedTreeId'),
+                    okvedTreeByParentId('okvedTreeId'),
                     {
                         cols: [
                             {
