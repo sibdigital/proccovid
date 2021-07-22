@@ -52,7 +52,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
     webix.ajax(`../request_subsidy_files_verification/${ docRequestSubsidyId }`).then(function (filesVerification) {
         filesVerification = filesVerification.json();
 
-        const newDateFormat = webix.Date.dateToStr("%d.%m.%Y %H:%i:%s");
+        const newDateFormat = webix.Date.dateToStr("%H:%i:%s %d.%m.%Y");
         filesVerification.map((file) => {
             file.verify_status = getVerifyStatusStringByIntStatus(file.verify_status);
 
@@ -72,7 +72,11 @@ function getFilesListByTypeView(docRequestSubsidyId) {
         webix.ajax(`../request_subsidy_files/${docRequestSubsidyId}`).then(function (data) {
             const views = [];
             data = data.json();
+
+            const dataTablesKeys = [];
+
             console.dir({ data, filesVerification });
+
             if (data.length > 0) {
                 const filesTypes = {};
                 const byFileType = data.reduce(function (result, file) {
@@ -126,6 +130,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                 console.dir({ byFileType });
 
                 for (const [key, filesArray] of Object.entries(byFileType)) {
+                    dataTablesKeys.push(key);
                     views.push({
                         rows: [
                             view_section(filesTypes[key]),
@@ -136,37 +141,47 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                 autoheight: true,
                                 // autowidth: true,
                                 header: `id = ${key}`,
-                                // select: 'row',
                                 resizeColumn: true,
                                 readonly: true,
                                 data: filesArray,
+                                fixedRowHeight: false,
+                                scrollX: false,
+                                autoConfig: true,
+                                rowLineHeight: 25,
+                                rowHeight: 60,
+                                resizeRow: true,
+                                headerRowHeight: 65,
                                 columns: [
                                     {
                                         id: 'originalFileName',
-                                        header: 'Название файла',
+                                        // header: 'Название файла',
+                                        header: [{ text: 'Название файла', css: 'request_subsidy_files_table_header' }],
                                         adjust: true,
-                                        minWidth: 650,
-                                        // fillspace: true,
+                                        css: 'request_subsidy_files_table_webix_cell',
+                                        maxWidth: 260,
                                         sort: 'string',
                                         template: (request) => {
                                             return `<div class='download_docs'>
                                                         <a target="_blank" rel="noopener noreferrer" style='text-decoration: none; color: #1ca1c1' href="${ LINK_PREFIX }${ request.attachmentPath }${ LINK_SUFFIX }" download>${ request.originalFileName }</a>
-                                                        <span style='padding-left: 10px; color: #389a0d; font-weight: 400'></span>
                                                     </div>`
                                         }
                                     },
                                     {
                                         id: 'viewFileName',
-                                        header: 'Описание',
+                                        // header: 'Описание',
+                                        header: [{ text: 'Описание', css: 'request_subsidy_files_table_header' }],
+                                        css: 'request_subsidy_files_table_webix_cell',
                                         adjust: true,
-                                        minWidth: 650,
-                                        // fillspace: true,
+                                        maxWidth: 260,
                                     },
                                     {
                                         id: 'signature',
-                                        header: 'Подпись',
+                                        // header: 'Подпись',
+                                        header: [{ text: 'Подпись', css: 'request_subsidy_files_table_header' }],
+                                        css: 'request_subsidy_files_table_webix_cell',
                                         adjust: true,
                                         sort: 'string',
+                                        maxWidth: 120,
                                         template: function (request) {
                                             let label = '';
                                             let style = '';
@@ -182,7 +197,6 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                             if (request.signature) {
                                                 return `<div class='download_docs verification_request_subsidy_file_signature_status_button'>
                                                         <a target="_blank" rel="noopener noreferrer" style='text-decoration: none; color: green' href="${ LINK_PREFIX }${ request.verificationStatus.download_link }${ LINK_SUFFIX }" download>${ label }</a>
-                                                        <span style='padding-left: 10px; color: #389a0d; font-weight: 400'></span>
                                                    </div>`
                                             } else {
                                                 return `<div style="${style}" role="gridcell" aria-rowindex="1" aria-colindex="1" aria-selected="true" tabindex="0" class="webix_cell webix_row_select">${label}</div>`;
@@ -191,28 +205,40 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                     },
                                     {
                                         id: 'userTimeVerification',
-                                        header: 'Дата проверки пользователем',
+                                        // header: 'Дата проверки пользователем',
+                                        header: [{ text: 'Дата проверки пользователем', css: 'request_subsidy_files_table_header' }],
+                                        css: 'request_subsidy_files_table_webix_cell',
                                         adjust: true,
+                                        maxWidth: 120,
                                         template: '#verificationStatus.userTimeVerification#',
                                     },
                                     {
                                         id: 'userVerificationStatus',
-                                        header: 'Результат проверки пользователем',
+                                        // header: 'Результат проверки пользователем',
+                                        header: [{ text: 'Результат проверки пользователем', css: 'request_subsidy_files_table_header' }],
+                                        css: 'request_subsidy_files_table_webix_cell',
                                         adjust: true,
+                                        maxWidth: 140,
                                         template: (request) => {
                                             return getVerificationInfoButton(request, request.verificationStatus.userVerificationStatus, `request_subsidy_files_table/${key}`);
                                         }
                                     },
                                     {
                                         id: 'iogvTimeVerification',
-                                        header: 'Дата проверки ИОГВ',
+                                        // header: 'Дата проверки ИОГВ',
+                                        header: [{ text: 'Дата проверки ИОГВ', css: 'request_subsidy_files_table_header' }],
+                                        css: 'request_subsidy_files_table_webix_cell',
                                         adjust: true,
+                                        maxWidth: 110,
                                         template: '#verificationStatus.iogvTimeVerification#',
                                     },
                                     {
                                         id: 'iogvVerificationStatus',
-                                        header: 'Результат проверки ИОГВ',
+                                        // header: 'Результат проверки ИОГВ',
+                                        header: [{ text: 'Результат проверки ИОГВ', css: 'request_subsidy_files_table_header' }],
+                                        css: 'request_subsidy_files_table_webix_cell',
                                         adjust: true,
+                                        maxWidth: 140,
                                         template: (request) => {
                                             return getVerificationInfoButton(request, request.verificationStatus.iogvVerificationStatus, `request_subsidy_files_table/${key}`);
                                         }
@@ -225,7 +251,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                     onAfterLoad: function () {
                                         this.hideOverlay();
                                         if (!this.count()) {
-                                            this.showOverlay("Отсутствуют данные")
+                                            this.showOverlay("Отсутствуют данные");
                                         }
                                     },
                                     onLoadError: function () {
@@ -265,6 +291,8 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                 id: 'filesListViewByType',
                 rows: views,
             }, $$('filesListViewByType'));
+
+            dataTablesKeys.forEach((key) => $$(`request_subsidy_files_table/${ key }`).adjustRowHeight('originalFileName'));
         })
     });
 }
@@ -618,8 +646,9 @@ function getVerificationStatus(idRequestSubsidyFile, idUser, idPrincipal, idVeri
         jsonResponse = [{}];
     }
 
-    const dataTableScrollState = $$(idDataTable).getScrollState();
+    const pageScrollX = window.scrollX;
     const pageScrollY = window.scrollY;
+
 
     $$('filesListViewByType').hide();
     $$('verifyFilesButton').hide();
@@ -723,14 +752,7 @@ function getVerificationStatus(idRequestSubsidyFile, idUser, idPrincipal, idVeri
                                                 $$('filesListViewByType').show();
                                                 $$('verifyFilesButton').show();
 
-
-                                                console.dir({ idDataTable, dataTableScrollState });
-                                                window.scrollTo(0, pageScrollY);
-
-                                                $$(idDataTable).scrollTo(dataTableScrollState.x, dataTableScrollState.y);
-                                                // $$(idDataTable).scrollTo(dataTableScrollState.x, dataTableScrollState.y);
-                                                // $$(idDataTable).scrollTo(dataTableScrollState.x, dataTableScrollState.y);
-                                                // $$(idDataTable).scrollTo(dataTableScrollState.x, dataTableScrollState.y);
+                                                window.scrollTo(pageScrollX, pageScrollY);
                                             }
                                         },
                                     ]
