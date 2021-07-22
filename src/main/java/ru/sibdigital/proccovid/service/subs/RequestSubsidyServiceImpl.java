@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -59,7 +60,7 @@ public class RequestSubsidyServiceImpl implements RequestSubsidyService {
             List<RegVerificationSignatureFile> previous = regVerificationSignatureFileRepo
                     .getTpRequestSubsidyFilesPrevisiousVerified(user.getId(),
                             signatureFile.getRequestSubsidy().getId(),
-                            signatureFile.getId(), docFile.getId());
+                            docFile.getId(), signatureFile.getId());
             if (previous.isEmpty()) {
                 RegVerificationSignatureFile regVerificationSignatureFile = RegVerificationSignatureFile.builder()
                         .requestSubsidy(docFile.getRequestSubsidy())
@@ -98,51 +99,29 @@ public class RequestSubsidyServiceImpl implements RequestSubsidyService {
             ResponseEntity<String> response = restTemplate.postForEntity(
                     url, newRequest, String.class);
 
-            response.getStatusCode();
+            HttpStatus responseFromAddCovid = response.getStatusCode();
         }
         return list;
     }
 
-    public HashMap<String, Object> checkSignatureFilesVerifyProgress(Long idRequest, Long idOrganization) {
-        RestTemplate restTemplate = new RestTemplate();
+    public HashMap<String, Object> checkSignatureFilesVerifyProgress(Long idRequest, Long idUser) {
+        HashMap<String, Object> result = new HashMap<>();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        List<RegVerificationSignatureFile> regVerificationSignatureFiles =
+                regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyAndIdUser(idRequest, idUser).orElse(null);
 
-        String url = String.format("%s/verify/subsidy/check_signature_files_verify_progress", addCovidBaseUrl);
+        if (regVerificationSignatureFiles == null) {
+            result.put("notFound", "Файлы не найдены");
+        } else {
+            long countVerifySignatures = regVerificationSignatureFiles.stream()
+                    .filter(rvsf -> rvsf.getVerifyStatus() != 0)
+                    .count();
+            long countNumberOfFiles = regVerificationSignatureFiles.size();
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("id_request", idRequest)
-                .queryParam("id_organization", idOrganization);
-
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-
-        HashMap<String, Object> response = restTemplate.getForObject(
-                builder.toUriString(),
-                HashMap.class,
-                entity
-        );
-
-        return response;
-    }
-
-    public ResponseEntity<String> checkProgress(Long idRequest, Long idOrganization) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-
-        String url = String.format("%s/verify/subsidy/check_request_subsidy_files_signatures", addCovidBaseUrl);
-
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("id_request", idRequest)
-                .queryParam("id_organization", idOrganization);
-
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                builder.toUriString(), String.class, entity);
-
-        return response;
+            result.put("files", regVerificationSignatureFiles);
+            result.put("verified", countVerifySignatures);
+            result.put("numberOfFiles", countNumberOfFiles);
+        }
+        return result;
     }
 }

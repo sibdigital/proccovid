@@ -140,7 +140,7 @@ public class RequestSubsidyController {
         }
         else if (idUser != null) {
             List<RegVerificationSignatureFile> regVerificationSignatureFile =
-                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(idRequestSubsidyFile, idUser);
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(idRequestSubsidyFile, idUser).orElse(null);
             return regVerificationSignatureFile;
         } else if (idPrincipal != null) {
             List<RegVerificationSignatureFile> regVerificationSignatureFile =
@@ -173,19 +173,11 @@ public class RequestSubsidyController {
     public HashMap<String, Object> checkSignatureFilesVerifyProgress(
             @RequestParam("id_request") Long idRequest
     ) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
 
-        HashMap<String, Object> result = requestSubsidyService.checkSignatureFilesVerifyProgress(idRequest, 8095L);
+        HashMap<String, Object> result = requestSubsidyService.checkSignatureFilesVerifyProgress(idRequest, clsUser.getId());
 
         return result;
-    }
-
-    @GetMapping("check_request_subsidy_files_signatures")
-    public ResponseEntity<String> checkProgress(
-            @RequestParam("id_request") Long idRequest
-    ) {
-
-        ResponseEntity<String> responseEntity = requestSubsidyService.checkProgress(idRequest, 8095L);
-
-        return responseEntity;
     }
 }

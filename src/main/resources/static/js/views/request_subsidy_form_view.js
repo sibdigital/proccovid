@@ -435,23 +435,18 @@ webix.ready(function () {
                                                                     width: 170,
                                                                     css: "webix_primary custom-btn-border",
                                                                     click: () => {
-                                                                        // let progressBar = $$("progress_bar");
-                                                                        // webix.extend(progressBar, webix.ProgressBar);
-                                                                        // let progress = 1 / 2;
-                                                                        // progressBar.showProgress({type: "top", position: progress === 0 ? 0.001 : progress})
-                                                                        // document.getElementById("progress_bar_text").innerHTML =
-                                                                        //     "<span style='position: absolute; margin-top: 8px; left: 10px; z-index: 100; font-weight: 500'>" +
-                                                                        //     "Проверено: " + 1 + "/" + 2 +
-                                                                        //     "</span>";
                                                                         if (!ID) {
                                                                             webix.message("Не найдена заявка", "error", 4000);
                                                                             return;
                                                                         }
-                                                                        webix.ajax('../verification_request_subsidy_signature_files/' + ID);
-                                                                        verify_progress(ID, "До начала проверки подписей не менее "); //show progress on start event
-                                                                        let timerId = setInterval(() => {
-                                                                            verify_progress(ID, "До начала проверки подписей не менее ", timerId);
-                                                                        }, 4000)
+
+                                                                        webix.ajax('../verification_request_subsidy_signature_files/' + ID).then(() => {
+                                                                            //show progress on start event
+                                                                            verify_progress(ID, "До начала проверки подписей не менее ");
+                                                                            let timerId = setInterval(() => {
+                                                                                verify_progress(ID, "До начала проверки подписей не менее ", timerId);
+                                                                            }, 4000);
+                                                                        });
                                                                     }
                                                                 },
                                                                 {
