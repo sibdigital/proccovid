@@ -1,18 +1,42 @@
 
 function changeLinkedMailingOkveds(){
+    // let mailingFormValues = $$('mailingForm').getValues();
+    // let data = $$('okved_table').serialize();
+    //
+    // let window = webix.ui({
+    //     view: 'window',
+    //     id: 'windowCLO',
+    //     head: 'ОКВЭДы рассылки \"' + mailingFormValues.name + '\" (id: '+ mailingFormValues.id +')',
+    //     close: true,
+    //     width: 1000,
+    //     height: 800,
+    //     position: 'center',
+    //     modal: true,
+    //     body: linkedOkvedsForm,
+    //     on: {
+    //         'onHide': function() {
+    //             window.destructor();
+    //         }
+    //     }
+    //
+    // });
+    // $$('linked_okved_table').parse(data);
+    //
+    // window.show();
+
     let mailingFormValues = $$('mailingForm').getValues();
     let data = $$('okved_table').serialize();
 
     let window = webix.ui({
         view: 'window',
         id: 'windowCLO',
-        head: 'ОКВЭДы рассылки \"' + mailingFormValues.name + '\" (id: '+ mailingFormValues.id +')',
         close: true,
+        head: 'Подбор ОКВЭДов для рассылки (ID ' + mailingFormValues.id + ')',
         width: 1000,
         height: 800,
         position: 'center',
         modal: true,
-        body: linkedOkvedsForm,
+        body: okvedSelector('okved_selector_id', 'linked_okved_table', 'okved_table'),
         on: {
             'onHide': function() {
                 window.destructor();
@@ -28,12 +52,12 @@ function changeLinkedMailingOkveds(){
 const mailingFormMain = {
     rows: [
         { cols: [
-                { view: 'text', label: 'Наименование', labelPosition: 'left', id: 'name', name: 'name', required: true, validate: webix.rules.isNotEmpty },
+                { view: 'text', label: 'Наименование', labelPosition: 'top', id: 'name', name: 'name', required: true, validate: webix.rules.isNotEmpty },
                 { view: 'richselect',
                     name: 'status',
                     id: 'status',
                     label: 'Статус',
-                    labelPosition: 'left',
+                    labelPosition: 'top',
                     required: true,
                     options: [
                         {id: "0", value:'Не действует'},
@@ -45,13 +69,13 @@ const mailingFormMain = {
                 {
                     view: 'checkbox',
                     label: 'Доступна пользователям',
-                    labelPosition: 'left',
+                    labelPosition: 'top',
                     name: 'isUserVisibility',
                 },
                 {
                     view: 'checkbox',
                     label: 'Рассылать только пользователям',
-                    labelPosition: 'left',
+                    labelPosition: 'top',
                     name: 'isForPrincipal',
                 },
             ]
@@ -68,6 +92,8 @@ const mailingFormMain = {
                     value: 'Сохранить',
                     click: function () {
                         if ($$('mailingForm').validate()) {
+                            $$('mailingFormId').disable();
+                            webix.message({text: "Идет сохранение рассылки", type: 'success'});
                             let params = $$('mailingForm').getValues();
 
                             let okveds = $$('okved_table').serialize();
@@ -79,16 +105,24 @@ const mailingFormMain = {
                             }).post('save_cls_mailing_list',
                                 params).then(function (data) {
                                 var response = JSON.parse(data.text());
-                                if (response.success == true) {
+                                if (response.success == 'true') {
                                     webix.message({text: response.message, type: 'success'});
-                                    webix.ui(mailingList, $$('mailingFormId'));
-                                    $$('mailing_table').clearAll();
-                                    $$('mailing_table').load('cls_mailing_list');
+                                    webix.ui({
+                                        id: 'content',
+                                        rows: [
+                                            webix.copy(mailingList)
+                                        ]
+                                    }, $$("content"));
+                                    // webix.ui(mailingList, $$('mailingFormId'));
+                                    // $$('mailing_table').clearAll();
+                                    // $$('mailing_table').load('cls_mailing_list');
                                 } else {
+                                    $$('mailingFormId').enable();
                                     webix.message({text: response.message, type: 'error'});
                                 }
                             })
                         } else {
+                            $$('mailingFormId').enable();
                             webix.message({text: 'Не заполнены обязательные поля', type: 'error'});
                         }
                     }
@@ -125,6 +159,7 @@ const mailingListOkved = {
                     select: 'row',
                     editable: true,
                     id: 'okved_table',
+                    pager: 'Pager',
                     columns: [
                         {
                             id: 'index',
@@ -133,20 +168,32 @@ const mailingListOkved = {
                         {
                             id: 'kindCode',
                             header: 'Код',
+                            sort: 'text'
                         },
                         {
                             id: 'version',
                             header: 'Версия',
+                            sort: 'text'
                         },
                         {
                             id: 'kindName',
                             header: 'ОКВЭД',
                             fillspace: true,
+                            sort: 'text'
                         },
                     ],
                     data: [],
                 },
+
                 {cols: [
+                        {
+                            view: 'pager',
+                            id: 'Pager',
+                            height: 38,
+                            size: 25,
+                            group: 5,
+                            template: '{common.first()}{common.prev()}{common.pages()}{common.next()}{common.last()}'
+                        },
                         {},
                         {
                             view: 'button',
