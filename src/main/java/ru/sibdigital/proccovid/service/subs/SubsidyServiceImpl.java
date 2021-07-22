@@ -125,30 +125,19 @@ public class SubsidyServiceImpl implements SubsidyService {
 
         filteredReqFileDtos.
                 forEach(reqFileDto -> {
-                    TpRequiredSubsidyFile fileWithTypeId = tpRequiredSubsidyFileRepo.findByIdSubsidyAndIdFileType(clsSubsidy.getId(), reqFileDto.getClsFileType().getId());
+//                    TpRequiredSubsidyFile fileWithTypeId = tpRequiredSubsidyFileRepo.findByIdSubsidyAndIdFileType(clsSubsidy.getId(), reqFileDto.getClsFileType().getId());
                     TpRequiredSubsidyFile requiredSubsidyFile;
-                    if (fileWithTypeId == null) {
-                        requiredSubsidyFile = TpRequiredSubsidyFile.builder()
-                                .isDeleted(false)
-                                .isRequired(reqFileDto.getRequired())
-                                .timeCreate(new Timestamp(System.currentTimeMillis()))
-                                .comment(reqFileDto.getComment())
-                                .weight(reqFileDto.getWeight())
-                                .clsFileType(reqFileDto.getClsFileType())
-                                .clsSubsidy(clsSubsidy)
-                                .build();
-                    } else {
-                        requiredSubsidyFile = TpRequiredSubsidyFile.builder()
-                                .id(fileWithTypeId.getId())
-                                .isDeleted(fileWithTypeId.getDeleted())
-                                .isRequired(reqFileDto.getRequired())
-                                .timeCreate(fileWithTypeId.getTimeCreate())
-                                .comment(reqFileDto.getComment())
-                                .weight(reqFileDto.getWeight())
-                                .clsFileType(reqFileDto.getClsFileType())
-                                .clsSubsidy(fileWithTypeId.getClsSubsidy())
-                                .build();
-                    }
+                    requiredSubsidyFile = TpRequiredSubsidyFile.builder()
+                            .id(reqFileDto.getId())
+                            .isDeleted(false)
+                            .isRequired(reqFileDto.getRequired())
+                            .timeCreate(new Timestamp(System.currentTimeMillis()))
+                            .comment(reqFileDto.getComment())
+                            .weight(reqFileDto.getWeight())
+                            .clsFileType(reqFileDto.getClsFileType())
+                            .clsSubsidy(clsSubsidy)
+                            .build();
+
                     tpRequiredSubsidyFileRepo.save(requiredSubsidyFile);
                 });
 
