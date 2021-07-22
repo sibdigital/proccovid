@@ -11,6 +11,7 @@ import ru.sibdigital.proccovid.model.DocRequestPrs;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -112,7 +113,7 @@ public interface ClsOrganizationRepo extends JpaRepository<ClsOrganization, Long
             "from cls_organization as co\n" +
             "inner join reg_organization_okved roo on co.id = roo.id_organization\n" +
             "where roo.id_okved in (:uids) and co.is_deleted = :isDeleted and co.is_activated = :isActivated")
-    List<ClsOrganization> getClsOrganizationByOkvedArray(UUID[] uids, boolean isDeleted, boolean isActivated);
+    Set<ClsOrganization> getClsOrganizationByOkvedArray(UUID[] uids, boolean isDeleted, boolean isActivated);
 
     @Query(nativeQuery = true, value = "SELECT *\n" +
             "FROM cls_organization\n" +
