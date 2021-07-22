@@ -88,6 +88,8 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                         fileVer.id_request_subsidy_file && !fileVerification.id_request_subsidy_file && Object.assign(fileVerification, { id_request_subsidy_file: fileVer.id_request_subsidy_file });
                         fileVer.id_user && !fileVerification.id_user && Object.assign(fileVerification, { id_user: fileVer.id_user });
                         fileVer.id_principal && !fileVerification.id_principal && Object.assign(fileVerification, { id_principal: fileVer.id_principal });
+                        fileVer.download_link && !fileVerification.download_link && Object.assign(fileVerification, { download_link: fileVer.download_link });
+
 
                         if (fileVer.id_user) {
                             fileVerification.userVerId = fileVer.id;
@@ -148,7 +150,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
                                         sort: 'string',
                                         template: (request) => {
                                             return `<div class='download_docs'>
-                                                        <a target="_blank" rel="noopener noreferrer" style='text-decoration: none; color: #1ca1c1' href="${ LINK_PREFIX }${ request.fileName }${ LINK_SUFFIX }" download>${ request.originalFileName }</a>
+                                                        <a target="_blank" rel="noopener noreferrer" style='text-decoration: none; color: #1ca1c1' href="${ LINK_PREFIX }${ request.attachmentPath }${ LINK_SUFFIX }" download>${ request.originalFileName }</a>
                                                         <span style='padding-left: 10px; color: #389a0d; font-weight: 400'></span>
                                                     </div>`
                                         }
@@ -179,7 +181,7 @@ function getFilesListByTypeView(docRequestSubsidyId) {
 
                                             if (request.signature) {
                                                 return `<div class='download_docs verification_request_subsidy_file_signature_status_button'>
-                                                        <a target="_blank" rel="noopener noreferrer" style='text-decoration: none; color: green' href="${ LINK_PREFIX }${ request.verificationStatus.signature_file_name }${ LINK_SUFFIX }" download>${ label }</a>
+                                                        <a target="_blank" rel="noopener noreferrer" style='text-decoration: none; color: green' href="${ LINK_PREFIX }${ request.verificationStatus.download_link }${ LINK_SUFFIX }" download>${ label }</a>
                                                         <span style='padding-left: 10px; color: #389a0d; font-weight: 400'></span>
                                                    </div>`
                                             } else {
