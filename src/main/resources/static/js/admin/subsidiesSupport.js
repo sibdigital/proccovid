@@ -259,11 +259,11 @@ const subsidiesSupport = {
 }
 
 function clearSubsidiesSearchQueries() {
-    $$('search_beginSearchTime').setValue('');
-    $$('search_endSearchTime').setValue('');
-    $$('search_inn').setValue('');
-    $$('subsidy_type').setValue('');
-    $$('subsidy_request_status').setValue('');
+    $$('search_beginSearchTime')?.setValue('');
+    $$('search_endSearchTime')?.setValue('');
+    $$('search_inn')?.setValue('');
+    $$('subsidy_type')?.setValue('');
+    $$('subsidy_request_status')?.setValue('');
     reloadSubsidiesSearchQueries();
 }
 
@@ -271,27 +271,29 @@ function reloadSubsidiesSearchQueries() {
     $$('subsidies_table').clearAll();
 
     const params = {};
-    const beginSearchTime = $$('search_beginSearchTime').getValue();
+
+    const beginSearchTime = $$('search_beginSearchTime')?.getValue();
     if (beginSearchTime != null) {
         params.bst = webix.i18n.timeFormatDate(beginSearchTime);
     }
-    const endSearchTime = $$('search_endSearchTime').getValue();
+
+    const endSearchTime = $$('search_endSearchTime')?.getValue();
     if (endSearchTime != null) {
         params.est = webix.i18n.timeFormatDate(endSearchTime);
     }
 
-    const inn = $$('search_inn').getValue();
+    const inn = $$('search_inn')?.getValue();
     if (inn) {
         params.inn = inn;
     }
 
-    const subsidy_type_id = $$('subsidy_type').getValue();
+    const subsidy_type_id = $$('subsidy_type')?.getValue();
 
     if (subsidy_type_id) {
         params.subsidy_type_id = subsidy_type_id;
     }
 
-    const subsidy_request_status_short_name = $$("subsidy_request_status").getValue() ? $$("subsidy_request_status").getList().getItem($$("subsidy_request_status").getValue()).value : null;
+    const subsidy_request_status_short_name = $$("subsidy_request_status")?.getValue() ? $$("subsidy_request_status").getList().getItem($$("subsidy_request_status").getValue()).value : null;
     if (subsidy_request_status_short_name) {
         params.subsidy_request_status_short_name = subsidy_request_status_short_name;
     }

@@ -324,6 +324,7 @@ webix.ready(function () {
                                     body: {
                                         view: 'scrollview',
                                         scroll: 'y',
+                                        css: { 'overflow': 'hidden !important;', 'padding': '10px' },
                                         autowidth: true,
                                         autoheight: true,
                                         body: {
@@ -416,6 +417,7 @@ webix.ready(function () {
                                     body: {
                                         view: 'scrollview',
                                         scroll: 'y',
+                                        css: { 'overflow': 'hidden !important;', 'padding': '10px' },
                                         autowidth: true,
                                         autoheight: true,
                                         body: {
@@ -480,6 +482,7 @@ webix.ready(function () {
                                     body: {
                                         view: 'scrollview',
                                         scroll: 'y',
+                                        css: { 'overflow': 'hidden !important;', 'padding': '10px' },
                                         autowidth: true,
                                         autoheight: true,
                                         body: {
@@ -720,6 +723,7 @@ function getVerificationStatus(idRequestSubsidyFile, idUser, idPrincipal, idVeri
             {
                 view: 'scrollview',
                 scroll: 'y',
+                css: { 'overflow': 'hidden !important;', 'padding': '10px' },
                 id: 'show_layout',
                 autowidth: true,
                 autoheight: true,

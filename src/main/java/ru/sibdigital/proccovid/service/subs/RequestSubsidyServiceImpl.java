@@ -79,13 +79,16 @@ public class RequestSubsidyServiceImpl implements RequestSubsidyService {
                     p.setVerifyResult("");
                 });
             }
+
             List<RegVerificationSignatureFile> prevList = regVerificationSignatureFileRepo.saveAll(previous);
+
             for (RegVerificationSignatureFile prev : prevList) {
                 System.out.println(prev);
                 if (verifiedData.getIdentificator().equals(prev.getRequestSubsidyFile().getId().toString()) && verifiedData.getSignatureIdentificator().equals(prev.getRequestSubsidySubsidySignatureFile().getId().toString())) {
                     verifiedData.setGroup(prev.getId().toString());
                 }
             }
+
             verifiedDataList.add(verifiedData);
 
             RestTemplate restTemplate = new RestTemplate();

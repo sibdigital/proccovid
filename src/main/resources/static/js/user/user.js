@@ -112,12 +112,12 @@ webix.ready(function() {
                                 let requestsBadge = "";
                                 let prescriptBadge = "";
                                 let margin = "";
-                                if (id == 'Requests') {
+                                if (id === 'Requests') {
                                     view = userRequests;
-                                } else if (id == 'Prescriptions') {
+                                } else if (id === 'Prescriptions') {
                                     view = userPrescriptions;
                                     let checkReqBadge = this.getMenuItem(id).badge
-                                    if (checkReqBadge != null && checkReqBadge != false) {
+                                    if (checkReqBadge != null && checkReqBadge !== false) {
                                         prescriptBadge = "(" + checkReqBadge + ")";
                                     }
 
@@ -125,33 +125,46 @@ webix.ready(function() {
                                     if ($$('prescriptions_table') != null) {
                                         $$('prescriptions_table').destructor();
                                     }
-                                } else if (id == 'Organizations') {
+                                } else if (id === 'Organizations') {
                                     view = organizations;
-                                } else if (id == 'Violations') {
+                                } else if (id === 'Violations') {
                                     view = violations;
                                     margin = {"margin-top":"10px !important"};
-                                } else if (id == 'PersonViolations') {
+                                } else if (id === 'PersonViolations') {
                                     view = personViolations;
                                     margin = {"margin-top":"10px !important","width":"100% !important"};
-                                } else if (id == 'InspectionReports') {
+                                } else if (id === 'InspectionReports') {
                                     view = inspectionReports;
-                                } else if (id == 'Reports') {
+                                } else if (id === 'Reports') {
                                     view = UserReports(userRoles);
                                 } else if (id === 'SubsidiesSupport') {
                                     view = subsidiesSupport;
                                 }
-                                hideBtnBack(),
+                                hideBtnBack();
                                 this.select(id)
                                 if (view != null) {
-                                    webix.ui({
-                                        id: 'content',
-                                        rows: [
-                                            view
-                                        ]
-                                    }, $$('content'));
+                                    if (id === 'SubsidiesSupport') {
+                                        webix.ui({
+                                            id: 'contentWithoutScrollViewBody',
+                                            rows: [
+                                                view,
+                                            ]
+                                        }, $$('contentWithoutScrollViewBody'));
+                                        $$('contentWithoutScrollViewBody').show();
+                                        $$('contentWithScrollViewBody').hide();
+                                    } else {
+                                        webix.ui({
+                                            id: 'content',
+                                            rows: [
+                                                view
+                                            ]
+                                        }, $$('content'));
+                                        $$('contentWithoutScrollViewBody').hide();
+                                        $$('contentWithScrollViewBody').show();
+                                    }
                                     itemValue = this.getMenuItem(id).value
                                     $$("labelLK").setValue("Личный кабинет > " + "<span style='color: #1ca1c1'>" + itemValue + " " + requestsBadge + prescriptBadge + "</span>");
-                                    if (id == 'Requests') {
+                                    if (id === 'Requests') {
                                         $$('tabbar').setValue('requests');
                                         $$('request_type').getList().add({id:'', value:'Все виды деятельности', $empty: true}, 0);
                                         $$('district_filter').getList().add({id:'', value:'Все районы', $empty: true}, 0);
@@ -216,15 +229,21 @@ webix.ready(function() {
                         ]
                     },
                     {
+                        id: 'contentWithScrollViewBody',
+                        hidden: true,
                         view: 'scrollview',
                         scroll: 'xy',
-                        css: {'overflow':'hidden !important'},
+                        css: { 'overflow':'hidden !important' },
                         body: {
                             padding: 20,
                             rows: [
-                                {id: 'content',}
+                                { id: 'content' }
                             ]
                         }
+                    },
+                    {
+                        id: 'contentWithoutScrollViewBody',
+                        hidden: true,
                     },
                 ]
             }
@@ -234,7 +253,7 @@ webix.ready(function() {
     let status = getUserStatus();
     if (status === 0) {
         webix.ui(newUserPasswordModal).show();
-    };
+    }
 
     if (ID_VIOLATION !== null) {
         getViolationForm(ID_VIOLATION);
