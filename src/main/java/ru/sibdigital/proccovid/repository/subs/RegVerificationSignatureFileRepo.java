@@ -16,7 +16,7 @@ public interface RegVerificationSignatureFileRepo extends JpaRepository<RegVerif
     @Query(
             value = "select rvsf.*\n " +
                     "from subs.reg_verification_signature_file as rvsf\n " +
-                    "where rvsf.id_user = :id_user and rvsf.id_request = :id_request\n " +
+                    "where rvsf.is_deleted = false and rvsf.id_user = :id_user and rvsf.id_request = :id_request\n " +
                     "and rvsf.id_request_subsidy_file = :id_request_subsidy_file\n" +
                     "and rvsf.id_request_subsidy_signature_file = :id_request_subsidy_signature_file\n",
             nativeQuery = true
@@ -29,11 +29,35 @@ public interface RegVerificationSignatureFileRepo extends JpaRepository<RegVerif
     @Query(
             value = "select *\n" +
                     "from subs.reg_verification_signature_file\n" +
+                    "where id_request_subsidy_file = :idRequestSubsidyFile and (id_principal = :idPrincipal or id_user = :idUser)",
+            nativeQuery = true
+    )
+    public List<RegVerificationSignatureFile> findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUserAndIdPrincipal(
+            @Param("idRequestSubsidyFile") Long idRequestSubsidyFile,
+            @Param("idUser") Long idUser,
+            @Param("idPrincipal") Long idPrincipal
+    );
+
+    @Query(
+            value = "select *\n" +
+                    "from subs.reg_verification_signature_file\n" +
+                    "where is_deleted = false and id_request = :idRequestSubsidy " +
+                    "and id_user = :idUser ",
+            nativeQuery = true
+    )
+    public Optional<List<RegVerificationSignatureFile>> findRegVerificationSignatureFileByIdRequestSubsidyAndIdUser(
+            @Param("idRequestSubsidy") Long idRequestSubsidy,
+            @Param("idUser") Long idUser
+    );
+
+    @Query(
+            value = "select *\n" +
+                    "from subs.reg_verification_signature_file\n" +
                     "where id_request_subsidy_file = :idRequestSubsidyFile " +
                     "and id_user = :idUser ",
             nativeQuery = true
     )
-    public Optional<RegVerificationSignatureFile> findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(
+    public Optional<List<RegVerificationSignatureFile>> findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(
             @Param("idRequestSubsidyFile") Long idRequestSubsidyFile,
             @Param("idUser") Long idUser
     );
@@ -45,7 +69,7 @@ public interface RegVerificationSignatureFileRepo extends JpaRepository<RegVerif
                     "and id_principal = :idPrincipal",
             nativeQuery = true
     )
-    public Optional<RegVerificationSignatureFile> findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(
+    public List<RegVerificationSignatureFile> findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(
             @Param("idRequestSubsidyFile") Long idRequestSubsidyFile,
             @Param("idPrincipal") Long idPrincipal
     );

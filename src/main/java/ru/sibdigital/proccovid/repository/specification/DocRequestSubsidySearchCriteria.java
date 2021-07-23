@@ -10,6 +10,7 @@ public class DocRequestSubsidySearchCriteria {
     private Timestamp endSearchTime;
     private String subsidyRequestStatusShortName;
     private Long subsidyId;
+    private Boolean isCurrentUserAdmin;
 
 
     public Long getIdDepartment() {
@@ -66,5 +67,13 @@ public class DocRequestSubsidySearchCriteria {
 
     public void setSubsidyId(Long subsidyId) {
         this.subsidyId = subsidyId;
+    }
+
+    public Boolean getIsCurrentUserAdmin() {
+        return isCurrentUserAdmin;
+    }
+
+    public void setIsCurrentUserAdmin(Boolean isCurrentUserAdmin) {
+        this.isCurrentUserAdmin = isCurrentUserAdmin;
     }
 }

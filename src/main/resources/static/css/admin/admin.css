@@ -163,3 +163,25 @@
 .verification_request_subsidy_file_signature_status_button:hover {
     background-color: #f4f5f9;
 }
+
+.request_subsidy_files_table_header {
+    line-height: 20px !important;
+    position: relative;
+    word-wrap: break-word;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.download_docs {
+    display: flex;
+}
+
+.request_subsidy_files_table_webix_cell .webix_cell {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    padding: 0 !important;
+    margin: 0 !important;
+}

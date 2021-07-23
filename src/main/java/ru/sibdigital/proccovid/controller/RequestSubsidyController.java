@@ -123,21 +123,31 @@ public class RequestSubsidyController {
     }
 
     @GetMapping("find_verification_request_subsidy_signature_file/{idRequestSubsidyFile}")
-    public RegVerificationSignatureFile getVerificationRequestSubsidySignatureFile(
+    public List<RegVerificationSignatureFile> getVerificationRequestSubsidySignatureFile(
             @PathVariable("idRequestSubsidyFile") Long idRequestSubsidyFile,
             @RequestParam("idUser") Long idUser,
             @RequestParam("idPrincipal") Long idPrincipal,
+            @RequestParam("id") Long idVerificationSignatureFile,
             HttpSession session) {
-        if (idUser != null) {
-            RegVerificationSignatureFile regVerificationSignatureFile =
+//        if (idVerificationSignatureFile != null) {
+//            RegVerificationSignatureFile regVerificationSignatureFile = regVerificationSignatureFileRepo.findById(idVerificationSignatureFile).orElse(null);
+//            return regVerificationSignatureFile;
+//        }
+        if (idPrincipal != null && idUser != null) {
+            List<RegVerificationSignatureFile> regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUserAndIdPrincipal(idRequestSubsidyFile, idUser, idPrincipal);
+            return regVerificationSignatureFile;
+        }
+        else if (idUser != null) {
+            List<RegVerificationSignatureFile> regVerificationSignatureFile =
                     regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdUser(idRequestSubsidyFile, idUser).orElse(null);
             return regVerificationSignatureFile;
         } else if (idPrincipal != null) {
-            RegVerificationSignatureFile regVerificationSignatureFile =
-                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(idRequestSubsidyFile, idPrincipal).orElse(null);
+            List<RegVerificationSignatureFile> regVerificationSignatureFile =
+                    regVerificationSignatureFileRepo.findRegVerificationSignatureFileByIdRequestSubsidyFileAndIdPrincipal(idRequestSubsidyFile, idPrincipal);
             return regVerificationSignatureFile;
         }
-        return new RegVerificationSignatureFile();
+        return new ArrayList<>();
     }
 
     @GetMapping("verification_request_subsidy_signature_files/{idRequestSubsidy}")
@@ -163,19 +173,11 @@ public class RequestSubsidyController {
     public HashMap<String, Object> checkSignatureFilesVerifyProgress(
             @RequestParam("id_request") Long idRequest
     ) {
+        CurrentUser currentUser = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ClsUser clsUser = currentUser.getClsUser();
 
-        HashMap<String, Object> result = requestSubsidyService.checkSignatureFilesVerifyProgress(idRequest, 8095L);
+        HashMap<String, Object> result = requestSubsidyService.checkSignatureFilesVerifyProgress(idRequest, clsUser.getId());
 
         return result;
-    }
-
-    @GetMapping("check_request_subsidy_files_signatures")
-    public ResponseEntity<String> checkProgress(
-            @RequestParam("id_request") Long idRequest
-    ) {
-
-        ResponseEntity<String> responseEntity = requestSubsidyService.checkProgress(idRequest, 8095L);
-
-        return responseEntity;
     }
 }
