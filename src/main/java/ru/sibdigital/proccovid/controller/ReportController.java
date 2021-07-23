@@ -5,20 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.sibdigital.proccovid.dto.KeyValue;
-import ru.sibdigital.proccovid.model.OrganizationTypes;
-import ru.sibdigital.proccovid.model.ReviewStatuses;
 import ru.sibdigital.proccovid.service.reports.RemoteCntReportService;
+import ru.sibdigital.proccovid.service.reports.RequestSubsidyReportService;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @Slf4j
@@ -26,6 +21,9 @@ public class ReportController {
 
     @Autowired
     RemoteCntReportService remoteCntReportService;
+
+    @Autowired
+    RequestSubsidyReportService requestSubsidyReportService;
 
     @RequestMapping(
             value = {"/generate_remote_cnt_report","/outer/generate_remote_cnt_report"},
@@ -161,4 +159,67 @@ public class ReportController {
         return list;
     }
 
+
+
+    @RequestMapping(
+            value = {"/generate_request_subsidy_cnt_by_okveds_report","/outer/generate_request_subsidy_cnt_by_okveds_report"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody String generateRequestSubsidyCntByOkvedsReport(@RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                                              @RequestParam(value = "startDateReport") String startDateSendString,
+                                                              @RequestParam(value = "endDateReport") String endDateSendString) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date startDateSend = (!startDateSendString.equals("")) ? dateFormat.parse(startDateSendString) : null;
+        Date endDateSend = (!endDateSendString.equals("")) ? dateFormat.parse(endDateSendString) : null;
+        byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReport("html", startDateSend, endDateSend, okvedPaths);
+        String template = new String(bytes);
+        return template;
+    }
+
+    @RequestMapping(
+            value = {"/request_subsidy_cnt_by_okveds/{format}/params","/outer/request_subsidy_cnt_by_okveds/{format}/params"}
+    )
+    public String downloadRequestSubsidyCntByOkveds(@PathVariable String format,
+                                                @RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                                @RequestParam(value = "startDateReport") String startDateSendString,
+                                                @RequestParam(value = "endDateReport") String endDateSendString,
+                                                HttpServletResponse response) throws IOException, ParseException {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        Date startDateSend = (!startDateSendString.equals("")) ? dateFormat.parse(startDateSendString) : null;
+        Date endDateSend = (!endDateSendString.equals("")) ? dateFormat.parse(endDateSendString) : null;
+        byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReport(format,  startDateSend, endDateSend, okvedPaths);
+
+        if (format.equals("pdf")) {
+            response.setContentType("application/pdf");
+        } else if (format.equals("html")) {
+            response.setContentType("text/html");
+        } else if (format.equals("xlsx")){
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=organizationCountByOkveds.xlsx");
+        }
+
+        ServletOutputStream out = response.getOutputStream();
+        out.write(bytes);
+        out.flush();
+        out.close();
+        return null;
+    }
+
+    @RequestMapping(
+            value = {"/generate_request_subsidy_cnt_by_okveds_report_details","/outer/generate_request_subsidy_cnt_by_okveds_report_details"},
+            method = RequestMethod.GET
+    )
+    public @ResponseBody String generateRequestSubsidyCntByOkvedsReportDetails(@RequestParam(value = "okvedPaths") List<String> okvedPaths,
+                                                                               @RequestParam(value = "startDateReport") String startDateSendString,
+                                                                               @RequestParam(value = "endDateReport") String endDateSendString,
+                                                                               @RequestParam(value = "okvedId") UUID okvedId,
+                                                                               @RequestParam(value = "statusId") Long statusId) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date startDateSend = (!startDateSendString.equals("")) ? dateFormat.parse(startDateSendString) : null;
+        Date endDateSend = (!endDateSendString.equals("")) ? dateFormat.parse(endDateSendString) : null;
+        byte[] bytes = requestSubsidyReportService.exportRequestSubsidiesByOkvedsReportDetail("html", startDateSend, endDateSend, okvedPaths, okvedId, statusId);
+        String template = new String(bytes);
+        return template;
+    }
 }
